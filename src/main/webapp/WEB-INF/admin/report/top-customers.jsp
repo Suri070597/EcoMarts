@@ -27,7 +27,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions">
-                            <h1 class="card-title">Top 10 Customer</h1>
+                            <h1 class="card-title">Top 5 Customer</h1>
                             <div class="d-flex gap-3">
                                 <form action="${pageContext.request.contextPath}/admin/report/top-customers" method="get">
                                 </form>
