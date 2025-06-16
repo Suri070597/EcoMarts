@@ -5,7 +5,7 @@
 
 <div class="main-content">
     <h1>Order Management</h1>
-
+ 
     <!-- Tìm kiếm -->
     <form action="${pageContext.request.contextPath}/admin/order" method="get" class="search-form">
         <input type="text" name="search" placeholder="Search by OrderID" />
