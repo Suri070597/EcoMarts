@@ -280,10 +280,10 @@ CREATE TABLE [Order] (
 -- Insert sample orders
 INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus)
 VALUES
-(2, '2023-06-01 10:30:00', 16000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Đã thanh toán', N'Đã giao'),
-(2, '2023-06-01 11:15:00', 45000, N'45 Nguyễn Huệ, Q.3, TP.HCM', '0918234567', N'MoMo', N'Đã thanh toán', N'Đang giao hàng'),
-(4, '2023-06-01 14:20:00', 21000, N'78 Trần Phú, Q.5, TP.HCM', '0987345678', N'VNPay', N'Đã thanh toán', N'Đã giao'),
-(4, '2023-06-02 09:45:00', 35000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Chưa thanh toán', N'Đang xử lý');
+(6, '2023-06-01 10:30:00', 16000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Đã thanh toán', N'Đã giao'),
+(7, '2023-06-01 11:15:00', 45000, N'45 Nguyễn Huệ, Q.3, TP.HCM', '0918234567', N'MoMo', N'Đã thanh toán', N'Đang giao hàng'),
+(8, '2023-06-01 14:20:00', 21000, N'78 Trần Phú, Q.5, TP.HCM', '0987345678', N'VNPay', N'Đã thanh toán', N'Đã giao'),
+(6, '2023-06-02 09:45:00', 35000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Chưa thanh toán', N'Đang xử lý');
 
 CREATE TABLE OrderDetail (
     OrderDetailID INT PRIMARY KEY IDENTITY(1,1),
