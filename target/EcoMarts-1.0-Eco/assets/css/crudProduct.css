@@ -1,0 +1,124 @@
+/* Base reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5dc;
+}
+
+/* Main flex container for sidebar and content */
+.main-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Content area */
+.content {
+    flex: 1;
+    padding: 20px;
+    background: linear-gradient(to right, #fbeec1, #f5f5dc);
+}
+
+/* Content container for forms and tables */
+.content-container {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-width: 600px;
+    margin: 0 auto; /* Center horizontally */
+}
+
+/* Adjust padding for product list table */
+.content-container.table-container {
+    padding: 20px;
+    max-width: 100%; /* Full width for tables */
+}
+
+/* Headings */
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Form labels */
+label.form-label {
+    font-weight: bold;
+}
+
+/* Buttons */
+.btn {
+    margin-right: 10px;
+}
+#back i, #submit i {
+    margin-right: 5px;
+}
+
+/* Delete confirmation text */
+.m_title, .m_id {
+    color: #333;
+}
+
+/* Table styling */
+.table img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+.table td {
+    vertical-align: middle;
+    text-align: center;
+}
+.date-column {
+    white-space: nowrap;
+    min-width: 150px;
+}
+
+/* Action buttons inside table */
+.action-buttons {
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    gap: 5px;
+    /*align-items: center;*/
+}
+
+.action-buttons .btn {
+    width: 80px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+.action-buttons {
+    /*display: flex;*/
+    flex-direction: row; /* Nút nằm ngang */
+    /*justify-content: center;*/
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+}
+
+/* Prevent Product Name from wrapping */
+/* Prevent Product Name from wrapping */
+.table td.product-name,
+.table th.product-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* hoặc điều chỉnh theo ý bạn */
+}
+
+/* Prevent Category (Parent Category) from wrapping */
+.table td.parent-category,
+.table th.parent-category {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px; /* có thể điều chỉnh tùy ý */
+}
+
+/* Action buttons container */
+
