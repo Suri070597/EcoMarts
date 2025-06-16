@@ -85,6 +85,9 @@
                     </div>
 
                     <div class="table-container">
+                        <c:if test="${not empty errorMessage}">
+                            <div class="alert alert-danger">${errorMessage}</div>
+                        </c:if>
                         <table class="table table-striped table-hover">
                             <thead>
                                 <tr>
@@ -135,14 +138,14 @@
                                                    class='btn btn-sm btn-primary'>
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href='${pageContext.request.contextPath}/admin/account?action=status&id=${acc.accountID}&status=${acc.status}'
+                                                <a href='javascript:void(0)'
+                                                   onclick='confirmStatusChange("${pageContext.request.contextPath}/admin/account?action=status&id=${acc.accountID}&status=${acc.status}", "${acc.status}")'
                                                    class='btn btn-sm ${acc.status eq "Active" ? "btn-warning" : "btn-success"}'>
-                                                    <i class="fas ${acc.status eq " Active" ? "fa-ban"
-                                                                    : "fa-check" }"></i>
+                                                    <i class="fas ${acc.status eq "Active" ? "fa-ban" : "fa-check"}"></i>
                                                 </a>
                                                 <a href='${pageContext.request.contextPath}/admin/account?action=delete&id=${acc.accountID}'
                                                    class='btn btn-sm btn-danger'
-                                                   onclick="return confirm('Are you sure you want to delete this account?')">
+                                                   onclick="return confirmDelete(event, '${acc.accountID}')">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             </div>
@@ -157,7 +160,31 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
+                                                       function confirmStatusChange(url, status) {
+                                                           // Chuẩn hóa trạng thái (loại bỏ khoảng trắng, chuyển về chữ thường)
+                                                           const normalizedStatus = String(status).trim().toLowerCase();
+                                                           const isActive = normalizedStatus === "active";
+
+                                                           Swal.fire({
+                                                               title: 'Xác nhận thay đổi trạng thái',
+                                                               text: isActive
+                                                                       ? 'Bạn có muốn khóa tài khoản này không?'
+                                                                       : 'Bạn có muốn kích hoạt tài khoản này không?',
+                                                               icon: 'question',
+                                                               showCancelButton: true,
+                                                               confirmButtonColor: '#3085d6',
+                                                               cancelButtonColor: '#d33',
+                                                               confirmButtonText: 'Đồng ý',
+                                                               cancelButtonText: 'Hủy'
+                                                           }).then((result) => {
+                                                               if (result.isConfirmed) {
+                                                                   window.location.href = url;
+                                                               }
+                                                           });
+                                                       }
+
                                                        // Add search functionality for client-side filtering
                                                        document.querySelector('.search-box input').addEventListener('input', function (e) {
                                                            const searchText = e.target.value.toLowerCase();
@@ -168,6 +195,25 @@
                                                                row.style.display = text.includes(searchText) ? '' : 'none';
                                                            });
                                                        });
+
+                                                       function confirmDelete(event, accountId) {
+                                                           event.preventDefault();
+                                                           Swal.fire({
+                                                               title: 'Xác nhận xóa tài khoản',
+                                                               text: "Bạn muốn xóa tài khoản này không?",
+                                                               icon: 'warning',
+                                                               showCancelButton: true,
+                                                               confirmButtonColor: '#d33',
+                                                               cancelButtonColor: '#3085d6',
+                                                               confirmButtonText: 'Đồng ý',
+                                                               cancelButtonText: 'Hủy'
+                                                           }).then((result) => {
+                                                               if (result.isConfirmed) {
+                                                                   window.location.href = '${pageContext.request.contextPath}/admin/account?action=delete&id=' + accountId;
+                                                               }
+                                                           });
+                                                           return false;
+                                                       }
         </script>
     </body>
 
