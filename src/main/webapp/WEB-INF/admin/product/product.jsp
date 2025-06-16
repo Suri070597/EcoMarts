@@ -30,10 +30,10 @@
                         <div class="header-actions d-flex justify-content-between align-items-center">
                             <h1 class="card-title">Product List</h1>
                             <div class="d-flex gap-2">
-                                <form action="${pageContext.request.contextPath}/admin/account" method="get"
+                                <form action="${pageContext.request.contextPath}/admin/product" method="get"
                                       class="search-box">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" name="search" placeholder="Search accounts..."
+                                    <input type="text" name="search" placeholder="Search products..."
                                            value="${keyword != null ? keyword : ''}">
                                     <button type="submit" class="btn btn-sm btn-primary">Search</button>
                                 </form>
@@ -100,9 +100,10 @@
                                             <a href="${pageContext.request.contextPath}/admin/product?action=update&id=<%= pro.getProductID()%>" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="<%= request.getContextPath()%>/admin/product?action=delete&id=<%= pro.getProductID()%>" class="btn btn-sm btn-danger">
+                                            <a  href="${pageContext.request.contextPath}/admin/product?action=delete&id=<%= pro.getProductID()%>" class="btn btn-sm btn-danger">
                                                 <i class="fas fa-trash"></i>
                                             </a>
+
                                         </div>
                                     </td>
                                 </tr>

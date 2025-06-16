@@ -33,11 +33,10 @@ public class ProductServlet extends HttpServlet {
             action = "list";
         }
         productDAO dao = new productDAO();
+        List<Category> listCategory = dao.getCategory();
         switch (action) {
             case "list":
                 List<Product> list = dao.getAll();
-                List<Category> listCategory = dao.getCategory();
-
                 request.setAttribute("dataCate", listCategory);
                 request.setAttribute("data", list);
 
@@ -71,11 +70,24 @@ public class ProductServlet extends HttpServlet {
 
                     request.setAttribute("dataCate", dao.getCategory());
                     request.setAttribute("dataSup", dao.getAllSuppliers());
-
                     request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
                 } catch (Exception e) {
-                    out.println(e.getMessage());
+                    e.printStackTrace();
                 }
+                break;
+            default:
+                String keyword = request.getParameter("search");
+//                List<Product> list;
+                if (keyword != null && !keyword.trim().isEmpty()) {
+                    list = dao.searchProductsByName(keyword);
+                    request.setAttribute("keyword", keyword);
+                } else {
+                    list = dao.getAll();
+                }
+                request.setAttribute("dataCate", listCategory);
+                request.setAttribute("data", list);
+
+                request.getRequestDispatcher("/WEB-INF/admin/product/product.jsp").forward(request, response);
                 break;
 
         }
@@ -131,7 +143,7 @@ public class ProductServlet extends HttpServlet {
             case "delete":
                 String idRaw = request.getParameter("id");
                 int id = Integer.parseInt(idRaw);
-                if (dao.delete(id) == 1) {
+                if (dao.delete(id)) {
                     response.sendRedirect(request.getContextPath() + "/admin/product");
                 } else {
                     response.sendRedirect(request.getContextPath() + "/admin/product?action=delete&id=" + id);
@@ -180,7 +192,7 @@ public class ProductServlet extends HttpServlet {
                 if (result) {
                     response.sendRedirect(request.getContextPath() + "/admin/product");
                 } else {
-                    response.sendRedirect("${pageContext.request.contextPath}/admin/product?action=update&id=" + id1);
+                    response.sendRedirect(request.getContextPath() + "/admin/product?action=update&id=" + id1);
                 }
                 break;
         }

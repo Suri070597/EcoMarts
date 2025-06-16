@@ -18,20 +18,25 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/css/bootstrap-icons.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-        <link rel="stylesheet" href="assets/css/crudProduct.css"/>
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
     </head>
     <body>
-        <div class="main-container">
-            <%@ include file="../sidebar.jsp" %>
-            <div class="content">
-                <div class="content-container">
+        <div class="container-fluid">
+            <%-- Include admin sidebar --%>
+            <jsp:include page="../components/sidebar.jsp" />
+
+            <div class="main-content">
+                <div class="container">
                     <h1>Edit Product</h1>
                     <div id="imageError" class="alert alert-danger d-none" role="alert"></div>
                     <% if (mo == null) { %>
                     <p>There is no product with that id</p>
-                    <a href="Product" class="btn btn-secondary">Back</a>
+                    <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary">Back</a>
                     <% } else {%>
-                    <form id="createForm" method="post" action="Product?action=update&id=<%= mo.getProductID()%>" enctype="multipart/form-data">
+                    <form id="createForm" method="post" action="${pageContext.request.contextPath}/admin/product?action=update&id=<%= mo.getProductID()%>" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label class="form-label">Product ID</label>
                             <input type="text" class="form-control" value="<%= mo.getProductID()%>" disabled>
@@ -50,7 +55,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Product Quantity</label>
-                            <input type="number" min="0" class="form-control" name="pQuantity" required value="<%= mo.getQuantity()%>" />
+                            <input type="number" min="0" class="form-control" name="pQuantity" required value="<%= mo.getStockQuantity()%>" />
                         </div>
 
                         <div class="mb-3">
@@ -66,7 +71,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Current Image</label><br>
-                            <img src="ImageServlet?name=<%= mo.getImage()%>" alt="Current Image" width="100" />
+                            <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= mo.getImageURL()%>" alt="Current Image" width="100" />
                         </div>
 
                         <div class="mb-3">
@@ -103,19 +108,19 @@
                                 <option value="">-- Select Supplier --</option>
                                 <% for (Supplier s : sup) {%>
                                 <option value="<%= s.getSupplierId()%>" <%= (mo.getSupplier() != null && mo.getSupplier().getSupplierId() == s.getSupplierId()) ? "selected" : ""%>>
-                                    <%= s.getSupplierName()%>
+                                    <%= s.getCompanyName()%>
                                 </option>
                                 <% } %>
                             </select>
                         </div>
 
-                        <a href="Product" class="btn btn-secondary">Back</a>
+                        <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary">Back</a>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </form>
                     <% }%>
                 </div>
             </div>
         </div>
-        <script src="assets/js/handelImg.js"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/handelImg.js"></script>
     </body>
 </html>

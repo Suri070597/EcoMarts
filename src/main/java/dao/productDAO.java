@@ -117,7 +117,7 @@ public class productDAO extends DBContext {
                 Supplier supplier = new Supplier(supplierId, supplierName);
 
                 // Create Product
-                product = new Product(parentId, proName, proPrice, description, quantity, ImageURL, unit, createdAt);
+                product = new Product(id, proName, proPrice, description, quantity, ImageURL, unit, createdAt);
                 product.setCategory(category);
                 product.setSupplier(supplier);  // nếu có field supplier
             }
@@ -128,61 +128,44 @@ public class productDAO extends DBContext {
     }
 
 //
-    public int delete(int id) {
-        String sql1 = "DELETE FROM Product_Promotion WHERE ProductID = ?";
-        String sql2 = "DELETE FROM InventoryTransaction WHERE ProductID = ?";
-        String sql3 = "DELETE FROM Product WHERE ProductID = ?";
-
-        int rowsAffected = 0;
-
-        PreparedStatement ps1 = null, ps2 = null, ps3 = null;
+    public boolean delete(int id) {
+        String sqlCartItem = "DELETE FROM CartItem WHERE ProductID = ?";
+        String sqlOrderDetail = "DELETE FROM OrderDetail WHERE ProductID = ?";
+        String sqlReview = "DELETE FROM Review WHERE ProductID = ?";
+        String sqlPromotion = "DELETE FROM Product_Promotion WHERE ProductID = ?";
+        String sqlInventory = "DELETE FROM InventoryTransaction WHERE ProductID = ?";
+        String sqlProduct = "DELETE FROM Product WHERE ProductID = ?";
 
         try {
-            conn.setAutoCommit(false);
-
-            // Xóa Promotion_Product
-            ps1 = conn.prepareStatement(sql1);
+            PreparedStatement ps1 = conn.prepareStatement(sqlCartItem);
             ps1.setInt(1, id);
             ps1.executeUpdate();
 
-            // Xóa Inventory
-            ps2 = conn.prepareStatement(sql2);
+            PreparedStatement ps2 = conn.prepareStatement(sqlOrderDetail);
             ps2.setInt(1, id);
             ps2.executeUpdate();
 
-            // Xóa Product
-            ps3 = conn.prepareStatement(sql3);
+            PreparedStatement ps3 = conn.prepareStatement(sqlReview);
             ps3.setInt(1, id);
-            rowsAffected = ps3.executeUpdate();
+            ps3.executeUpdate();
 
-            conn.commit();
+            PreparedStatement ps4 = conn.prepareStatement(sqlPromotion);
+            ps4.setInt(1, id);
+            ps4.executeUpdate();
 
+            PreparedStatement ps5 = conn.prepareStatement(sqlInventory);
+            ps5.setInt(1, id);
+            ps5.executeUpdate();
+
+            PreparedStatement ps6 = conn.prepareStatement(sqlProduct);
+            ps6.setInt(1, id);
+            int affectedRows = ps6.executeUpdate();
+
+            return affectedRows > 0;
         } catch (Exception e) {
-            System.out.println("Delete Error: " + e.getMessage());
-            try {
-                conn.rollback();
-            } catch (Exception ex) {
-                System.out.println("Rollback failed: " + ex.getMessage());
-            }
-            rowsAffected = -1;
-        } finally {
-            try {
-                if (ps1 != null) {
-                    ps1.close();
-                }
-                if (ps2 != null) {
-                    ps2.close();
-                }
-                if (ps3 != null) {
-                    ps3.close();
-                }
-                conn.setAutoCommit(true);
-            } catch (Exception e) {
-                System.out.println("Cleanup failed: " + e.getMessage());
-            }
+            e.printStackTrace();
+            return false;
         }
-
-        return rowsAffected;
     }
 
     public boolean update(Product product) {
@@ -261,23 +244,52 @@ public class productDAO extends DBContext {
         return list;
     }
 
-    public static void main(String[] args) {
-        productDAO dao = new productDAO();
-
-        // Test delete()
-        System.out.println("=================================");
-        System.out.println("🔹 Test xóa Product");
-
-        int deleteProductId = 4; // <-- Thay ID này bằng ProductID bạn muốn test
-        int result = dao.delete(deleteProductId);
-
-        if (result > 0) {
-            System.out.println("✅ Xóa sản phẩm có ID = " + deleteProductId + " thành công.");
-        } else if (result == 0) {
-            System.out.println("⚠️ Không tìm thấy sản phẩm để xóa với ID = " + deleteProductId);
-        } else {
-            System.out.println("❌ Đã xảy ra lỗi khi xóa sản phẩm có ID = " + deleteProductId);
+    public List<Product> searchProductsByName(String keyword) {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT * FROM Product WHERE ProductName LIKE ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, "%" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                p.setPrice(rs.getDouble("Price"));
+                p.setDescription(rs.getString("Description"));
+                p.setStockQuantity(rs.getInt("StockQuantity"));
+                p.setImageURL(rs.getString("ImageURL"));
+                p.setUnit(rs.getString("Unit"));
+                p.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                list.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return list;
+    }
 
+    public static void main(String[] args) {
+        productDAO dao = new productDAO(); // Đảm bảo DBContext đã kết nối thành công
+        String keyword = "coca"; // 👉 Thay bằng từ khóa bạn muốn tìm
+
+        List<Product> products = dao.searchProductsByName(keyword);
+
+        if (products.isEmpty()) {
+            System.out.println("❌ No products found with keyword: " + keyword);
+        } else {
+            System.out.println("🔍 Found " + products.size() + " products with keyword: " + keyword);
+            for (Product p : products) {
+                System.out.println("➡️ ID: " + p.getProductID());
+                System.out.println("➡️ Name: " + p.getProductName());
+                System.out.println("➡️ Price: " + p.getPrice());
+                System.out.println("➡️ Description: " + p.getDescription());
+                System.out.println("➡️ Quantity: " + p.getStockQuantity());
+                System.out.println("➡️ Image URL: " + p.getImageURL());
+                System.out.println("➡️ Unit: " + p.getUnit());
+                System.out.println("➡️ Created At: " + p.getCreatedAt());
+                System.out.println("----------------------------------");
+            }
+        }
     }
 }
