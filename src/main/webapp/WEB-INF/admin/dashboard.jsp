@@ -95,7 +95,7 @@
                         transition: var(--transition);
                         position: relative;
                         overflow: hidden;
-                        min-height: 70px;
+                        min-height: 50px;
                     }
 
                     .stat-card:hover {

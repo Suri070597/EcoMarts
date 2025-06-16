@@ -17,13 +17,13 @@
                                 <c:choose>
                                     <c:when
                                         test="${category.categoryName.contains('nước') || category.categoryName.contains('Nước')}">
-                                        🍹 </c:when>
-                                    <c:when test="${category.categoryName.contains('Sữa')}">🧃 </c:when>
-                                    <c:when test="${category.categoryName.contains('Trái cây')}">🍎 </c:when>
-                                    <c:when test="${category.categoryName.contains('Bánh')}">🍬 </c:when>
-                                    <c:when test="${category.categoryName.contains('Mẹ và bé')}">🍼 </c:when>
-                                    <c:when test="${category.categoryName.contains('Mỹ phẩm')}">💄 </c:when>
-                                    <c:otherwise>📦 </c:otherwise>
+                                        <i class="fa fa-glass-water" style="color: #4a90e2;"></i> </c:when>
+                                    <c:when test="${category.categoryName.contains('Sữa')}" ><i class="fa fa-bottle-water" style="color: #FFFFFF;"></i></c:when>
+                                    <c:when test="${category.categoryName.contains('Trái cây')}"><i class="fa fa-apple-whole" style="color: #43D214;"></i> </c:when>
+                                    <c:when test="${category.categoryName.contains('Bánh')}"><i class="fa fa-cookie" style="color: #f1c40f;"></i> </c:when>
+                                    <c:when test="${category.categoryName.contains('Mẹ và bé')}"><i class="fa fa-baby" style="color: #e84393;"></i> </c:when>
+                                    <c:when test="${category.categoryName.contains('Mỹ phẩm')}"><i class="fa fa-pump-soap" style="color: #9b59b6;"></i> </c:when>
+                                    <c:otherwise><i class="fa fa-fire" style="color: #D25014;"></i> </c:otherwise>
                                 </c:choose>
                                 ${category.categoryName} <i class="fa fa-chevron-down"></i>
                             </button>
