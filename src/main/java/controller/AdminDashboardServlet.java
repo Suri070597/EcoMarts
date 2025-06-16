@@ -40,12 +40,19 @@ public class AdminDashboardServlet extends HttpServlet {
         request.setAttribute("recentOrders", recentOrders);
 
         // 5. Top selling products (top 10)
-        List<Map<String, Object>> topProducts = orderDAO.getTopSellingProducts(10);
-        request.setAttribute("topProducts", topProducts);
+        String view = request.getParameter("view");
+        if ("top-products".equals(view)) {
+            List<Map<String, Object>> topProducts = orderDAO.getTopSellingProducts(10);
+            request.setAttribute("topProducts", topProducts);
+            request.getRequestDispatcher("/WEB-INF/admin/top-products.jsp").forward(request, response);
+            return;
 
         // 6. Top customers (top 5)
-        List<Map<String, Object>> topCustomers = orderDAO.getTopCustomers(5);
-        request.setAttribute("topCustomers", topCustomers);
+        }else if ("top-customers".equals(view)) {
+            List<Map<String, Object>> topCustomers = orderDAO.getTopCustomers(5);
+            request.setAttribute("topCustomers", topCustomers);
+            request.getRequestDispatcher("/WEB-INF/admin/top-customers.jsp").forward(request, response);
+            return;}
 
         // 7. Total products count
         List<Product> products = productDAO.getAll();

@@ -20,9 +20,9 @@
                         Manager</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/supplier"><i class="fas fa-parachute-box"></i>
                         Supplier</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/statistic/top-products"><i
+                <li><a href="${pageContext.request.contextPath}/admin/dashboard?view=top-products"><i
                             class="fas fa-shoe-prints"></i> Top 10 product</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/statistic/top-customers"><i
+                <li><a href="${pageContext.request.contextPath}/admin/dashboard?view=top-customers"><i
                             class="fas fa-users"></i> Top 5 customer</a></li>
             </ul>
         </aside>
