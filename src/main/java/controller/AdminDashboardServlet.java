@@ -1,14 +1,17 @@
 package controller;
 
-import dao.AccountDAO;
-import dao.OrderDAO;
-import dao.ProductDAO;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import jakarta.servlet.*;
+
+import dao.AccountDAO;
+import dao.OrderDAO;
+import dao.ProductDAO;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import model.Product;
 
 @WebServlet(name = "AdminDashboardServlet", urlPatterns = {"/admin/dashboard"})
@@ -44,28 +47,16 @@ public class AdminDashboardServlet extends HttpServlet {
         if ("top-products".equals(view)) {
             List<Map<String, Object>> topProducts = orderDAO.getTopSellingProducts(10);
             request.setAttribute("topProducts", topProducts);
-<<<<<<< feature/top-customers_top-products
-            request.getRequestDispatcher("/WEB-INF/admin/top-products.jsp").forward(request, response);
-            return;
-
-        // 6. Top customers (top 5)
-        }else if ("top-customers".equals(view)) {
-            List<Map<String, Object>> topCustomers = orderDAO.getTopCustomers(5);
-            request.setAttribute("topCustomers", topCustomers);
-            request.getRequestDispatcher("/WEB-INF/admin/top-customers.jsp").forward(request, response);
-            return;}
-=======
             request.getRequestDispatcher("/WEB-INF/admin/report/top-products.jsp").forward(request, response);
             return;
 
-            // 6. Top customers (top 5)
+        // 6. Top customers (top 5)
         } else if ("top-customers".equals(view)) {
             List<Map<String, Object>> topCustomers = orderDAO.getTopCustomers(5);
             request.setAttribute("topCustomers", topCustomers);
             request.getRequestDispatcher("/WEB-INF/admin/report/top-customers.jsp").forward(request, response);
             return;
         }
->>>>>>> main
 
         // 7. Total products count
         List<Product> products = productDAO.getAll();
