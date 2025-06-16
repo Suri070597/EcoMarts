@@ -17,6 +17,7 @@ controller\ProductServlet.class
 model\Promotion.class
 controller\CategoryServlet.class
 dao\OrderDetailDAO.class
+controller\admin\OrderServlet.class
 model\Order.class
 controller\AdminDashboardServlet.class
 model\Category.class

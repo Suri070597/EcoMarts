@@ -1,12 +1,15 @@
 package model;
 
 public class OrderDetail {
+
     private int orderDetailID;
     private int orderID;
     private int productID;
     private int quantity;
     private double unitPrice;
-    private double subTotal; // This is a calculated field in the database (Quantity * UnitPrice)
+    private double subTotal;
+    private String productName;
+    private Product product;
 
     public OrderDetail() {
     }
@@ -62,19 +65,39 @@ public class OrderDetail {
         this.subTotal = this.quantity * this.unitPrice;
     }
 
+    public void setSubTotal(double subTotal) {
+        this.subTotal = subTotal;
+    }
+
     public double getSubTotal() {
         return subTotal;
     }
 
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
     @Override
     public String toString() {
-        return "OrderDetail{" +
-                "orderDetailID=" + orderDetailID +
-                ", orderID=" + orderID +
-                ", productID=" + productID +
-                ", quantity=" + quantity +
-                ", unitPrice=" + unitPrice +
-                ", subTotal=" + subTotal +
-                '}';
+        return "OrderDetail{"
+                + "orderDetailID=" + orderDetailID
+                + ", orderID=" + orderID
+                + ", productID=" + productID
+                + ", quantity=" + quantity
+                + ", unitPrice=" + unitPrice
+                + ", subTotal=" + subTotal
+                + '}';
     }
 }

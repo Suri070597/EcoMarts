@@ -437,8 +437,8 @@
                                                 </c:forEach>
                                             </tbody>
                                         </table>
-                                        <a href="#" class="view-all">View all orders <i
-                                                class="fas fa-arrow-right"></i></a>
+                                        <li><a href="${pageContext.request.contextPath}/admin/order" class="view-all">View all orders <i
+                                                class="fas fa-arrow-right"></i></a></li>
                                     </c:when>
                                     <c:otherwise>
                                         <div class="empty-state">
