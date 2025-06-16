@@ -35,16 +35,17 @@ CREATE TABLE Account (
 
 INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], Position, [Status])
 VALUES
--- Customers
-(N'nguyenvana', N'pass123', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', N'Nam', 0, NULL, N'Active'),
-(N'tranthib', N'pass456', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', N'Nữ', 0, NULL, N'Active'),
-(N'levanc', N'pass789', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', N'Nam', 0, NULL, N'Active'),
 -- Admin
 (N'admin123', N'adminpass', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nam', 1, N'Giám đốc', N'Active'),
 -- Staff
-(N'thacnha', N'staffpass1', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Nhân viên bán hàng', N'Active'),
-(N'mantue', N'staffpass2', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Quản lý kho', N'Active'),
-(N'truongsinh', N'staffpass3', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Nhân viên giao hàng', N'Active');
+(N'Thacnha', N'Thacnha02', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Nhân viên bán hàng', N'Active'),
+(N'Mantue', N'Mantue03', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Quản lý kho', N'Active'),
+(N'Truongsinh', N'Truongsinh04', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Nhân viên giao hàng', N'Active'),
+(N'Tuenhi', N'Tuenhi05', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', N'Vĩnh Long', N'Nữ', 2, N'Nhân viên bán hàng', N'Active'),
+-- Customers
+(N'nguyenvana', N'pass123', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', N'Nam', 0, NULL, N'Active'),
+(N'tranthib', N'pass456', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', N'Nữ', 0, NULL, N'Active'),
+(N'levanc', N'pass789', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', N'Nam', 0, NULL, N'Active');
 
 -- Update token values for some accounts (formerly in Token table)
 UPDATE Account SET 
@@ -279,10 +280,10 @@ CREATE TABLE [Order] (
 -- Insert sample orders
 INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus)
 VALUES
-(1, '2023-06-01 10:30:00', 16000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Đã thanh toán', N'Đã giao'),
-(2, '2023-06-01 11:15:00', 45000, N'45 Nguyễn Huệ, Q.3, TP.HCM', '0918234567', N'MoMo', N'Đã thanh toán', N'Đang giao hàng'),
-(3, '2023-06-01 14:20:00', 21000, N'78 Trần Phú, Q.5, TP.HCM', '0987345678', N'VNPay', N'Đã thanh toán', N'Đã giao'),
-(1, '2023-06-02 09:45:00', 35000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Chưa thanh toán', N'Đang xử lý');
+(6, '2023-06-01 10:30:00', 16000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Đã thanh toán', N'Đã giao'),
+(7, '2023-06-01 11:15:00', 45000, N'45 Nguyễn Huệ, Q.3, TP.HCM', '0918234567', N'MoMo', N'Đã thanh toán', N'Đang giao hàng'),
+(8, '2023-06-01 14:20:00', 21000, N'78 Trần Phú, Q.5, TP.HCM', '0987345678', N'VNPay', N'Đã thanh toán', N'Đã giao'),
+(6, '2023-06-02 09:45:00', 35000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Chưa thanh toán', N'Đang xử lý');
 
 CREATE TABLE OrderDetail (
     OrderDetailID INT PRIMARY KEY IDENTITY(1,1),
