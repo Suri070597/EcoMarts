@@ -430,3 +430,13 @@ VALUES
 (@JohnsonBaby, -1, N'Sale', 'ORD002', N'Bán hàng', 5),
 (@SuaVinamilk, -3, N'Sale', 'ORD003', N'Bán hàng', 5),
 (@TaoMy, 50, N'Purchase', 'PUR002', N'Nhập hàng từ Thịnh An', 6);
+
+
+
+
+delete product
+DBCC CHECKIDENT ('Product', RESEED, 0);
+
+SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p 
+                                JOIN Category c ON p.categoryID = c.categoryID 
+                               JOIN Supplier s ON p.supplierID = s.supplierID

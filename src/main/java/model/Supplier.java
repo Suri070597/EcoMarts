@@ -1,6 +1,7 @@
 package model;
 
 public class Supplier {
+
     private int supplierID;
     private String brandName;
     private String companyName;
@@ -10,6 +11,11 @@ public class Supplier {
     private String status; // Đang hợp tác, Ngừng hợp tác, etc.
 
     public Supplier() {
+    }
+
+    public Supplier(int supplierID, String companyName) {
+        this.supplierID = supplierID;
+        this.companyName = companyName;
     }
 
     public Supplier(int supplierID, String brandName, String companyName, String address, String email, String phone,
@@ -79,16 +85,22 @@ public class Supplier {
         this.status = status;
     }
 
+    public int getSupplierId() {
+        return supplierID;
+    }
+    
     @Override
     public String toString() {
-        return "Supplier{" +
-                "supplierID=" + supplierID +
-                ", brandName='" + brandName + '\'' +
-                ", companyName='" + companyName + '\'' +
-                ", address='" + address + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", status='" + status + '\'' +
-                '}';
+        return "Supplier{"
+                + "supplierID=" + supplierID
+                + ", brandName='" + brandName + '\''
+                + ", companyName='" + companyName + '\''
+                + ", address='" + address + '\''
+                + ", email='" + email + '\''
+                + ", phone='" + phone + '\''
+                + ", status='" + status + '\''
+                + '}';
     }
+
+    
 }

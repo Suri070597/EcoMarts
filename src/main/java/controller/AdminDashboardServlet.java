@@ -2,7 +2,7 @@ package controller;
 
 import dao.AccountDAO;
 import dao.OrderDAO;
-import dao.ProductDAO;
+import dao.productDAO;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
         // Get data for dashboard
         OrderDAO orderDAO = new OrderDAO();
-        ProductDAO productDAO = new ProductDAO();
+        productDAO productDAO = new productDAO();
         AccountDAO accountDAO = new AccountDAO();
 
         // 1. Revenue summary (total, monthly, daily)
