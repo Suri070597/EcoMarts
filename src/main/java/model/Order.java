@@ -1,11 +1,13 @@
 package model;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class Order {
+
     private int orderID;
     private int accountID;
-    private Timestamp orderDate;
+    private Date orderDate;
     private double totalAmount;
     private String shippingAddress;
     private String shippingPhone;
@@ -13,6 +15,8 @@ public class Order {
     private String paymentStatus;
     private String orderStatus;
     private String notes;
+    private String accountName;
+    private Account account;
 
     public Order() {
     }
@@ -48,8 +52,20 @@ public class Order {
         this.accountID = accountID;
     }
 
-    public Timestamp getOrderDate() {
+    public Date getOrderDate() {
         return orderDate;
+    }
+
+    public void setOrderDate(Date orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
     public void setOrderDate(Timestamp orderDate) {
@@ -111,4 +127,13 @@ public class Order {
     public void setNotes(String notes) {
         this.notes = notes;
     }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+    
 }
