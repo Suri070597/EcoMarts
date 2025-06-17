@@ -1,7 +1,7 @@
 package controller;
 
 import dao.CategoryDAO;
-import dao.productDAO;
+import dao.ProductDAO;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.*;
@@ -22,7 +22,7 @@ public class HomeServlet extends HttpServlet {
         request.setAttribute("categories", categories);
 
         // Get products
-        productDAO dao = new productDAO();
+        ProductDAO dao = new ProductDAO();
         List<Product> list = dao.getAll();
 
         request.setAttribute("products", list);

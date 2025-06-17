@@ -1,6 +1,6 @@
 package controller;
 
-import dao.productDAO;
+import dao.ProductDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -32,7 +32,7 @@ public class ProductServlet extends HttpServlet {
         if (action == null) {
             action = "list";
         }
-        productDAO dao = new productDAO();
+        ProductDAO dao = new ProductDAO();
         List<Category> listCategory = dao.getCategory();
         switch (action) {
             case "list":
@@ -97,7 +97,7 @@ public class ProductServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        productDAO dao = new productDAO();
+        ProductDAO dao = new ProductDAO();
         String action = request.getParameter("action");
         PrintWriter out = response.getWriter();
         if (action == null) {

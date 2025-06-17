@@ -21,7 +21,7 @@ import model.Supplier;
  *
  * @author LNQB
  */
-public class productDAO extends DBContext {
+public class ProductDAO extends DBContext {
 
     public List<Product> getAll() {
         List<Product> list = new ArrayList<>();
@@ -270,7 +270,7 @@ public class productDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        productDAO dao = new productDAO(); // Đảm bảo DBContext đã kết nối thành công
+        ProductDAO dao = new ProductDAO(); // Đảm bảo DBContext đã kết nối thành công
         String keyword = "coca"; // 👉 Thay bằng từ khóa bạn muốn tìm
 
         List<Product> products = dao.searchProductsByName(keyword);

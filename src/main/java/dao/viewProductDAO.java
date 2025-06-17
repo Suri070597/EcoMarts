@@ -15,7 +15,7 @@ import model.Product;
  *
  * @author LNQB
  */
-public class viewProductDAO extends DBContext {
+public class ViewProductDAO extends DBContext {
 
     // Hàm chung lấy sản phẩm theo categoryID
     public List<Product> getProductsByCategory(int parentCategoryId) {
@@ -75,7 +75,7 @@ public class viewProductDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        viewProductDAO dao = new viewProductDAO();
+        ViewProductDAO dao = new ViewProductDAO();
 
         // Test từng danh mục
         System.out.println("=== SẢN PHẨM SỮA ===");
