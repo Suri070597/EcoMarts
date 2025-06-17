@@ -1,4 +1,3 @@
-<%@page import="dao.productDAO"%>
 <%@page import="model.Supplier"%>
 <%@page import="model.Category"%>
 <%@page import="java.util.List"%>
