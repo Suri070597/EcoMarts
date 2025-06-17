@@ -131,9 +131,8 @@ public class ProductDAO extends DBContext {
         String sqlOrderDetail = "DELETE FROM OrderDetail WHERE ProductID = ?";
         String sqlReview = "DELETE FROM Review WHERE ProductID = ?";
         String sqlPromotion = "DELETE FROM Product_Promotion WHERE ProductID = ?";
-        String sqlInventory = "DELETE FROM InventoryTransaction WHERE ProductID = ?";
+        String sqlInventory = "DELETE FROM Inventory WHERE ProductID = ?";
         String sqlProduct = "DELETE FROM Product WHERE ProductID = ?";
-
         try {
             PreparedStatement ps1 = conn.prepareStatement(sqlCartItem);
             ps1.setInt(1, id);
@@ -269,25 +268,34 @@ public class ProductDAO extends DBContext {
 
     public static void main(String[] args) {
         ProductDAO dao = new ProductDAO(); // Đảm bảo DBContext đã kết nối thành công
-        String keyword = "coca"; // 👉 Thay bằng từ khóa bạn muốn tìm
 
-        List<Product> products = dao.searchProductsByName(keyword);
+        // 👇 In ra danh sách sản phẩm ban đầu
+        System.out.println("=== Danh sách sản phẩm trước khi xóa ===");
+        List<Product> productsBefore = dao.getAll();
+        for (Product p : productsBefore) {
+            System.out.println("➡️ ID: " + p.getProductID() + " | Name: " + p.getProductName());
+        }
 
-        if (products.isEmpty()) {
-            System.out.println("❌ No products found with keyword: " + keyword);
+        // 👇 ID sản phẩm bạn muốn xóa (nhớ đảm bảo ID này tồn tại)
+        int productIdToDelete = 20;
+
+        // 👇 Gọi phương thức delete
+        boolean deleted = dao.delete(productIdToDelete);
+        System.out.println("\n❗Kết quả xóa sản phẩm có ID " + productIdToDelete + ": " + (deleted ? "Thành công ✅" : "Thất bại ❌"));
+
+        // 👇 Kiểm tra lại danh sách sau khi xóa
+        System.out.println("\n=== Danh sách sản phẩm sau khi xóa ===");
+        List<Product> productsAfter = dao.getAll();
+        for (Product p : productsAfter) {
+            System.out.println("➡️ ID: " + p.getProductID() + " | Name: " + p.getProductName());
+        }
+
+        // 👇 Kiểm tra xem sản phẩm đã thực sự bị xóa chưa
+        boolean stillExists = productsAfter.stream().anyMatch(p -> p.getProductID() == productIdToDelete);
+        if (!stillExists) {
+            System.out.println("\n✅ Sản phẩm đã được xóa khỏi hệ thống.");
         } else {
-            System.out.println("🔍 Found " + products.size() + " products with keyword: " + keyword);
-            for (Product p : products) {
-                System.out.println("➡️ ID: " + p.getProductID());
-                System.out.println("➡️ Name: " + p.getProductName());
-                System.out.println("➡️ Price: " + p.getPrice());
-                System.out.println("➡️ Description: " + p.getDescription());
-                System.out.println("➡️ Quantity: " + p.getStockQuantity());
-                System.out.println("➡️ Image URL: " + p.getImageURL());
-                System.out.println("➡️ Unit: " + p.getUnit());
-                System.out.println("➡️ Created At: " + p.getCreatedAt());
-                System.out.println("----------------------------------");
-            }
+            System.out.println("\n❌ Sản phẩm vẫn còn trong hệ thống.");
         }
     }
 }
