@@ -22,7 +22,7 @@ CREATE TABLE Account (
     FullName NVARCHAR(100) NOT NULL,
     Phone VARCHAR(15),
     [Address] NVARCHAR(255),
-	Gender NVARCHAR(10),
+    Gender NVARCHAR(10),
     [Role] INT NOT NULL, -- 0: Customer, 1: Admin, 2: Staff
     [Status] NVARCHAR(50) DEFAULT 'Active', -- Active, Inactive, Suspended
 );
