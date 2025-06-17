@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Account;
 
-@WebServlet(name = "AdminAccountServlet", urlPatterns = { "/admin/account" })
+@WebServlet(name = "AdminAccountServlet", urlPatterns = {"/admin/account"})
 public class AdminAccountServlet extends HttpServlet {
 
     @Override
@@ -133,6 +133,7 @@ public class AdminAccountServlet extends HttpServlet {
                 String fullName = request.getParameter("fullName");
                 String phone = request.getParameter("phone");
                 String address = request.getParameter("address");
+                String gender = request.getParameter("gender");
                 int role = Integer.parseInt(request.getParameter("role"));
                 String status = request.getParameter("status");
 
@@ -143,6 +144,7 @@ public class AdminAccountServlet extends HttpServlet {
                 account.setFullName(fullName);
                 account.setPhone(phone);
                 account.setAddress(address);
+                account.setGender(gender);
                 account.setRole(role);
                 account.setStatus(status);
 
@@ -169,6 +171,7 @@ public class AdminAccountServlet extends HttpServlet {
                 String fullName = request.getParameter("fullName");
                 String phone = request.getParameter("phone");
                 String address = request.getParameter("address");
+                String gender = request.getParameter("gender");
                 int role = Integer.parseInt(request.getParameter("role"));
                 String status = request.getParameter("status");
 
@@ -180,6 +183,7 @@ public class AdminAccountServlet extends HttpServlet {
                 account.setFullName(fullName);
                 account.setPhone(phone);
                 account.setAddress(address);
+                account.setGender(gender);
                 account.setRole(role);
                 account.setStatus(status);
 
