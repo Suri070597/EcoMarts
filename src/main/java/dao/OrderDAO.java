@@ -10,38 +10,128 @@ import java.util.List;
 import java.util.Map;
 import model.Order;
 import db.DBContext;
+import model.OrderDetail;
 
 public class OrderDAO extends DBContext {
 
-    // Get all orders with pagination
-    public List<Order> getAllOrders(int page, int pageSize) {
-        List<Order> orders = new ArrayList<>();
-        String sql = "SELECT * FROM [Order] ORDER BY OrderDate DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, (page - 1) * pageSize);
-            ps.setInt(2, pageSize);
+    // Lấy danh sách tất cả đơn hàng
+    public List<Order> getAllOrders() {
+        List<Order> list = new ArrayList<>();
+        String sql = """
+            SELECT o.*, a.FullName
+            FROM [Order] o
+            JOIN Account a ON o.AccountID = a.AccountID
+            ORDER BY o.OrderDate DESC
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Order order = new Order();
-                order.setOrderID(rs.getInt("OrderID"));
-                order.setAccountID(rs.getInt("AccountID"));
-                order.setOrderDate(rs.getTimestamp("OrderDate"));
-                order.setTotalAmount(rs.getDouble("TotalAmount"));
-                order.setShippingAddress(rs.getString("ShippingAddress"));
-                order.setShippingPhone(rs.getString("ShippingPhone"));
-                order.setPaymentMethod(rs.getString("PaymentMethod"));
-                order.setPaymentStatus(rs.getString("PaymentStatus"));
-                order.setOrderStatus(rs.getString("OrderStatus"));
-                order.setNotes(rs.getString("Notes"));
-                orders.add(order);
+                Order o = new Order();
+                o.setOrderID(rs.getInt("OrderID"));
+                o.setAccountID(rs.getInt("AccountID"));
+                o.setOrderDate(rs.getTimestamp("OrderDate"));
+                o.setTotalAmount(rs.getDouble("TotalAmount"));
+                o.setShippingAddress(rs.getString("ShippingAddress"));
+                o.setShippingPhone(rs.getString("ShippingPhone"));
+                o.setPaymentMethod(rs.getString("PaymentMethod"));
+                o.setPaymentStatus(rs.getString("PaymentStatus"));
+                o.setOrderStatus(rs.getString("OrderStatus"));
+                o.setNotes(rs.getString("Notes"));
+                o.setAccountName(rs.getString("FullName"));
+                list.add(o);
             }
-            rs.close();
-            ps.close();
         } catch (SQLException e) {
-            System.out.println("Error in getAllOrders: " + e.getMessage());
+            e.printStackTrace();
         }
-        return orders;
+        return list;
+    }
+
+    // Tìm đơn hàng theo ID
+    public Order getOrderById(int id) {
+        String sql = """
+            SELECT o.*, a.FullName
+            FROM [Order] o
+            JOIN Account a ON o.AccountID = a.AccountID
+            WHERE o.OrderID = ?
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Order o = new Order();
+                o.setOrderID(rs.getInt("OrderID"));
+                o.setAccountID(rs.getInt("AccountID"));
+                o.setOrderDate(rs.getTimestamp("OrderDate"));
+                o.setTotalAmount(rs.getDouble("TotalAmount"));
+                o.setShippingAddress(rs.getString("ShippingAddress"));
+                o.setShippingPhone(rs.getString("ShippingPhone"));
+                o.setPaymentMethod(rs.getString("PaymentMethod"));
+                o.setPaymentStatus(rs.getString("PaymentStatus"));
+                o.setOrderStatus(rs.getString("OrderStatus"));
+                o.setNotes(rs.getString("Notes"));
+                o.setAccountName(rs.getString("FullName"));
+                return o;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Chi tiết sản phẩm trong đơn hàng
+    public List<OrderDetail> getOrderDetailsByOrderId(int orderId) {
+        List<OrderDetail> list = new ArrayList<>();
+        String sql = """
+            SELECT od.*, p.ProductName
+            FROM OrderDetail od
+            JOIN Product p ON od.ProductID = p.ProductID
+            WHERE od.OrderID = ?
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                OrderDetail od = new OrderDetail();
+                od.setOrderDetailID(rs.getInt("OrderDetailID"));
+                od.setOrderID(rs.getInt("OrderID"));
+                od.setProductID(rs.getInt("ProductID"));
+                od.setQuantity(rs.getInt("Quantity"));
+                od.setUnitPrice(rs.getDouble("UnitPrice"));
+                od.setSubTotal(rs.getDouble("SubTotal"));
+                od.setProductName(rs.getString("ProductName"));
+                list.add(od);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Thống kê số đơn hàng
+    public int countAllOrders() {
+        String sql = "SELECT COUNT(*) FROM [Order]";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countDeliveredOrders() {
+        String sql = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Đã giao'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     // Count total orders
@@ -67,9 +157,9 @@ public class OrderDAO extends DBContext {
     // Get recent orders for dashboard (last 5 orders)
     public List<Map<String, Object>> getRecentOrders(int limit) {
         List<Map<String, Object>> recentOrders = new ArrayList<>();
-        String sql = "SELECT o.OrderID, o.OrderDate, o.TotalAmount, o.OrderStatus, " +
-                "a.Username FROM [Order] o JOIN Account a ON o.AccountID = a.AccountID " +
-                "ORDER BY o.OrderDate DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT o.OrderID, o.OrderDate, o.TotalAmount, o.OrderStatus, "
+                + "a.Username FROM [Order] o JOIN Account a ON o.AccountID = a.AccountID "
+                + "ORDER BY o.OrderDate DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, limit);
@@ -94,10 +184,10 @@ public class OrderDAO extends DBContext {
     // Get revenue by month for current year
     public List<Map<String, Object>> getRevenueByMonth() {
         List<Map<String, Object>> revenueData = new ArrayList<>();
-        String sql = "SELECT MONTH(OrderDate) as Month, SUM(TotalAmount) as Revenue " +
-                "FROM [Order] WHERE YEAR(OrderDate) = YEAR(GETDATE()) " +
-                "AND OrderStatus = N'Đã giao' " +
-                "GROUP BY MONTH(OrderDate) ORDER BY Month";
+        String sql = "SELECT MONTH(OrderDate) as Month, SUM(TotalAmount) as Revenue "
+                + "FROM [Order] WHERE YEAR(OrderDate) = YEAR(GETDATE()) "
+                + "AND OrderStatus = N'Đã giao' "
+                + "GROUP BY MONTH(OrderDate) ORDER BY Month";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -123,14 +213,14 @@ public class OrderDAO extends DBContext {
         String totalSql = "SELECT SUM(TotalAmount) FROM [Order] WHERE OrderStatus = N'Đã giao'";
 
         // This month's revenue
-        String monthlySql = "SELECT SUM(TotalAmount) FROM [Order] WHERE " +
-                "YEAR(OrderDate) = YEAR(GETDATE()) AND MONTH(OrderDate) = MONTH(GETDATE()) " +
-                "AND OrderStatus = N'Đã giao'";
+        String monthlySql = "SELECT SUM(TotalAmount) FROM [Order] WHERE "
+                + "YEAR(OrderDate) = YEAR(GETDATE()) AND MONTH(OrderDate) = MONTH(GETDATE()) "
+                + "AND OrderStatus = N'Đã giao'";
 
         // Today's revenue
-        String dailySql = "SELECT SUM(TotalAmount) FROM [Order] WHERE " +
-                "CAST(OrderDate AS DATE) = CAST(GETDATE() AS DATE) " +
-                "AND OrderStatus = N'Đã giao'";
+        String dailySql = "SELECT SUM(TotalAmount) FROM [Order] WHERE "
+                + "CAST(OrderDate AS DATE) = CAST(GETDATE() AS DATE) "
+                + "AND OrderStatus = N'Đã giao'";
 
         try {
             // Get total revenue
@@ -200,15 +290,15 @@ public class OrderDAO extends DBContext {
     // Get top selling products
     public List<Map<String, Object>> getTopSellingProducts(int limit) {
         List<Map<String, Object>> topProducts = new ArrayList<>();
-        String sql = "SELECT p.ProductID, p.ProductName, p.ImageURL, SUM(od.Quantity) AS TotalQuantity, " +
-                "SUM(od.SubTotal) AS TotalRevenue " +
-                "FROM OrderDetail od " +
-                "JOIN Product p ON od.ProductID = p.ProductID " +
-                "JOIN [Order] o ON od.OrderID = o.OrderID " +
-                "WHERE o.OrderStatus = N'Đã giao' " +
-                "GROUP BY p.ProductID, p.ProductName, p.ImageURL " +
-                "ORDER BY TotalQuantity DESC " +
-                "OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT p.ProductID, p.ProductName, p.ImageURL, SUM(od.Quantity) AS TotalQuantity, "
+                + "SUM(od.SubTotal) AS TotalRevenue "
+                + "FROM OrderDetail od "
+                + "JOIN Product p ON od.ProductID = p.ProductID "
+                + "JOIN [Order] o ON od.OrderID = o.OrderID "
+                + "WHERE o.OrderStatus = N'Đã giao' "
+                + "GROUP BY p.ProductID, p.ProductName, p.ImageURL "
+                + "ORDER BY TotalQuantity DESC "
+                + "OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -235,14 +325,14 @@ public class OrderDAO extends DBContext {
     // Get top customers
     public List<Map<String, Object>> getTopCustomers(int limit) {
         List<Map<String, Object>> topCustomers = new ArrayList<>();
-        String sql = "SELECT a.AccountID, a.Username, COUNT(o.OrderID) AS OrderCount, " +
-                "SUM(o.TotalAmount) AS TotalSpent " +
-                "FROM Account a " +
-                "JOIN [Order] o ON a.AccountID = o.AccountID " +
-                "WHERE o.OrderStatus = N'Đã giao' " +
-                "GROUP BY a.AccountID, a.Username " +
-                "ORDER BY TotalSpent DESC " +
-                "OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT a.AccountID, a.Username, COUNT(o.OrderID) AS OrderCount, "
+                + "SUM(o.TotalAmount) AS TotalSpent "
+                + "FROM Account a "
+                + "JOIN [Order] o ON a.AccountID = o.AccountID "
+                + "WHERE o.OrderStatus = N'Đã giao' "
+                + "GROUP BY a.AccountID, a.Username "
+                + "ORDER BY TotalSpent DESC "
+                + "OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
