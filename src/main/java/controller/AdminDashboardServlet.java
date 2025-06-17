@@ -50,7 +50,7 @@ public class AdminDashboardServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/admin/report/top-products.jsp").forward(request, response);
             return;
 
-        // 6. Top customers (top 5)
+            // 6. Top customers (top 5)
         } else if ("top-customers".equals(view)) {
             List<Map<String, Object>> topCustomers = orderDAO.getTopCustomers(5);
             request.setAttribute("topCustomers", topCustomers);

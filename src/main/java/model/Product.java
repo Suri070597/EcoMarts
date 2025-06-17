@@ -25,6 +25,37 @@ public class Product {
     private int categoryID;
     private int supplierID;
     private String status;
+    private Category category;
+    private Supplier supplier;
+
+    public Category getCategory() {
+        return category;
+    }
+    
+    public int getCategoryID() {
+        return categoryID;
+    }
+    public void setCategory(Category category) {
+    this.category = category;
+}
+
+    public void setCategoryID(int categoryID) {
+        this.categoryID = categoryID;
+    }
+
+    
+    public Product(Category category, Supplier supplier) {
+        this.category = category;
+        this.supplier = supplier;
+    }
+
+    public Supplier getSupplier() {
+        return supplier;
+    }
+
+    public void setSupplier(Supplier supplier) {
+        this.supplier = supplier;
+    }
 
     // Constructors
     public Product() {
@@ -110,14 +141,6 @@ public class Product {
         this.createdAt = createdAt;
     }
 
-    public int getCategoryID() {
-        return categoryID;
-    }
-
-    public void setCategoryID(int categoryID) {
-        this.categoryID = categoryID;
-    }
-
     public int getSupplierID() {
         return supplierID;
     }
@@ -141,4 +164,7 @@ public class Product {
                 + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID="
                 + supplierID + ", status=" + status + '}';
     }
+
+    
+
 }

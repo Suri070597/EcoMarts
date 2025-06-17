@@ -16,10 +16,12 @@ model\AccountManager.class
 controller\ProductServlet.class
 model\Promotion.class
 controller\CategoryServlet.class
+dao\ViewProductDAO.class
 dao\OrderDetailDAO.class
 model\Order.class
 controller\AdminDashboardServlet.class
 model\Category.class
+controller\ImageServlet.class
 db\DBContext.class
 dao\ProductDAO.class
 controller\HomeServlet.class
