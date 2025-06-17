@@ -14,7 +14,7 @@ public class DBContext {
 
     String url = "jdbc:sqlserver://localhost:1433;databaseName=EcoMart;encrypt=false";
     String user = "sa";
-    String password = "1";
+    String password = "123456";
 
     protected Connection conn;
 

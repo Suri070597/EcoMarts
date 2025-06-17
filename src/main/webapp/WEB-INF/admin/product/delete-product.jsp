@@ -25,7 +25,7 @@
 
             <div class="main-content">
                 <div class="container">
-                    <h1>Delete Product</h1>
+                    <!--<h1>Delete Product</h1>-->
                     <% if (mo == null) { %>
                     <p>There is no product with that id</p> <br>
                     <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary" id="back"><i class="bi bi-arrow-return-left"></i> Back</a>
