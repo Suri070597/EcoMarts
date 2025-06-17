@@ -1,11 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
-import dao.CategoryDAO;
-import dao.ProductDAO;
+import dao.productDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -16,56 +11,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.File;
+import static java.lang.System.out;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.List;
 import model.Category;
 import model.Product;
+import model.Supplier;
 
-/**
- *
- * @author LNQB
- */
-@WebServlet(name = "ProductServlet", urlPatterns = { "/Product" })
+@WebServlet(name = "ProductServlet", urlPatterns = {"/admin/product"})
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ProductServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ProductServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
+    private static final String IMAGE_UPLOAD_DIR = "C:/ProductImages";
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
-    // + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -73,44 +32,79 @@ public class ProductServlet extends HttpServlet {
         if (action == null) {
             action = "list";
         }
-
-        // Load categories for sidebar navigation
-        CategoryDAO categoryDAO = new CategoryDAO();
-        List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
-        request.setAttribute("categories", categories);
-
-        ProductDAO dao = new ProductDAO();
+        productDAO dao = new productDAO();
+        List<Category> listCategory = dao.getCategory();
         switch (action) {
             case "list":
                 List<Product> list = dao.getAll();
-                request.setAttribute("list", list);
-                request.getRequestDispatcher("product.jsp").forward(request, response);
+                request.setAttribute("dataCate", listCategory);
+                request.setAttribute("data", list);
+
+                request.getRequestDispatcher("/WEB-INF/admin/product/product.jsp").forward(request, response);
                 break;
             case "create":
-                List<Product> listProduct = dao.getAll();
-                request.setAttribute("listPro", listProduct);
-                request.getRequestDispatcher("./CRUD_Product/create-product.jsp").forward(request, response);
+                request.setAttribute("dataCate", dao.getCategory());
+                request.setAttribute("dataSup", dao.getAllSuppliers());
+                request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
                 break;
+            case "delete":
+                String idRaw = request.getParameter("id");
+                int id = 0;
+                Product mo = null;
+                try {
+                    id = Integer.parseInt(idRaw);
+                    mo = dao.getProductById(id);
+                    request.setAttribute("mo", mo);
+                    request.getRequestDispatcher("/WEB-INF/admin/product/delete-product.jsp").forward(request, response);
+                } catch (Exception e) {
+                    out.println(e.getMessage());
+                }
+                break;
+            case "update":
+                String idRaw1 = request.getParameter("id");
+                int id1 = 0;
+                try {
+                    id1 = Integer.parseInt(idRaw1);
+                    mo = dao.getProductById(id1);
+                    request.setAttribute("mo", mo);
+
+                    request.setAttribute("dataCate", dao.getCategory());
+                    request.setAttribute("dataSup", dao.getAllSuppliers());
+                    request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            default:
+                String keyword = request.getParameter("search");
+//                List<Product> list;
+                if (keyword != null && !keyword.trim().isEmpty()) {
+                    list = dao.searchProductsByName(keyword);
+                    request.setAttribute("keyword", keyword);
+                } else {
+                    list = dao.getAll();
+                }
+                request.setAttribute("dataCate", listCategory);
+                request.setAttribute("data", list);
+
+                request.getRequestDispatcher("/WEB-INF/admin/product/product.jsp").forward(request, response);
+                break;
+
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        productDAO dao = new productDAO();
         String action = request.getParameter("action");
+        PrintWriter out = response.getWriter();
         if (action == null) {
-            action = "list";
+            response.sendRedirect("/admin/product");
+            return;
         }
 
-        ProductDAO dao = new ProductDAO();
         switch (action) {
             case "create":
                 String pName = request.getParameter("pName");
@@ -119,41 +113,93 @@ public class ProductServlet extends HttpServlet {
                 String pUnit = request.getParameter("pUnit");
                 String pDescription = request.getParameter("pDescription");
 
-                // Handle image upload
+                int categoryID = Integer.parseInt(request.getParameter("categoryID"));
+                int supplierID = Integer.parseInt(request.getParameter("supplierID"));
+
                 Part filePart = request.getPart("pImage");
                 String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
 
-                // Đường dẫn lưu ảnh (ví dụ thư mục images trong webapp)
-                String uploadPath = getServletContext().getRealPath("") + "images";
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdir();
+                if (!fileName.isEmpty()) {
+                    File uploadDir = new File(IMAGE_UPLOAD_DIR);
+                    if (!uploadDir.exists()) {
+                        uploadDir.mkdirs();
+                    }
+                    filePart.write(IMAGE_UPLOAD_DIR + File.separator + fileName);
                 }
 
-                filePart.write(uploadPath + File.separator + fileName);
-
-                String pImage = "images/" + fileName; // Lưu đường dẫn để lưu DB
-
+                String pImage = fileName;
                 Timestamp date = new Timestamp(System.currentTimeMillis());
 
-                int res = dao.insert(pName, pPrice, pDescription, pQuantity, pImage, pUnit, date);
+                int res = dao.insert(pName, pPrice, pDescription, pQuantity, pImage, pUnit, date, categoryID, supplierID);
 
                 if (res == 1) {
-                    response.sendRedirect("Product");
+                    response.sendRedirect(request.getContextPath() + "/admin/product");
                 } else {
-                    response.sendRedirect("Product?action=create");
+                    response.sendRedirect(request.getContextPath() + "/admin/product?action=create");
+                }
+
+                break;
+
+            case "delete":
+                String idRaw = request.getParameter("id");
+                int id = Integer.parseInt(idRaw);
+                if (dao.delete(id)) {
+                    response.sendRedirect(request.getContextPath() + "/admin/product");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/admin/product?action=delete&id=" + id);
+                }
+                break;
+
+            case "update":
+                int id1 = Integer.parseInt(request.getParameter("id"));
+                String name = request.getParameter("pName");
+                double price = Double.parseDouble(request.getParameter("pPrice"));
+                int quantity = Integer.parseInt(request.getParameter("pQuantity"));
+                String unit = request.getParameter("pUnit");
+                String description = request.getParameter("pDescription");
+                int categoryId = Integer.parseInt(request.getParameter("categoryID"));
+                int supplierId = Integer.parseInt(request.getParameter("supplierID"));
+
+                Part filePart1 = request.getPart("pImage");
+                String fileName1 = Paths.get(filePart1.getSubmittedFileName()).getFileName().toString();
+                String image;
+
+                if (!fileName1.isEmpty()) {
+                    File uploadDir = new File(IMAGE_UPLOAD_DIR);
+                    if (!uploadDir.exists()) {
+                        uploadDir.mkdirs();
+                    }
+                    filePart1.write(IMAGE_UPLOAD_DIR + File.separator + fileName1);
+                    image = fileName1;
+                } else {
+                    Product existing = dao.getProductById(id1);
+                    image = existing.getImageURL();
+                }
+
+                Timestamp createdAt = new Timestamp(System.currentTimeMillis());
+                Product product = new Product(id1, name, price, description, quantity, image, unit, createdAt);
+
+                Category category = new Category();
+                category.setCategoryID(categoryId);
+                product.setCategory(category);
+
+                Supplier supplier = new Supplier();
+                supplier.setSupplierID(supplierId);
+                product.setSupplier(supplier);
+
+                boolean result = dao.update(product);
+
+                if (result) {
+                    response.sendRedirect(request.getContextPath() + "/admin/product");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/admin/product?action=update&id=" + id1);
                 }
                 break;
         }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
+        return "ProductServlet handles CRUD for products";
+    }
 }

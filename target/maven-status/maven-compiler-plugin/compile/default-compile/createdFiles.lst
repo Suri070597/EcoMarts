@@ -6,7 +6,9 @@ controller\AdminAccountServlet.class
 dao\CategoryDAO.class
 model\InventoryTransaction.class
 dao\AccountDAO.class
+dao\viewProductDAO.class
 model\Review.class
+dao\productDAO.class
 model\Product.class
 model\VoucherUsage.class
 model\ProductPromotion.class
@@ -20,6 +22,6 @@ dao\OrderDetailDAO.class
 model\Order.class
 controller\AdminDashboardServlet.class
 model\Category.class
+controller\ImageServlet.class
 db\DBContext.class
-dao\ProductDAO.class
 controller\HomeServlet.class
