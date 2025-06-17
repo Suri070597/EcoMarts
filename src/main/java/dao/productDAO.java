@@ -242,52 +242,7 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
-    public List<Product> searchProductsByName(String keyword) {
-        List<Product> list = new ArrayList<>();
-        String sql = "SELECT * FROM Product WHERE ProductName LIKE ?";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, "%" + keyword + "%");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Product p = new Product();
-                p.setProductID(rs.getInt("ProductID"));
-                p.setProductName(rs.getString("ProductName"));
-                p.setPrice(rs.getDouble("Price"));
-                p.setDescription(rs.getString("Description"));
-                p.setStockQuantity(rs.getInt("StockQuantity"));
-                p.setImageURL(rs.getString("ImageURL"));
-                p.setUnit(rs.getString("Unit"));
-                p.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                list.add(p);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
     public static void main(String[] args) {
-        ProductDAO dao = new ProductDAO(); // Đảm bảo DBContext đã kết nối thành công
-        String keyword = "coca"; // 👉 Thay bằng từ khóa bạn muốn tìm
 
-        List<Product> products = dao.searchProductsByName(keyword);
-
-        if (products.isEmpty()) {
-            System.out.println("❌ No products found with keyword: " + keyword);
-        } else {
-            System.out.println("🔍 Found " + products.size() + " products with keyword: " + keyword);
-            for (Product p : products) {
-                System.out.println("➡️ ID: " + p.getProductID());
-                System.out.println("➡️ Name: " + p.getProductName());
-                System.out.println("➡️ Price: " + p.getPrice());
-                System.out.println("➡️ Description: " + p.getDescription());
-                System.out.println("➡️ Quantity: " + p.getStockQuantity());
-                System.out.println("➡️ Image URL: " + p.getImageURL());
-                System.out.println("➡️ Unit: " + p.getUnit());
-                System.out.println("➡️ Created At: " + p.getCreatedAt());
-                System.out.println("----------------------------------");
-            }
-        }
     }
 }
