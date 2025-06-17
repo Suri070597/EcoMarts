@@ -53,16 +53,16 @@ CREATE TABLE Token_Table (
 INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
 VALUES
 -- Admin
-(N'admin123', N'adminpass', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', 'Nữ', 1, N'Active'),
+(N'admin123', N'adminpass', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
 -- Staff
-(N'Thacnha', N'Thacnha02', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', 'Nữ', 2, N'Active'),
-(N'Mantue', N'Mantue03', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', 'Nữ', 2, N'Active'),
-(N'Truongsinh', N'Truongsinh04', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', 'Nam', 2, N'Active'),
-(N'Tuenhi', N'Tuenhi05', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', 'Bạc Liêu', 'Nữ', 2, N'Active'),
+(N'Thacnha', N'Thacnha02', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
+(N'Mantue', N'Mantue03', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Active'),
+(N'Truongsinh', N'Truongsinh04', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Active'),
+(N'Tuenhi', N'Tuenhi05', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', 'Bạc Liêu', N'Nữ', 2, N'Active'),
 -- Customers
-(N'nguyenvana', N'pass123', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', 'Nam', 0, N'Active'),
-(N'tranthib', N'pass456', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', 'Nữ', 0, N'Active'),
-(N'levanc', N'pass789', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', 'Nữ', 0, N'Active');
+(N'nguyenvana', N'pass123', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', N'Nam', 0, N'Active'),
+(N'tranthib', N'pass456', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', N'Nữ', 0, N'Active'),
+(N'levanc', N'pass789', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', N'Nữ', 0, N'Active');
 
 
 CREATE TABLE Supplier (
