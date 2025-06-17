@@ -54,7 +54,7 @@
 
                                         <td>${customer.orderCount}</td>
                                         <td>
-                                            <fmt:formatNumber value="${customer.totalSpent}" type="currency" />
+                                            <fmt:formatNumber value="${customer.totalSpent}" type="number" />
                                         </td>
                                     </tr>
                                 </c:forEach>

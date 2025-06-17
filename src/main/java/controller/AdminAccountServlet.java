@@ -1,13 +1,14 @@
 package controller;
 
-import dao.AccountDAO;
 import java.io.IOException;
+import java.util.List;
+
+import dao.AccountDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import model.Account;
 
 @WebServlet(name = "AdminAccountServlet", urlPatterns = { "/admin/account" })
@@ -23,6 +24,13 @@ public class AdminAccountServlet extends HttpServlet {
         if (action != null && action.equals("delete")) {
             int id = Integer.parseInt(request.getParameter("id"));
             boolean result = accDAO.deleteAccount(id);
+            if (!result) {
+                request.setAttribute("errorMessage", "Không thể xóa tài khoản này do đã phát sinh dữ liệu liên quan!");
+                List<Account> accounts = accDAO.getAllAccountsFull();
+                request.setAttribute("accounts", accounts);
+                request.getRequestDispatcher("/WEB-INF/admin/account/manage-account.jsp").forward(request, response);
+                return;
+            }
             response.sendRedirect(request.getContextPath() + "/admin/account");
             return;
         }
@@ -125,9 +133,7 @@ public class AdminAccountServlet extends HttpServlet {
                 String fullName = request.getParameter("fullName");
                 String phone = request.getParameter("phone");
                 String address = request.getParameter("address");
-                String gender = request.getParameter("gender");
                 int role = Integer.parseInt(request.getParameter("role"));
-                String position = request.getParameter("position");
                 String status = request.getParameter("status");
 
                 Account account = new Account();
@@ -137,9 +143,7 @@ public class AdminAccountServlet extends HttpServlet {
                 account.setFullName(fullName);
                 account.setPhone(phone);
                 account.setAddress(address);
-                account.setGender(gender);
                 account.setRole(role);
-                account.setPosition(position);
                 account.setStatus(status);
 
                 boolean res = accDAO.insertFullAccount(account);
@@ -165,9 +169,7 @@ public class AdminAccountServlet extends HttpServlet {
                 String fullName = request.getParameter("fullName");
                 String phone = request.getParameter("phone");
                 String address = request.getParameter("address");
-                String gender = request.getParameter("gender");
                 int role = Integer.parseInt(request.getParameter("role"));
-                String position = request.getParameter("position");
                 String status = request.getParameter("status");
 
                 Account account = new Account();
@@ -178,9 +180,7 @@ public class AdminAccountServlet extends HttpServlet {
                 account.setFullName(fullName);
                 account.setPhone(phone);
                 account.setAddress(address);
-                account.setGender(gender);
                 account.setRole(role);
-                account.setPosition(position);
                 account.setStatus(status);
 
                 boolean res = accDAO.updateFullAccount(account);

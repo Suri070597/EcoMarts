@@ -56,7 +56,7 @@
                                         <td>${product.productName}</td>
                                         <td>${product.totalQuantity}</td>
                                         <td>
-                                            <fmt:formatNumber value="${product.totalRevenue}" type="currency" />
+                                            <fmt:formatNumber value="${product.totalRevenue}" type="number"/>
                                         </td>
                                     </tr>
                                 </c:forEach>

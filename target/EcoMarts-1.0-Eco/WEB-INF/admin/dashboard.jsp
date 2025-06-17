@@ -351,7 +351,7 @@
                                 </div>
                                 <div class="stat-title">Total Revenue</div>
                                 <div class="stat-value">
-                                    <fmt:formatNumber value="${revenueSummary.total}" type="currency"
+                                    <fmt:formatNumber value="${revenueSummary.total}" type="number"
                                         maxFractionDigits="0" />
                                 </div>
                             </div>
@@ -408,7 +408,7 @@
                                                         </td>
                                                         <td>
                                                             <fmt:formatNumber value="${order.totalAmount}"
-                                                                type="currency" maxFractionDigits="0" />
+                                                                type="number" maxFractionDigits="0" />
                                                         </td>
                                                         <td>
                                                             <c:choose>
@@ -437,7 +437,7 @@
                                                 </c:forEach>
                                             </tbody>
                                         </table>
-                                        <a href="#" class="view-all">View all orders <i
+                                        <a href="${pageContext.request.contextPath}/admin/order" class="view-all">View all orders <i
                                                 class="fas fa-arrow-right"></i></a>
                                     </c:when>
                                     <c:otherwise>
