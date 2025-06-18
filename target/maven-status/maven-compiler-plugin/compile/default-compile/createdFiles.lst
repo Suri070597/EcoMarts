@@ -1,8 +1,10 @@
+controller\supplier\SupplierServlet.class
 model\CartItem.class
 dao\OrderDAO.class
 model\OrderDetail.class
 model\Supplier.class
 controller\AdminAccountServlet.class
+dao\SupplierDAO.class
 dao\CategoryDAO.class
 model\InventoryTransaction.class
 dao\AccountDAO.class
