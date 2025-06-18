@@ -90,6 +90,11 @@
                                                    class='btn btn-sm btn-primary'>
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+                                                <a href='javascript:void(0)'
+                                                   onclick='confirmStatusChange("${pageContext.request.contextPath}/admin/voucher?action=status&id=${v.voucherID}&status=${v.active}", "${v.active}")'
+                                                   class='btn btn-sm ${v.active ? "btn-warning" : "btn-success"}'>
+                                                    <i class="fas ${v.active ? "fa-ban" : "fa-check"}"></i>
+                                                </a>
                                                 <a href='${pageContext.request.contextPath}/admin/voucher?action=delete&id=${v.voucherID}'
                                                    class='btn btn-sm btn-danger'
                                                    onclick="return confirmDelete(event, '${v.voucherID}')">
@@ -109,35 +114,55 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-                                                   // Add search functionality for client-side filtering
-                                                   document.querySelector('.search-box input').addEventListener('input', function (e) {
-                                                       const searchText = e.target.value.toLowerCase();
-                                                       const rows = document.querySelectorAll('tbody tr');
+                                                       // Add search functionality for client-side filtering
+                                                       document.querySelector('.search-box input').addEventListener('input', function (e) {
+                                                           const searchText = e.target.value.toLowerCase();
+                                                           const rows = document.querySelectorAll('tbody tr');
 
-                                                       rows.forEach(row => {
-                                                           const text = row.textContent.toLowerCase();
-                                                           row.style.display = text.includes(searchText) ? '' : 'none';
+                                                           rows.forEach(row => {
+                                                               const text = row.textContent.toLowerCase();
+                                                               row.style.display = text.includes(searchText) ? '' : 'none';
+                                                           });
                                                        });
-                                                   });
 
-                                                   function confirmDelete(event, voucherId) {
-                                                       event.preventDefault();
-                                                       Swal.fire({
-                                                           title: 'Confirm Delete Voucher',
-                                                           text: 'Are you sure you want to delete this supplier?',
-                                                           icon: 'warning',
-                                                           showCancelButton: true,
-                                                           confirmButtonColor: '#d33',
-                                                           cancelButtonColor: '#3085d6',
-                                                           confirmButtonText: 'Yes',
-                                                           cancelButtonText: 'Cancel'
-                                                       }).then((result) => {
-                                                           if (result.isConfirmed) {
-                                                               window.location.href = '${pageContext.request.contextPath}/admin/voucher?action=delete&id=' + voucherId;
-                                                           }
-                                                       });
-                                                       return false;
-                                                   }
+                                                       function confirmDelete(event, voucherId) {
+                                                           event.preventDefault();
+                                                           Swal.fire({
+                                                               title: 'Confirm Delete Voucher',
+                                                               text: 'Are you sure you want to delete this supplier?',
+                                                               icon: 'warning',
+                                                               showCancelButton: true,
+                                                               confirmButtonColor: '#d33',
+                                                               cancelButtonColor: '#3085d6',
+                                                               confirmButtonText: 'Yes',
+                                                               cancelButtonText: 'Cancel'
+                                                           }).then((result) => {
+                                                               if (result.isConfirmed) {
+                                                                   window.location.href = '${pageContext.request.contextPath}/admin/voucher?action=delete&id=' + voucherId;
+                                                               }
+                                                           });
+                                                           return false;
+                                                       }
+        </script>
+        <script>
+            function confirmStatusChange(url, active) {
+                const isActive = String(active).trim().toLowerCase() === "true";
+
+                Swal.fire({
+                    title: 'Confirm Status Change',
+                    text: isActive ? 'Do you want to deactivate this voucher?' : 'Do you want to activate this account?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+            }
         </script>
 
     </body>
