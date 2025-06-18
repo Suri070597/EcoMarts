@@ -53,8 +53,18 @@
 
                         <div class="mb-3">
                             <label class="form-label">Product Unit</label>
-                            <input type="text" class="form-control" name="pUnit" required />
+                            <select class="form-select" name="pUnit" required>
+                                <option value="">-- Chọn đơn vị --</option>
+                                <option value="kg">kg</option>
+                                <option value="gói">gói</option>
+                                <option value="chai">chai</option>
+                                <option value="lon">lon</option>
+                                <option value="lốc">lốc</option>
+                                <option value="thùng">thùng</option>
+                                <option value="hộp">hộp</option>
+                            </select>
                         </div>
+
 
                         <div class="mb-3">
                             <label class="form-label">Product Description</label>

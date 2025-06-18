@@ -60,8 +60,24 @@
 
                         <div class="mb-3">
                             <label class="form-label">Product Unit</label>
-                            <input type="text" class="form-control" name="pUnit" required value="<%= mo.getUnit()%>" />
+                            <select class="form-select" name="pUnit" required>
+                                <option value="">-- Chọn đơn vị --</option>
+                                <option value="kg" <%= "kg".equals(mo.getUnit()) ? "selected" : ""%>>kg</option>
+                                <option value="gói" <%= "gói".equals(mo.getUnit()) ? "selected" : ""%>>gói</option>
+                                <option value="chai" <%= "chai".equals(mo.getUnit()) ? "selected" : ""%>>chai</option>
+                                <option value="lon" <%= "lon".equals(mo.getUnit()) ? "selected" : ""%>>lon</option>
+                                <option value="lốc" <%= "lốc".equals(mo.getUnit()) ? "selected" : ""%>>lốc</option>
+                                <option value="thùng" <%= "thùng".equals(mo.getUnit()) ? "selected" : ""%>>thùng</option>
+                                <option value="hộp" <%= "hộp".equals(mo.getUnit()) ? "selected" : ""%>>hộp</option>
+                            </select>
                         </div>
+
+
+
+                        <!--                        <div class="mb-3">
+                                                    <label class="form-label">Product Unit</label>
+                                                    <input type="text" class="form-control" name="pUnit" required value="<%= mo.getUnit()%>" />
+                                                </div>-->
 
                         <div class="mb-3">
                             <label class="form-label">Product Description</label>
