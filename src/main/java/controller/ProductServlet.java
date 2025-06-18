@@ -75,6 +75,14 @@ public class ProductServlet extends HttpServlet {
                     e.printStackTrace();
                 }
                 break;
+            case "search":
+                String keyword = request.getParameter("keyword");
+                List<Product> searchResults = dao.searchProductsByName(keyword);
+                request.setAttribute("dataCate", listCategory);
+                request.setAttribute("data", searchResults);
+                request.setAttribute("keyword", keyword);
+                request.getRequestDispatcher("/WEB-INF/admin/product/product.jsp").forward(request, response);
+                break;
         }
     }
 

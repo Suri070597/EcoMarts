@@ -72,13 +72,6 @@
                             </select>
                         </div>
 
-
-
-                        <!--                        <div class="mb-3">
-                                                    <label class="form-label">Product Unit</label>
-                                                    <input type="text" class="form-control" name="pUnit" required value="<%= mo.getUnit()%>" />
-                                                </div>-->
-
                         <div class="mb-3">
                             <label class="form-label">Product Description</label>
                             <textarea class="form-control" name="pDescription" rows="6" required><%= mo.getDescription()%></textarea>

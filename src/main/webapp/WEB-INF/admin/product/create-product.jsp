@@ -65,7 +65,6 @@
                             </select>
                         </div>
 
-
                         <div class="mb-3">
                             <label class="form-label">Product Description</label>
                             <textarea class="form-control" name="pDescription" rows="4" required></textarea>

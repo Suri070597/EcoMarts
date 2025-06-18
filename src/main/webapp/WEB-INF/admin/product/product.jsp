@@ -30,13 +30,13 @@
                         <div class="header-actions d-flex justify-content-between align-items-center">
                             <h1 class="card-title">Product List</h1>
                             <div class="d-flex gap-2">
-                                <form action="${pageContext.request.contextPath}/admin/product" method="get"
-                                      class="search-box">
+                                <form action="${pageContext.request.contextPath}/admin/product" method="get" class="search-box">
+                                    <input type="hidden" name="action" value="search" />
                                     <i class="fas fa-search"></i>
-                                    <input type="text" name="search" placeholder="Search products..."
-                                           value="${keyword != null ? keyword : ''}">
+                                    <input type="text" name="keyword" placeholder="Search products..." value="${keyword != null ? keyword : ''}">
                                     <button type="submit" class="btn btn-sm btn-primary">Search</button>
                                 </form>
+
                                 <a href="${pageContext.request.contextPath}/admin/product?action=create" class="btn btn-success">
                                     <i class="fas fa-plus"></i> Create
                                 </a>
@@ -120,18 +120,5 @@
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-
-            // Add search functionality for client-side filtering
-            document.querySelector('.search-box input').addEventListener('input', function (e) {
-                const searchText = e.target.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
-
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchText) ? '' : 'none';
-                });
-            });
-        </script>
     </body>
 </html>

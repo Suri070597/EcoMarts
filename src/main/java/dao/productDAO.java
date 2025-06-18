@@ -62,6 +62,11 @@ public class ProductDAO extends DBContext {
     public int insert(String name, double price, String description, int quantity,
             String ImageURL, String unit, Timestamp createdAt,
             int categoryID, int supplierID) {
+
+        if (price < 1000) {
+            price *= 1000;
+        }
+
         String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -117,7 +122,7 @@ public class ProductDAO extends DBContext {
                 // Create Product
                 product = new Product(id, proName, proPrice, description, quantity, ImageURL, unit, createdAt);
                 product.setCategory(category);
-                product.setSupplier(supplier);  // nếu có field supplier
+                product.setSupplier(supplier);
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -125,13 +130,12 @@ public class ProductDAO extends DBContext {
         return product;
     }
 
-//
     public boolean delete(int id) {
         String sqlCartItem = "DELETE FROM CartItem WHERE ProductID = ?";
         String sqlOrderDetail = "DELETE FROM OrderDetail WHERE ProductID = ?";
         String sqlReview = "DELETE FROM Review WHERE ProductID = ?";
         String sqlPromotion = "DELETE FROM Product_Promotion WHERE ProductID = ?";
-        String sqlInventory = "DELETE FROM InventoryTransaction WHERE ProductID = ?";
+        String sqlInventory = "DELETE FROM Inventory WHERE ProductID = ?";
         String sqlProduct = "DELETE FROM Product WHERE ProductID = ?";
 
         try {
@@ -181,8 +185,14 @@ public class ProductDAO extends DBContext {
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
+
+            double price = product.getPrice();
+            if (price < 1000) {
+                price *= 1000;
+            }
+
             ps.setString(1, product.getProductName());
-            ps.setDouble(2, product.getPrice());
+            ps.setDouble(2, price);
             ps.setString(3, product.getDescription());
             ps.setInt(4, product.getStockQuantity());
             ps.setString(5, product.getImageURL());
@@ -242,7 +252,68 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
-    public static void main(String[] args) {
+    public List<Product> searchProductsByName(String keyword) {
+        List<Product> list = new ArrayList<>();
+        String sql = """
+        SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
+        FROM Product p
+        JOIN Category c ON p.CategoryID = c.CategoryID
+        JOIN Supplier s ON p.SupplierID = s.SupplierID
+        WHERE p.ProductName LIKE ?
+    """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                p.setPrice(rs.getDouble("Price"));
+                p.setDescription(rs.getString("Description"));
+                p.setStockQuantity(rs.getInt("StockQuantity"));
+                p.setImageURL(rs.getString("ImageURL"));
+                p.setUnit(rs.getString("Unit"));
+                p.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                p.setStatus(rs.getString("Status"));
 
+                // Set Category
+                Category c = new Category();
+                c.setCategoryID(rs.getInt("CategoryID"));
+                c.setCategoryName(rs.getString("CategoryName"));
+                c.setParentID(rs.getInt("ParentID"));
+                p.setCategory(c);
+
+                // Set Supplier
+                Supplier s = new Supplier();
+                s.setSupplierID(rs.getInt("SupplierID"));
+                s.setCompanyName(rs.getString("CompanyName"));
+                p.setSupplier(s);
+
+                list.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static void main(String[] args) {
+        ProductDAO dao = new ProductDAO();
+        String keyword = "co";
+
+        List<Product> results = dao.searchProductsByName(keyword);
+
+        if (results.isEmpty()) {
+            System.out.println("Không tìm thấy sản phẩm nào với từ khóa: " + keyword);
+        } else {
+            System.out.println("Các sản phẩm tìm thấy với từ khóa \"" + keyword + "\":");
+            for (Product p : results) {
+                System.out.println("ID: " + p.getProductID()
+                        + ", Tên: " + p.getProductName()
+                        + ", Giá: " + p.getPrice()
+                        + ", Loại: " + p.getCategory().getCategoryName()
+                        + ", Nhà cung cấp: " + p.getSupplier().getCompanyName());
+            }
+        }
     }
 }
