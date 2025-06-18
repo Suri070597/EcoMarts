@@ -131,7 +131,7 @@
                                                         const isActive = status == 1;
                                                         Swal.fire({
                                                             title: 'Confirm Status Change',
-                                                            text: isActive ? 'Do you want to deactivate this supplier?' : 'Do you want to activate this supplier?',
+                                                            text: isActive ? 'Do you want to stop cooperating with this supplier?' : 'Do you want to start cooperating with this supplier?',
                                                             icon: 'question',
                                                             showCancelButton: true,
                                                             confirmButtonColor: '#3085d6',
@@ -155,7 +155,7 @@
                                                     function confirmDelete(event, supplierId) {
                                                         event.preventDefault();
                                                         Swal.fire({
-                                                            title: 'Confirm Delete',
+                                                            title: 'Confirm Delete Supplier',
                                                             text: 'Are you sure you want to delete this supplier?',
                                                             icon: 'warning',
                                                             showCancelButton: true,

@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
               type="image/x-icon">
-        <title>Account Manager</title>
+        <title>Manage Accounts</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet"
@@ -168,16 +168,16 @@
                                                            const isActive = normalizedStatus === "active";
 
                                                            Swal.fire({
-                                                               title: 'Xác nhận thay đổi trạng thái',
+                                                               title: 'Confirm Status Change',
                                                                text: isActive
-                                                                       ? 'Bạn có muốn khóa tài khoản này không?'
-                                                                       : 'Bạn có muốn kích hoạt tài khoản này không?',
+                                                                       ? 'Do you want to deactivate this account?'
+                                                                       : 'Do you want to activate this account?',
                                                                icon: 'question',
                                                                showCancelButton: true,
                                                                confirmButtonColor: '#3085d6',
                                                                cancelButtonColor: '#d33',
-                                                               confirmButtonText: 'Đồng ý',
-                                                               cancelButtonText: 'Hủy'
+                                                               confirmButtonText: 'Yes',
+                                                               cancelButtonText: 'Cancel'
                                                            }).then((result) => {
                                                                if (result.isConfirmed) {
                                                                    window.location.href = url;
@@ -199,14 +199,14 @@
                                                        function confirmDelete(event, accountId) {
                                                            event.preventDefault();
                                                            Swal.fire({
-                                                               title: 'Xác nhận xóa tài khoản',
-                                                               text: "Bạn muốn xóa tài khoản này không?",
+                                                               title: 'Confirm Delete Account',
+                                                               text: 'Are you sure you want to delete this account?',
                                                                icon: 'warning',
                                                                showCancelButton: true,
                                                                confirmButtonColor: '#d33',
                                                                cancelButtonColor: '#3085d6',
-                                                               confirmButtonText: 'Đồng ý',
-                                                               cancelButtonText: 'Hủy'
+                                                               confirmButtonText: 'Yes',
+                                                               cancelButtonText: 'Cancel'
                                                            }).then((result) => {
                                                                if (result.isConfirmed) {
                                                                    window.location.href = '${pageContext.request.contextPath}/admin/account?action=delete&id=' + accountId;
