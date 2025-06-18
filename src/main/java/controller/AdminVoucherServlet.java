@@ -35,6 +35,14 @@ public class AdminVoucherServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/voucher");
             return;
         }
+        if (action != null && action.equals("status")) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            boolean currentStatus = Boolean.parseBoolean(request.getParameter("status")); // convert thành boolean
+            boolean newStatus = !currentStatus; // đảo trạng thái
+            boolean result = voucherDAO.updateVoucherStatus(id, newStatus);
+            response.sendRedirect(request.getContextPath() + "/admin/voucher");
+            return;
+        }
 
         if (view != null) {
             switch (view) {
