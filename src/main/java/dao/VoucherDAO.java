@@ -198,4 +198,21 @@ public class VoucherDAO extends DBContext {
         voucher.setCategoryID(rs.getObject("CategoryID") != null ? rs.getInt("CategoryID") : null);
         return voucher;
     }
+    
+    public boolean updateVoucherStatus(int voucherId, boolean isActive) {
+    String sql = "UPDATE Voucher SET IsActive = ? WHERE VoucherID = ?";
+    try {
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, isActive ? 1 : 0); // Vì cột BIT lưu 0/1
+        ps.setInt(2, voucherId);
+
+        int rows = ps.executeUpdate();
+        ps.close();
+        return rows > 0;
+    } catch (SQLException e) {
+        System.out.println("Update status failed: " + e.getMessage());
+        return false;
+    }
+}
+
 }
