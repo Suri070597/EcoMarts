@@ -1,11 +1,11 @@
+<%@page import="dao.ProductDAO"%>
 <%@page import="model.Product"%>
 <%@page import="java.util.List"%>
-<%@page import="dao.productDAO"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html; charset=UTF-8");
-    productDAO dao = new productDAO();
+    ProductDAO dao = new ProductDAO();
     List<Product> product = dao.getAll();
 %>
 
@@ -64,11 +64,11 @@
                         <td><%= pro.getProductID()%></td>
                         <td><%= pro.getProductName()%></td>
                         <td><%= pro.getPrice()%></td>
-                        <td><%= pro.getQuantity()%></td>
+                        <td><%= pro.getStockQuantity()%></td>
                         <td><%= pro.getUnit()%></td>
                         <td><%= pro.getDescription()%></td>
                         <td>
-                            <img src="<%= request.getContextPath() + "/" + pro.getImage()%>" alt="Product Image" style="max-width: 100px; max-height: 100px;">
+                            <img src="<%= request.getContextPath() + "/" + pro.getImageURL()%>" alt="Product Image" style="max-width: 100px; max-height: 100px;">
                         </td>
 
                         <td class="date-column"><%= pro.getCreatedAt()%></td>
