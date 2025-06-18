@@ -5,11 +5,13 @@ D:\EcoMarts\src\main\java\controller\HomeServlet.java
 D:\EcoMarts\src\main\java\controller\ImageServlet.java
 D:\EcoMarts\src\main\java\controller\OrderServlet.java
 D:\EcoMarts\src\main\java\controller\ProductServlet.java
+D:\EcoMarts\src\main\java\controller\supplier\SupplierServlet.java
 D:\EcoMarts\src\main\java\dao\AccountDAO.java
 D:\EcoMarts\src\main\java\dao\CategoryDAO.java
 D:\EcoMarts\src\main\java\dao\OrderDAO.java
 D:\EcoMarts\src\main\java\dao\OrderDetailDAO.java
 D:\EcoMarts\src\main\java\dao\ProductDAO.java
+D:\EcoMarts\src\main\java\dao\SupplierDAO.java
 D:\EcoMarts\src\main\java\dao\ViewProductDAO.java
 D:\EcoMarts\src\main\java\db\DBContext.java
 D:\EcoMarts\src\main\java\model\Account.java

@@ -12,7 +12,7 @@ import model.AccountManager;
 
 /**
  *
- * @author MSI Gaming
+ * @author Nguyễn Thị Kim Soàn - CE180197
  */
 public class AccountDAO extends DBContext {
 
