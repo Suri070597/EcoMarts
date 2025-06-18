@@ -25,7 +25,7 @@
 
                         <div class="main-content">
                             <div class="container">
-                                <h1>Tạo Tài Khoản Mới</h1>
+                                <h1>Create New Account</h1>
                                 <c:if test="${not empty errorMessage}">
                                     <div class="alert alert-danger" role="alert">
                                         ${errorMessage}

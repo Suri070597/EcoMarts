@@ -24,7 +24,7 @@
 
     <div class="main-content">
         <div class="container">
-            <h1>Tạo Voucher Mới</h1>
+            <h1>Create New Voucher</h1>
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger" role="alert">
                     ${errorMessage}
@@ -47,25 +47,25 @@
 
                 <div class="mb-3">
                     <label class="form-label" for="discountAmount">Discount Amount</label>
-                    <input type="number" step="0.01" class="form-control" id="discountAmount" name="discountAmount" value="${param.discountAmount}" required>
+                    <input type="number" min='0' class="form-control" id="discountAmount" name="discountAmount" value="${param.discountAmount}" required>
                     <div class="invalid-feedback">Please enter a discount amount</div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="minOrderValue">Min Order Value</label>
-                    <input type="number" step="0.01" class="form-control" id="minOrderValue" name="minOrderValue" value="${param.minOrderValue}" required>
+                    <input type="number" min="0" class="form-control" id="minOrderValue" name="minOrderValue" value="${param.minOrderValue}" required>
                     <div class="invalid-feedback">Please enter a minimum order value</div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="maxUsage">Max Usage</label>
-                    <input type="number" class="form-control" id="maxUsage" name="maxUsage" value="${param.maxUsage}" required>
+                    <input type="number" min='0' class="form-control" id="maxUsage" name="maxUsage" value="${param.maxUsage}" required>
                     <div class="invalid-feedback">Please enter max usage count</div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="usageCount">Usage Count</label>
-                    <input type="number" class="form-control" id="usageCount" name="usageCount" value="${param.usageCount}" required>
+                    <input type="number" min='0' class="form-control" id="usageCount" name="usageCount" value="${param.usageCount}" required>
                     <div class="invalid-feedback">Please enter current usage count</div>
                 </div>
 
@@ -88,7 +88,7 @@
 
                 <div class="mb-3">
                     <label class="form-label" for="categoryID">Category ID (optional)</label>
-                    <input type="number" class="form-control" id="categoryID" name="categoryID" value="${param.categoryID}">
+                    <input type="number" class="form-control" id="categoryID" min='1' name="categoryID" value="${param.categoryID}">
                 </div>
 
                 <div class="btn-group">

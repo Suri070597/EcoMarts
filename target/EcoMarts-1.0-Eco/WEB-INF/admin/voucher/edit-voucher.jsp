@@ -24,7 +24,7 @@
 
     <div class="main-content">
         <div class="container">
-            <h1>Cập Nhật Voucher</h1>
+            <h1>Edit Voucher</h1>
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger" role="alert">
                     ${errorMessage}
@@ -48,25 +48,25 @@
 
                 <div class="mb-3">
                     <label class="form-label" for="discountAmount">Discount Amount</label>
-                    <input type="number" step="0.01" class="form-control" id="discountAmount" name="discountAmount" value="${voucher.discountAmount}" required>
+                    <input type="number" min='0' class="form-control" id="discountAmount" name="discountAmount" value="${voucher.discountAmount}" required>
                     <div class="invalid-feedback">Please enter a discount amount</div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="minOrderValue">Min Order Value</label>
-                    <input type="number" step="0.01" class="form-control" id="minOrderValue" name="minOrderValue" value="${voucher.minOrderValue}" required>
+                    <input type="number" min='0' class="form-control" id="minOrderValue" name="minOrderValue" value="${voucher.minOrderValue}" required>
                     <div class="invalid-feedback">Please enter a minimum order value</div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="maxUsage">Max Usage</label>
-                    <input type="number" class="form-control" id="maxUsage" name="maxUsage" value="${voucher.maxUsage}" required>
+                    <input type="number" min='0' class="form-control" id="maxUsage" name="maxUsage" value="${voucher.maxUsage}" required>
                     <div class="invalid-feedback">Please enter max usage count</div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="usageCount">Usage Count</label>
-                    <input type="number" class="form-control" id="usageCount" name="usageCount" value="${voucher.usageCount}" required>
+                    <input type="number" min='0' class="form-control" id="usageCount" name="usageCount" value="${voucher.usageCount}" required>
                     <div class="invalid-feedback">Please enter current usage count</div>
                 </div>
 

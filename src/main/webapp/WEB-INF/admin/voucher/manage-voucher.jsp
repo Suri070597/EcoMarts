@@ -149,14 +149,14 @@
                 const isActive = String(active).trim().toLowerCase() === "true";
 
                 Swal.fire({
-                    title: 'Xác nhận thay đổi trạng thái',
-                    text: isActive ? 'Bạn có muốn vô hiệu hóa voucher này không?' : 'Bạn có muốn kích hoạt voucher này không?',
+                    title: 'Confirm Status Change',
+                    text: isActive ? 'Do you want to deactivate this voucher?' : 'Do you want to activate this account?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Đồng ý',
-                    cancelButtonText: 'Hủy'
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = url;
