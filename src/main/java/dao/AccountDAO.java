@@ -6,13 +6,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import db.DBContext;
 import model.Account;
 import model.AccountManager;
-import db.DBContext;
 
 /**
  *
- * @author MSI Gaming
+ * @author Nguyễn Thị Kim Soàn - CE180197
  */
 public class AccountDAO extends DBContext {
 
@@ -145,16 +145,21 @@ public class AccountDAO extends DBContext {
         return null;
     }
 
-    public boolean insert(String username, String password, String email, String phone, int role, String status) {
-        String sql = "INSERT INTO Account (Username, Password, Email, Phone, Role, Status) VALUES (?, ?, ?, ?, ?, ?)";
+    public boolean insert(String username, String password, String email, String fullName, String phone,
+            String address, String gender, int role, String status) {
+        String sql = "INSERT INTO Account (Username, Password, Email, FullName, Phone, Address, Gender, Role, Status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, username);
             ps.setString(2, password);
             ps.setString(3, email);
-            ps.setString(4, phone);
-            ps.setInt(5, role);
-            ps.setString(6, status);
+            ps.setString(4, fullName);
+            ps.setString(5, phone);
+            ps.setString(6, address);
+            ps.setString(7, gender);
+            ps.setInt(8, role);
+            ps.setString(9, status);
 
             int rows = ps.executeUpdate();
             ps.close();
@@ -166,8 +171,8 @@ public class AccountDAO extends DBContext {
     }
 
     public boolean insertFullAccount(Account account) {
-        String sql = "INSERT INTO Account (Username, Password, Email, FullName, Phone, Address, Gender, Role, Position, Status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Account (Username, Password, Email, FullName, Phone, Address, Gender, Role, Status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, account.getUsername());
@@ -178,8 +183,7 @@ public class AccountDAO extends DBContext {
             ps.setString(6, account.getAddress());
             ps.setString(7, account.getGender());
             ps.setInt(8, account.getRole());
-            ps.setString(9, account.getPosition());
-            ps.setString(10, account.getStatus());
+            ps.setString(9, account.getStatus());
 
             int rows = ps.executeUpdate();
             ps.close();
@@ -190,32 +194,10 @@ public class AccountDAO extends DBContext {
         }
     }
 
-    public boolean update(int accountId, String username, String password, String email, String phone, int role,
-            String status) {
-        String sql = "UPDATE Account SET Username = ?, Password = ?, Email = ?, Phone = ?, Role = ?, Status = ? WHERE AccountID = ?";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
-            ps.setString(2, password);
-            ps.setString(3, email);
-            ps.setString(4, phone);
-            ps.setInt(5, role);
-            ps.setString(6, status);
-            ps.setInt(7, accountId);
-
-            int rows = ps.executeUpdate();
-            ps.close();
-            return rows > 0;
-        } catch (SQLException e) {
-            System.out.println("Update failed: " + e.getMessage());
-            return false;
-        }
-    }
-
     public boolean updateFullAccount(Account account) {
-        String sql = "UPDATE Account SET Username = ?, Password = ?, Email = ?, FullName = ?, Phone = ?, " +
-                "Address = ?, Gender = ?, Role = ?, Position = ?, Status = ? " +
-                "WHERE AccountID = ?";
+        String sql = "UPDATE Account SET Username = ?, Password = ?, Email = ?, FullName = ?, Phone = ?, "
+                + "Address = ?, Gender = ?, Role = ?, Status = ? "
+                + "WHERE AccountID = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, account.getUsername());
@@ -226,9 +208,8 @@ public class AccountDAO extends DBContext {
             ps.setString(6, account.getAddress());
             ps.setString(7, account.getGender());
             ps.setInt(8, account.getRole());
-            ps.setString(9, account.getPosition());
-            ps.setString(10, account.getStatus());
-            ps.setInt(11, account.getAccountID());
+            ps.setString(9, account.getStatus());
+            ps.setInt(10, account.getAccountID());
 
             int rows = ps.executeUpdate();
             ps.close();
@@ -377,12 +358,7 @@ public class AccountDAO extends DBContext {
         account.setAddress(rs.getString("Address"));
         account.setGender(rs.getString("Gender"));
         account.setRole(rs.getInt("Role"));
-        account.setPosition(rs.getString("Position"));
         account.setStatus(rs.getString("Status"));
-        account.setTokenValue(rs.getString("TokenValue"));
-        account.setTokenStatus(rs.getString("TokenStatus"));
-        account.setTokenCreatedAt(rs.getTimestamp("TokenCreatedAt"));
-        account.setTokenExpiresAt(rs.getTimestamp("TokenExpiresAt"));
         return account;
     }
 }
