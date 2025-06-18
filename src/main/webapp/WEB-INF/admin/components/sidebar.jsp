@@ -20,7 +20,7 @@
                         Manager</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/supplier"><i class="fas fa-parachute-box"></i>
                         Supplier</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/Voucher"><i class="fas fa-parachute-box"></i>
+                <li><a href="${pageContext.request.contextPath}/admin/voucher"><i class="fas fa-parachute-box"></i>
                         Voucher</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/dashboard?view=top-products"><i
                             class="fas fa-shoe-prints"></i> Top 10 product</a></li>
