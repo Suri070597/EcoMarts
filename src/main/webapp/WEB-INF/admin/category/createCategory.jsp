@@ -9,7 +9,81 @@
       href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+<style>
+    /* Container chính */
+    .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 30px 40px;
+        border-radius: 16px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', sans-serif;
+    }
 
+    /* Tiêu đề */
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+    }
+
+    /* Label */
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #34495e;
+    }
+
+    /* Input & Select */
+    input[type="text"],
+    select {
+        width: 100%;
+        padding: 10px 12px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        transition: border-color 0.3s;
+        font-size: 16px;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+        border-color: #3498db;
+        outline: none;
+    }
+
+    /* Button */
+    button[type="submit"] {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+        margin-right: 10px;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #2980b9;
+    }
+
+    /* Link quay lại */
+    a {
+        text-decoration: none;
+        color: #7f8c8d;
+        font-size: 16px;
+        transition: color 0.3s;
+    }
+
+    a:hover {
+        color: #2c3e50;
+    }
+
+</style>
 <body>
     <div class="container-fluid">
         <%-- Include admin sidebar --%>
