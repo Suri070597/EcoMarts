@@ -13,6 +13,7 @@ model\Product.class
 model\VoucherUsage.class
 model\ProductPromotion.class
 model\Voucher.class
+dao\VoucherDAO.class
 model\Account.class
 model\AccountManager.class
 controller\ProductServlet.class
@@ -25,6 +26,7 @@ model\Order.class
 controller\AdminDashboardServlet.class
 model\Category.class
 controller\ImageServlet.class
+controller\AdminVoucherServlet.class
 db\DBContext.class
 dao\ProductDAO.class
 controller\HomeServlet.class
