@@ -25,7 +25,7 @@
 
                         <div class="main-content">
                             <div class="container">
-                                <h1>Cập Nhật Tài Khoản</h1>
+                                <h1>Edit Account</h1>
                                 <c:if test="${not empty errorMessage}">
                                     <div class="alert alert-danger" role="alert">
                                         ${errorMessage}
@@ -92,20 +92,14 @@
                                         <div class="invalid-feedback">Please select a role</div>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label" for="position">Position</label>
-                                        <input type="text" class="form-control" id="position" name="position"
-                                            value="${account.position}">
-                                        <div class="form-text">Required for staff accounts</div>
-                                    </div>
-                                    <div class="mb-3">
                                         <label class="form-label" for="status">Status</label>
                                         <select class="form-control" name="status" id="status" required>
                                             <option value="Active" ${account.status eq 'Active' ? 'selected' : '' }>
                                                 Active</option>
                                             <option value="Inactive" ${account.status eq 'Inactive' ? 'selected' : '' }>
                                                 Inactive</option>
-                                            <option value="Suspended" ${account.status eq 'Suspended' ? 'selected' : ''
-                                                }>Suspended</option>
+                                            <option value="Suspended" ${account.status eq 'Suspended' ? 'selected' : '' }>
+                                                Suspended</option>
                                         </select>
                                         <div class="invalid-feedback">Please select a status</div>
                                     </div>
@@ -155,25 +149,6 @@
                         } else {
                             this.setCustomValidity('');
                         }
-                    });
-
-                    // Show/hide position field based on role
-                    document.getElementById('role').addEventListener('change', function () {
-                        const positionField = document.getElementById('position');
-                        const positionContainer = positionField.closest('.mb-3');
-
-                        if (this.value === '2') { // Staff
-                            positionContainer.style.display = 'block';
-                            positionField.setAttribute('required', 'required');
-                        } else {
-                            positionContainer.style.display = 'none';
-                            positionField.removeAttribute('required');
-                        }
-                    });
-
-                    // Trigger role change event on page load
-                    document.addEventListener('DOMContentLoaded', function () {
-                        document.getElementById('role').dispatchEvent(new Event('change'));
                     });
                 </script>
             </body>

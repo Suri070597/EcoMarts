@@ -62,11 +62,6 @@ public class ProductDAO extends DBContext {
     public int insert(String name, double price, String description, int quantity,
             String ImageURL, String unit, Timestamp createdAt,
             int categoryID, int supplierID) {
-
-        if (price < 1000) {
-            price *= 1000;
-        }
-
         String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -122,7 +117,7 @@ public class ProductDAO extends DBContext {
                 // Create Product
                 product = new Product(id, proName, proPrice, description, quantity, ImageURL, unit, createdAt);
                 product.setCategory(category);
-                product.setSupplier(supplier);
+                product.setSupplier(supplier);  // nếu có field supplier
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -130,6 +125,7 @@ public class ProductDAO extends DBContext {
         return product;
     }
 
+//
     public boolean delete(int id) {
         String sqlCartItem = "DELETE FROM CartItem WHERE ProductID = ?";
         String sqlOrderDetail = "DELETE FROM OrderDetail WHERE ProductID = ?";
@@ -137,7 +133,6 @@ public class ProductDAO extends DBContext {
         String sqlPromotion = "DELETE FROM Product_Promotion WHERE ProductID = ?";
         String sqlInventory = "DELETE FROM Inventory WHERE ProductID = ?";
         String sqlProduct = "DELETE FROM Product WHERE ProductID = ?";
-
         try {
             PreparedStatement ps1 = conn.prepareStatement(sqlCartItem);
             ps1.setInt(1, id);
@@ -185,14 +180,8 @@ public class ProductDAO extends DBContext {
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
-
-            double price = product.getPrice();
-            if (price < 1000) {
-                price *= 1000;
-            }
-
             ps.setString(1, product.getProductName());
-            ps.setDouble(2, price);
+            ps.setDouble(2, product.getPrice());
             ps.setString(3, product.getDescription());
             ps.setInt(4, product.getStockQuantity());
             ps.setString(5, product.getImageURL());
@@ -254,14 +243,9 @@ public class ProductDAO extends DBContext {
 
     public List<Product> searchProductsByName(String keyword) {
         List<Product> list = new ArrayList<>();
-        String sql = """
-        SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
-        FROM Product p
-        JOIN Category c ON p.CategoryID = c.CategoryID
-        JOIN Supplier s ON p.SupplierID = s.SupplierID
-        WHERE p.ProductName LIKE ?
-    """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "SELECT * FROM Product WHERE ProductName LIKE ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, "%" + keyword + "%");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -274,21 +258,6 @@ public class ProductDAO extends DBContext {
                 p.setImageURL(rs.getString("ImageURL"));
                 p.setUnit(rs.getString("Unit"));
                 p.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                p.setStatus(rs.getString("Status"));
-
-                // Set Category
-                Category c = new Category();
-                c.setCategoryID(rs.getInt("CategoryID"));
-                c.setCategoryName(rs.getString("CategoryName"));
-                c.setParentID(rs.getInt("ParentID"));
-                p.setCategory(c);
-
-                // Set Supplier
-                Supplier s = new Supplier();
-                s.setSupplierID(rs.getInt("SupplierID"));
-                s.setCompanyName(rs.getString("CompanyName"));
-                p.setSupplier(s);
-
                 list.add(p);
             }
         } catch (Exception e) {
@@ -298,22 +267,35 @@ public class ProductDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        ProductDAO dao = new ProductDAO();
-        String keyword = "co";
+        ProductDAO dao = new ProductDAO(); // Đảm bảo DBContext đã kết nối thành công
 
-        List<Product> results = dao.searchProductsByName(keyword);
+        // 👇 In ra danh sách sản phẩm ban đầu
+        System.out.println("=== Danh sách sản phẩm trước khi xóa ===");
+        List<Product> productsBefore = dao.getAll();
+        for (Product p : productsBefore) {
+            System.out.println("➡️ ID: " + p.getProductID() + " | Name: " + p.getProductName());
+        }
 
-        if (results.isEmpty()) {
-            System.out.println("Không tìm thấy sản phẩm nào với từ khóa: " + keyword);
+        // 👇 ID sản phẩm bạn muốn xóa (nhớ đảm bảo ID này tồn tại)
+        int productIdToDelete = 20;
+
+        // 👇 Gọi phương thức delete
+        boolean deleted = dao.delete(productIdToDelete);
+        System.out.println("\n❗Kết quả xóa sản phẩm có ID " + productIdToDelete + ": " + (deleted ? "Thành công ✅" : "Thất bại ❌"));
+
+        // 👇 Kiểm tra lại danh sách sau khi xóa
+        System.out.println("\n=== Danh sách sản phẩm sau khi xóa ===");
+        List<Product> productsAfter = dao.getAll();
+        for (Product p : productsAfter) {
+            System.out.println("➡️ ID: " + p.getProductID() + " | Name: " + p.getProductName());
+        }
+
+        // 👇 Kiểm tra xem sản phẩm đã thực sự bị xóa chưa
+        boolean stillExists = productsAfter.stream().anyMatch(p -> p.getProductID() == productIdToDelete);
+        if (!stillExists) {
+            System.out.println("\n✅ Sản phẩm đã được xóa khỏi hệ thống.");
         } else {
-            System.out.println("Các sản phẩm tìm thấy với từ khóa \"" + keyword + "\":");
-            for (Product p : results) {
-                System.out.println("ID: " + p.getProductID()
-                        + ", Tên: " + p.getProductName()
-                        + ", Giá: " + p.getPrice()
-                        + ", Loại: " + p.getCategory().getCategoryName()
-                        + ", Nhà cung cấp: " + p.getSupplier().getCompanyName());
-            }
+            System.out.println("\n❌ Sản phẩm vẫn còn trong hệ thống.");
         }
     }
 }

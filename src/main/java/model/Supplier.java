@@ -8,7 +8,7 @@ public class Supplier {
     private String address;
     private String email;
     private String phone;
-    private String status; // Đang hợp tác, Ngừng hợp tác, etc.
+    private int status; // Đang hợp tác, Ngừng hợp tác, etc.
 
     public Supplier() {
     }
@@ -19,7 +19,7 @@ public class Supplier {
     }
 
     public Supplier(int supplierID, String brandName, String companyName, String address, String email, String phone,
-            String status) {
+            int status) {
         this.supplierID = supplierID;
         this.brandName = brandName;
         this.companyName = companyName;
@@ -77,11 +77,11 @@ public class Supplier {
         this.phone = phone;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 

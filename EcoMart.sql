@@ -24,50 +24,46 @@ CREATE TABLE Account (
     [Address] NVARCHAR(255),
     Gender NVARCHAR(10),
     [Role] INT NOT NULL, -- 0: Customer, 1: Admin, 2: Staff
-    Position NVARCHAR(50) NULL, -- For staff: 'Sales', 'Inventory Manager', etc.
     [Status] NVARCHAR(50) DEFAULT 'Active', -- Active, Inactive, Suspended
-    -- Token fields integrated from Token table
-    TokenValue NVARCHAR(255) NULL,
-    TokenStatus NVARCHAR(50) NULL, -- Unused, Used, Expired
-    TokenCreatedAt DATETIME NULL,
-    TokenExpiresAt DATETIME NULL
 );
 
-INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], Position, [Status])
+CREATE TABLE Staff (
+    StaffID INT PRIMARY KEY IDENTITY(1,1),
+    AccountID INT,
+    FullName NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100) UNIQUE NOT NULL,
+    Phone VARCHAR(20),
+    Gender NVARCHAR(10),
+    [Address] NVARCHAR(200),
+    [Status] BIT DEFAULT 1,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+);
+
+CREATE TABLE Token_Table (
+    TokenID INT PRIMARY KEY IDENTITY(1,1),
+    AccountID INT NOT NULL,
+    Token NVARCHAR(255) NOT NULL,
+    [Status] NVARCHAR(50) NOT NULL,
+    Time_Add DATETIME NOT NULL,
+    Time_Exp DATETIME NOT NULL,
+    FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE
+);
+
+INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
 VALUES
 -- Admin
-(N'admin123', N'adminpass', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nam', 1, N'Giám đốc', N'Active'),
+(N'admin123', N'adminpass', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
 -- Staff
-(N'Thacnha', N'Thacnha02', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Nhân viên bán hàng', N'Active'),
-(N'Mantue', N'Mantue03', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Quản lý kho', N'Active'),
-(N'Truongsinh', N'Truongsinh04', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Nhân viên giao hàng', N'Active'),
-(N'Tuenhi', N'Tuenhi05', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', N'Vĩnh Long', N'Nữ', 2, N'Nhân viên bán hàng', N'Active'),
+(N'Thacnha', N'Thacnha02', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
+(N'Mantue', N'Mantue03', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Active'),
+(N'Truongsinh', N'Truongsinh04', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Active'),
+(N'Tuenhi', N'Tuenhi05', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', 'Bạc Liêu', N'Nữ', 2, N'Active'),
 -- Customers
-(N'nguyenvana', N'pass123', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', N'Nam', 0, NULL, N'Active'),
-(N'tranthib', N'pass456', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', N'Nữ', 0, NULL, N'Active'),
-(N'levanc', N'pass789', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', N'Nam', 0, NULL, N'Active');
+(N'nguyenvana', N'pass123', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', N'Nam', 0, N'Active'),
+(N'tranthib', N'pass456', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', N'Nữ', 0, N'Active'),
+(N'levanc', N'pass789', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', N'Nữ', 0, N'Active');
 
--- Update token values for some accounts (formerly in Token table)
-UPDATE Account SET 
-    TokenValue = 'ABC123XYZ', 
-    TokenStatus = N'Unused', 
-    TokenCreatedAt = '2023-06-01 22:00:00', 
-    TokenExpiresAt = '2023-06-01 22:05:00'
-WHERE AccountID = 1;
-
-UPDATE Account SET 
-    TokenValue = 'DEF456UVW', 
-    TokenStatus = N'Used', 
-    TokenCreatedAt = '2023-06-01 22:02:00', 
-    TokenExpiresAt = '2023-06-01 22:07:00'
-WHERE AccountID = 2;
-
-UPDATE Account SET 
-    TokenValue = 'GHI789RST', 
-    TokenStatus = N'Unused', 
-    TokenCreatedAt = '2023-06-01 22:03:00', 
-    TokenExpiresAt = '2023-06-01 22:08:00'
-WHERE AccountID = 3;
 
 CREATE TABLE Supplier (
     SupplierID INT PRIMARY KEY IDENTITY(1,1),
@@ -76,16 +72,16 @@ CREATE TABLE Supplier (
     [Address] NVARCHAR(255),
     Email NVARCHAR(255),
     Phone VARCHAR(15),
-    [Status] NVARCHAR(50) DEFAULT N'Đang hợp tác'
+    [Status] BIT DEFAULT 1
 );
 
 INSERT INTO Supplier (BrandName, CompanyName, [Address], Email, Phone, [Status])
 VALUES
-(N'Thịnh An', N'Công ty Thịnh An', N'123 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'thinhan@fruit.vn', '0909123456', N'Đang hợp tác'),
-(N'SUNTORY PEPSICO', N'Công ty TNHH Nước giải khát SUNTORY PEPSICO Việt Nam', N'Sun Avenue, Quận 2, TP.HCM', N'contact@suntorypepsico.vn', '02838912345', N'Đang hợp tác'),
-(N'Mondelez Kinh Đô', N'Công ty cổ phần bánh kẹo Mondelez Kinh Đô', N'138-142 Hai Bà Trưng, Quận 1, TP.HCM', N'info@mondelezkinhdo.vn', '02838212345', N'Đang hợp tác'),
-(N'Vinamilk', N'Công ty Cổ phần Sữa Việt Nam', N'10 Tân Trào, Quận 7, TP.HCM', N'vinamilk@vinamilk.com.vn', '02854155555', N'Đang hợp tác'),
-(N'IFREE BEAUTY', N'Công ty TNHH IFREE BEAUTY', N'18A Cộng Hòa, Quận Tân Bình, TP.HCM', N'cs@ifreebeauty.vn', '02839451234', N'Đang hợp tác');
+(N'Thịnh An', N'Công ty Thịnh An', N'123 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'thinhan@fruit.vn', '0909123456', 1),
+(N'SUNTORY PEPSICO', N'Công ty TNHH Nước giải khát SUNTORY PEPSICO Việt Nam', N'Sun Avenue, Quận 2, TP.HCM', N'contact@suntorypepsico.vn', '02838912345', 1),
+(N'Mondelez Kinh Đô', N'Công ty cổ phần bánh kẹo Mondelez Kinh Đô', N'138-142 Hai Bà Trưng, Quận 1, TP.HCM', N'info@mondelezkinhdo.vn', '02838212345', 1),
+(N'Vinamilk', N'Công ty Cổ phần Sữa Việt Nam', N'10 Tân Trào, Quận 7, TP.HCM', N'vinamilk@vinamilk.com.vn', '02854155555', 1),
+(N'IFREE BEAUTY', N'Công ty TNHH IFREE BEAUTY', N'18A Cộng Hòa, Quận Tân Bình, TP.HCM', N'cs@ifreebeauty.vn', '02839451234', 1);
 
 CREATE TABLE Category (
     CategoryID INT PRIMARY KEY IDENTITY(1,1),
@@ -204,6 +200,7 @@ DECLARE @Son INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Son' 
 DECLARE @SuaRuaMat INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Sữa rửa mặt' AND ParentID = @MyPham);
 DECLARE @KemChongNang INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Kem chống nắng' AND ParentID = @MyPham);
 
+delete Product
 -- Insert products with correct CategoryIDs
 INSERT INTO Product (ProductName, Price, [Description], StockQuantity, ImageURL, Unit, CategoryID, SupplierID, [Status])
 VALUES
@@ -410,34 +407,10 @@ VALUES
 (1, 1, 1, '2023-06-01 10:25:00', 10000),
 (2, 3, 3, '2023-06-01 14:15:00', 20000);
 
-CREATE TABLE InventoryTransaction (
-    TransactionID INT PRIMARY KEY IDENTITY(1,1),
+CREATE TABLE Inventory (
+    InventoryID INT PRIMARY KEY IDENTITY(1,1),
     ProductID INT NOT NULL,
-    Quantity INT NOT NULL, -- Positive for stock in, negative for stock out
-    TransactionType NVARCHAR(50) NOT NULL, -- 'Purchase', 'Sale', 'Return', 'Adjustment'
-    Reference NVARCHAR(50), -- Order ID or Purchase ID
-    Notes NVARCHAR(255),
-    TransactionDate DATETIME DEFAULT GETDATE(),
-    AccountID INT, -- Staff who made the transaction
-    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
-    FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    Quantity INT CHECK (Quantity >= 0),
+    LastUpdated DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
 );
-
--- Insert inventory transactions
-INSERT INTO InventoryTransaction (ProductID, Quantity, TransactionType, Reference, Notes, AccountID)
-VALUES
-(@CocaCola, 100, N'Purchase', 'PUR001', N'Nhập hàng từ Pepsico', 6),
-(@CocaCola, -2, N'Sale', 'ORD001', N'Bán hàng', 5),
-(@JohnsonBaby, -1, N'Sale', 'ORD002', N'Bán hàng', 5),
-(@SuaVinamilk, -3, N'Sale', 'ORD003', N'Bán hàng', 5),
-(@TaoMy, 50, N'Purchase', 'PUR002', N'Nhập hàng từ Thịnh An', 6);
-
-
-
-
-delete product
-DBCC CHECKIDENT ('Product', RESEED, 0);
-
-SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p 
-                                JOIN Category c ON p.categoryID = c.categoryID 
-                               JOIN Supplier s ON p.supplierID = s.supplierID
