@@ -16,7 +16,6 @@ model\ProductPromotion.class
 model\Voucher.class
 model\Account.class
 model\AccountManager.class
-dao\CategoryDAOV1.class
 controller\ProductServlet.class
 model\Promotion.class
 controller\CategoryServlet.class

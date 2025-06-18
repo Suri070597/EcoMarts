@@ -1,6 +1,6 @@
 package controller;
 
-import dao.CategoryDAOV1;
+import dao.CategoryDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @WebServlet(name = "AdimCategoryServlet", urlPatterns = {"/admin/category", "/admin/createCategory", "/admin/deleteCategory"})
 public class AdminCategoryServlet extends HttpServlet {
-    private final CategoryDAOV1 dao = new CategoryDAOV1();
+    private final CategoryDAO dao = new CategoryDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
