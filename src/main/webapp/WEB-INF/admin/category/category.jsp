@@ -32,7 +32,7 @@
             <div class="main-content">
                 <div class="category-container">
                     <div class="category-header">
-                        <h1><i class="fas fa-sitemap"></i>Category Management</h1>
+                        <h1><i class="fas fa-sitemap"></i> Category Management</h1>
                         <a href="${pageContext.request.contextPath}/admin/createCategory" class="btn btn-primary">
                             + Add Category
                         </a>
@@ -76,7 +76,7 @@
 
                                                     Swal.fire({
                                                         title: 'Confirm Delete Subfolder',
-                                                        text: 'Are you sure you want to delete this account?',
+                                                        text: 'Are you sure you want to delete this subcategory?',
                                                         icon: 'warning',
                                                         showCancelButton: true,
                                                         confirmButtonColor: '#c35f5f',

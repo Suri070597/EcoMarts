@@ -9,6 +9,7 @@ dao\CategoryDAO.class
 model\InventoryTransaction.class
 dao\AccountDAO.class
 model\Review.class
+controller\AdminCategoryServlet.class
 model\Product.class
 model\VoucherUsage.class
 model\ProductPromotion.class

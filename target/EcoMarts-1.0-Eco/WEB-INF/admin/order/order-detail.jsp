@@ -23,7 +23,7 @@
                 <!-- Thông tin đơn hàng -->
                 <div class="order-info">
                     <p><strong>Order ID:</strong> ${order.orderID}</p>
-                    <p><strong>Customer:</strong> ${order.account.fullName}</p>
+                    <p><strong>Customer:</strong> ${order.accountName}</p>
                     <p><strong>Phone:</strong> ${order.shippingPhone}</p>
                     <p><strong>Shipping Address:</strong> ${order.shippingAddress}</p>
                     <p><strong>Order Date:</strong> ${order.orderDate}</p>

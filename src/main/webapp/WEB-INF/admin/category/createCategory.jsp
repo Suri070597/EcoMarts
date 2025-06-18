@@ -19,7 +19,7 @@
         <div class="main-content">
             <div class="category-container">
                 <div class="category-header">
-                    <h1><i class="fas fa-plus-circle"></i>Add Subcategory</h1>
+                    <h1><i class="fas fa-plus-circle"></i> Add Subcategory</h1>
                 </div>
                 <form action="createCategory" method="post">
                     <div class="mb-3">

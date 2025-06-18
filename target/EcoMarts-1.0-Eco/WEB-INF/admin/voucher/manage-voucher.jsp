@@ -129,7 +129,7 @@
                                                            event.preventDefault();
                                                            Swal.fire({
                                                                title: 'Confirm Delete Voucher',
-                                                               text: 'Are you sure you want to delete this supplier?',
+                                                               text: 'Are you sure you want to delete this voucher?',
                                                                icon: 'warning',
                                                                showCancelButton: true,
                                                                confirmButtonColor: '#d33',
@@ -150,7 +150,7 @@
 
                 Swal.fire({
                     title: 'Confirm Status Change',
-                    text: isActive ? 'Do you want to deactivate this voucher?' : 'Do you want to activate this account?',
+                    text: isActive ? 'Do you want to deactivate this voucher?' : 'Do you want to activate this voucher?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
