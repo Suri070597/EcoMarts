@@ -32,9 +32,9 @@
             <div class="main-content">
                 <div class="category-container">
                     <div class="category-header">
-                        <h1><i class="fas fa-sitemap"></i> Quản lý danh mục</h1>
+                        <h1><i class="fas fa-sitemap"></i>Category Management</h1>
                         <a href="${pageContext.request.contextPath}/admin/createCategory" class="btn btn-primary">
-                            + Thêm danh mục
+                            + Add Category
                         </a>
                     </div>
 
@@ -47,7 +47,7 @@
                                         <li>
                                             <span>${child.categoryName}</span>
                                             <button class="btn-delete" onclick="confirmDelete('${child.categoryID}', '${child.categoryName}')">
-                                                <i class="fas fa-trash"></i> Xóa
+                                                <i class="fas fa-trash"></i> Delete
                                             </button>
                                         </li>
                                     </c:forEach>
