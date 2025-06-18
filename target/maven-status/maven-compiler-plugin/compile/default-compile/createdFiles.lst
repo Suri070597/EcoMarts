@@ -9,12 +9,14 @@ dao\CategoryDAO.class
 model\InventoryTransaction.class
 dao\AccountDAO.class
 model\Review.class
+controller\AdminCategoryServlet.class
 model\Product.class
 model\VoucherUsage.class
 model\ProductPromotion.class
 model\Voucher.class
 model\Account.class
 model\AccountManager.class
+dao\CategoryDAOV1.class
 controller\ProductServlet.class
 model\Promotion.class
 controller\CategoryServlet.class
