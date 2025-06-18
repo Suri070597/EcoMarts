@@ -5,10 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import model.Category;
 import db.DBContext;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class CategoryDAO extends DBContext {
 
@@ -39,9 +35,9 @@ public class CategoryDAO extends DBContext {
             ResultSet rs = execSelectQuery(sql, new Object[]{parentId});
             while (rs.next()) {
                 Category cat = new Category(
-                        rs.getInt("CategoryID"),
-                        rs.getString("CategoryName"),
-                        parentId
+                    rs.getInt("CategoryID"),
+                    rs.getString("CategoryName"),
+                    parentId
                 );
                 cat.setChildren(getChildCategories(cat.getCategoryID())); // đệ quy
                 list.add(cat);
@@ -51,62 +47,5 @@ public class CategoryDAO extends DBContext {
         }
 
         return list;
-    }
-
-    public List<Category> getParentCategories() {
-        List<Category> list = new ArrayList<>();
-        String sql = "SELECT * FROM Category WHERE ParentID IS NULL";
-        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                list.add(new Category(
-                        rs.getInt("CategoryID"),
-                        rs.getString("CategoryName"),
-                        null
-                ));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public Map<Integer, List<Category>> getChildCategoriesGrouped() {
-        Map<Integer, List<Category>> map = new HashMap<>();
-        String sql = "SELECT * FROM Category WHERE ParentID IS NOT NULL";
-        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                int parentId = rs.getInt("ParentID");
-                Category cat = new Category(
-                        rs.getInt("CategoryID"),
-                        rs.getString("CategoryName"),
-                        parentId
-                );
-                map.computeIfAbsent(parentId, k -> new ArrayList<>()).add(cat);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return map;
-    }
-
-    public void insertCategory(String name, int parentId) {
-        String sql = "INSERT INTO Category (CategoryName, ParentID) VALUES (?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, name);
-            ps.setInt(2, parentId);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void deleteCategory(int id) {
-        String sql = "DELETE FROM Category WHERE CategoryID = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 }

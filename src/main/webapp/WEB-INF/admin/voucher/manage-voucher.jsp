@@ -150,7 +150,7 @@
 
                 Swal.fire({
                     title: 'Confirm Status Change',
-                    text: isActive ? 'Do you want to deactivate this voucher?' : 'Do you want to activate this voucher?',
+                    text: isActive ? 'Do you want to deactivate this voucher?' : 'Do you want to activate this account?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',

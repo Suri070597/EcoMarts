@@ -75,21 +75,14 @@ public class ProductServlet extends HttpServlet {
                     e.printStackTrace();
                 }
                 break;
-            default:
-                String keyword = request.getParameter("search");
-//                List<Product> list;
-                if (keyword != null && !keyword.trim().isEmpty()) {
-                    list = dao.searchProductsByName(keyword);
-                    request.setAttribute("keyword", keyword);
-                } else {
-                    list = dao.getAll();
-                }
+            case "search":
+                String keyword = request.getParameter("keyword");
+                List<Product> searchResults = dao.searchProductsByName(keyword);
                 request.setAttribute("dataCate", listCategory);
-                request.setAttribute("data", list);
-
+                request.setAttribute("data", searchResults);
+                request.setAttribute("keyword", keyword);
                 request.getRequestDispatcher("/WEB-INF/admin/product/product.jsp").forward(request, response);
                 break;
-
         }
     }
 

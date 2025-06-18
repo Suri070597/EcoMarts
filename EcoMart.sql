@@ -206,7 +206,7 @@ INSERT INTO Product (ProductName, Price, [Description], StockQuantity, ImageURL,
 VALUES
 -- Nước giải khát
 (N'Coca-Cola Lon 330ml', 8000, N'Nước ngọt có ga hương cola', 100, 'assets/img/products/coca-cola.jpg', N'Lon', @NuocNgot, 2, N'Còn hàng'),
-(N'Pepsi Lon 330ml', 7500, N'Nước ngọt có ga vị pepsi', 120, 'assets/img/products/pepsi.jpg', N'Lon', @NuocNgot, 2, N'Còn hàng'),
+(N'Pepsi Lon 330ml', 7500, N'Nước ngọt có ga hương cola', 120, 'assets/img/products/pepsi.jpg', N'Lon', @NuocNgot, 2, N'Còn hàng'),
 (N'Trà Ô Long TEA+ 500ml', 12000, N'Trà ô long thanh mát', 80, 'assets/img/products/tea-plus.jpg', N'Chai', @NuocTra, 2, N'Còn hàng'),
 (N'Nước suối Aquafina 500ml', 5000, N'Nước tinh khiết', 200, 'assets/img/products/aquafina.jpg', N'Chai', @NuocSuoi, 2, N'Còn hàng'),
 
