@@ -116,14 +116,15 @@
                                                         <th>Gender:</th>
                                                         <td>${account.gender}</td>
                                                     </tr>
-                                                    <c:if test="${account.role == 2}">
-                                                        <tr>
-                                                            <th>Position:</th>
-                                                            <td>${account.position}</td>
-                                                        </tr>
-                                                    </c:if>
+                                                    <tr>
+                                                        <th>Role:</th>
+                                                        <td>${account.role == 0 ? 'Customer' : account.role == 1 ? 'Admin' : 'Staff'}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Status:</th>
+                                                        <td>${account.status}</td>
+                                                    </tr>
                                                 </table>
-
                                             </div>
                                         </div>
                                     </div>
