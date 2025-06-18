@@ -10,50 +10,70 @@
     Map<Integer, List<Category>> childMap = (Map<Integer, List<Category>>) request.getAttribute("childMap");
 %>
 
-<div class="main-content">
-    <h1>Quản lý danh mục</h1>
-   <a href="${pageContext.request.contextPath}/admin/createCategory" class="btn btn-primary">+ Thêm category</a>
+<link rel="stylesheet"
+      href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
+<link rel="stylesheet"
+      href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
 
-    <ul class="category-tree">
-        <c:forEach var="parent" items="${parents}">
-            <li class="parent" onclick="toggleChildren(this)">
-                <strong>${parent.categoryName}</strong>
-                <ul class="children hidden">
-                    <c:forEach var="child" items="${childMap[parent.categoryID]}">
-                        <li>
-                            ${child.categoryName}
-                            <button onclick="confirmDelete(${child.categoryID})">Xóa</button>
+<body>
+    <div class="container-fluid">
+        <%-- Include admin sidebar --%>
+        <jsp:include page="../components/sidebar.jsp" />
+
+        <div class="main-content">
+            <div class="container">
+                <h1>Quản lý danh mục</h1>
+                <a href="${pageContext.request.contextPath}/admin/createCategory" class="btn btn-primary">+ Thêm category</a>
+
+                <ul class="category-tree">
+                    <c:forEach var="parent" items="${parents}">
+                        <li class="parent" onclick="toggleChildren(this)">
+                            <strong>${parent.categoryName}</strong>
+                            <ul class="children hidden">
+                                <c:forEach var="child" items="${childMap[parent.categoryID]}">
+                                    <li>
+                                        ${child.categoryName}
+                                        <button onclick="confirmDelete(${child.categoryID})">Xóa</button>
+                                    </li>
+                                </c:forEach>
+                            </ul>
                         </li>
                     </c:forEach>
                 </ul>
-            </li>
-        </c:forEach>
-    </ul>
-</div>
+            </div>
 
-<style>
-    .category-tree ul.children {
-        margin-left: 20px;
-        padding-left: 10px;
-        border-left: 2px solid #ccc;
-    }
-    .hidden { display: none; }
-    .parent { cursor: pointer; margin-bottom: 10px; }
-    button { margin-left: 10px; }
-</style>
+            <style>
+                .category-tree ul.children {
+                    margin-left: 20px;
+                    padding-left: 10px;
+                    border-left: 2px solid #ccc;
+                }
+                .hidden {
+                    display: none;
+                }
+                .parent {
+                    cursor: pointer;
+                    margin-bottom: 10px;
+                }
+                button {
+                    margin-left: 10px;
+                }
+            </style>
 
-<script>
-    function toggleChildren(element) {
-        const children = element.querySelector(".children");
-        if (children) {
-            children.classList.toggle("hidden");
-        }
-    }
+            <script>
+                function toggleChildren(element) {
+                    const children = element.querySelector(".children");
+                    if (children) {
+                        children.classList.toggle("hidden");
+                    }
+                }
 
-    function confirmDelete(id) {
-        event.stopPropagation(); // Không làm sập cây
-        if (confirm("Bạn có chắc muốn xóa danh mục này?")) {
-            window.location.href = "deleteCategory?id=" + id;
-        }
-    }
-</script>
+                function confirmDelete(id) {
+                    event.stopPropagation(); // Không làm sập cây
+                    if (confirm("Bạn có chắc muốn xóa danh mục này?")) {
+                        window.location.href = "deleteCategory?id=" + id;
+                    }
+                }
+            </script>
