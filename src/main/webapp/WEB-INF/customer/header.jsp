@@ -56,12 +56,12 @@
         <% String username = (String) session.getAttribute("username"); %>
         <% if (username != null) {%>
         <span>Chào, <%= username%></span>
-        <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-in-alt"></i>Đăng Xuất</a>
+        <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i>Đăng Xuất</a>
 
         <% } else {%>
-        <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
-        <a href="<%= request.getContextPath()%>/register"><i class="fas fa-sign-in-alt"></i> Đăng ký</a>
         <a href="<%= request.getContextPath()%>/cart"><i class="fas fa-shopping-cart"></i>Giỏ hàng</a>
+        <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
+        <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
         <% }%>
     </div>
         </div>
