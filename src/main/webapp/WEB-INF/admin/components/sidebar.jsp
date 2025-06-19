@@ -28,5 +28,7 @@
                     class="fas fa-shopping-bag"></i> Top 10 product</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/dashboard?view=top-customers"><i
                     class="fas fa-users"></i> Top 5 customer</a></li>
+        <li><a href="${pageContext.request.contextPath}/logout"><i
+                    class="fas fa-users"></i> Logout</a></li>
     </ul>
 </aside>

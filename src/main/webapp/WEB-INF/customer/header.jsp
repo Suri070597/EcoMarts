@@ -52,12 +52,18 @@
                 <input type="text" placeholder="Tìm kiếm sản phẩm...">
             </div>
 
-            <div class="header-icons">
-                <a href="#"><i class="fas fa-shopping-cart"></i> Giỏ hàng</a>
-                <!--        <a href="#"><i class="fa-solid fa-bell"></i></a>-->
-                <a href="#"><i class="fas fa-user-plus"></i> Đăng ký</a>
-                <a href="#"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
-            </div>
+             <div class="header-icons">
+        <% String username = (String) session.getAttribute("username"); %>
+        <% if (username != null) {%>
+        <span>Chào, <%= username%></span>
+        <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-in-alt"></i>Đăng Xuất</a>
+
+        <% } else {%>
+        <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
+        <a href="<%= request.getContextPath()%>/register"><i class="fas fa-sign-in-alt"></i> Đăng ký</a>
+        <a href="<%= request.getContextPath()%>/cart"><i class="fas fa-shopping-cart"></i>Giỏ hàng</a>
+        <% }%>
+    </div>
         </div>
 
         <!-- JS -->
