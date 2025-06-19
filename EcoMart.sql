@@ -53,17 +53,19 @@ CREATE TABLE Token_Table (
 INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
 VALUES
 -- Admin
-(N'admin123', N'adminpass', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
--- Staff
-(N'Thacnha', N'Thacnha02', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
-(N'Mantue', N'Mantue03', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Active'),
-(N'Truongsinh', N'Truongsinh04', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Active'),
-(N'Tuenhi', N'Tuenhi05', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', 'Bạc Liêu', N'Nữ', 2, N'Active'),
--- Customers
-(N'nguyenvana', N'pass123', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', N'Nam', 0, N'Active'),
-(N'tranthib', N'pass456', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', N'Nữ', 0, N'Active'),
-(N'levanc', N'pass789', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', N'Nữ', 0, N'Active');
+(N'admin123', N'admin123@', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
 
+-- Staff
+(N'adminnnn', N'Thacnha02@', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
+(N'Thacnha', N'Thacnha02@', N'thacnha2@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
+(N'Mantue', N'Mantue03@', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Active'),
+(N'Truongsinh', N'Truongsinh04@', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Active'),
+(N'Tuenhi', N'Tuenhi05@', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', 'Bạc Liêu', N'Nữ', 2, N'Active'),
+
+-- Customers
+(N'nguyenvana', N'pass123@', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', N'Nam', 0, N'Active'),
+(N'tranthib', N'pass456@', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', N'Nữ', 0, N'Active'),
+(N'levanc', N'pass789@', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', N'Nữ', 0, N'Active');
 
 CREATE TABLE Supplier (
     SupplierID INT PRIMARY KEY IDENTITY(1,1),
@@ -274,6 +276,7 @@ CREATE TABLE [Order] (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
 );
 
+delete [Order]
 -- Insert sample orders
 INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus)
 VALUES
@@ -292,15 +295,16 @@ CREATE TABLE OrderDetail (
     FOREIGN KEY (OrderID) REFERENCES [Order](OrderID) ON DELETE CASCADE,
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
 );
-
+delete OrderDetail
+select * from Product
 -- Insert sample order details with correct ProductIDs
 INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice)
 VALUES
-(1, @CocaCola, 2, 8000),      -- 2 Coca-Cola for Order 1
-(2, @JohnsonBaby, 1, 45000),  -- 1 Johnson Baby for Order 2
+(5, 21, 2, 8000),      -- 2 Coca-Cola for Order 1
+(6, @JohnsonBaby, 1, 45000),  -- 1 Johnson Baby for Order 2
 (3, @SuaVinamilk, 3, 7000),   -- 3 Vinamilk for Order 3
 (4, @TaoMy, 1, 35000);        -- 1kg Táo Mỹ for Order 4
-
+select * from [Order]
 CREATE TABLE Review (
     ReviewID INT PRIMARY KEY IDENTITY(1,1),
     ProductID INT NOT NULL,
