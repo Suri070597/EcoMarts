@@ -32,10 +32,16 @@
                 <div class="container">
                     <h1>Edit Product</h1>
                     <div id="imageError" class="alert alert-danger d-none" role="alert"></div>
+                    <% String error = (String) request.getAttribute("error"); %>
+                    <% if (error != null) {%>
+                    <div class="alert alert-danger"><%= error%></div>
+                    <% }%>
                     <% if (mo == null) { %>
-                    <p>There is no product with that id</p>
-                    <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary">Back</a>
+                    <div class="alert alert-danger">❌ Không tìm thấy sản phẩm với ID yêu cầu.</div>
+                    <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary">Trở về</a>
                     <% } else {%>
+
+                    <!-- Hiển thị form update như bình thường -->
                     <form id="createForm" method="post" action="${pageContext.request.contextPath}/admin/product?action=update&id=<%= mo.getProductID()%>" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label class="form-label">Product ID</label>
@@ -50,7 +56,8 @@
 
                         <div class="mb-3">
                             <label class="form-label">Product Price</label>
-                            <input type="number" min="0" step="any" class="form-control" name="pPrice" required value="<%= mo.getPrice()%>" />
+                            <input type="number" min="0" step="any" class="form-control" name="pPrice" required
+                                   value="<%= new java.text.DecimalFormat("0.##").format(mo.getPrice())%>" />
                         </div>
 
                         <div class="mb-3">
@@ -87,6 +94,39 @@
                             <label class="form-label">Change Image (optional)</label>
                             <input type="file" class="form-control" name="pImage" id="pImage" accept=".jpg,.jpeg,.png" >
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Manufacture Date</label>
+                            <%
+                                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                                String manufactureDateStr = (mo.getManufactureDate() != null) ? sdf.format(mo.getManufactureDate()) : "";
+                            %>
+                            <input type="date" class="form-control" name="manufactureDate" value="<%= manufactureDateStr%>" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Expiration Period</label>
+                            <%
+                                int expiryMonths = 0;
+                                if (mo.getManufactureDate() != null && mo.getExpirationDate() != null) {
+                                    java.util.Calendar manu = java.util.Calendar.getInstance();
+                                    java.util.Calendar exp = java.util.Calendar.getInstance();
+                                    manu.setTime(mo.getManufactureDate());
+                                    exp.setTime(mo.getExpirationDate());
+
+                                    expiryMonths = (exp.get(java.util.Calendar.YEAR) - manu.get(java.util.Calendar.YEAR)) * 12
+                                            + (exp.get(java.util.Calendar.MONTH) - manu.get(java.util.Calendar.MONTH));
+                                }
+                            %>
+                            <select class="form-select" name="expirySelect" required>
+                                <option value="">-- Select Expiration Period --</option>
+                                <option value="3" <%= (expiryMonths == 3) ? "selected" : ""%>>3 months</option>
+                                <option value="6" <%= (expiryMonths == 6) ? "selected" : ""%>>6 months</option>
+                                <option value="12" <%= (expiryMonths == 12) ? "selected" : ""%>>1 year</option>
+                                <option value="24" <%= (expiryMonths == 24) ? "selected" : ""%>>2 years</option>
+                            </select>
+                        </div>
+
 
                         <div class="mb-3">
                             <label class="form-label">Category</label>

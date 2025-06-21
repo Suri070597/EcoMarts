@@ -14,6 +14,9 @@ import java.io.File;
 import static java.lang.System.out;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import model.Category;
 import model.Product;
@@ -100,37 +103,93 @@ public class ProductServlet extends HttpServlet {
 
         switch (action) {
             case "create":
-                String pName = request.getParameter("pName");
-                double pPrice = Double.parseDouble(request.getParameter("pPrice"));
-                int pQuantity = Integer.parseInt(request.getParameter("pQuanity"));
-                String pUnit = request.getParameter("pUnit");
-                String pDescription = request.getParameter("pDescription");
+                try {
+                    String pName = request.getParameter("pName");
+                    double pPrice = Double.parseDouble(request.getParameter("pPrice"));
+                    int pQuantity = Integer.parseInt(request.getParameter("pQuanity"));
+                    String pUnit = request.getParameter("pUnit");
+                    String pDescription = request.getParameter("pDescription");
 
-                int categoryID = Integer.parseInt(request.getParameter("categoryID"));
-                int supplierID = Integer.parseInt(request.getParameter("supplierID"));
+                    int categoryID = Integer.parseInt(request.getParameter("categoryID"));
+                    int supplierID = Integer.parseInt(request.getParameter("supplierID"));
 
-                Part filePart = request.getPart("pImage");
-                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                    String manufactureDateStr = request.getParameter("manufactureDate");
+                    String expiryMonthsStr = request.getParameter("expirySelect");
 
-                if (!fileName.isEmpty()) {
-                    File uploadDir = new File(IMAGE_UPLOAD_DIR);
-                    if (!uploadDir.exists()) {
-                        uploadDir.mkdirs();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date manufactureDate = sdf.parse(manufactureDateStr);
+
+                    int months = Integer.parseInt(expiryMonthsStr);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(manufactureDate);
+                    cal.add(Calendar.MONTH, months);
+                    Date expirationDate = cal.getTime();
+
+                    Date today = new Date();
+                    if (manufactureDate.after(today)) {
+                        request.setAttribute("error", "Ngày sản xuất không được ở tương lai.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                        return;
                     }
-                    filePart.write(IMAGE_UPLOAD_DIR + File.separator + fileName);
+
+                    // Không cho phép ngày sản xuất quá 2 năm về trước
+                    Calendar twoYearsAgo = Calendar.getInstance();
+                    twoYearsAgo.setTime(today);
+                    twoYearsAgo.add(Calendar.YEAR, -2);  // Trừ đi 2 năm
+                    Date twoYearsBefore = twoYearsAgo.getTime();
+
+                    if (manufactureDate.before(twoYearsBefore)) {
+                        request.setAttribute("error", "Ngày sản xuất không được quá 2 năm trước.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                        return;
+                    }
+
+                    if (expirationDate.before(today)) {
+                        request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                        return;
+                    }
+
+                    // Xử lý ảnh
+                    Part filePart = request.getPart("pImage");
+                    String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                    if (!fileName.isEmpty()) {
+                        File uploadDir = new File(IMAGE_UPLOAD_DIR);
+                        if (!uploadDir.exists()) {
+                            uploadDir.mkdirs();
+                        }
+                        filePart.write(IMAGE_UPLOAD_DIR + File.separator + fileName);
+                    }
+
+                    String pImage = fileName;
+                    Timestamp createdAt = new Timestamp(System.currentTimeMillis());
+
+                    int res = dao.insert(pName, pPrice, pDescription, pQuantity, pImage, pUnit,
+                            createdAt, categoryID, supplierID, manufactureDate, expirationDate);
+
+                    if (res == 1) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product");
+                        return;
+                    } else {
+                        request.setAttribute("error", "❌ Thêm sản phẩm thất bại.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.setAttribute("error", "❌ Đã xảy ra lỗi khi tạo sản phẩm.");
+                    request.setAttribute("dataCate", dao.getCategory());
+                    request.setAttribute("dataSup", dao.getAllSuppliers());
+                    request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
                 }
-
-                String pImage = fileName;
-                Timestamp date = new Timestamp(System.currentTimeMillis());
-
-                int res = dao.insert(pName, pPrice, pDescription, pQuantity, pImage, pUnit, date, categoryID, supplierID);
-
-                if (res == 1) {
-                    response.sendRedirect(request.getContextPath() + "/admin/product");
-                } else {
-                    response.sendRedirect(request.getContextPath() + "/admin/product?action=create");
-                }
-
                 break;
 
             case "delete":
@@ -144,50 +203,120 @@ public class ProductServlet extends HttpServlet {
                 break;
 
             case "update":
-                int id1 = Integer.parseInt(request.getParameter("id"));
-                String name = request.getParameter("pName");
-                double price = Double.parseDouble(request.getParameter("pPrice"));
-                int quantity = Integer.parseInt(request.getParameter("pQuantity"));
-                String unit = request.getParameter("pUnit");
-                String description = request.getParameter("pDescription");
-                int categoryId = Integer.parseInt(request.getParameter("categoryID"));
-                int supplierId = Integer.parseInt(request.getParameter("supplierID"));
+                try {
+                    int id1 = Integer.parseInt(request.getParameter("id"));
+                    String name = request.getParameter("pName");
+                    double price = Double.parseDouble(request.getParameter("pPrice"));
+                    int quantity = Integer.parseInt(request.getParameter("pQuantity"));
+                    String unit = request.getParameter("pUnit");
+                    String description = request.getParameter("pDescription");
+                    int categoryId = Integer.parseInt(request.getParameter("categoryID"));
+                    int supplierId = Integer.parseInt(request.getParameter("supplierID"));
+                    String manufactureDateStr1 = request.getParameter("manufactureDate");
+                    String expirySelect = request.getParameter("expirySelect");
 
-                Part filePart1 = request.getPart("pImage");
-                String fileName1 = Paths.get(filePart1.getSubmittedFileName()).getFileName().toString();
-                String image;
-
-                if (!fileName1.isEmpty()) {
-                    File uploadDir = new File(IMAGE_UPLOAD_DIR);
-                    if (!uploadDir.exists()) {
-                        uploadDir.mkdirs();
+                    // Kiểm tra và chuyển đổi ngày sản xuất
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date manufactureDate;
+                    try {
+                        if (manufactureDateStr1 == null || manufactureDateStr1.isEmpty()) {
+                            throw new IllegalArgumentException("❌ Ngày sản xuất không được để trống.");
+                        }
+                        manufactureDate = sdf.parse(manufactureDateStr1);
+                    } catch (Exception e) {
+                        request.setAttribute("error", "❌ Ngày sản xuất không hợp lệ. Định dạng phải là yyyy-MM-dd.");
+                        Product existing = dao.getProductById(id1);
+                        request.setAttribute("mo", existing); // <-- fix ở đây
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
+                        return;
                     }
-                    filePart1.write(IMAGE_UPLOAD_DIR + File.separator + fileName1);
-                    image = fileName1;
-                } else {
-                    Product existing = dao.getProductById(id1);
-                    image = existing.getImageURL();
-                }
 
-                Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-                Product product = new Product(id1, name, price, description, quantity, image, unit, createdAt);
+                    // Tính ngày hết hạn
+                    int months = Integer.parseInt(expirySelect);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(manufactureDate);
+                    cal.add(Calendar.MONTH, months);
+                    Date expirationDate = cal.getTime();
 
-                Category category = new Category();
-                category.setCategoryID(categoryId);
-                product.setCategory(category);
+                    Date today = new Date();
+                    Calendar twoYearsAgo = Calendar.getInstance();
+                    twoYearsAgo.add(Calendar.YEAR, -2);
 
-                Supplier supplier = new Supplier();
-                supplier.setSupplierID(supplierId);
-                product.setSupplier(supplier);
+                    // Kiểm tra hợp lệ ngày
+                    String err = null;
+                    if (manufactureDate.after(today)) {
+                        err = "Ngày sản xuất không được ở tương lai.";
+                    } else if (manufactureDate.before(twoYearsAgo.getTime())) {
+                        err = "Ngày sản xuất không được quá 2 năm trước.";
+                    } else if (expirationDate.before(today)) {
+                        err = "Ngày hết hạn đã trôi qua.";
+                    }
 
-                boolean result = dao.update(product);
+                    if (err != null) {
+                        request.setAttribute("error", err);
+                        Product existing = dao.getProductById(id1);
+                        request.setAttribute("mo", existing); // <-- fix ở đây
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
+                        return;
+                    }
 
-                if (result) {
-                    response.sendRedirect(request.getContextPath() + "/admin/product");
-                } else {
-                    response.sendRedirect(request.getContextPath() + "/admin/product?action=update&id=" + id1);
+                    // Xử lý ảnh
+                    Part filePart1 = request.getPart("pImage");
+                    String fileName1 = Paths.get(filePart1.getSubmittedFileName()).getFileName().toString();
+                    String image;
+
+                    if (!fileName1.isEmpty()) {
+                        File uploadDir = new File(IMAGE_UPLOAD_DIR);
+                        if (!uploadDir.exists()) {
+                            uploadDir.mkdirs();
+                        }
+                        filePart1.write(IMAGE_UPLOAD_DIR + File.separator + fileName1);
+                        image = fileName1;
+                    } else {
+                        Product existing = dao.getProductById(id1);
+                        image = existing.getImageURL();
+                    }
+
+                    Timestamp createdAt = new Timestamp(System.currentTimeMillis());
+                    Product product = new Product(id1, name, price, description, quantity, image, unit, createdAt, manufactureDate, expirationDate);
+
+                    Category category = new Category();
+                    category.setCategoryID(categoryId);
+                    product.setCategory(category);
+
+                    Supplier supplier = new Supplier();
+                    supplier.setSupplierID(supplierId);
+                    product.setSupplier(supplier);
+
+                    boolean result = dao.update(product);
+
+                    if (result) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product");
+                    } else {
+                        request.setAttribute("error", "❌ Cập nhật sản phẩm thất bại.");
+                        Product existing = dao.getProductById(id1);
+                        request.setAttribute("mo", existing); // <-- fix ở đây
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.setAttribute("error", "❌ Đã xảy ra lỗi khi cập nhật sản phẩm.");
+                    request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
                 }
                 break;
+
         }
     }
 

@@ -77,37 +77,57 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label">Manufacture Date</label>
+                            <input type="date" class="form-control" name="manufactureDate" id="manufactureDate" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Expiration Period</label>
+                            <select class="form-select" id="expirySelect" name="expirySelect" required>
+                                <option value="">-- Select Expiration Period --</option>
+                                <option value="3">3 months</option>
+                                <option value="6">6 months</option>
+                                <option value="12">1 year</option>
+                                <option value="24">2 years</option>
+                            </select>
+                        </div>
+
+
+                        <div class="mb-3">
                             <label class="form-label">Category</label>
                             <select name="categoryID" class="form-select" required>
                                 <option value="">-- Select Category --</option>
-                                <%  for (Category c : cate) {
-                                        if (c.getParentID() != 0) {
-                                            String parentName = "";
-                                            for (Category p : cate) {
-                                                if (c.getParentID() == p.getCategoryID()) {
-                                                    parentName = p.getCategoryName() + " > ";
-                                                    break;
+                                <% if (cate != null) {
+                                        for (Category c : cate) {
+                                            if (c.getParentID() != 0) {
+                                                String parentName = "";
+                                                for (Category p : cate) {
+                                                    if (c.getParentID() == p.getCategoryID()) {
+                                                        parentName = p.getCategoryName() + " > ";
+                                                        break;
+                                                    }
                                                 }
-                                            }
-                                            String display = parentName + c.getCategoryName();
+                                                String display = parentName + c.getCategoryName();
                                 %>
                                 <option value="<%= c.getCategoryID()%>"><%= display%></option>
                                 <%
+                                            }
                                         }
                                     }
                                 %>
                             </select>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Supplier</label>
                             <select name="supplierID" class="form-select" required>
                                 <option value="">-- Select Supplier --</option>
-                                <%
-                                    for (Supplier s : sup) {
+                                <% if (sup != null) {
+
+                                        for (Supplier s : sup) {
                                 %>
                                 <option value="<%= s.getSupplierId()%>"><%= s.getCompanyName()%></option>
                                 <%
+                                        }
                                     }
                                 %>
                             </select>

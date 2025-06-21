@@ -99,7 +99,7 @@
                     <div class="category-item">
                         <a href="category?id=1">
                             <div class="category-icon">
-                                <img src="assets/img/cocacola330ml.jpg" alt="Nước giải khát">
+                                <img src="assets/img/coca-cola.jpg" alt="Nước giải khát">
                             </div>
                             <p>Nước giải khát</p>
                         </a>
@@ -125,7 +125,7 @@
                             <div class="category-icon">
                                 <img src="assets/img/sua.jpg" alt="Sữa các loại">
                             </div>
-                            <p>Sửa các loại</p>
+                            <p>Sữa các loại</p>
                         </a>
                     </div>
                     <div class="category-item">

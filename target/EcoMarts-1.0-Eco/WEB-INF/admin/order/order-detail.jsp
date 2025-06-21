@@ -47,9 +47,9 @@
                         <c:forEach var="d" items="${details}">
                             <tr>
                                 <td>${d.productName}</td>
-                                <td>$${d.unitPrice}</td>
+                                <td>${d.unitPrice} VND</td>
                                 <td>${d.quantity}</td>
-                                <td>$${d.subTotal}</td>
+                                <td>${d.subTotal} VND</td>
 
                             </tr>
                         </c:forEach>
@@ -58,7 +58,7 @@
 
                 <!-- Tổng tiền -->
                 <div class="order-total">
-                    <p><strong>Total Amount:</strong> $${order.totalAmount}</p>
+                    <p><strong>Total Amount:</strong> ${order.totalAmount} VND</p>
                 </div>
             </div>
 
