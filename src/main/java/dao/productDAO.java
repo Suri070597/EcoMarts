@@ -9,7 +9,10 @@ import db.DBContext;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import model.Category;
 import model.Product;
@@ -61,12 +64,16 @@ public class ProductDAO extends DBContext {
 
     public int insert(String name, double price, String description, int quantity,
             String ImageURL, String unit, Timestamp createdAt,
-            int categoryID, int supplierID) {
-        String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            int categoryID, int supplierID,
+            Date manufactureDate, Date expirationDate) {
+
         if (price < 1000) {
             price *= 1000;
         }
+
+        String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID, ManufactureDate, ExpirationDate) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ps.setDouble(2, price);
@@ -77,20 +84,24 @@ public class ProductDAO extends DBContext {
             ps.setTimestamp(7, createdAt);
             ps.setInt(8, categoryID);
             ps.setInt(9, supplierID);
+            ps.setDate(10, new java.sql.Date(manufactureDate.getTime()));
+            ps.setDate(11, new java.sql.Date(expirationDate.getTime()));
+
             return ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return 0;
     }
 
     public Product getProductById(int id) {
         Product product = null;
         String sql = "SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName \n"
-                + "                             FROM product p \n"
-                + "                             LEFT JOIN Category c ON p.CategoryID = c.CategoryID \n"
-                + "                               LEFT JOIN supplier s ON p.SupplierID = s.SupplierID \n"
-                + "                               WHERE p.ProductID = ?";
+                + "FROM product p \n"
+                + "LEFT JOIN Category c ON p.CategoryID = c.CategoryID \n"
+                + "LEFT JOIN Supplier s ON p.SupplierID = s.SupplierID \n"
+                + "WHERE p.ProductID = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
@@ -102,28 +113,28 @@ public class ProductDAO extends DBContext {
                 double proPrice = rs.getDouble("Price");
                 String description = rs.getString("Description");
                 int quantity = rs.getInt("StockQuantity");
-                String ImageURL = rs.getString("ImageURL");
+                String imageURL = rs.getString("ImageURL");
                 String unit = rs.getString("Unit");
                 Timestamp createdAt = rs.getTimestamp("CreatedAt");
 
-                // Category info
+                Date manufactureDate = rs.getDate("ManufactureDate");
+                Date expirationDate = rs.getDate("ExpirationDate");
+
                 int categoryId = rs.getInt("CategoryID");
                 String categoryName = rs.getString("CategoryName");
                 int parentId = rs.getInt("ParentID");
                 Category category = new Category(categoryId, categoryName, parentId);
 
-                // Supplier info
                 int supplierId = rs.getInt("SupplierID");
                 String supplierName = rs.getString("CompanyName");
                 Supplier supplier = new Supplier(supplierId, supplierName);
 
-                // Create Product
-                product = new Product(id, proName, proPrice, description, quantity, ImageURL, unit, createdAt);
+                product = new Product(id, proName, proPrice, description, quantity, imageURL, unit, createdAt, manufactureDate, expirationDate);
                 product.setCategory(category);
-                product.setSupplier(supplier);  // nếu có field supplier
+                product.setSupplier(supplier);
             }
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error in getProductById: " + e.getMessage());
         }
         return product;
     }
@@ -177,13 +188,17 @@ public class ProductDAO extends DBContext {
                 + "ImageURL = ?, "
                 + "Unit = ?, "
                 + "CreatedAt = ?, "
+                + "ManufactureDate = ?, "
+                + "ExpirationDate = ?, "
                 + "CategoryID = ?, "
                 + "SupplierID = ? "
                 + "WHERE ProductID = ?";
+
         double price = product.getPrice();
         if (price < 1000) {
             price *= 1000;
         }
+
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, product.getProductName());
@@ -193,9 +208,11 @@ public class ProductDAO extends DBContext {
             ps.setString(5, product.getImageURL());
             ps.setString(6, product.getUnit());
             ps.setTimestamp(7, product.getCreatedAt());
-            ps.setInt(8, product.getCategory().getCategoryID());
-            ps.setInt(9, product.getSupplier().getSupplierId());
-            ps.setInt(10, product.getProductID());
+            ps.setDate(8, new java.sql.Date(product.getManufactureDate().getTime()));
+            ps.setDate(9, new java.sql.Date(product.getExpirationDate().getTime()));
+            ps.setInt(10, product.getCategory().getCategoryID());
+            ps.setInt(11, product.getSupplier().getSupplierId());
+            ps.setInt(12, product.getProductID());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
@@ -292,23 +309,28 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         ProductDAO dao = new ProductDAO();
-        String keyword = "ba"; // bạn muốn tìm từ khóa "co" trong tên sản phẩm
+        // Gọi getProductById
+        int productIdToTest = 55; // thay ID thực tế trong DB của bạn
+        Product p = dao.getProductById(productIdToTest);
 
-        List<Product> results = dao.searchProductsByName(keyword);
+        if (p != null) {
+            System.out.println("Product ID: " + p.getProductID());
+            System.out.println("Name: " + p.getProductName());
+            System.out.println("Price: " + p.getPrice());
+            System.out.println("Quantity: " + p.getStockQuantity());
+            System.out.println("Unit: " + p.getUnit());
+            System.out.println("Description: " + p.getDescription());
+            System.out.println("Image: " + p.getImageURL());
+            System.out.println("Created At: " + p.getCreatedAt());
+            System.out.println("Manufacture Date: " + p.getManufactureDate());
+            System.out.println("Expiration Date: " + p.getExpirationDate());
 
-        if (results.isEmpty()) {
-            System.out.println("Không tìm thấy sản phẩm nào với từ khóa: " + keyword);
+            System.out.println("Category: " + (p.getCategory() != null ? p.getCategory().getCategoryName() : "null"));
+            System.out.println("Supplier: " + (p.getSupplier() != null ? p.getSupplier().getCompanyName() : "null"));
         } else {
-            System.out.println("Các sản phẩm tìm thấy với từ khóa \"" + keyword + "\":");
-            for (Product p : results) {
-                System.out.println("ID: " + p.getProductID()
-                        + ", Tên: " + p.getProductName()
-                        + ", Giá: " + p.getPrice()
-                        + ", Loại: " + p.getCategory().getCategoryName()
-                        + ", Nhà cung cấp: " + p.getSupplier().getCompanyName());
-            }
+            System.out.println("No product found with ID = " + productIdToTest);
         }
     }
 }

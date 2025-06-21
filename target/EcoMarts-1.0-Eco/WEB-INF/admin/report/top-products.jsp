@@ -51,7 +51,7 @@
                                     <tr>
                                         <td>${product.productId}</td>
                                         <td>
-                                            <img src="${product.image}" alt="${product.productName}" width="60" height="60" style="object-fit: cover; border-radius: 6px;">
+                                            <img src="<%= request.getContextPath()%>/ImageServlet?name=${product.image}" alt="${product.productName}" width="60" height="60" style="object-fit: cover; border-radius: 6px;">
                                         </td>
                                         <td>${product.productName}</td>
                                         <td>${product.totalQuantity}</td>

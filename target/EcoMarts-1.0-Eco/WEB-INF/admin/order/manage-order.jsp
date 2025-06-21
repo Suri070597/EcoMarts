@@ -41,7 +41,7 @@
                             <p><strong>Customer:</strong> ${o.accountName}</p>
                             <p><strong>Order Date:</strong> ${o.orderDate}</p>
                             <p><strong>Status:</strong> ${o.orderStatus}</p>
-                            <p><strong>Total:</strong> $${o.totalAmount}</p>
+                            <p><strong>Total:</strong> ${o.totalAmount} VND</p>
                             <a href="${pageContext.request.contextPath}/admin/order/detail?id=${o.orderID}">View Details</a>
                         </div>
                     </c:forEach>

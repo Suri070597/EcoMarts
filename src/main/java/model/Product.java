@@ -5,8 +5,7 @@
 package model;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -25,25 +24,27 @@ public class Product {
     private int categoryID;
     private int supplierID;
     private String status;
+    private Date manufactureDate;
+    private Date expirationDate;
     private Category category;
     private Supplier supplier;
 
     public Category getCategory() {
         return category;
     }
-    
+
     public int getCategoryID() {
         return categoryID;
     }
+
     public void setCategory(Category category) {
-    this.category = category;
-}
+        this.category = category;
+    }
 
     public void setCategoryID(int categoryID) {
         this.categoryID = categoryID;
     }
 
-    
     public Product(Category category, Supplier supplier) {
         this.category = category;
         this.supplier = supplier;
@@ -74,6 +75,37 @@ public class Product {
         // this.categoryID = categoryID;
         // this.supplierID = supplierID;
         // this.status = status;
+    }
+
+    public Product(int productID, String productName, double price, String description, int stockQuantity,
+            String imageURL, String unit, Timestamp createdAt,
+            Date manufactureDate, Date expirationDate) {
+        this.productID = productID;
+        this.productName = productName;
+        this.price = price;
+        this.description = description;
+        this.stockQuantity = stockQuantity;
+        this.imageURL = imageURL;
+        this.unit = unit;
+        this.createdAt = createdAt;
+        this.manufactureDate = manufactureDate;
+        this.expirationDate = expirationDate;
+    }
+
+    public Date getManufactureDate() {
+        return manufactureDate;
+    }
+
+    public void setManufactureDate(Date manufactureDate) {
+        this.manufactureDate = manufactureDate;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     // Getters and Setters
@@ -159,12 +191,6 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price
-                + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL
-                + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID="
-                + supplierID + ", status=" + status + '}';
+        return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID=" + supplierID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate=" + expirationDate + ", category=" + category + ", supplier=" + supplier + '}';
     }
-
-    
-
 }
