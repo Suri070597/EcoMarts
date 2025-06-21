@@ -2,6 +2,8 @@
 <%@ page import="java.util.*" %>
 <%@ page import="model.*" %>
 <%@ page import="dao.*" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <%
 //    List<Product> featuredProducts = (List<Product>) request.getAttribute("featuredProducts");
     ViewProductDAO dao = new ViewProductDAO();
@@ -86,6 +88,7 @@
             <!-- Category Navigation -->
             <section class="category-section" data-aos="fade-up">
                 <div class="category-wrapper">
+                    <!-- Mục tĩnh "Mua lại đơn cũ" -->
                     <div class="category-item">
                         <a href="#">
                             <div class="category-icon">
@@ -95,57 +98,21 @@
                             <p>Mua lại đơn cũ</p>
                         </a>
                     </div>
-                    <!-- Static category items for display on homepage -->
-                    <div class="category-item">
-                        <a href="category?id=1">
-                            <div class="category-icon">
-                                <img src="assets/img/coca-cola.jpg" alt="Nước giải khát">
-                            </div>
-                            <p>Nước giải khát</p>
-                        </a>
-                    </div>
-                    <div class="category-item">
-                        <a href="category?id=3">
-                            <div class="category-icon">
-                                <img src="assets/img/traicay.webp" alt="Trái cây">
-                            </div>
-                            <p>Trái cây</p>
-                        </a>
-                    </div>
-                    <div class="category-item">
-                        <a href="category?id=4">
-                            <div class="category-icon">
-                                <img src="assets/img/banhkeo.jpg" alt="Bánh kẹo">
-                            </div>
-                            <p>Bánh kẹo</p>
-                        </a>
-                    </div>
-                    <div class="category-item">
-                        <a href="category?id=2">
-                            <div class="category-icon">
-                                <img src="assets/img/sua.jpg" alt="Sữa các loại">
-                            </div>
-                            <p>Sữa các loại</p>
-                        </a>
-                    </div>
-                    <div class="category-item">
-                        <a href="category?id=5">
-                            <div class="category-icon">
-                                <img src="assets/img/me&be.jpg" alt="Mẹ và bé">
-                            </div>
-                            <p>Mẹ và bé</p>
-                        </a>
-                    </div>
-                    <div class="category-item">
-                        <a href="category?id=6">
-                            <div class="category-icon">
-                                <img src="assets/img/mypham.jpg" alt="Mỹ phẩm">
-                            </div>
-                            <p>Mỹ phẩm</p>
-                        </a>
-                    </div>
+
+                    <!-- Vòng lặp hiển thị các danh mục cha từ database -->
+                    <c:forEach var="cat" items="${categories}">
+                        <div class="category-item">
+                            <a href="category?id=${cat.categoryID}">
+                                <div class="category-icon">
+                                    <img src="${cat.imageURL}" alt="${cat.categoryName}">
+                                </div>
+                                <p>${cat.categoryName}</p>
+                            </a>
+                        </div>
+                    </c:forEach>
                 </div>
             </section>
+
 
             <!-- Hot Products Section -->
             <section class="product-section" data-aos="fade-up">

@@ -12,16 +12,18 @@ public class Category {
     private String categoryName;
     private Integer parentID;
     private List<Category> children;
+    private String imageURL;
 
     public Category() {
     }
     
+public Category(int categoryID, String categoryName, Integer parentID, String imageURL) {
+    this.categoryID = categoryID;
+    this.categoryName = categoryName;
+    this.parentID = parentID;
+    this.imageURL = imageURL; // ❗ thiếu dòng này trong code cũ
+}
 
-    public Category(int categoryID, String categoryName, Integer parentID) {
-        this.categoryID = categoryID;
-        this.categoryName = categoryName;
-        this.parentID = parentID;
-    }
 
     public int getCategoryID() {
         return categoryID;
@@ -53,6 +55,14 @@ public class Category {
 
     public void setChildren(List<Category> children) {
         this.children = children;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
     }
 
     @Override
