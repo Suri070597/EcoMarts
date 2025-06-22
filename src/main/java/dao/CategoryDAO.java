@@ -22,7 +22,7 @@ public class CategoryDAO extends DBContext {
                 int id = rs.getInt("CategoryID");
                 Category parent = new Category(id, rs.getString("CategoryName"), 
                         null, 
-                        rs.getString("ImageURLURL"));
+                        rs.getString("ImageURL"));
                 parent.setChildren(getChildCategories(id));
                 parents.add(parent);
             }
@@ -43,7 +43,7 @@ public class CategoryDAO extends DBContext {
                 Category cat = new Category(
                         rs.getInt("CategoryID"),
                         rs.getString("CategoryName"),
-                        parentId, rs.getString("ImageURLURL")
+                        parentId, rs.getString("ImageURL")
                 );
                 cat.setChildren(getChildCategories(cat.getCategoryID())); // đệ quy
                 list.add(cat);
