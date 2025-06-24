@@ -89,6 +89,7 @@ CREATE TABLE Category (
     CategoryID INT PRIMARY KEY IDENTITY(1,1),
     CategoryName NVARCHAR(100) NOT NULL,
     ParentID INT NULL,
+	ImageURL NVARCHAR(255),
     [Description] NVARCHAR(255),
     FOREIGN KEY (ParentID) REFERENCES Category(CategoryID)
 );
@@ -176,6 +177,8 @@ CREATE TABLE Product (
     ImageURL NVARCHAR(255),
     Unit NVARCHAR(50), -- đơn vị tính: kg, chai, gói,...
     CreatedAt DATETIME DEFAULT GETDATE(),
+	ManufactureDate DATE, 
+	ExpirationDate DATE,
     CategoryID INT NOT NULL,
     SupplierID INT NOT NULL,
     [Status] NVARCHAR(50) DEFAULT N'Còn hàng',
@@ -201,41 +204,6 @@ DECLARE @BinhSua INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'B
 DECLARE @Son INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Son' AND ParentID = @MyPham);
 DECLARE @SuaRuaMat INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Sữa rửa mặt' AND ParentID = @MyPham);
 DECLARE @KemChongNang INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Kem chống nắng' AND ParentID = @MyPham);
-
-delete Product
--- Insert products with correct CategoryIDs
-INSERT INTO Product (ProductName, Price, [Description], StockQuantity, ImageURL, Unit, CategoryID, SupplierID, [Status])
-VALUES
--- Nước giải khát
-(N'Coca-Cola Lon 330ml', 8000, N'Nước ngọt có ga hương cola', 100, 'assets/img/products/coca-cola.jpg', N'Lon', @NuocNgot, 2, N'Còn hàng'),
-(N'Pepsi Lon 330ml', 7500, N'Nước ngọt có ga hương cola', 120, 'assets/img/products/pepsi.jpg', N'Lon', @NuocNgot, 2, N'Còn hàng'),
-(N'Trà Ô Long TEA+ 500ml', 12000, N'Trà ô long thanh mát', 80, 'assets/img/products/tea-plus.jpg', N'Chai', @NuocTra, 2, N'Còn hàng'),
-(N'Nước suối Aquafina 500ml', 5000, N'Nước tinh khiết', 200, 'assets/img/products/aquafina.jpg', N'Chai', @NuocSuoi, 2, N'Còn hàng'),
-
--- Sữa các loại
-(N'Sữa tươi Vinamilk 180ml', 7000, N'Sữa tươi tiệt trùng', 150, 'assets/img/products/vinamilk.jpg', N'Hộp', @SuaTuoi, 4, N'Còn hàng'),
-(N'Sữa chua Vinamilk hộp', 6500, N'Sữa chua có đường', 100, 'assets/img/products/sua-chua.jpg', N'Hộp', @SuaChua, 4, N'Còn hàng'),
-(N'Sữa đặc Ông Thọ', 25000, N'Sữa đặc có đường', 70, 'assets/img/products/sua-dac.jpg', N'Lon', @SuaDac, 4, N'Còn hàng'),
-
--- Trái cây
-(N'Táo Mỹ', 35000, N'Táo nhập khẩu từ Mỹ', 50, 'assets/img/products/tao-my.jpg', N'Kg', @Tao, 1, N'Còn hàng'),
-(N'Xoài Cát Hòa Lộc', 30000, N'Xoài Cát Hòa Lộc chín vàng', 40, 'assets/img/products/xoai-cat.jpg', N'Kg', @Xoai, 1, N'Còn hàng'),
-(N'Sầu riêng Ri6', 120000, N'Sầu riêng Ri6 chất lượng cao', 20, 'assets/img/products/sau-rieng.jpg', N'Kg', @SauRieng, 1, N'Còn hàng'),
-
--- Bánh kẹo
-(N'Kẹo Socola M&M gói 100g', 25000, N'Kẹo socola viên nhiều màu sắc', 70, 'assets/img/products/keo-mm.jpg', N'Gói', @Snack, 3, N'Còn hàng'),
-(N'Snack Lay''s vị tự nhiên', 12000, N'Snack khoai tây chiên', 100, 'assets/img/products/lays.jpg', N'Gói', @Snack, 3, N'Còn hàng'),
-(N'Bánh Oreo gói 137g', 18000, N'Bánh quy sandwich kem', 80, 'assets/img/products/oreo.jpg', N'Gói', @BanhBongLan, 3, N'Còn hàng'),
-
--- Mẹ và bé
-(N'Sữa tắm Johnson Baby 500ml', 45000, N'Sản phẩm dịu nhẹ cho bé', 30, 'assets/img/products/johnson.jpg', N'Chai', @SuaTamBe, 5, N'Còn hàng'),
-(N'Bình sữa NUK 150ml', 120000, N'Bình sữa cao cấp cho bé', 25, 'assets/img/products/binh-sua.jpg', N'Cái', @BinhSua, 5, N'Còn hàng'),
-(N'Nước giặt Dnee 3L', 135000, N'Nước giặt dành cho bé', 35, 'assets/img/products/nuoc-giat.jpg', N'Chai', @NuocGiat, 5, N'Còn hàng'),
-
--- Mỹ phẩm
-(N'Son môi Maybelline', 120000, N'Son lì bền màu', 20, 'assets/img/products/maybelline.jpg', N'Thỏi', @Son, 5, N'Còn hàng'),
-(N'Sữa rửa mặt Cetaphil 500ml', 210000, N'Sữa rửa mặt dịu nhẹ', 15, 'assets/img/products/cetaphil.jpg', N'Chai', @SuaRuaMat, 5, N'Còn hàng'),
-(N'Kem chống nắng Anessa 40ml', 350000, N'Kem chống nắng dưỡng da', 10, 'assets/img/products/anessa.jpg', N'Chai', @KemChongNang, 5, N'Còn hàng');
 
 CREATE TABLE CartItem (
     CartItemID INT PRIMARY KEY IDENTITY(1,1),
@@ -276,15 +244,6 @@ CREATE TABLE [Order] (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
 );
 
-delete [Order]
--- Insert sample orders
-INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus)
-VALUES
-(6, '2023-06-01 10:30:00', 16000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Đã thanh toán', N'Đã giao'),
-(7, '2023-06-01 11:15:00', 45000, N'45 Nguyễn Huệ, Q.3, TP.HCM', '0918234567', N'MoMo', N'Đã thanh toán', N'Đang giao hàng'),
-(8, '2023-06-01 14:20:00', 21000, N'78 Trần Phú, Q.5, TP.HCM', '0987345678', N'VNPay', N'Đã thanh toán', N'Đã giao'),
-(6, '2023-06-02 09:45:00', 35000, N'123 Lê Lợi, Q.1, TP.HCM', '0909123456', N'Tiền mặt', N'Chưa thanh toán', N'Đang xử lý');
-
 CREATE TABLE OrderDetail (
     OrderDetailID INT PRIMARY KEY IDENTITY(1,1),
     OrderID INT NOT NULL,
@@ -295,16 +254,7 @@ CREATE TABLE OrderDetail (
     FOREIGN KEY (OrderID) REFERENCES [Order](OrderID) ON DELETE CASCADE,
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
 );
-delete OrderDetail
-select * from Product
--- Insert sample order details with correct ProductIDs
-INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice)
-VALUES
-(5, 21, 2, 8000),      -- 2 Coca-Cola for Order 1
-(6, @JohnsonBaby, 1, 45000),  -- 1 Johnson Baby for Order 2
-(3, @SuaVinamilk, 3, 7000),   -- 3 Vinamilk for Order 3
-(4, @TaoMy, 1, 35000);        -- 1kg Táo Mỹ for Order 4
-select * from [Order]
+
 CREATE TABLE Review (
     ReviewID INT PRIMARY KEY IDENTITY(1,1),
     ProductID INT NOT NULL,
@@ -322,13 +272,6 @@ DECLARE @Keo INT = (SELECT ProductID FROM Product WHERE ProductName = N'Kẹo So
 DECLARE @SonMoi INT = (SELECT ProductID FROM Product WHERE ProductName = N'Son môi Maybelline');
 -- Note: @Son above is a CategoryID, but here we need the ProductID
 
--- Insert sample reviews with correct ProductIDs
-INSERT INTO Review (ProductID, AccountID, Rating, Comment, CreatedAt)
-VALUES
-(@CocaCola, 1, 4, N'Sản phẩm ngon, giao hàng nhanh!', '2023-06-01 14:00:00'),
-(@Keo, 2, 5, N'Kẹo rất ngon, đóng gói đẹp!', '2023-06-01 15:30:00'),
-(@SonMoi, 3, 3, N'Son màu đẹp nhưng hơi khô', '2023-06-01 16:15:00');
-
 CREATE TABLE Promotion (
     PromotionID INT PRIMARY KEY IDENTITY(1,1),
     PromotionName NVARCHAR(100) NOT NULL,
@@ -339,13 +282,6 @@ CREATE TABLE Promotion (
     IsActive BIT DEFAULT 1, -- 1 = active, 0 = inactive
     CHECK (StartDate < EndDate)
 );
-
--- Insert sample promotions
-INSERT INTO Promotion (PromotionName, Description, DiscountPercent, StartDate, EndDate, IsActive)
-VALUES 
-(N'Khuyến mãi mùa hè', N'Giảm giá 20% cho tất cả sản phẩm mùa hè', 20, '2023-06-01', '2023-08-31', 1),
-(N'Flash Sale cuối tuần', N'Giảm 30% cho sản phẩm chọn lọc', 30, '2023-06-03', '2023-06-05', 1),
-(N'Giảm giá dịp lễ', N'Ưu đãi đặc biệt 15% cho toàn bộ cửa hàng', 15, '2023-08-28', '2023-09-03', 1);
 
 CREATE TABLE Product_Promotion (
     ProductPromotionID INT PRIMARY KEY IDENTITY(1,1),
@@ -359,16 +295,6 @@ CREATE TABLE Product_Promotion (
 -- Get Pepsi and Xoai
 DECLARE @Pepsi INT = (SELECT ProductID FROM Product WHERE ProductName = N'Pepsi Lon 330ml');
 DECLARE @XoaiCat INT = (SELECT ProductID FROM Product WHERE ProductName = N'Xoài Cát Hòa Lộc');
-
--- Insert product-promotion relationships
-INSERT INTO Product_Promotion (ProductID, PromotionID)
-VALUES
-(@CocaCola, 1),  -- Coca-Cola in Summer promotion
-(@Pepsi, 1),     -- Pepsi in Summer promotion
-(@TaoMy, 2),     -- Táo Mỹ in Flash Sale
-(@XoaiCat, 2),   -- Xoài in Flash Sale
-(@JohnsonBaby, 3), -- Johnson Baby in Holiday promotion
-(@SonMoi, 3);       -- Son môi in Holiday promotion
 
 CREATE TABLE Voucher (
     VoucherID INT PRIMARY KEY IDENTITY(1,1),
@@ -386,12 +312,6 @@ CREATE TABLE Voucher (
     CHECK (StartDate < EndDate)
 );
 
--- Insert sample vouchers
-INSERT INTO Voucher (VoucherCode, [Description], DiscountAmount, MinOrderValue, MaxUsage, StartDate, EndDate, IsActive, CategoryID)
-VALUES
-('WELCOME10K', N'Giảm 10K cho đơn hàng đầu tiên', 10000, 50000, 100, '2023-06-01', '2023-07-01', 1, NULL),
-('FRUIT20K', N'Giảm 20K cho sản phẩm trái cây', 20000, 100000, 50, '2023-06-01', '2023-06-30', 1, @TraiCay),
-('BEAUTY15K', N'Giảm 15K cho sản phẩm mỹ phẩm', 15000, 80000, 50, '2023-06-01', '2023-06-30', 1, @MyPham);
 
 CREATE TABLE VoucherUsage (
     VoucherUsageID INT PRIMARY KEY IDENTITY(1,1),
@@ -405,11 +325,6 @@ CREATE TABLE VoucherUsage (
     FOREIGN KEY (OrderID) REFERENCES [Order](OrderID)
 );
 
--- Insert sample voucher usages
-INSERT INTO VoucherUsage (VoucherID, AccountID, OrderID, UsedDate, DiscountAmount)
-VALUES
-(1, 1, 1, '2023-06-01 10:25:00', 10000),
-(2, 3, 3, '2023-06-01 14:15:00', 20000);
 
 CREATE TABLE Inventory (
     InventoryID INT PRIMARY KEY IDENTITY(1,1),
