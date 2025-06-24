@@ -9,10 +9,12 @@ controller\dangky\RegistrationServlet.class
 model\Product.class
 controller\register\StaffServlet.class
 dao\AccountDAO1.class
+controller\SuggestServlet.class
 model\ProductPromotion.class
 model\Voucher.class
 controller\register\LoginServlet.class
 controller\ProductServlet.class
+controller\SearchProductServlet.class
 controller\OrderServlet.class
 dao\OrderDetailDAO.class
 controller\AdminDashboardServlet.class
@@ -48,5 +50,6 @@ db\MD5Util.class
 dao\ViewProductDAO.class
 controller\register\AdminServlet.class
 model\Order.class
+dao\SearchProductsDAO.class
 db\DBContext.class
 controller\HomeServlet.class

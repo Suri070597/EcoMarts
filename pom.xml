@@ -16,6 +16,8 @@
         <jakartaee.version>10.0.0</jakartaee.version>
     </properties>
     
+    
+    
     <dependencies>
         <!-- Jakarta Servlet API (Tomcat 10+) -->
         <dependency>
@@ -74,7 +76,7 @@
 
         <!-- Apache HTTP Client -->
         <dependency>
-<groupId>org.apache.httpcomponents</groupId>
+            <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.14</version>
         </dependency>
@@ -92,6 +94,11 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version> <!-- hoặc version mới nhất -->
         </dependency>
     </dependencies>
 
