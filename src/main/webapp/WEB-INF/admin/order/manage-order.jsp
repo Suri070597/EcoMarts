@@ -1,95 +1,103 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
     <title>Manage Orders</title>
+    <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-
 <body>
-    <div class="container-fluid">
-        <%-- Include admin sidebar --%>
-        <jsp:include page="../components/sidebar.jsp" />
+<div class="container-fluid">
+    <jsp:include page="../components/sidebar.jsp" />
 
-        <div class="main-content">
-            <div class="container">
-                <h1>Order Management</h1>
-
-                <!-- Tìm kiếm -->
-                <form action="${pageContext.request.contextPath}/admin/order" method="get" class="search-form">
-                    <input type="text" name="search" placeholder="Search by OrderID" />
-                    <button type="submit">Search</button>
-                </form>
-
-                <!-- Thống kê -->
-                <div class="order-stats">
-                    <p>Total Orders: <strong>${total}</strong></p>
-                    <p>Delivered Orders: <strong>${delivered}</strong></p>
-                </div>
-
-                <!-- Danh sách đơn hàng -->
-                <div class="order-list">
-                    <c:forEach var="o" items="${orders}">
-                        <div class="order-card">
-                            <p><strong>Order ID:</strong> ${o.orderID}</p>
-                            <p><strong>Customer:</strong> ${o.accountName}</p>
-                            <p><strong>Order Date:</strong> ${o.orderDate}</p>
-                            <p><strong>Status:</strong> ${o.orderStatus}</p>
-                            <p><strong>Total:</strong> ${o.totalAmount} VND</p>
-                            <a href="${pageContext.request.contextPath}/admin/order/detail?id=${o.orderID}">View Details</a>
-                        </div>
-                    </c:forEach>
+    <div class="main-content">
+        <div class="card">
+            <div class="card-header">
+                <div class="header-actions d-flex justify-content-between align-items-center">
+                    <h1 class="card-title mb-0">Order Management</h1>
+                    <form action="${pageContext.request.contextPath}/admin/order" method="get" class="d-flex gap-2">
+                        <input type="text" name="search" class="form-control form-control-sm"
+                               placeholder="Search by OrderID" value="${param.search}">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            <style>
-                .main-content {
-                    margin-left: 250px;
-                    padding: 20px;
-                }
+            <div class="dashboard-stats row m-2">
+                <div class="col-md-6">
+                    <div class="stat-card d-flex align-items-center p-3 bg-light rounded">
+                        <div class="stat-icon bg-primary text-white rounded-circle p-3 me-3">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div>
+                            <h5>${total}</h5>
+                            <p class="mb-0">Total Orders</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-card d-flex align-items-center p-3 bg-light rounded">
+                        <div class="stat-icon bg-success text-white rounded-circle p-3 me-3">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div>
+                            <h5>${delivered}</h5>
+                            <p class="mb-0">Delivered Orders</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                .search-form {
-                    margin: 20px 0;
-                }
+            <div class="table-responsive px-3 pb-3">
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Order Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="o" items="${orders}">
+                            <tr>
+                                <td>${o.orderID}</td>
+                                <td>${o.accountName}</td>
+                                <td><fmt:formatDate value="${o.orderDate}" pattern="yyyy-MM-dd HH:mm" /></td>
+                                <td>
+                                    <span class="badge ${o.orderStatus eq 'Delivered' ? 'bg-success' : 'bg-secondary'}">
+                                        ${o.orderStatus}
+                                    </span>
+                                </td>
+                                <td><fmt:formatNumber value="${o.totalAmount}" type="number" groupingUsed="true" /> VND</td>
+                                <td>
+                                    <a href="${pageContext.request.contextPath}/admin/order/detail?id=${o.orderID}"
+                                       class="btn btn-sm btn-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
-                .search-form input {
-                    padding: 5px 10px;
-                }
-
-                .order-stats {
-                    display: flex;
-                    gap: 50px;
-                    margin-bottom: 20px;
-                }
-
-                .order-list {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 20px;
-                }
-
-                .order-card {
-                    background: #fff;
-                    border: 1px solid #ddd;
-                    padding: 15px;
-                    border-radius: 8px;
-                    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-                }
-
-                .order-card a {
-                    display: inline-block;
-                    margin-top: 10px;
-                    color: #007bff;
-                    text-decoration: none;
-                }
-
-                .order-card a:hover {
-                    text-decoration: underline;
-                }
-            </style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
