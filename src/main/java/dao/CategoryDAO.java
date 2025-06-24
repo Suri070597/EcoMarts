@@ -20,7 +20,9 @@ public class CategoryDAO extends DBContext {
             ResultSet rs = execSelectQuery(parentSql);
             while (rs.next()) {
                 int id = rs.getInt("CategoryID");
-                Category parent = new Category(id, rs.getString("CategoryName"), null);
+                Category parent = new Category(id, rs.getString("CategoryName"), 
+                        null, 
+                        rs.getString("ImageURL"));
                 parent.setChildren(getChildCategories(id));
                 parents.add(parent);
             }
@@ -41,7 +43,7 @@ public class CategoryDAO extends DBContext {
                 Category cat = new Category(
                         rs.getInt("CategoryID"),
                         rs.getString("CategoryName"),
-                        parentId
+                        parentId, rs.getString("ImageURL")
                 );
                 cat.setChildren(getChildCategories(cat.getCategoryID())); // đệ quy
                 list.add(cat);
@@ -61,7 +63,7 @@ public class CategoryDAO extends DBContext {
                 list.add(new Category(
                         rs.getInt("CategoryID"),
                         rs.getString("CategoryName"),
-                        null
+                        null, rs.getString("ImageURL")
                 ));
             }
         } catch (SQLException e) {
@@ -79,7 +81,7 @@ public class CategoryDAO extends DBContext {
                 Category cat = new Category(
                         rs.getInt("CategoryID"),
                         rs.getString("CategoryName"),
-                        parentId
+                        parentId, rs.getString("ImageURL")
                 );
                 map.computeIfAbsent(parentId, k -> new ArrayList<>()).add(cat);
             }

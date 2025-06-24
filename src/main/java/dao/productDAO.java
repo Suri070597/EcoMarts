@@ -171,7 +171,7 @@ public class ProductDAO extends DBContext {
                 int categoryId = rs.getInt("CategoryID");
                 String categoryName = rs.getString("CategoryName");
                 int parentId = rs.getInt("ParentID");
-                Category category = new Category(categoryId, categoryName, parentId);
+                Category category = new Category(categoryId, categoryName, parentId, rs.getString("ImageURL"));
 
                 int supplierId = rs.getInt("SupplierID");
                 String supplierName = rs.getString("CompanyName");

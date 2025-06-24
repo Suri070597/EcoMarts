@@ -39,7 +39,8 @@ public class OrderServlet extends HttpServlet {
                 Order o = dao.getOrderById(orderId);
                 orders = o != null ? List.of(o) : List.of();
             } catch (NumberFormatException e) {
-                orders = List.of(); // Không hợp lệ thì trả về danh sách rỗng
+                // Nếu không phải số, tìm theo tên (phân biệt hoa thường)
+                orders = dao.getOrdersByCustomerNameCaseSensitive(search);
             }
         } else {
             orders = dao.getAllOrders();
