@@ -67,7 +67,7 @@ public class SearchProductServlet extends HttpServlet {
         try {
             List<Product> result = dao.searchProductsByKeyword(keyword);
             request.setAttribute("searchResult", result);
-            request.setAttribute("searchKeyword", keyword); // để hiển thị lại từ khóa trong ô tìm kiếm nếu cần
+            request.setAttribute("searchKeyword", keyword);
             request.getRequestDispatcher("./WEB-INF/customer/searchProductResult.jsp").forward(request, response);
         } catch (SQLException e) {
             e.printStackTrace();

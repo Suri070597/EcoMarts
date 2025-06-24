@@ -95,11 +95,6 @@
             <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20240303</version> <!-- hoặc version mới nhất -->
-        </dependency>
     </dependencies>
 
     <build>
