@@ -16,6 +16,7 @@ controller\ProductServlet.class
 controller\OrderServlet.class
 dao\OrderDetailDAO.class
 controller\AdminDashboardServlet.class
+dao\StaffDAO.class
 controller\register\LogoutServlet.class
 model\Category.class
 controller\ImageServlet.class
@@ -28,7 +29,9 @@ model\OrderDetail.class
 model\Supplier.class
 db\DBContext1.class
 model\InventoryTransaction.class
+controller\AdminStaffServlet.class
 dao\AccountDAO.class
+model\Staff.class
 db\EmailUtil.class
 model\Review.class
 dao\TokenDAO.class

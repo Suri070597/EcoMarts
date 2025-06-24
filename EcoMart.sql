@@ -29,16 +29,16 @@ CREATE TABLE Account (
 
 CREATE TABLE Staff (
     StaffID INT PRIMARY KEY IDENTITY(1,1),
-    AccountID INT,
+    AccountID INT NOT NULL,
     FullName NVARCHAR(100) NOT NULL,
     Email NVARCHAR(100) UNIQUE NOT NULL,
     Phone VARCHAR(20),
     Gender NVARCHAR(10),
     [Address] NVARCHAR(200),
-    [Status] BIT DEFAULT 1,
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    [Status] VARCHAR(50) DEFAULT 'Active',
+    FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE
 );
+
 
 CREATE TABLE Token_Table (
     TokenID INT PRIMARY KEY IDENTITY(1,1),
@@ -56,7 +56,6 @@ VALUES
 (N'admin123', N'admin123@', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
 
 -- Staff
-(N'adminnnn', N'Thacnha02@', N'thacnha@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
 (N'Thacnha', N'Thacnha02@', N'thacnha2@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
 (N'Mantue', N'Mantue03@', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Active'),
 (N'Truongsinh', N'Truongsinh04@', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Active'),
@@ -66,6 +65,14 @@ VALUES
 (N'nguyenvana', N'pass123@', N'nguyenvana@gmail.com', N'Nguyễn Văn A', '0909123456', N'123 Lê Lợi, Q.1, TP.HCM', N'Nam', 0, N'Active'),
 (N'tranthib', N'pass456@', N'tranthib@gmail.com', N'Trần Thị B', '0918234567', N'45 Nguyễn Huệ, Q.3, TP.HCM', N'Nữ', 0, N'Active'),
 (N'levanc', N'pass789@', N'levanc@gmail.com', N'Lê Văn C', '0987345678', N'78 Trần Phú, Q.5, TP.HCM', N'Nữ', 0, N'Active');
+
+-- Insert Staff data with correct AccountID references
+INSERT INTO Staff (AccountID, FullName, Email, Phone, Gender, [Address], [Status])
+VALUES
+(2, N'Trương Thác Nhã', N'thacnha2@ecomart.vn', '0909123456', N'Nữ', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Active'),
+(3, N'Trần Mẫn Tuệ', N'mantue@ecomart.vn', '0912345678', N'Nữ', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Active'),
+(4, N'Lê Trường Sinh', N'truongsinh@ecomart.vn', '0923456789', N'Nam', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Active'),
+(5, N'Nguyễn Tuệ Nhi', N'tuenhi@ecomart.vn', '0977527752', N'Nữ', N'Bạc Liêu', N'Active');
 
 CREATE TABLE Supplier (
     SupplierID INT PRIMARY KEY IDENTITY(1,1),
@@ -221,14 +228,6 @@ DECLARE @CocaCola INT = (SELECT ProductID FROM Product WHERE ProductName = N'Coc
 DECLARE @TaoMy INT = (SELECT ProductID FROM Product WHERE ProductName = N'Táo Mỹ');
 DECLARE @JohnsonBaby INT = (SELECT ProductID FROM Product WHERE ProductName = N'Sữa tắm Johnson Baby 500ml');
 DECLARE @SuaVinamilk INT = (SELECT ProductID FROM Product WHERE ProductName = N'Sữa tươi Vinamilk 180ml');
-
--- Insert cart items with correct ProductIDs
-INSERT INTO CartItem (AccountID, ProductID, Quantity, AddedAt, [Status])
-VALUES
-(1, @CocaCola, 2, GETDATE(), 'Active'),   -- User 1 has 2 Coca-Colas in cart
-(1, @TaoMy, 1, GETDATE(), 'Active'),      -- User 1 has 1kg of Táo Mỹ
-(2, @JohnsonBaby, 1, GETDATE(), 'Active'), -- User 2 has Sữa tắm Johnson
-(3, @SuaVinamilk, 3, GETDATE(), 'Active');  -- User 3 has 3 Sữa tươi Vinamilk
 
 CREATE TABLE [Order] (
     OrderID INT PRIMARY KEY IDENTITY(1,1),

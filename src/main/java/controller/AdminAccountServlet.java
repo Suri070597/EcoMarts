@@ -87,13 +87,11 @@ public class AdminAccountServlet extends HttpServlet {
                     int totalAccounts = accDAO.countAccounts();
                     int customerCount = accDAO.countAccountsByRole(0);
                     int adminCount = accDAO.countAccountsByRole(1);
-                    int staffCount = accDAO.countAccountsByRole(2);
 
                     request.setAttribute("accounts", accounts);
                     request.setAttribute("totalAccounts", totalAccounts);
                     request.setAttribute("customerCount", customerCount);
                     request.setAttribute("adminCount", adminCount);
-                    request.setAttribute("staffCount", staffCount);
 
                     request.getRequestDispatcher("/WEB-INF/admin/account/manage-account.jsp").forward(request,
                             response);
@@ -107,13 +105,11 @@ public class AdminAccountServlet extends HttpServlet {
             int totalAccounts = accDAO.countAccounts();
             int customerCount = accDAO.countAccountsByRole(0);
             int adminCount = accDAO.countAccountsByRole(1);
-            int staffCount = accDAO.countAccountsByRole(2);
 
             request.setAttribute("accounts", accounts);
             request.setAttribute("totalAccounts", totalAccounts);
             request.setAttribute("customerCount", customerCount);
             request.setAttribute("adminCount", adminCount);
-            request.setAttribute("staffCount", staffCount);
 
             request.getRequestDispatcher("/WEB-INF/admin/account/manage-account.jsp").forward(request, response);
         }

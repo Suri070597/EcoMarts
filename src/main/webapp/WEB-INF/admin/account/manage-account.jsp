@@ -34,7 +34,6 @@
                                     <i class="fas fa-search"></i>
                                     <input type="text" name="search" placeholder="Search accounts..."
                                            value="${keyword != null ? keyword : ''}">
-                                    <button type="submit" class="btn btn-sm btn-primary">Search</button>
                                 </form>
                                 <a href="${pageContext.request.contextPath}/admin/account?view=create"
                                    class="btn btn-success">
@@ -73,15 +72,6 @@
                                 <p>Admins</p>
                             </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon bg-info">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
-                            <div class="stat-details">
-                                <h3>${staffCount}</h3>
-                                <p>Staff</p>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="table-container">
@@ -103,54 +93,53 @@
                             </thead>
                             <tbody>
                                 <c:forEach items="${accounts}" var="acc">
-                                    <tr>
-                                        <td>${acc.accountID}</td>
-                                        <td>${acc.username}</td>
-                                        <td>${acc.fullName}</td>
-                                        <td>${acc.email}</td>
-                                        <td>${acc.phone}</td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${acc.role == 0}">
-                                                    <span class="badge bg-info">Customer</span>
-                                                </c:when>
-                                                <c:when test="${acc.role == 1}">
-                                                    <span class="badge bg-warning">Admin</span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="badge bg-secondary">Staff</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="status-badge ${acc.status eq 'Active' ? 'status-active' : 'status-inactive'}">
-                                                ${acc.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex gap-2">
-                                                <a href='${pageContext.request.contextPath}/admin/account?view=detail&id=${acc.accountID}'
-                                                   class='btn btn-sm btn-info'>
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href='${pageContext.request.contextPath}/admin/account?view=edit&id=${acc.accountID}'
-                                                   class='btn btn-sm btn-primary'>
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href='javascript:void(0)'
-                                                   onclick='confirmStatusChange("${pageContext.request.contextPath}/admin/account?action=status&id=${acc.accountID}&status=${acc.status}", "${acc.status}")'
-                                                   class='btn btn-sm ${acc.status eq "Active" ? "btn-warning" : "btn-success"}'>
-                                                    <i class="fas ${acc.status eq "Active" ? "fa-ban" : "fa-check"}"></i>
-                                                </a>
-                                                <a href='${pageContext.request.contextPath}/admin/account?action=delete&id=${acc.accountID}'
-                                                   class='btn btn-sm btn-danger'
-                                                   onclick="return confirmDelete(event, '${acc.accountID}')">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <c:if test="${acc.role == 0 || acc.role == 1}">
+                                        <tr>
+                                            <td>${acc.accountID}</td>
+                                            <td>${acc.username}</td>
+                                            <td>${acc.fullName}</td>
+                                            <td>${acc.email}</td>
+                                            <td>${acc.phone}</td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${acc.role == 0}">
+                                                        <span class="badge bg-info">Customer</span>
+                                                    </c:when>
+                                                    <c:when test="${acc.role == 1}">
+                                                        <span class="badge bg-warning">Admin</span>
+                                                    </c:when>
+                                                </c:choose>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="status-badge ${acc.status eq 'Active' ? 'status-active' : 'status-inactive'}">
+                                                    ${acc.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <a href='${pageContext.request.contextPath}/admin/account?view=detail&id=${acc.accountID}'
+                                                       class='btn btn-sm btn-info'>
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href='${pageContext.request.contextPath}/admin/account?view=edit&id=${acc.accountID}'
+                                                       class='btn btn-sm btn-primary'>
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href='javascript:void(0)'
+                                                       onclick='confirmStatusChange("${pageContext.request.contextPath}/admin/account?action=status&id=${acc.accountID}&status=${acc.status}", "${acc.status}")'
+                                                       class='btn btn-sm ${acc.status eq "Active" ? "btn-warning" : "btn-success"}'>
+                                                        <i class="fas ${acc.status eq "Active" ? "fa-ban" : "fa-check"}"></i>
+                                                    </a>
+                                                    <a href='${pageContext.request.contextPath}/admin/account?action=delete&id=${acc.accountID}'
+                                                       class='btn btn-sm btn-danger'
+                                                       onclick="return confirmDelete(event, '${acc.accountID}')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:if>
                                 </c:forEach>
                             </tbody>
                         </table>
@@ -162,58 +151,58 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-                                                       function confirmStatusChange(url, status) {
-                                                           // Chuẩn hóa trạng thái (loại bỏ khoảng trắng, chuyển về chữ thường)
-                                                           const normalizedStatus = String(status).trim().toLowerCase();
-                                                           const isActive = normalizedStatus === "active";
+                                                           function confirmStatusChange(url, status) {
+                                                               // Chuẩn hóa trạng thái (loại bỏ khoảng trắng, chuyển về chữ thường)
+                                                               const normalizedStatus = String(status).trim().toLowerCase();
+                                                               const isActive = normalizedStatus === "active";
 
-                                                           Swal.fire({
-                                                               title: 'Confirm Status Change',
-                                                               text: isActive
-                                                                       ? 'Do you want to deactivate this account?'
-                                                                       : 'Do you want to activate this account?',
-                                                               icon: 'question',
-                                                               showCancelButton: true,
-                                                               confirmButtonColor: '#3085d6',
-                                                               cancelButtonColor: '#d33',
-                                                               confirmButtonText: 'Yes',
-                                                               cancelButtonText: 'Cancel'
-                                                           }).then((result) => {
-                                                               if (result.isConfirmed) {
-                                                                   window.location.href = url;
-                                                               }
+                                                               Swal.fire({
+                                                                   title: 'Confirm Status Change',
+                                                                   text: isActive
+                                                                           ? 'Do you want to deactivate this account?'
+                                                                           : 'Do you want to activate this account?',
+                                                                   icon: 'question',
+                                                                   showCancelButton: true,
+                                                                   confirmButtonColor: '#3085d6',
+                                                                   cancelButtonColor: '#d33',
+                                                                   confirmButtonText: 'Yes',
+                                                                   cancelButtonText: 'Cancel'
+                                                               }).then((result) => {
+                                                                   if (result.isConfirmed) {
+                                                                       window.location.href = url;
+                                                                   }
+                                                               });
+                                                           }
+
+                                                           // Add search functionality for client-side filtering
+                                                           document.querySelector('.search-box input').addEventListener('input', function (e) {
+                                                               const searchText = e.target.value.toLowerCase();
+                                                               const rows = document.querySelectorAll('tbody tr');
+
+                                                               rows.forEach(row => {
+                                                                   const text = row.textContent.toLowerCase();
+                                                                   row.style.display = text.includes(searchText) ? '' : 'none';
+                                                               });
                                                            });
-                                                       }
 
-                                                       // Add search functionality for client-side filtering
-                                                       document.querySelector('.search-box input').addEventListener('input', function (e) {
-                                                           const searchText = e.target.value.toLowerCase();
-                                                           const rows = document.querySelectorAll('tbody tr');
-
-                                                           rows.forEach(row => {
-                                                               const text = row.textContent.toLowerCase();
-                                                               row.style.display = text.includes(searchText) ? '' : 'none';
-                                                           });
-                                                       });
-
-                                                       function confirmDelete(event, accountId) {
-                                                           event.preventDefault();
-                                                           Swal.fire({
-                                                               title: 'Confirm Delete Account',
-                                                               text: 'Are you sure you want to delete this account?',
-                                                               icon: 'warning',
-                                                               showCancelButton: true,
-                                                               confirmButtonColor: '#d33',
-                                                               cancelButtonColor: '#3085d6',
-                                                               confirmButtonText: 'Yes',
-                                                               cancelButtonText: 'Cancel'
-                                                           }).then((result) => {
-                                                               if (result.isConfirmed) {
-                                                                   window.location.href = '${pageContext.request.contextPath}/admin/account?action=delete&id=' + accountId;
-                                                               }
-                                                           });
-                                                           return false;
-                                                       }
+                                                           function confirmDelete(event, accountId) {
+                                                               event.preventDefault();
+                                                               Swal.fire({
+                                                                   title: 'Confirm Delete Account',
+                                                                   text: 'Are you sure you want to delete this account?',
+                                                                   icon: 'warning',
+                                                                   showCancelButton: true,
+                                                                   confirmButtonColor: '#d33',
+                                                                   cancelButtonColor: '#3085d6',
+                                                                   confirmButtonText: 'Yes',
+                                                                   cancelButtonText: 'Cancel'
+                                                               }).then((result) => {
+                                                                   if (result.isConfirmed) {
+                                                                       window.location.href = '${pageContext.request.contextPath}/admin/account?action=delete&id=' + accountId;
+                                                                   }
+                                                               });
+                                                               return false;
+                                                           }
         </script>
     </body>
 </html>     
