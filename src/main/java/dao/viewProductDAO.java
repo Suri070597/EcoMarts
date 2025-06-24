@@ -17,11 +17,10 @@ import model.Product;
  */
 public class ViewProductDAO extends DBContext {
 
-    // Hàm chung lấy sản phẩm theo categoryID
     public List<Product> getProductsByCategory(int parentCategoryId) {
         List<Product> list = new ArrayList<>();
         String sql = """
-            SELECT p.ProductName, p.Price, p.ImageURL, p.Unit
+            SELECT p.productID, p.ProductName, p.Price, p.ImageURL, p.Unit
                         FROM Product p
                         JOIN Category c ON p.CategoryID = c.CategoryID
                         WHERE c.ParentID = ?
@@ -31,6 +30,7 @@ public class ViewProductDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 p.setPrice(rs.getDouble("Price"));
                 p.setImageURL(rs.getString("ImageURL"));
@@ -43,9 +43,6 @@ public class ViewProductDAO extends DBContext {
         return list;
     }
 
-    // ----------------------
-    // Các phương thức tiện ích cụ thể
-    // ----------------------
     public List<Product> getMilkProducts() {
         return getProductsByCategory(2); // Sữa các loại
     }

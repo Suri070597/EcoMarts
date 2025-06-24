@@ -28,6 +28,19 @@ public class Product {
     private Date expirationDate;
     private Category category;
     private Supplier supplier;
+    private InventoryTransaction inventory;
+
+    public InventoryTransaction getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(InventoryTransaction inventory) {
+        this.inventory = inventory;
+    }
+
+    public Product(InventoryTransaction inventory) {
+        this.inventory = inventory;
+    }
 
     public Category getCategory() {
         return category;

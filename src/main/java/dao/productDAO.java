@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import model.Category;
+import model.InventoryTransaction;
 import model.Product;
 import model.Supplier;
 
@@ -95,12 +96,59 @@ public class ProductDAO extends DBContext {
         return 0;
     }
 
+//    public Product getProductById(int id) {
+//        Product product = null;
+//        String sql = "SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName \n"
+//                + "FROM product p \n"
+//                + "LEFT JOIN Category c ON p.CategoryID = c.CategoryID \n"
+//                + "LEFT JOIN Supplier s ON p.SupplierID = s.SupplierID \n"
+//                + "WHERE p.ProductID = ?";
+//        try {
+//            PreparedStatement ps = conn.prepareStatement(sql);
+//            ps.setInt(1, id);
+//            ResultSet rs = ps.executeQuery();
+//
+//            if (rs.next()) {
+//                // Product info
+//                String proName = rs.getString("ProductName");
+//                double proPrice = rs.getDouble("Price");
+//                String description = rs.getString("Description");
+//                int quantity = rs.getInt("StockQuantity");
+//                String imageURL = rs.getString("ImageURL");
+//                String unit = rs.getString("Unit");
+//                Timestamp createdAt = rs.getTimestamp("CreatedAt");
+//
+//                Date manufactureDate = rs.getDate("ManufactureDate");
+//                Date expirationDate = rs.getDate("ExpirationDate");
+//
+//                int categoryId = rs.getInt("CategoryID");
+//                String categoryName = rs.getString("CategoryName");
+//                int parentId = rs.getInt("ParentID");
+//                Category category = new Category(categoryId, categoryName, parentId);
+//
+//                int supplierId = rs.getInt("SupplierID");
+//                String supplierName = rs.getString("CompanyName");
+//                Supplier supplier = new Supplier(supplierId, supplierName);
+//
+//                product = new Product(id, proName, proPrice, description, quantity, imageURL, unit, createdAt, manufactureDate, expirationDate);
+//                product.setCategory(category);
+//                product.setSupplier(supplier);
+//            }
+//        } catch (Exception e) {
+//            System.out.println("Error in getProductById: " + e.getMessage());
+//        }
+//        return product;
+//    }
     public Product getProductById(int id) {
         Product product = null;
-        String sql = "SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName \n"
-                + "FROM product p \n"
-                + "LEFT JOIN Category c ON p.CategoryID = c.CategoryID \n"
-                + "LEFT JOIN Supplier s ON p.SupplierID = s.SupplierID \n"
+        String sql = "SELECT p.*, \n"
+                + "       c.CategoryName, c.ParentID, \n"
+                + "       s.SupplierID, s.CompanyName,\n"
+                + "       i.Quantity AS InventoryQuantity, i.LastUpdated\n"
+                + "FROM product p\n"
+                + "LEFT JOIN Category c ON p.CategoryID = c.CategoryID\n"
+                + "LEFT JOIN Supplier s ON p.SupplierID = s.SupplierID\n"
+                + "LEFT JOIN Inventory i ON p.ProductID = i.ProductID\n"
                 + "WHERE p.ProductID = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -129,9 +177,14 @@ public class ProductDAO extends DBContext {
                 String supplierName = rs.getString("CompanyName");
                 Supplier supplier = new Supplier(supplierId, supplierName);
 
+                int inventoryQty = rs.getInt("InventoryQuantity");
+                Timestamp lastUpdated = rs.getTimestamp("LastUpdated");
+                InventoryTransaction inventory = new InventoryTransaction(id, inventoryQty, lastUpdated);
+
                 product = new Product(id, proName, proPrice, description, quantity, imageURL, unit, createdAt, manufactureDate, expirationDate);
                 product.setCategory(category);
                 product.setSupplier(supplier);
+                product.setInventory(inventory);
             }
         } catch (Exception e) {
             System.out.println("Error in getProductById: " + e.getMessage());
@@ -309,28 +362,41 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
+    public List<Product> getRelatedProductsByParentCategory(int parentId, int excludeProductId) {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT p.* FROM Product p "
+                + "JOIN Category c ON p.CategoryID = c.CategoryID "
+                + "WHERE c.ParentID = ? AND p.ProductID != ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, parentId);
+            ps.setInt(2, excludeProductId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                p.setPrice(rs.getDouble("Price"));
+                p.setImageURL(rs.getString("ImageURL"));
+                list.add(p);
+            }
+        } catch (Exception e) {
+            System.out.println("Error getting related products: " + e.getMessage());
+        }
+        return list;
+    }
+
     public static void main(String[] args) throws ParseException {
         ProductDAO dao = new ProductDAO();
-        // Gọi getProductById
-        int productIdToTest = 55; // thay ID thực tế trong DB của bạn
-        Product p = dao.getProductById(productIdToTest);
 
-        if (p != null) {
-            System.out.println("Product ID: " + p.getProductID());
-            System.out.println("Name: " + p.getProductName());
-            System.out.println("Price: " + p.getPrice());
-            System.out.println("Quantity: " + p.getStockQuantity());
-            System.out.println("Unit: " + p.getUnit());
-            System.out.println("Description: " + p.getDescription());
-            System.out.println("Image: " + p.getImageURL());
-            System.out.println("Created At: " + p.getCreatedAt());
-            System.out.println("Manufacture Date: " + p.getManufactureDate());
-            System.out.println("Expiration Date: " + p.getExpirationDate());
+        int parentCategoryId = 7;
+        int excludeProductId = 50;
 
-            System.out.println("Category: " + (p.getCategory() != null ? p.getCategory().getCategoryName() : "null"));
-            System.out.println("Supplier: " + (p.getSupplier() != null ? p.getSupplier().getCompanyName() : "null"));
-        } else {
-            System.out.println("No product found with ID = " + productIdToTest);
+        List<Product> relatedProducts = dao.getRelatedProductsByParentCategory(parentCategoryId, excludeProductId);
+
+        // In ra kết quả
+        for (Product p : relatedProducts) {
+            System.out.println("ID: " + p.getProductID() + " - Tên: " + p.getProductName() + " - Giá: " + p.getPrice());
         }
+
     }
 }

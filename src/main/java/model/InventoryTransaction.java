@@ -3,6 +3,7 @@ package model;
 import java.sql.Timestamp;
 
 public class InventoryTransaction {
+
     private int transactionID;
     private int productID;
     private int quantity; // Positive for stock in, negative for stock out
@@ -17,6 +18,12 @@ public class InventoryTransaction {
     private Account account;
 
     public InventoryTransaction() {
+    }
+
+    public InventoryTransaction(int productID, int quantity, Timestamp transactionDate) {
+        this.productID = productID;
+        this.quantity = quantity;
+        this.transactionDate = transactionDate;
     }
 
     public InventoryTransaction(int transactionID, int productID, int quantity, String transactionType,
@@ -113,15 +120,15 @@ public class InventoryTransaction {
 
     @Override
     public String toString() {
-        return "InventoryTransaction{" +
-                "transactionID=" + transactionID +
-                ", productID=" + productID +
-                ", quantity=" + quantity +
-                ", transactionType='" + transactionType + '\'' +
-                ", reference='" + reference + '\'' +
-                ", notes='" + notes + '\'' +
-                ", transactionDate=" + transactionDate +
-                ", accountID=" + accountID +
-                '}';
+        return "InventoryTransaction{"
+                + "transactionID=" + transactionID
+                + ", productID=" + productID
+                + ", quantity=" + quantity
+                + ", transactionType='" + transactionType + '\''
+                + ", reference='" + reference + '\''
+                + ", notes='" + notes + '\''
+                + ", transactionDate=" + transactionDate
+                + ", accountID=" + accountID
+                + '}';
     }
 }

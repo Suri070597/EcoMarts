@@ -3,6 +3,7 @@ controller\AdminAccountServlet.class
 dao\SupplierDAO.class
 db\EmailUtil$1.class
 dao\CategoryDAO.class
+controller\ProductDetailServlet.class
 db\Dotenv.class
 controller\dangky\RegistrationServlet.class
 model\Product.class
