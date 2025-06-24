@@ -1,78 +1,104 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Đăng Ký - Bách Hóa Xanh</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-                background-color: #f0f0f0;
-            }
-            .container {
-                background-color: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                width: 400px;
-            }
-            h2 {
-                text-align: center;
-                color: #333;
-            }
-            .error {
-                color: red;
-                text-align: center;
-                margin-bottom: 10px;
-            }
-            label {
-                display: block;
-                margin: 10px 0 5px;
-                color: #555;
-            }
-            input[type="text"], input[type="email"], input[type="tel"], input[type="password"], select {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                box-sizing: border-box;
-            }
-            input[type="submit"] {
-                width: 100%;
-                padding: 10px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                margin-top: 10px;
-            }
-            input[type="submit"]:hover {
-                background-color: #45a049;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h2>Đăng Ký Tài Khoản</h2>
-            <% if (request.getAttribute("error") != null) {%>
-            <p class="error"><%= request.getAttribute("error")%></p>
-            <% }%>
-            <form action="<%= request.getContextPath()%>/RegistrationServlet" method="post">
-                <label for="username">Tên người dùng:</label>
-                <input type="text" id="username" name="username" required>
-                <label for="fullName">Họ và tên:</label>
-                <input type="text" id="fullName" name="fullName" required>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-                <label for="phone">Số điện thoại:</label>
-                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required title="Số điện thoại phải có 10 chữ số">
-                <label for="city">Thành phố:</label>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Register_EcoMart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #fff6ec;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color:#fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 480px;
+        }
+        h2 {
+            text-align: center;
+            color: #2e7d32;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            color: #333;
+            font-weight: 500;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 16px;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Đăng Ký Tài Khoản</h2>
+        <% if (request.getAttribute("error") != null) { %>
+            <p class="error"><%= request.getAttribute("error") %></p>
+        <% } %>
+        <form action="<%= request.getContextPath() %>/RegistrationServlet" method="post">
+            <label for="username">Tên người dùng:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="fullName">Họ và tên:</label>
+            <input type="text" id="fullName" name="fullName" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phone">Số điện thoại:</label>
+            <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required title="Số điện thoại phải có 10 chữ số">
+
+        <label for="city">Thành phố:</label>
                 <select id="city" name="city" required>
                     <option value="An Giang">An Giang</option>
                     <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
@@ -139,20 +165,27 @@
                     <option value="Yên Bái">Yên Bái</option>
                 </select>
 
-                <label for="address">Địa chỉ chi tiết:</label>
-                <input type="text" id="address" name="address" required>
-                <select name="gender">
-                    <option value="">Chọn giới tính</option>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                    <option value="Khác">Khác</option>
-                </select>
-                <label for="password">Mật khẩu:</label>
-                <input type="password" id="password" name="password" required pattern="(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}" title="Mật khẩu phải có ít nhất 6 ký tự, chứa chữ, số và ký tự đặc biệt">
-                <label for="confirmPassword">Xác nhận mật khẩu:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
-                <input type="submit" value="Đăng Ký">
-            </form>
-        </div>
-    </body>
+            <label for="address">Địa chỉ chi tiết:</label>
+            <input type="text" id="address" name="address" required>
+
+            <label for="gender">Giới tính:</label>
+            <select name="gender" id="gender" required>
+                <option value="">-- Chọn giới tính --</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
+            </select>
+
+            <label for="password">Mật khẩu:</label>
+            <input type="password" id="password" name="password" required
+                   pattern="(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}"
+                   title="Mật khẩu phải có ít nhất 6 ký tự, chứa chữ, số và ký tự đặc biệt">
+
+            <label for="confirmPassword">Xác nhận mật khẩu:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+            <input type="submit" value="Đăng Ký">
+        </form>
+    </div>
+</body>
 </html>
