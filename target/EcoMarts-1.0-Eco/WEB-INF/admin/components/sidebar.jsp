@@ -12,20 +12,22 @@
                     class="fas fa-chart-line"></i> Revenue by month</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/statistic/yearly"><i class="fas fa-chart-bar"></i>
                 Revenue by year</a></li>
-        <li><a href="${pageContext.request.contextPath}/admin/order"><i class="fas fa-receipt"></i> Order Manager</a>
+        <li><a href="${pageContext.request.contextPath}/admin/order"><i class="fas fa-receipt"></i> Order Management</a>
         </li>
         <li><a href="${pageContext.request.contextPath}/admin/product"><i class="fas fa-box"></i> Product
-                Manager</a></li>
+                Management</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/account"><i class="fas fa-user"></i> Account
-                Manager</a></li>
+                Management</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/staff"><i class="fas fa-user-tie"></i>
                 Staff Management</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/supplier"><i class="fas fa-handshake"></i>
-                Supplier Manager</a></li>
+                Supplier Management</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/category"><i class="fas fa-folder"></i>
-                Category</a></li>
+                Category Management</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/voucher"><i class="fas fa-ticket-alt"></i>
-                Voucher Manager</a></li>
+                Voucher Management</a></li>
+        <li><a href="${pageContext.request.contextPath}/admin/promotion"><i class="fas fas fa-percent"></i>
+                Promotion Management</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/dashboard?view=top-products"><i
                     class="fas fa-shopping-bag"></i> Top 10 product</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/dashboard?view=top-customers"><i
