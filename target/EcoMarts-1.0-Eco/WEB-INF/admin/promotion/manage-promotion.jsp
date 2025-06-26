@@ -52,7 +52,7 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Description</th>
-                                    <th>Discount %</th>
+                                    <th>Discount</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
                                     <th>Status</th>
@@ -65,7 +65,7 @@
                                         <td>${p.promotionID}</td>
                                         <td>${p.promotionName}</td>
                                         <td>${p.description}</td>
-                                        <td>${p.discountPercent}</td>
+                                        <td><fmt:formatNumber value="${p.discountPercent}" type="number"/>%</td>
                                         <td><fmt:formatDate value="${p.startDate}" pattern="yyyy-MM-dd"/></td>
                                         <td><fmt:formatDate value="${p.endDate}" pattern="yyyy-MM-dd"/></td>
                                         <td>

@@ -7,15 +7,14 @@ controller\ProductDetailServlet.class
 db\Dotenv.class
 controller\dangky\RegistrationServlet.class
 model\Product.class
-controller\register\StaffServlet.class
 dao\AccountDAO1.class
-controller\SuggestServlet.class
 model\ProductPromotion.class
 model\Voucher.class
+controller\staff\StaffServlet.class
 controller\register\LoginServlet.class
 controller\ProductServlet.class
 controller\SearchProductServlet.class
-controller\OrderServlet.class
+controller\staff\OrderServlet.class
 dao\OrderDetailDAO.class
 controller\AdminDashboardServlet.class
 dao\StaffDAO.class
@@ -33,7 +32,9 @@ db\DBContext1.class
 model\InventoryTransaction.class
 controller\AdminStaffServlet.class
 dao\AccountDAO.class
+dao\PromotionDAO.class
 model\Staff.class
+controller\AdminPromotionServlet.class
 db\EmailUtil.class
 model\Review.class
 dao\TokenDAO.class
@@ -48,6 +49,7 @@ model\Promotion.class
 controller\CategoryServlet.class
 db\MD5Util.class
 dao\ViewProductDAO.class
+controller\LoadMoreFeaturedServlet.class
 controller\register\AdminServlet.class
 model\Order.class
 dao\SearchProductsDAO.class
