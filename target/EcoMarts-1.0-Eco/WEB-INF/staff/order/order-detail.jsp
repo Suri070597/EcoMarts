@@ -14,7 +14,7 @@
         <div class="main-content">
             <div class="container">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <a href="<c:url value='/admin/order' />" class="btn-back">← Back</a>
+                    <a href="<c:url value='/staff/order' />" class="btn-back">← Back</a>
 
                     <h1>Order Detail</h1>
                 </div>
@@ -61,55 +61,57 @@
                     <p><strong>Total Amount:</strong> ${order.totalAmount} VND</p>
                 </div>
             </div>
+        </div>
+    </div>
+    <style>
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
 
-            <style>
-                .main-content {
-                    margin-left: 250px;
-                    padding: 20px;
-                }
+        .order-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
 
-                .order-info {
-                    background-color: #f8f9fa;
-                    padding: 20px;
-                    border-radius: 8px;
-                    margin-bottom: 20px;
-                }
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
 
-                .order-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 20px;
-                }
+        .order-table th,
+        .order-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
 
-                .order-table th,
-                .order-table td {
-                    border: 1px solid #ddd;
-                    padding: 10px;
-                    text-align: left;
-                }
+        .order-table th {
+            background-color: #f1f1f1;
+        }
 
-                .order-table th {
-                    background-color: #f1f1f1;
-                }
+        .order-total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn-back {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
 
-                .order-total {
-                    font-size: 18px;
-                    font-weight: bold;
-                    margin-top: 10px;
-                }
-                .btn-back {
-                    display: inline-block;
-                    padding: 8px 16px;
-                    background-color: #007bff;
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 4px;
-                    font-weight: bold;
-                    transition: background-color 0.3s;
-                }
+        .btn-back:hover {
+            background-color: #0056b3;
+        }
 
-                .btn-back:hover {
-                    background-color: #0056b3;
-                }
-
-            </style>
+    </style>
+</body>

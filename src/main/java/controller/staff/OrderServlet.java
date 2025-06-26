@@ -1,6 +1,5 @@
-package controller;
+package controller.staff;
 
-import dao.OrderDAO;
 import dao.OrderDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,7 +10,7 @@ import model.OrderDetail;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(name = "OrderServlet", urlPatterns = {"/admin/order", "/admin/order/detail"})
+@WebServlet(name = "OrderServlet", urlPatterns = {"/staff/order", "/staff/order/detail"})
 public class OrderServlet extends HttpServlet {
 
     OrderDAO dao = new OrderDAO();
@@ -21,9 +20,9 @@ public class OrderServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-        if (path.equals("/admin/order")) {
+        if (path.equals("/staff/order")) {
             handleOrderList(request, response);
-        } else if (path.equals("/admin/order/detail")) {
+        } else if (path.equals("/staff/order/detail")) {
             handleOrderDetail(request, response);
         }
     }
@@ -39,8 +38,7 @@ public class OrderServlet extends HttpServlet {
                 Order o = dao.getOrderById(orderId);
                 orders = o != null ? List.of(o) : List.of();
             } catch (NumberFormatException e) {
-                // Nếu không phải số, tìm theo tên (phân biệt hoa thường)
-                orders = dao.getOrdersByCustomerNameCaseSensitive(search);
+                orders = List.of(); // Không hợp lệ thì trả về danh sách rỗng
             }
         } else {
             orders = dao.getAllOrders();
@@ -53,7 +51,7 @@ public class OrderServlet extends HttpServlet {
         request.setAttribute("total", total);
         request.setAttribute("delivered", delivered);
 
-        request.getRequestDispatcher("/WEB-INF/admin/order/manage-order.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/staff/order/manage-order.jsp").forward(request, response);
 
     }
 
@@ -78,7 +76,7 @@ public class OrderServlet extends HttpServlet {
             request.setAttribute("order", order);
             request.setAttribute("details", details);
 
-            request.getRequestDispatcher("/WEB-INF/admin/order/order-detail.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/staff/order/order-detail.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             response.sendRedirect("order");
         }

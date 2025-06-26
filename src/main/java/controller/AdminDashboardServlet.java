@@ -63,7 +63,7 @@ public class AdminDashboardServlet extends HttpServlet {
         request.setAttribute("totalProducts", products.size());
 
         // 8. Total accounts (customers) count
-        request.setAttribute("totalAccounts", accountDAO.getAllAccounts().size());
+        request.setAttribute("totalAccounts", accountDAO.countAccountsByRole(0));
 
         // 9. Total orders count
         request.setAttribute("totalOrders", orderDAO.countTotalOrders());

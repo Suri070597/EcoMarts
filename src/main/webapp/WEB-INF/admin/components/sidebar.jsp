@@ -12,8 +12,6 @@
                     class="fas fa-chart-line"></i> Revenue by month</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/statistic/yearly"><i class="fas fa-chart-bar"></i>
                 Revenue by year</a></li>
-        <li><a href="${pageContext.request.contextPath}/admin/order"><i class="fas fa-receipt"></i> Order Management</a>
-        </li>
         <li><a href="${pageContext.request.contextPath}/admin/product"><i class="fas fa-box"></i> Product
                 Management</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/account"><i class="fas fa-user"></i> Account

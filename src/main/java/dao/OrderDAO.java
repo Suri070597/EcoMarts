@@ -3,13 +3,13 @@ package dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import model.Order;
+
 import db.DBContext;
+import model.Order;
 import model.OrderDetail;
 
 public class OrderDAO extends DBContext {
@@ -45,41 +45,6 @@ public class OrderDAO extends DBContext {
         }
         return list;
     }
-
-    
-    public List<Order> getOrdersByCustomerNameCaseSensitive(String keyword) {
-    List<Order> list = new ArrayList<>();
-    String sql = """
-        SELECT o.*, a.FullName
-        FROM [Order] o
-        JOIN Account a ON o.AccountID = a.AccountID
-        WHERE a.FullName COLLATE Latin1_General_CS_AS LIKE ?
-        ORDER BY o.OrderDate DESC
-    """;
-
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setString(1, "%" + keyword + "%");  // Tìm gần đúng, phân biệt chữ hoa/thường
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Order o = new Order();
-            o.setOrderID(rs.getInt("OrderID"));
-            o.setAccountID(rs.getInt("AccountID"));
-            o.setOrderDate(rs.getTimestamp("OrderDate"));
-            o.setTotalAmount(rs.getDouble("TotalAmount"));
-            o.setShippingAddress(rs.getString("ShippingAddress"));
-            o.setShippingPhone(rs.getString("ShippingPhone"));
-            o.setPaymentMethod(rs.getString("PaymentMethod"));
-            o.setPaymentStatus(rs.getString("PaymentStatus"));
-            o.setOrderStatus(rs.getString("OrderStatus"));
-            o.setNotes(rs.getString("Notes"));
-            o.setAccountName(rs.getString("FullName"));
-            list.add(o);
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return list;
-}
 
     // Tìm đơn hàng theo ID
     public Order getOrderById(int id) {
@@ -388,5 +353,37 @@ public class OrderDAO extends DBContext {
         }
 
         return topCustomers;
+    }
+
+    // Count orders for a specific date
+    public int countOrdersForDate(java.sql.Date date) {
+        String sql = "SELECT COUNT(*) FROM [Order] WHERE CAST(OrderDate AS DATE) = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, date);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in countOrdersForDate: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    // Count orders by status
+    public int countOrdersByStatus(String status) {
+        String sql = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in countOrdersByStatus: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

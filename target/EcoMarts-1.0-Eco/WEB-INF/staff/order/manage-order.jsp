@@ -24,7 +24,7 @@
             <div class="card-header">
                 <div class="header-actions d-flex justify-content-between align-items-center">
                     <h1 class="card-title mb-0">Order Management</h1>
-                    <form action="${pageContext.request.contextPath}/admin/order" method="get" class="d-flex gap-2">
+                    <form action="${pageContext.request.contextPath}/staff/order" method="get" class="d-flex gap-2">
                         <input type="text" name="search" class="form-control form-control-sm"
                                placeholder="Search by OrderID" value="${param.search}">
                         <button type="submit" class="btn btn-sm btn-primary">
@@ -84,7 +84,7 @@
                                 </td>
                                 <td><fmt:formatNumber value="${o.totalAmount}" type="number" groupingUsed="true" /> VND</td>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/admin/order/detail?id=${o.orderID}"
+                                    <a href="${pageContext.request.contextPath}/staff/order/detail?id=${o.orderID}"
                                        class="btn btn-sm btn-info" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
