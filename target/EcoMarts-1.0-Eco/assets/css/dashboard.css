@@ -311,3 +311,90 @@ html {
         max-height: 300px;
     }
 }
+
+/* Staff Dashboard Styles */
+.work-shift-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow);
+    padding: 25px;
+    margin-top: 30px;
+}
+
+.work-shift-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.work-shift-title i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.work-shift-info {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.shift-time {
+    text-align: center;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: var(--gray-100);
+    min-width: 150px;
+}
+
+.shift-time-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.shift-time-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.date-indicator {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+    display: inline-block;
+}
+
+.date-indicator i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.date-indicator span {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.status-return {
+    background-color: #f3e5f5;
+    color: #9c27b0;
+}
+
+/* Responsive styles for staff dashboard */
+@media (max-width: 768px) {
+    .work-shift-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .shift-time {
+        width: 100%;
+    }
+}
