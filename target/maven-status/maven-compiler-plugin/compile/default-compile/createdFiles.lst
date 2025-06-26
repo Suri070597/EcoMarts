@@ -9,7 +9,6 @@ controller\dangky\RegistrationServlet.class
 model\Product.class
 controller\register\StaffServlet.class
 dao\AccountDAO1.class
-controller\SuggestServlet.class
 model\ProductPromotion.class
 model\Voucher.class
 controller\register\LoginServlet.class
