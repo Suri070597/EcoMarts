@@ -27,7 +27,22 @@
                     <p><strong>Phone:</strong> ${order.shippingPhone}</p>
                     <p><strong>Shipping Address:</strong> ${order.shippingAddress}</p>
                     <p><strong>Order Date:</strong> ${order.orderDate}</p>
-                    <p><strong>Order Status:</strong> ${order.orderStatus}</p>
+                    <form action="${pageContext.request.contextPath}/staff/order/updateStatus" method="post" style="margin-top: 10px;">
+                        <input type="hidden" name="orderId" value="${order.orderID}" />
+                        <label for="status"><strong>Change Order Status:</strong></label>
+                        <select name="status" id="status" required>
+                            <option value="Đang xử lý" ${order.orderStatus == 'Đang xử lý' ? 'selected' : ''}>Đang xử lý</option>
+                            <option value="Đang giao hàng" ${order.orderStatus == 'Đang giao hàng' ? 'selected' : ''}>Đang giao hàng</option>
+                            <option value="Đã giao" ${order.orderStatus == 'Đã giao' ? 'selected' : ''}>Đã giao</option>
+                            <option value="Đã hủy" ${order.orderStatus == 'Đã hủy' ? 'selected' : ''}>Đã hủy</option>
+                        </select>
+                        <button type="submit" style="margin-left: 10px;">Cập nhật</button>
+                    </form>
+
+                    <c:if test="${not empty message}">
+                        <p style="color: green; font-weight: bold;">${message}</p>
+                    </c:if>
+
                     <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
                     <p><strong>Payment Status:</strong> ${order.paymentStatus}</p>
                 </div>

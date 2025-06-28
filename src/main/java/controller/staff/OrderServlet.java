@@ -10,7 +10,12 @@ import model.OrderDetail;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(name = "OrderServlet", urlPatterns = {"/staff/order", "/staff/order/detail"})
+@WebServlet(name = "OrderServlet", urlPatterns = {
+    "/staff/order",
+    "/staff/order/detail",
+    "/staff/order/updateStatus" // 👈 thêm dòng này
+})
+
 public class OrderServlet extends HttpServlet {
 
     OrderDAO dao = new OrderDAO();
@@ -32,13 +37,15 @@ public class OrderServlet extends HttpServlet {
         String search = request.getParameter("search");
 
         List<Order> orders;
-        if (search != null && !search.isEmpty()) {
+        if (search != null && !search.trim().isEmpty()) {
             try {
-                int orderId = Integer.parseInt(search);
+                // Nếu nhập số → tìm theo OrderID
+                int orderId = Integer.parseInt(search.trim());
                 Order o = dao.getOrderById(orderId);
                 orders = o != null ? List.of(o) : List.of();
             } catch (NumberFormatException e) {
-                orders = List.of(); // Không hợp lệ thì trả về danh sách rỗng
+                // Nếu không phải số → tìm theo tên
+                orders = dao.getOrdersByCustomerName(search.trim());
             }
         } else {
             orders = dao.getAllOrders();
@@ -46,7 +53,8 @@ public class OrderServlet extends HttpServlet {
 
         int total = dao.countAllOrders();
         int delivered = dao.countDeliveredOrders();
-
+        int cancelled = dao.countCancelledOrders();
+        request.setAttribute("cancelled", cancelled);
         request.setAttribute("orders", orders);
         request.setAttribute("total", total);
         request.setAttribute("delivered", delivered);
@@ -81,4 +89,40 @@ public class OrderServlet extends HttpServlet {
             response.sendRedirect("order");
         }
     }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String path = request.getServletPath();
+
+        if (path.equals("/staff/order/updateStatus")) {
+            updateOrderStatus(request, response);
+        }
+    }
+
+    private void updateOrderStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int orderId = Integer.parseInt(request.getParameter("orderId"));
+            String newStatus = request.getParameter("status");
+
+            boolean success = dao.updateOrderStatus(orderId, newStatus);
+
+            if (success) {
+                request.setAttribute("message", "Cập nhật trạng thái đơn hàng thành công!");
+            } else {
+                request.setAttribute("message", "Cập nhật thất bại. Vui lòng thử lại.");
+            }
+
+            // Lấy lại order & detail để hiển thị
+            Order order = dao.getOrderById(orderId);
+            List<OrderDetail> details = dao.getOrderDetailsByOrderId(orderId);
+            request.setAttribute("order", order);
+            request.setAttribute("details", details);
+
+            request.getRequestDispatcher("/WEB-INF/staff/order/order-detail.jsp").forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("order");
+        }
+    }
+
 }

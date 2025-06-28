@@ -265,6 +265,19 @@ public class OrderDAO extends DBContext {
         return summary;
     }
 
+    public int countCancelledOrders() {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Đã hủy'";
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
     // Get order counts by status
     public Map<String, Integer> getOrderCountsByStatus() {
         Map<String, Integer> statusCounts = new HashMap<>();
@@ -370,7 +383,7 @@ public class OrderDAO extends DBContext {
         }
         return 0;
     }
-    
+
     // Count orders by status
     public int countOrdersByStatus(String status) {
         String sql = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = ?";
@@ -386,4 +399,46 @@ public class OrderDAO extends DBContext {
         }
         return 0;
     }
+
+    public boolean updateOrderStatus(int orderId, String status) {
+        String sql = "UPDATE [Order] SET OrderStatus = ? WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, orderId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<Order> getOrdersByCustomerName(String name) {
+        List<Order> list = new ArrayList<>();
+        String sql = "SELECT o.*, a.FullName FROM [Order] o JOIN Account a ON o.AccountID = a.AccountID "
+                + "WHERE a.FullName LIKE ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + name + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Order o = new Order();
+                o.setOrderID(rs.getInt("OrderID"));
+                o.setAccountID(rs.getInt("AccountID"));
+                o.setOrderDate(rs.getTimestamp("OrderDate"));
+                o.setTotalAmount(rs.getDouble("TotalAmount"));
+                o.setShippingAddress(rs.getString("ShippingAddress"));
+                o.setShippingPhone(rs.getString("ShippingPhone"));
+                o.setPaymentMethod(rs.getString("PaymentMethod"));
+                o.setPaymentStatus(rs.getString("PaymentStatus"));
+                o.setOrderStatus(rs.getString("OrderStatus"));
+                o.setNotes(rs.getString("Notes"));
+                o.setAccountName(rs.getString("FullName")); // tên khách hàng
+                list.add(o);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 }
