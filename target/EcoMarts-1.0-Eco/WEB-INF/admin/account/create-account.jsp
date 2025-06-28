@@ -32,7 +32,7 @@
                         </div>
                     </c:if>
                     <form method="POST" action="${pageContext.request.contextPath}/admin/account"
-                          class="needs-validation" novalidate>
+                          class="needs-validation" novalidate id="accountForm">
                         <input type="hidden" name="action" value="create">
                         <div class="mb-3">
                             <label class="form-label" for="username">Username</label>
@@ -44,7 +44,7 @@
                             <label class="form-label" for="password">Password</label>
                             <input type="password" class="form-control" id="password" name="password"
                                    required>
-                            <div class="invalid-feedback">Please enter a password</div>
+                            <div class="invalid-feedback" id="passwordFeedback">Password must be at least 8 characters and include letters, numbers, and special characters</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="email">Email</label>
@@ -124,6 +124,35 @@
                 })
             })()
 
+            // Password validation
+            document.getElementById('password').addEventListener('input', function() {
+                const password = this.value;
+                const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+                
+                if (!passwordRegex.test(password)) {
+                    this.setCustomValidity('Password must contain at least 8 characters, including letters, numbers, and special characters');
+                    document.getElementById('passwordFeedback').textContent = 
+                        'Password must contain at least 8 characters, including letters, numbers, and special characters';
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            // Custom form validation
+            document.getElementById('accountForm').addEventListener('submit', function(event) {
+                const passwordInput = document.getElementById('password');
+                const password = passwordInput.value;
+                const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+                
+                if (!passwordRegex.test(password)) {
+                    event.preventDefault();
+                    passwordInput.setCustomValidity('Password must contain at least 8 characters, including letters, numbers, and special characters');
+                    document.getElementById('passwordFeedback').textContent = 
+                        'Password must contain at least 8 characters, including letters, numbers, and special characters';
+                    passwordInput.classList.add('is-invalid');
+                }
+            });
+
             // Phone number validation
             document.getElementById('phone').addEventListener('input', function (e) {
                 // Remove any non-digit characters
@@ -148,12 +177,12 @@
             // Show/hide position field based on role
             document.getElementById('role').addEventListener('change', function () {
                 const positionField = document.getElementById('position');
-                const positionContainer = positionField.closest('.mb-3');
+                const positionContainer = positionField?.closest('.mb-3');
 
-                if (this.value === '2') { // Staff
+                if (this.value === '2' && positionContainer) { // Staff
                     positionContainer.style.display = 'block';
                     positionField.setAttribute('required', 'required');
-                } else {
+                } else if (positionContainer) {
                     positionContainer.style.display = 'none';
                     positionField.removeAttribute('required');
                 }

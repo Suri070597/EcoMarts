@@ -32,7 +32,7 @@
                     </div>
                 </c:if>
                 <form method="POST" action="${pageContext.request.contextPath}/admin/staff"
-                    class="needs-validation" novalidate>
+                    class="needs-validation" novalidate id="staffForm">
                     <input type="hidden" name="action" value="create">
                     <input type="hidden" name="role" value="2">
                     <div class="mb-3">
@@ -45,7 +45,7 @@
                         <label class="form-label" for="password">Password</label>
                         <input type="password" class="form-control" id="password" name="password"
                             required>
-                        <div class="invalid-feedback">Please enter a password</div>
+                        <div class="invalid-feedback" id="passwordFeedback">Password must be at least 8 characters and include letters, numbers, and special characters</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="email">Email</label>
@@ -102,6 +102,50 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Form validation
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+        
+        // Password validation
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+            
+            if (!passwordRegex.test(password)) {
+                this.setCustomValidity('Password must contain at least 8 characters, including letters, numbers, and special characters');
+                document.getElementById('passwordFeedback').textContent = 
+                    'Password must contain at least 8 characters, including letters, numbers, and special characters';
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Custom form validation
+        document.getElementById('staffForm').addEventListener('submit', function(event) {
+            const passwordInput = document.getElementById('password');
+            const password = passwordInput.value;
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+            
+            if (!passwordRegex.test(password)) {
+                event.preventDefault();
+                passwordInput.setCustomValidity('Password must contain at least 8 characters, including letters, numbers, and special characters');
+                document.getElementById('passwordFeedback').textContent = 
+                    'Password must contain at least 8 characters, including letters, numbers, and special characters';
+                passwordInput.classList.add('is-invalid');
+            }
+        });
+
         // Phone number validation
         document.getElementById('phone').addEventListener('input', function (e) {
             // Remove any non-digit characters

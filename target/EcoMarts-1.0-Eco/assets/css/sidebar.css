@@ -1,12 +1,3 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
-*/
-/* 
-    Created on : Jun 13, 2025, 12:15:37 AM
-    Author     : LNQB
-*/
-
 :root {
   --primary-color: #d4b78f;
   --primary-dark: #b89c70;
@@ -29,7 +20,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     var(--primary-color),
     var(--primary-light)
   );
-  padding: 20px;
+  padding: 0 20px;
   flex-shrink: 0;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   position: fixed;
