@@ -26,7 +26,7 @@
                             <h1 class="card-title mb-0">Order Management</h1>
                             <form action="${pageContext.request.contextPath}/staff/order" method="get" class="d-flex gap-2">
                                 <input type="text" name="search" class="form-control form-control-sm"
-                                       placeholder="Search by OrderID" value="${param.search}">
+                                       placeholder="Search Orders..." value="${param.search}">
                                 <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="fas fa-search"></i>
                                 </button>

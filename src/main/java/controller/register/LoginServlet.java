@@ -44,6 +44,7 @@ public class LoginServlet extends HttpServlet {
             Account account = accountDAO.checkLogin(email, password);
             if (account != null) {
                 System.out.println("Login successful: email=" + email + ", role=" + account.getRole());
+                request.getSession().setAttribute("account", account); // thêm dòng này để lưu Account vào session
                 request.getSession().setAttribute("email", account.getEmail());
                 request.getSession().setAttribute("username", account.getUsername());
                 request.getSession().setAttribute("fullName", account.getFullName());

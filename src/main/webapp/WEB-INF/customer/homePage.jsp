@@ -94,579 +94,579 @@
                 </div>
             </section>
 
-            <!-- Category Navigation -->
-            <section class="category-section" data-aos="fade-up">
-                <div class="category-wrapper">
-                    <!-- Mục tĩnh "Mua lại đơn cũ" -->
-                    <div class="category-item">
-                        <a href="#">
-                            <div class="category-icon">
-                                <img src="https://cdn.tgdd.vn/bachhoaxanh/www/Content/images/icon-history.v202301091407.png"
-                                     alt="Mua lại đơn cũ">
-                            </div>
-                            <p>Mua lại đơn cũ</p>
-                        </a>
-                    </div>
-
-                    <!-- Vòng lặp hiển thị các danh mục cha từ database -->
-                    <c:forEach var="cat" items="${categories}">
-                        <div class="category-item">
-                            <a href="category?id=${cat.categoryID}">
-                                <div class="category-icon">
-                                    <img src="${cat.imageURL}" alt="${cat.categoryName}">
-                                </div>
-                                <p>${cat.categoryName}</p>
-                            </a>
-                        </div>
-                    </c:forEach>
+<!-- Category Navigation -->
+<section class="category-section" data-aos="fade-up">
+    <div class="category-wrapper">
+        <!-- Mục tĩnh "Mua lại đơn cũ" -->
+        <div class="category-item">
+            <a href="${pageContext.request.contextPath}/customer/reorder">
+                <div class="category-icon">
+                    <img src="https://cdn.tgdd.vn/bachhoaxanh/www/Content/images/icon-history.v202301091407.png"
+                         alt="Mua lại đơn cũ">
                 </div>
-            </section>
-
-
-            <!-- Hot Products Section -->
-            <section class="product-section" data-aos="fade-up">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-fire"></i> Sản phẩm nổi bật
-                    </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
-                </div>
-                <div class="product-grid" id="featured-products">
-                    <%
-                        if (featuredProducts != null && !featuredProducts.isEmpty()) {
-                            for (Product p : featuredProducts) {
-                    %>
-                    <div class="product-card">
-                        <div class="product-badge">Hot</div>
-                        <div class="product-image-container">
-                            <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
-                            <div class="product-actions">
-                                <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name"><%= p.getProductName()%></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
-                            </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
-                            <div class="button-group">
-                                <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <button class="buy-now-btn">Mua ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
-                    <%
-                        }
-                    %>
-                </div>
-                <button id="load-more-featured" class="see-more-btn"
-                        data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
-            </section>
-
-            <!--mở đầu-->
-
-            <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
-            </section>
-
-            <section class="product-section" data-aos="fade-up">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-glass-cheers"></i> Nước giải khát
-                    </div>
-
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
-                </div>
-                <div class="product-grid" id="drink-products">
-                    <%
-                        if (drinkProducts != null && !drinkProducts.isEmpty()) {
-                            for (Product p : drinkProducts) {
-                    %>
-                    <div class="product-card">
-                        <!--<div class="product-badge">Hot</div>-->
-                        <div class="product-image-container">
-                            <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
-                            <div class="product-actions">
-                                <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name"><%= p.getProductName()%></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
-                            </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
-                            <div class="button-group">
-                                <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <button class="buy-now-btn">Mua ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
-                    <%
-                        }
-                    %>
-                </div>
-                <button id="load-more-drink" class="see-more-btn"
-                        data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
-            </section>
-
-            <!--kết thúc-->
-
-            <!--mở đầu-->
-
-            <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
-            </section>
-
-            <section class="product-section" data-aos="fade-up">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-apple-alt"></i> Sữa
-                    </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
-                </div>
-                <div class="product-grid" id="milk-products">
-                    <%
-                        if (MilkProducts != null && !MilkProducts.isEmpty()) {
-                            for (Product p : MilkProducts) {
-                    %>
-                    <div class="product-card">
-                        <!--<div class="product-badge">Hot</div>-->
-                        <div class="product-image-container">
-                            <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
-                            <div class="product-actions">
-                                <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name"><%= p.getProductName()%></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
-                            </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
-                            <div class="button-group">
-                                <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <button class="buy-now-btn">Mua ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
-                    <%
-                        }
-                    %>
-                </div>
-                <button id="load-more-milk" class="see-more-btn"
-                        data-parent="2" data-target="milk-products">
-                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
-            </section>
-
-            <!--kết thúc--> 
-
-            <!--mở đầu-->
-
-            <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
-            </section>
-
-            <section class="product-section" data-aos="fade-up">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-apple-alt"></i> Trái cây
-                    </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
-                </div>
-                <div class="product-grid" id="fruit-products">
-                    <%
-                        if (FruitProducts != null && !FruitProducts.isEmpty()) {
-                            for (Product p : FruitProducts) {
-                    %>
-                    <div class="product-card">
-                        <!--<div class="product-badge">Hot</div>-->
-                        <div class="product-image-container">
-                            <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
-                            <div class="product-actions">
-                                <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name"><%= p.getProductName()%></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
-                            </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
-                            <div class="button-group">
-                                <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <button class="buy-now-btn">Mua ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
-                    <%
-                        }
-                    %>
-                </div>
-                <button id="load-more-fruit" class="see-more-btn"
-                        data-parent="3" data-target="fruit-products">
-                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>
-            </section>
-
-            <!--kết thúc--> 
-
-            <!--mở đầu-->
-
-            <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
-            </section>
-
-            <section class="product-section" data-aos="fade-up">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-apple-alt"></i> Bánh Kẹo
-                    </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
-                </div>
-                <div class="product-grid" id="snack-products">
-                    <%
-                        if (CandyProducts != null && !CandyProducts.isEmpty()) {
-                            for (Product p : CandyProducts) {
-                    %>
-                    <div class="product-card">
-                        <!--<div class="product-badge">Hot</div>-->
-                        <div class="product-image-container">
-                            <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
-                            <div class="product-actions">
-                                <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name"><%= p.getProductName()%></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
-                            </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
-                            <div class="button-group">
-                                <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <button class="buy-now-btn">Mua ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
-                    <%
-                        }
-                    %>
-                </div>
-                <button id="load-more-snack" class="see-more-btn"
-                        data-parent="4" data-target="snack-products">
-                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>
-            </section>
-
-            <!--kết thúc--> 
-
-
-
-
-            <!--mở đầu-->
-
-            <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
-            </section>
-
-            <section class="product-section" data-aos="fade-up">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-apple-alt"></i> Mẹ Và Bé
-                    </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
-                </div>
-                <div class="product-grid" id="baby-products">
-                    <%
-                        if (MotherBabyProducts != null && !MotherBabyProducts.isEmpty()) {
-                            for (Product p : MotherBabyProducts) {
-                    %>
-                    <div class="product-card">
-                        <!--<div class="product-badge">Hot</div>-->
-                        <div class="product-image-container">
-                            <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
-                            <div class="product-actions">
-                                <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name"><%= p.getProductName()%></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
-                            </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
-                            <div class="button-group">
-                                <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <button class="buy-now-btn">Mua ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
-                    <%
-                        }
-                    %>
-                </div>
-                <button id="load-more-baby" class="see-more-btn"
-                        data-parent="5" data-target="baby-products">
-                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
-            </section>
-
-            <!--kết thúc--> 
-
-            <!--mở đầu-->
-
-            <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
-            </section>
-
-            <section class="product-section" data-aos="fade-up">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-apple-alt"></i> Mỹ Phẩm
-                    </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
-                </div>
-                <div class="product-grid" id="cosmetic-products">
-                    <%
-                        if (CosmeticProducts != null && !CosmeticProducts.isEmpty()) {
-                            for (Product p : CosmeticProducts) {
-                    %>
-                    <div class="product-card">
-                        <!--<div class="product-badge">Hot</div>-->
-                        <div class="product-image-container">
-                            <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
-                            <div class="product-actions">
-                                <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name"><%= p.getProductName()%></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
-                            </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
-                            <div class="button-group">
-                                <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <button class="buy-now-btn">Mua ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
-                    <%
-                        }
-                    %>
-                </div>
-                <button id="load-more-cosmetic" class="see-more-btn"
-                        data-parent="6" data-target="cosmetic-products">
-                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
-            </section>
-
-            <!--kết thúc--> 
-
-            <!-- Tips Section -->
-            <section class="tips-section" data-aos="fade-up">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-lightbulb"></i> Mẹo vặt hữu ích
-                    </div>
-                </div>
-
-                <div class="tips-container">
-                    <div class="tips-video">
-                        <iframe width="560" height="315"
-                                src="https://www.youtube.com/embed/jN58QsGK4WI?si=2bBTyZJ0KCMstDbu"
-                                title="YouTube video player" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
-
-                    <div class="tips-list">
-                        <a href="meo-vat.html#lam-sach-rau-cu" class="tip-item">
-                            <div class="tip-image">
-                                <img src="https://th.bing.com/th/id/OIP.z6N7VnK2aWx6YlRmR-gpCwHaEK?w=200&h=112&rs=1&qlt=80&o=6&dpr=1.3&pid=3.1"
-                                     alt="Làm sạch rau củ">
-                            </div>
-                            <div class="tip-content">
-                                <h3 class="tip-title">Cách làm sạch rau củ nhanh chóng</h3>
-                                <p class="tip-desc">Học cách rửa rau củ đúng cách để loại bỏ bụi bẩn và hóa
-                                    chất.</p>
-                            </div>
-                        </a>
-
-                        <a href="meo-vat.html#bao-quan-thit-ca" class="tip-item">
-                            <div class="tip-image">
-                                <img src="https://th.bing.com/th/id/OIP.quVOFTDt4CAdc7VhwyocagHaEo?w=295&h=184&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
-                                     alt="Bảo quản thịt cá">
-                            </div>
-                            <div class="tip-content">
-                                <h3 class="tip-title">Bí quyết bảo quản thịt cá tươi lâu</h3>
-                                <p class="tip-desc">Mẹo giữ thịt cá tươi ngon trong tủ lạnh hoặc tủ đông.
-                                </p>
-                            </div>
-                        </a>
-
-                        <a href="meo-vat.html#chong-lang-phi-thuc-pham" class="tip-item">
-                            <div class="tip-image">
-                                <img src="https://th.bing.com/th/id/OIP.-2dh96wDCZIaPp8k1q3b7gHaE8?w=269&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
-                                     alt="Chống lãng phí">
-                            </div>
-                            <div class="tip-content">
-                                <h3 class="tip-title">Mẹo chống lãng phí thực phẩm</h3>
-                                <p class="tip-desc">Cách tận dụng thức ăn thừa để tiết kiệm và bảo vệ môi
-                                    trường.</p>
-                            </div>
-                        </a>
-
-                        <a href="meo-vat.html#lam-nuoc-uong-tai-nha" class="tip-item">
-                            <div class="tip-image">
-                                <img src="https://th.bing.com/th/id/OIP.qtsxKJLVM8WZX27VbcEp3AHaE8?w=242&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
-                                     alt="Nước uống tại nhà">
-                            </div>
-                            <div class="tip-content">
-                                <h3 class="tip-title">Cách làm nước uống giải nhiệt tại nhà</h3>
-                                <p class="tip-desc">Công thức đơn giản để tạo ra thức uống mát lành từ trái
-                                    cây tươi.</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </section>
+                <p>Mua lại đơn cũ</p>
+            </a>
         </div>
 
-        <jsp:include page="scrollToTop.jsp" />
-        <jsp:include page="footer.jsp" />
+        <!-- Vòng lặp hiển thị các danh mục cha từ database -->
+        <c:forEach var="cat" items="${categories}">
+            <div class="category-item">
+                <a href="category?id=${cat.categoryID}">
+                    <div class="category-icon">
+                        <img src="${cat.imageURL}" alt="${cat.categoryName}">
+                    </div>
+                    <p>${cat.categoryName}</p>
+                </a>
+            </div>
+        </c:forEach>
+    </div> <!-- Đóng div.category-wrapper -->
+</section>
 
-        <!-- JavaScript -->
-        <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-        <script>
-                        // Initialize AOS
-                        AOS.init({
-                            duration: 800,
-                            easing: 'ease-in-out',
-                            once: true,
-                            delay: 100
-                        });
 
-                        // Current slide index
-                        let slideIndex = 1;
-                        showSlides(slideIndex);
+    <!-- Hot Products Section -->
+    <section class="product-section" data-aos="fade-up">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-fire"></i> Sản phẩm nổi bật
+            </div>
+            <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="product-grid" id="featured-products">
+            <%
+                if (featuredProducts != null && !featuredProducts.isEmpty()) {
+                    for (Product p : featuredProducts) {
+            %>
+            <div class="product-card">
+                <div class="product-badge">Hot</div>
+                <div class="product-image-container">
+                    <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                        <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name"><%= p.getProductName()%></h3>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(29)</span>
+                    </div>
+                    <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                    <div class="button-group">
+                        <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                        <button class="buy-now-btn">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+            <%
+                }
+            } else {
+            %>
+            <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+            <%
+                }
+            %>
+        </div>
+        <button id="load-more-featured" class="see-more-btn"
+                data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+    </section>
 
-                        // Auto slide every 4 seconds
-                        setInterval(function () {
-                            plusSlides(1);
-                        }, 4000);
+    <!--mở đầu-->
 
-                        // Next/previous controls
-                        function plusSlides(n) {
-                            showSlides(slideIndex += n);
-                        }
+    <section class="banner-section" data-aos="fade-up">
+        <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+    </section>
 
-                        // Thumbnail image controls
-                        function currentSlide(n) {
-                            showSlides(slideIndex = n);
-                        }
+    <section class="product-section" data-aos="fade-up">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-glass-cheers"></i> Nước giải khát
+            </div>
 
-                        function showSlides(n) {
-                            let i;
-                            let slides = document.getElementsByClassName("mySlides");
-                            let dots = document.getElementsByClassName("dot");
-                            if (n > slides.length) {
-                                slideIndex = 1
-                            }
-                            if (n < 1) {
-                                slideIndex = slides.length
-                            }
-                            for (i = 0; i < slides.length; i++) {
-                                slides[i].style.display = "none";
-                            }
-                            for (i = 0; i < dots.length; i++) {
-                                dots[i].className = dots[i].className.replace(" active", "");
-                            }
-                            slides[slideIndex - 1].style.display = "block";
-                            dots[slideIndex - 1].className += " active";
-                        }
-        </script>
-        <script src="${pageContext.request.contextPath}/assets/js/loadMore.js"></script>
-    </body>
+            <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="product-grid" id="drink-products">
+            <%
+                if (drinkProducts != null && !drinkProducts.isEmpty()) {
+                    for (Product p : drinkProducts) {
+            %>
+            <div class="product-card">
+                <!--<div class="product-badge">Hot</div>-->
+                <div class="product-image-container">
+                    <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                        <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name"><%= p.getProductName()%></h3>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(29)</span>
+                    </div>
+                    <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                    <div class="button-group">
+                        <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                        <button class="buy-now-btn">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+            <%
+                }
+            } else {
+            %>
+            <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+            <%
+                }
+            %>
+        </div>
+        <button id="load-more-drink" class="see-more-btn"
+                data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+    </section>
+
+    <!--kết thúc-->
+
+    <!--mở đầu-->
+
+    <section class="banner-section" data-aos="fade-up">
+        <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+    </section>
+
+    <section class="product-section" data-aos="fade-up">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-apple-alt"></i> Sữa
+            </div>
+            <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="product-grid" id="milk-products">
+            <%
+                if (MilkProducts != null && !MilkProducts.isEmpty()) {
+                    for (Product p : MilkProducts) {
+            %>
+            <div class="product-card">
+                <!--<div class="product-badge">Hot</div>-->
+                <div class="product-image-container">
+                    <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                        <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name"><%= p.getProductName()%></h3>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(29)</span>
+                    </div>
+                    <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                    <div class="button-group">
+                        <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                        <button class="buy-now-btn">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+            <%
+                }
+            } else {
+            %>
+            <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+            <%
+                }
+            %>
+        </div>
+        <button id="load-more-milk" class="see-more-btn"
+                data-parent="2" data-target="milk-products">
+            Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+        </button>            
+    </section>
+
+    <!--kết thúc--> 
+
+    <!--mở đầu-->
+
+    <section class="banner-section" data-aos="fade-up">
+        <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+    </section>
+
+    <section class="product-section" data-aos="fade-up">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-apple-alt"></i> Trái cây
+            </div>
+            <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="product-grid" id="fruit-products">
+            <%
+                if (FruitProducts != null && !FruitProducts.isEmpty()) {
+                    for (Product p : FruitProducts) {
+            %>
+            <div class="product-card">
+                <!--<div class="product-badge">Hot</div>-->
+                <div class="product-image-container">
+                    <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                        <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name"><%= p.getProductName()%></h3>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(29)</span>
+                    </div>
+                    <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                    <div class="button-group">
+                        <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                        <button class="buy-now-btn">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+            <%
+                }
+            } else {
+            %>
+            <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+            <%
+                }
+            %>
+        </div>
+        <button id="load-more-fruit" class="see-more-btn"
+                data-parent="3" data-target="fruit-products">
+            Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+        </button>
+    </section>
+
+    <!--kết thúc--> 
+
+    <!--mở đầu-->
+
+    <section class="banner-section" data-aos="fade-up">
+        <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+    </section>
+
+    <section class="product-section" data-aos="fade-up">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-apple-alt"></i> Bánh Kẹo
+            </div>
+            <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="product-grid" id="snack-products">
+            <%
+                if (CandyProducts != null && !CandyProducts.isEmpty()) {
+                    for (Product p : CandyProducts) {
+            %>
+            <div class="product-card">
+                <!--<div class="product-badge">Hot</div>-->
+                <div class="product-image-container">
+                    <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                        <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name"><%= p.getProductName()%></h3>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(29)</span>
+                    </div>
+                    <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                    <div class="button-group">
+                        <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                        <button class="buy-now-btn">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+            <%
+                }
+            } else {
+            %>
+            <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+            <%
+                }
+            %>
+        </div>
+        <button id="load-more-snack" class="see-more-btn"
+                data-parent="4" data-target="snack-products">
+            Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+        </button>
+    </section>
+
+    <!--kết thúc--> 
+
+
+
+
+    <!--mở đầu-->
+
+    <section class="banner-section" data-aos="fade-up">
+        <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+    </section>
+
+    <section class="product-section" data-aos="fade-up">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-apple-alt"></i> Mẹ Và Bé
+            </div>
+            <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="product-grid" id="baby-products">
+            <%
+                if (MotherBabyProducts != null && !MotherBabyProducts.isEmpty()) {
+                    for (Product p : MotherBabyProducts) {
+            %>
+            <div class="product-card">
+                <!--<div class="product-badge">Hot</div>-->
+                <div class="product-image-container">
+                    <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                        <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name"><%= p.getProductName()%></h3>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(29)</span>
+                    </div>
+                    <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                    <div class="button-group">
+                        <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                        <button class="buy-now-btn">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+            <%
+                }
+            } else {
+            %>
+            <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+            <%
+                }
+            %>
+        </div>
+        <button id="load-more-baby" class="see-more-btn"
+                data-parent="5" data-target="baby-products">
+            Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+        </button>            
+    </section>
+
+    <!--kết thúc--> 
+
+    <!--mở đầu-->
+
+    <section class="banner-section" data-aos="fade-up">
+        <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+    </section>
+
+    <section class="product-section" data-aos="fade-up">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-apple-alt"></i> Mỹ Phẩm
+            </div>
+            <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="product-grid" id="cosmetic-products">
+            <%
+                if (CosmeticProducts != null && !CosmeticProducts.isEmpty()) {
+                    for (Product p : CosmeticProducts) {
+            %>
+            <div class="product-card">
+                <!--<div class="product-badge">Hot</div>-->
+                <div class="product-image-container">
+                    <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                        <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name"><%= p.getProductName()%></h3>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(29)</span>
+                    </div>
+                    <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                    <div class="button-group">
+                        <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                        <button class="buy-now-btn">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+            <%
+                }
+            } else {
+            %>
+            <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+            <%
+                }
+            %>
+        </div>
+        <button id="load-more-cosmetic" class="see-more-btn"
+                data-parent="6" data-target="cosmetic-products">
+            Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+        </button>            
+    </section>
+
+    <!--kết thúc--> 
+
+    <!-- Tips Section -->
+    <section class="tips-section" data-aos="fade-up">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-lightbulb"></i> Mẹo vặt hữu ích
+            </div>
+        </div>
+
+        <div class="tips-container">
+            <div class="tips-video">
+                <iframe width="560" height="315"
+                        src="https://www.youtube.com/embed/jN58QsGK4WI?si=2bBTyZJ0KCMstDbu"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+            <div class="tips-list">
+                <a href="meo-vat.html#lam-sach-rau-cu" class="tip-item">
+                    <div class="tip-image">
+                        <img src="https://th.bing.com/th/id/OIP.z6N7VnK2aWx6YlRmR-gpCwHaEK?w=200&h=112&rs=1&qlt=80&o=6&dpr=1.3&pid=3.1"
+                             alt="Làm sạch rau củ">
+                    </div>
+                    <div class="tip-content">
+                        <h3 class="tip-title">Cách làm sạch rau củ nhanh chóng</h3>
+                        <p class="tip-desc">Học cách rửa rau củ đúng cách để loại bỏ bụi bẩn và hóa
+                            chất.</p>
+                    </div>
+                </a>
+
+                <a href="meo-vat.html#bao-quan-thit-ca" class="tip-item">
+                    <div class="tip-image">
+                        <img src="https://th.bing.com/th/id/OIP.quVOFTDt4CAdc7VhwyocagHaEo?w=295&h=184&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
+                             alt="Bảo quản thịt cá">
+                    </div>
+                    <div class="tip-content">
+                        <h3 class="tip-title">Bí quyết bảo quản thịt cá tươi lâu</h3>
+                        <p class="tip-desc">Mẹo giữ thịt cá tươi ngon trong tủ lạnh hoặc tủ đông.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="meo-vat.html#chong-lang-phi-thuc-pham" class="tip-item">
+                    <div class="tip-image">
+                        <img src="https://th.bing.com/th/id/OIP.-2dh96wDCZIaPp8k1q3b7gHaE8?w=269&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
+                             alt="Chống lãng phí">
+                    </div>
+                    <div class="tip-content">
+                        <h3 class="tip-title">Mẹo chống lãng phí thực phẩm</h3>
+                        <p class="tip-desc">Cách tận dụng thức ăn thừa để tiết kiệm và bảo vệ môi
+                            trường.</p>
+                    </div>
+                </a>
+
+                <a href="meo-vat.html#lam-nuoc-uong-tai-nha" class="tip-item">
+                    <div class="tip-image">
+                        <img src="https://th.bing.com/th/id/OIP.qtsxKJLVM8WZX27VbcEp3AHaE8?w=242&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
+                             alt="Nước uống tại nhà">
+                    </div>
+                    <div class="tip-content">
+                        <h3 class="tip-title">Cách làm nước uống giải nhiệt tại nhà</h3>
+                        <p class="tip-desc">Công thức đơn giản để tạo ra thức uống mát lành từ trái
+                            cây tươi.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<jsp:include page="scrollToTop.jsp" />
+<jsp:include page="footer.jsp" />
+
+<!-- JavaScript -->
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+                // Initialize AOS
+                AOS.init({
+                    duration: 800,
+                    easing: 'ease-in-out',
+                    once: true,
+                    delay: 100
+                });
+
+                // Current slide index
+                let slideIndex = 1;
+                showSlides(slideIndex);
+
+                // Auto slide every 4 seconds
+                setInterval(function () {
+                    plusSlides(1);
+                }, 4000);
+
+                // Next/previous controls
+                function plusSlides(n) {
+                    showSlides(slideIndex += n);
+                }
+
+                // Thumbnail image controls
+                function currentSlide(n) {
+                    showSlides(slideIndex = n);
+                }
+
+                function showSlides(n) {
+                    let i;
+                    let slides = document.getElementsByClassName("mySlides");
+                    let dots = document.getElementsByClassName("dot");
+                    if (n > slides.length) {
+                        slideIndex = 1
+                    }
+                    if (n < 1) {
+                        slideIndex = slides.length
+                    }
+                    for (i = 0; i < slides.length; i++) {
+                        slides[i].style.display = "none";
+                    }
+                    for (i = 0; i < dots.length; i++) {
+                        dots[i].className = dots[i].className.replace(" active", "");
+                    }
+                    slides[slideIndex - 1].style.display = "block";
+                    dots[slideIndex - 1].className += " active";
+                }
+</script>
+<script src="${pageContext.request.contextPath}/assets/js/loadMore.js"></script>
+</body>
 
 </html>

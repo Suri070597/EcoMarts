@@ -440,5 +440,32 @@ public class OrderDAO extends DBContext {
         }
         return list;
     }
+public List<Order> getOrdersByAccountId(int accountId) {
+    List<Order> list = new ArrayList<>();
+    String sql = "SELECT o.*, a.FullName FROM [Order] o JOIN Account a ON o.AccountID = a.AccountID "
+               + "WHERE o.AccountID = ?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, accountId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Order o = new Order();
+            o.setOrderID(rs.getInt("OrderID"));
+            o.setAccountID(rs.getInt("AccountID"));
+            o.setOrderDate(rs.getTimestamp("OrderDate"));
+            o.setTotalAmount(rs.getDouble("TotalAmount"));
+            o.setShippingAddress(rs.getString("ShippingAddress"));
+            o.setShippingPhone(rs.getString("ShippingPhone"));
+            o.setPaymentMethod(rs.getString("PaymentMethod"));
+            o.setPaymentStatus(rs.getString("PaymentStatus"));
+            o.setOrderStatus(rs.getString("OrderStatus"));
+            o.setNotes(rs.getString("Notes"));
+            o.setAccountName(rs.getString("FullName"));
+            list.add(o);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return list;
+}
 
 }
