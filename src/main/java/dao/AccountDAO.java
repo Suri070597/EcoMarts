@@ -309,7 +309,7 @@ public class AccountDAO extends DBContext {
     }
 
     public int countAccounts() {
-        String sql = "SELECT COUNT(*) FROM Account";
+        String sql = "SELECT COUNT(*) FROM Account WHERE Role IN (0, 1)";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();

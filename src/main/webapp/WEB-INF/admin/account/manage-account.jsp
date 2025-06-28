@@ -51,7 +51,7 @@
                             </div>
                             <div class="stat-details">
                                 <h3>${totalAccounts}</h3>
-                                <p>Total Accounts</p>
+                                <p>Total Customers & Admins</p>
                             </div>
                         </div>
                         <div class="stat-card">
