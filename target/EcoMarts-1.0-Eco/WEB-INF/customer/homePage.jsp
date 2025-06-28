@@ -7,15 +7,22 @@
 <%
 //    List<Product> featuredProducts = (List<Product>) request.getAttribute("featuredProducts");
     ViewProductDAO dao = new ViewProductDAO();
-    List<Product> featuredProducts = dao.getFeaturedProducts();
-    List<Product> drinkProducts = dao.getDrinkProducts();
-    List<Product> FruitProducts = dao.getFruitProducts();
-    List<Product> CandyProducts = dao.getCandyProducts();
-    List<Product> CosmeticProducts = dao.getCosmeticProducts();
-    List<Product> MilkProducts = dao.getMilkProducts();
-    List<Product> MotherBabyProducts = dao.getMotherBabyProducts();
+//    List<Product> featuredProducts = dao.getFeaturedProducts();
+//    List<Product> drinkProducts = dao.getDrinkProducts();
+//    List<Product> FruitProducts = dao.getFruitProducts();
+//    List<Product> CandyProducts = dao.getCandyProducts();
+//    List<Product> CosmeticProducts = dao.getCosmeticProducts();
+//    List<Product> MilkProducts = dao.getMilkProducts();
+//    List<Product> MotherBabyProducts = dao.getMotherBabyProducts();
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
     List<Product> product = (List<Product>) request.getAttribute("data");
+    List<Product> drinkProducts = (List<Product>) request.getAttribute("featuredProducts1");
+    List<Product> FruitProducts = (List<Product>) request.getAttribute("featuredProducts3");
+    List<Product> CandyProducts = (List<Product>) request.getAttribute("featuredProducts4");
+    List<Product> CosmeticProducts = (List<Product>) request.getAttribute("featuredProducts6");
+    List<Product> MilkProducts = (List<Product>) request.getAttribute("featuredProducts2");
+    List<Product> MotherBabyProducts = (List<Product>) request.getAttribute("featuredProducts5");
+    List<Product> featuredProducts = (List<Product>) request.getAttribute("featuredProducts7");
 %>
 <!DOCTYPE html>
 <html>
@@ -124,7 +131,7 @@
                     </div>
                     <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                 </div>
-                <div class="product-grid">
+                <div class="product-grid" id="featured-products">
                     <%
                         if (featuredProducts != null && !featuredProducts.isEmpty()) {
                             for (Product p : featuredProducts) {
@@ -164,7 +171,8 @@
                         }
                     %>
                 </div>
-                <a href="#" class="see-more-btn">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></a>
+                <button id="load-more-featured" class="see-more-btn"
+                        data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
             </section>
 
             <!--mở đầu-->
@@ -181,7 +189,7 @@
 
                     <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                 </div>
-                <div class="product-grid">
+                <div class="product-grid" id="drink-products">
                     <%
                         if (drinkProducts != null && !drinkProducts.isEmpty()) {
                             for (Product p : drinkProducts) {
@@ -221,7 +229,8 @@
                         }
                     %>
                 </div>
-                <a href="#" class="see-more-btn">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></a>
+                <button id="load-more-drink" class="see-more-btn"
+                        data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
             </section>
 
             <!--kết thúc-->
@@ -239,7 +248,7 @@
                     </div>
                     <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                 </div>
-                <div class="product-grid">
+                <div class="product-grid" id="milk-products">
                     <%
                         if (MilkProducts != null && !MilkProducts.isEmpty()) {
                             for (Product p : MilkProducts) {
@@ -279,7 +288,10 @@
                         }
                     %>
                 </div>
-                <a href="#" class="see-more-btn">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></a>
+                <button id="load-more-milk" class="see-more-btn"
+                        data-parent="2" data-target="milk-products">
+                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+                </button>            
             </section>
 
             <!--kết thúc--> 
@@ -297,7 +309,7 @@
                     </div>
                     <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                 </div>
-                <div class="product-grid">
+                <div class="product-grid" id="fruit-products">
                     <%
                         if (FruitProducts != null && !FruitProducts.isEmpty()) {
                             for (Product p : FruitProducts) {
@@ -337,7 +349,10 @@
                         }
                     %>
                 </div>
-                <a href="#" class="see-more-btn">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></a>
+                <button id="load-more-fruit" class="see-more-btn"
+                        data-parent="3" data-target="fruit-products">
+                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+                </button>
             </section>
 
             <!--kết thúc--> 
@@ -355,7 +370,7 @@
                     </div>
                     <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                 </div>
-                <div class="product-grid">
+                <div class="product-grid" id="snack-products">
                     <%
                         if (CandyProducts != null && !CandyProducts.isEmpty()) {
                             for (Product p : CandyProducts) {
@@ -395,7 +410,10 @@
                         }
                     %>
                 </div>
-                <a href="#" class="see-more-btn">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></a>
+                <button id="load-more-snack" class="see-more-btn"
+                        data-parent="4" data-target="snack-products">
+                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+                </button>
             </section>
 
             <!--kết thúc--> 
@@ -416,7 +434,7 @@
                     </div>
                     <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                 </div>
-                <div class="product-grid">
+                <div class="product-grid" id="baby-products">
                     <%
                         if (MotherBabyProducts != null && !MotherBabyProducts.isEmpty()) {
                             for (Product p : MotherBabyProducts) {
@@ -456,7 +474,10 @@
                         }
                     %>
                 </div>
-                <a href="#" class="see-more-btn">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></a>
+                <button id="load-more-baby" class="see-more-btn"
+                        data-parent="5" data-target="baby-products">
+                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+                </button>            
             </section>
 
             <!--kết thúc--> 
@@ -474,7 +495,7 @@
                     </div>
                     <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                 </div>
-                <div class="product-grid">
+                <div class="product-grid" id="cosmetic-products">
                     <%
                         if (CosmeticProducts != null && !CosmeticProducts.isEmpty()) {
                             for (Product p : CosmeticProducts) {
@@ -514,7 +535,10 @@
                         }
                     %>
                 </div>
-                <a href="#" class="see-more-btn">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></a>
+                <button id="load-more-cosmetic" class="see-more-btn"
+                        data-parent="6" data-target="cosmetic-products">
+                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+                </button>            
             </section>
 
             <!--kết thúc--> 
@@ -642,6 +666,7 @@
                             dots[slideIndex - 1].className += " active";
                         }
         </script>
+        <script src="${pageContext.request.contextPath}/assets/js/loadMore.js"></script>
     </body>
 
 </html>

@@ -77,11 +77,11 @@
                                 </tr>
                                 <tr>
                                     <th>Discount Amount:</th>
-                                    <td>${voucher.discountAmount}</td>
+                                    <td><fmt:formatNumber value="${voucher.discountAmount}" type="number"/></td>
                                 </tr>
                                 <tr>
                                     <th>Min Order Value:</th>
-                                    <td>${voucher.minOrderValue}</td>
+                                    <td><fmt:formatNumber value="${voucher.minOrderValue}" type="number"/></td>
                                 </tr>
                                 <tr>
                                     <th>Max Usage:</th>

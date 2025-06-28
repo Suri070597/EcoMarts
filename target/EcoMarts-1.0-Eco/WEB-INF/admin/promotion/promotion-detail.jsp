@@ -44,8 +44,8 @@
                                 <td>${promotion.description}</td>
                             </tr>
                             <tr>
-                                <th>Discount %</th>
-                                <td><fmt:formatNumber value="${promotion.discountPercent}" type="number"/></td>
+                                <th>Discount</th>
+                                <td><fmt:formatNumber value="${promotion.discountPercent}" type="number"/>%</td>
                             </tr>
                             <tr>
                                 <th>Start Date</th>

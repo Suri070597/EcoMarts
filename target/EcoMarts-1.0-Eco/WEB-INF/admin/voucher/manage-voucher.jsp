@@ -70,8 +70,8 @@
                                         <td>${v.voucherID}</td>
                                         <td>${v.voucherCode}</td>
                                         <td>${v.description}</td>
-                                        <td>${v.discountAmount}</td>
-                                        <td>${v.minOrderValue}</td>
+                                        <td><fmt:formatNumber value="${v.discountAmount}" type="number"/></td>
+                                        <td><fmt:formatNumber value="${v.minOrderValue}" type="number"/></td>
                                         <td>${v.usageCount}/${v.maxUsage}</td>
                                         <td><fmt:formatDate value="${v.startDate}" pattern="yyyy-MM-dd"/></td>
                                         <td><fmt:formatDate value="${v.endDate}" pattern="yyyy-MM-dd"/></td>
