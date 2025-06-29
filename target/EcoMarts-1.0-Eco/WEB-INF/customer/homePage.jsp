@@ -5,15 +5,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%
-//    List<Product> featuredProducts = (List<Product>) request.getAttribute("featuredProducts");
     ViewProductDAO dao = new ViewProductDAO();
-//    List<Product> featuredProducts = dao.getFeaturedProducts();
-//    List<Product> drinkProducts = dao.getDrinkProducts();
-//    List<Product> FruitProducts = dao.getFruitProducts();
-//    List<Product> CandyProducts = dao.getCandyProducts();
-//    List<Product> CosmeticProducts = dao.getCosmeticProducts();
-//    List<Product> MilkProducts = dao.getMilkProducts();
-//    List<Product> MotherBabyProducts = dao.getMotherBabyProducts();
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
     List<Product> product = (List<Product>) request.getAttribute("data");
     List<Product> drinkProducts = (List<Product>) request.getAttribute("featuredProducts1");
@@ -99,7 +91,7 @@
                 <div class="category-wrapper">
                     <!-- Mục tĩnh "Mua lại đơn cũ" -->
                     <div class="category-item">
-                        <a href="#">
+                        <a href="${pageContext.request.contextPath}/customer/reorder">
                             <div class="category-icon">
                                 <img src="https://cdn.tgdd.vn/bachhoaxanh/www/Content/images/icon-history.v202301091407.png"
                                      alt="Mua lại đơn cũ">
@@ -119,7 +111,7 @@
                             </a>
                         </div>
                     </c:forEach>
-                </div>
+                </div> <!-- Đóng div.category-wrapper -->
             </section>
 
 
@@ -129,7 +121,7 @@
                     <div class="section-title">
                         <i class="fas fa-fire"></i> Sản phẩm nổi bật
                     </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                    <a href="ViewAllProductServlet?categoryId=7" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                 </div>
                 <div class="product-grid" id="featured-products">
                     <%
@@ -137,7 +129,6 @@
                             for (Product p : featuredProducts) {
                     %>
                     <div class="product-card">
-                        <div class="product-badge">Hot</div>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
@@ -186,8 +177,7 @@
                     <div class="section-title">
                         <i class="fas fa-glass-cheers"></i> Nước giải khát
                     </div>
-
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                    <a href="ViewAllProductServlet?categoryId=1" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>    
                 </div>
                 <div class="product-grid" id="drink-products">
                     <%
@@ -246,7 +236,7 @@
                     <div class="section-title">
                         <i class="fas fa-apple-alt"></i> Sữa
                     </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                    <a href="ViewAllProductServlet?categoryId=2" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>               
                 </div>
                 <div class="product-grid" id="milk-products">
                     <%
@@ -307,7 +297,7 @@
                     <div class="section-title">
                         <i class="fas fa-apple-alt"></i> Trái cây
                     </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                    <a href="ViewAllProductServlet?categoryId=3" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>               
                 </div>
                 <div class="product-grid" id="fruit-products">
                     <%
@@ -368,7 +358,7 @@
                     <div class="section-title">
                         <i class="fas fa-apple-alt"></i> Bánh Kẹo
                     </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                    <a href="ViewAllProductServlet?categoryId=4" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>              
                 </div>
                 <div class="product-grid" id="snack-products">
                     <%
@@ -432,7 +422,7 @@
                     <div class="section-title">
                         <i class="fas fa-apple-alt"></i> Mẹ Và Bé
                     </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                    <a href="ViewAllProductServlet?categoryId=5" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>             
                 </div>
                 <div class="product-grid" id="baby-products">
                     <%
@@ -493,7 +483,7 @@
                     <div class="section-title">
                         <i class="fas fa-apple-alt"></i> Mỹ Phẩm
                     </div>
-                    <a href="#" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                    <a href="ViewAllProductServlet?categoryId=6" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>           
                 </div>
                 <div class="product-grid" id="cosmetic-products">
                     <%
