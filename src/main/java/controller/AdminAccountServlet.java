@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import dao.AccountDAO;
+import db.MD5Util;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -135,7 +136,7 @@ public class AdminAccountServlet extends HttpServlet {
 
                 Account account = new Account();
                 account.setUsername(username);
-                account.setPassword(password);
+                account.setPassword(MD5Util.hash(password));
                 account.setEmail(email);
                 account.setFullName(fullName);
                 account.setPhone(phone);
@@ -174,7 +175,16 @@ public class AdminAccountServlet extends HttpServlet {
                 Account account = new Account();
                 account.setAccountID(id);
                 account.setUsername(username);
-                account.setPassword(password);
+                // If password field is not empty, update with new MD5 hashed password
+                if (password != null && !password.trim().isEmpty()) {
+                    account.setPassword(MD5Util.hash(password));
+                } else {
+                    // Retrieve current password from database if not changed
+                    Account existingAccount = accDAO.getFullAccountById(id);
+                    if (existingAccount != null) {
+                        account.setPassword(existingAccount.getPassword());
+                    }
+                }
                 account.setEmail(email);
                 account.setFullName(fullName);
                 account.setPhone(phone);

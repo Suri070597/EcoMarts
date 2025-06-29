@@ -5,6 +5,7 @@ import java.util.List;
 
 import dao.AccountDAO;
 import dao.StaffDAO;
+import db.MD5Util;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,6 +16,7 @@ import model.Staff;
 
 @WebServlet(name = "AdminStaffServlet", urlPatterns = {"/admin/staff"})
 public class AdminStaffServlet extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -29,19 +31,19 @@ public class AdminStaffServlet extends HttpServlet {
                 return;
             }
             int staffId = Integer.parseInt(idParam);
-            
+
             try {
                 // Use the comprehensive deletion method
                 boolean deleted = staffDAO.deleteStaffCompletely(staffId);
                 if (!deleted) {
                     request.setAttribute("errorMessage", "Không thể xóa nhân viên này!");
                     List<Staff> staffList = staffDAO.getAllStaff();
-                    
+
                     // Get statistics for dashboard
                     int totalStaff = staffDAO.countStaff();
                     int activeStaffCount = staffDAO.countStaffByStatus("Active");
                     int inactiveStaffCount = staffDAO.countStaffByStatus("Inactive");
-                    
+
                     request.setAttribute("staffList", staffList);
                     request.setAttribute("totalStaff", totalStaff);
                     request.setAttribute("activeStaffCount", activeStaffCount);
@@ -49,18 +51,18 @@ public class AdminStaffServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/staff/manage-staff.jsp").forward(request, response);
                     return;
                 }
-                
+
                 response.sendRedirect(request.getContextPath() + "/admin/staff");
-                
+
             } catch (Exception e) {
                 request.setAttribute("errorMessage", "Lỗi khi xóa nhân viên: " + e.getMessage());
                 List<Staff> staffList = staffDAO.getAllStaff();
-                
+
                 // Get statistics for dashboard
                 int totalStaff = staffDAO.countStaff();
                 int activeStaffCount = staffDAO.countStaffByStatus("Active");
                 int inactiveStaffCount = staffDAO.countStaffByStatus("Inactive");
-                
+
                 request.setAttribute("staffList", staffList);
                 request.setAttribute("totalStaff", totalStaff);
                 request.setAttribute("activeStaffCount", activeStaffCount);
@@ -128,12 +130,12 @@ public class AdminStaffServlet extends HttpServlet {
                     } else {
                         staffList = staffDAO.getAllStaff();
                     }
-                    
+
                     // Get statistics for dashboard
                     int totalStaff = staffDAO.countStaff();
                     int activeStaffCount = staffDAO.countStaffByStatus("Active");
                     int inactiveStaffCount = staffDAO.countStaffByStatus("Inactive");
-                    
+
                     request.setAttribute("staffList", staffList);
                     request.setAttribute("totalStaff", totalStaff);
                     request.setAttribute("activeStaffCount", activeStaffCount);
@@ -143,12 +145,12 @@ public class AdminStaffServlet extends HttpServlet {
             }
         } else {
             List<Staff> staffList = staffDAO.getAllStaff();
-            
+
             // Get statistics for dashboard
             int totalStaff = staffDAO.countStaff();
             int activeStaffCount = staffDAO.countStaffByStatus("Active");
             int inactiveStaffCount = staffDAO.countStaffByStatus("Inactive");
-            
+
             request.setAttribute("staffList", staffList);
             request.setAttribute("totalStaff", totalStaff);
             request.setAttribute("activeStaffCount", activeStaffCount);
@@ -173,14 +175,14 @@ public class AdminStaffServlet extends HttpServlet {
                 String phone = request.getParameter("phone");
                 String address = request.getParameter("address");
                 String gender = request.getParameter("gender");
-                
+
                 // Check for null role parameter and set default to 2 (Staff)
                 String roleParam = request.getParameter("role");
                 int role = 2; // Default to Staff role
                 if (roleParam != null && !roleParam.trim().isEmpty()) {
                     role = Integer.parseInt(roleParam);
                 }
-                
+
                 String status = request.getParameter("status");
 
                 // Validate required fields
@@ -228,7 +230,7 @@ public class AdminStaffServlet extends HttpServlet {
                 // Create account first
                 Account account = new Account();
                 account.setUsername(username);
-                account.setPassword(password);
+                account.setPassword(MD5Util.hash(password));
                 account.setEmail(email);
                 account.setFullName(fullName);
                 account.setPhone(phone);
@@ -280,22 +282,22 @@ public class AdminStaffServlet extends HttpServlet {
             try {
                 String staffIDParam = request.getParameter("staffID");
                 String accountIDParam = request.getParameter("accountID");
-                
+
                 if (staffIDParam == null || staffIDParam.trim().isEmpty()) {
                     request.setAttribute("errorMessage", "Invalid staff ID.");
                     request.getRequestDispatcher("/WEB-INF/admin/staff/edit-staff.jsp").forward(request, response);
                     return;
                 }
-                
+
                 if (accountIDParam == null || accountIDParam.trim().isEmpty()) {
                     request.setAttribute("errorMessage", "Invalid account ID.");
                     request.getRequestDispatcher("/WEB-INF/admin/staff/edit-staff.jsp").forward(request, response);
                     return;
                 }
-                
+
                 int staffID = Integer.parseInt(staffIDParam);
                 int accountID = Integer.parseInt(accountIDParam);
-                
+
                 // Get form data
                 String username = request.getParameter("username");
                 String password = request.getParameter("password");
@@ -309,13 +311,6 @@ public class AdminStaffServlet extends HttpServlet {
                 // Validate required fields
                 if (username == null || username.trim().isEmpty()) {
                     request.setAttribute("errorMessage", "Username is required.");
-                    Staff currentStaff = staffDAO.getStaffById(staffID);
-                    request.setAttribute("staff", currentStaff);
-                    request.getRequestDispatcher("/WEB-INF/admin/staff/edit-staff.jsp").forward(request, response);
-                    return;
-                }
-                if (password == null || password.trim().isEmpty()) {
-                    request.setAttribute("errorMessage", "Password is required.");
                     Staff currentStaff = staffDAO.getStaffById(staffID);
                     request.setAttribute("staff", currentStaff);
                     request.getRequestDispatcher("/WEB-INF/admin/staff/edit-staff.jsp").forward(request, response);
@@ -368,7 +363,18 @@ public class AdminStaffServlet extends HttpServlet {
                 Account account = new Account();
                 account.setAccountID(accountID);
                 account.setUsername(username);
-                account.setPassword(password);
+
+                // If password field is not empty, update with new MD5 hashed password
+                if (password != null && !password.trim().isEmpty()) {
+                    account.setPassword(MD5Util.hash(password));
+                } else {
+                    // Retrieve current password from database if not changed
+                    Account existingAccount = accDAO.getFullAccountById(accountID);
+                    if (existingAccount != null) {
+                        account.setPassword(existingAccount.getPassword());
+                    }
+                }
+
                 account.setEmail(email);
                 account.setFullName(fullName);
                 account.setPhone(phone);
@@ -424,4 +430,4 @@ public class AdminStaffServlet extends HttpServlet {
         }
     }
 
-} 
+}
