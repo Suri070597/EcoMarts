@@ -1,3 +1,4 @@
+controller\ViewAllProductServlet.class
 dao\OrderDAO.class
 controller\AdminAccountServlet.class
 dao\SupplierDAO.class
@@ -16,6 +17,7 @@ controller\ProductServlet.class
 controller\SearchProductServlet.class
 controller\staff\OrderServlet.class
 dao\OrderDetailDAO.class
+controller\ReorderServlet.class
 controller\AdminDashboardServlet.class
 dao\StaffDAO.class
 controller\register\LogoutServlet.class

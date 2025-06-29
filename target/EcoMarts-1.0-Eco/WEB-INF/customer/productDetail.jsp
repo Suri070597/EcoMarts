@@ -39,15 +39,22 @@
         <!-- Font Awesome -->
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-        <!-- Sửa lại bằng cách dùng context path -->
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/homeProductDetail.css?version=<%= System.currentTimeMillis()%>">
-
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/mainProductDetail.css?version=<%= System.currentTimeMillis()%>">
+        <!-- Main CSS -->
+        <link rel="stylesheet" href="./assets/css/main.css?version=<%= System.currentTimeMillis()%>" />
+        <!-- Home CSS -->
+        <link rel="stylesheet" href="./assets/css/home.css?version=<%= System.currentTimeMillis()%>">
+        <script defer src="./assets/js/homeJs.js"></script>
         <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/css/productDetail.css">
+
+        <!-- Animate on scroll -->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     </head>
+
     <body>
-        <jsp:include page="headerProductDetail.jsp" />
-        <div class="main-content1">
+        <jsp:include page="header.jsp" />
+
+        <!-- Main content -->
+        <div class="main-content2">
             <%
                 String errorMessage = (String) request.getAttribute("errorMessage");
                 if (errorMessage != null && !errorMessage.isEmpty()) {
@@ -251,7 +258,7 @@
                 </div>
             </div>
         </div>
-        <jsp:include page="footerProductDetail.jsp" />
+        <jsp:include page="footer.jsp" />
         <%
             }
         %>

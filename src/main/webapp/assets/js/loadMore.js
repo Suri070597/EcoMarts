@@ -6,7 +6,7 @@ document.querySelectorAll(".see-more-btn").forEach(btn => {
     const targetId = btn.dataset.target;
 
     if (!offsets[parentId]) {
-        offsets[parentId] = 6; // nếu bạn hiển thị trước 6 sp
+//        offsets[parentId] = 6; // nếu bạn hiển thị trước 6 sp
     }
 
     btn.addEventListener("click", function () {

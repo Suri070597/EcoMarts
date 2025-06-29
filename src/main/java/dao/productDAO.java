@@ -385,18 +385,97 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
+    public List<Product> getProductsByCategoryAndSub(int parentCategoryId) {
+        List<Product> list = new ArrayList<>();
+
+        String sql = """
+        SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
+        FROM Product p
+        JOIN Category c ON p.CategoryID = c.CategoryID
+        JOIN Supplier s ON p.SupplierID = s.SupplierID
+        WHERE p.CategoryID IN (
+            SELECT CategoryID FROM Category
+            WHERE ParentID = ? OR CategoryID = ?
+        )
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, parentCategoryId); // danh mục con
+            ps.setInt(2, parentCategoryId); // chính nó
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                p.setPrice(rs.getDouble("Price"));
+                p.setDescription(rs.getString("Description"));
+                p.setStockQuantity(rs.getInt("StockQuantity"));
+                p.setImageURL(rs.getString("ImageURL"));
+                p.setUnit(rs.getString("Unit"));
+                p.setCreatedAt(rs.getTimestamp("CreatedAt"));
+
+                // Set Category
+                Category c = new Category();
+                c.setCategoryID(rs.getInt("CategoryID"));
+                c.setCategoryName(rs.getString("CategoryName"));
+                c.setParentID(rs.getInt("ParentID"));
+                p.setCategory(c);
+
+                // Set Supplier
+                Supplier s = new Supplier();
+                s.setSupplierID(rs.getInt("SupplierID"));
+                s.setCompanyName(rs.getString("CompanyName"));
+                p.setSupplier(s);
+
+                list.add(p);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public String getCategoryNameById(int id) {
+        String categoryName = null;
+        String sql = "SELECT c.CategoryName FROM Category as c WHERE c.CategoryID = ?";
+
+        try ( PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                categoryName = rs.getString("CategoryName");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return categoryName;
+    }
+
     public static void main(String[] args) throws ParseException {
         ProductDAO dao = new ProductDAO();
 
-        int parentCategoryId = 7;
-        int excludeProductId = 50;
+        int parentCategoryId = 1; // Thay đổi ID này tùy theo dữ liệu thực tế của bạn
 
-        List<Product> relatedProducts = dao.getRelatedProductsByParentCategory(parentCategoryId, excludeProductId);
+        List<Product> products = dao.getProductsByCategoryAndSub(parentCategoryId);
 
-        // In ra kết quả
-        for (Product p : relatedProducts) {
-            System.out.println("ID: " + p.getProductID() + " - Tên: " + p.getProductName() + " - Giá: " + p.getPrice());
+        if (products.isEmpty()) {
+            System.out.println("Không có sản phẩm nào thuộc category cha có ID = " + parentCategoryId);
+        } else {
+            System.out.println("Danh sách sản phẩm thuộc category cha có ID = " + parentCategoryId + ":");
+            for (Product p : products) {
+                System.out.println("Product ID: " + p.getProductID());
+                System.out.println("Name: " + p.getProductName());
+                System.out.println("Price: " + p.getPrice());
+                System.out.println("Category ID: " + (p.getCategory() != null ? p.getCategory().getCategoryID() : "null"));
+                System.out.println("-----------------------------");
+            }
         }
-
     }
 }

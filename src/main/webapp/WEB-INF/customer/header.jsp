@@ -79,7 +79,7 @@
 <!-- Header -->
 <div class="header">
     <div class="logo">
-        <img src="assets/img/eco.png" alt="Logo">
+        <a href="home"><img src="assets/img/eco.png" alt="Logo"></a>
         <span>EcoMart</span>
     </div>
 

@@ -4,6 +4,7 @@
  */
 package controller;
 
+import dao.CategoryDAO;
 import dao.SearchProductsDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.List;
+import model.Category;
 import model.Product;
 
 /**
@@ -61,6 +63,10 @@ public class SearchProductServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        CategoryDAO categoryDAO = new CategoryDAO();
+        List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
+        request.setAttribute("categories", categories);
+        String categoryIdRaw = request.getParameter("categoryId");
         String keyword = request.getParameter("keyword");
 
         SearchProductsDAO dao = new SearchProductsDAO();
