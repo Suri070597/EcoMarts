@@ -21,8 +21,8 @@ import model.Product;
  *
  * @author LNQB
  */
-@WebServlet(name = "ProductDetailServlet", urlPatterns = {"/ProductDetail"})
-public class ProductDetailServlet extends HttpServlet {
+@WebServlet(name = "ViewAllProductServlet", urlPatterns = {"/ViewAllProductServlet"})
+public class ViewAllProductServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -37,18 +37,20 @@ public class ProductDetailServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ProductDetailServlet</title>");
+            out.println("<title>Servlet ProductByCategoryServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet ProductDetailServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet ProductByCategoryServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
     }
 
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -64,42 +66,22 @@ public class ProductDetailServlet extends HttpServlet {
         List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
         request.setAttribute("categories", categories);
         String categoryIdRaw = request.getParameter("categoryId");
-        ProductDAO dao = new ProductDAO();
-        String idRaw = request.getParameter("id");
-
         try {
-            if (idRaw == null || idRaw.trim().isEmpty()) {
-                request.setAttribute("errorMessage", "ID sản phẩm không hợp lệ");
-                request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
-                return;
-            }
 
-            int id = Integer.parseInt(idRaw);
-            Product mo = dao.getProductById(id);
+            int categoryId = Integer.parseInt(categoryIdRaw);
 
-            if (mo == null) {
-                request.setAttribute("errorMessage", "Sản phẩm với ID " + id + " không tồn tại");
-                request.setAttribute("productId", id);
-                request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
-                return;
-            }
+            ProductDAO dao = new ProductDAO();
+            List<Product> productList = dao.getProductsByCategoryAndSub(categoryId);
 
-            if (mo.getCategory() != null) {
-                int parentId = mo.getCategory().getParentID();
-                List<Product> relatedProducts = dao.getRelatedProductsByParentCategory(parentId, id);
-                request.setAttribute("relatedProducts", relatedProducts);
-            }
+            String categoryName = dao.getCategoryNameById(categoryId);
+            request.setAttribute("categoryName", categoryName);
 
-            request.setAttribute("mo", mo);
-            request.setAttribute("dataCate", dao.getCategory());
-            request.setAttribute("dataSup", dao.getAllSuppliers());
-            request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
+            request.setAttribute("productList", productList);
+            request.setAttribute("categoryId", categoryId);
+            request.getRequestDispatcher("/WEB-INF/customer/view-all.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "ID sản phẩm phải là một số hợp lệ: " + idRaw);
-            request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
-        } catch (Exception e) {
-            throw new ServletException(e);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid category ID");
         }
     }
 
