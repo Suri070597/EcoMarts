@@ -11,8 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
 public class TokenDAO {
+
     private final DBContext1 dbContext = new DBContext1();
 
     public void insertToken(Token token) throws SQLException {
@@ -59,6 +59,51 @@ public class TokenDAO {
             stmt.setInt(2, tokenId);
             stmt.executeUpdate();
             System.out.println("Updated token status to " + status + " for TokenID=" + tokenId);
+        }
+    }
+    // Tạo token mới
+
+    public void createToken(Connection conn, int accountId, String token) {
+        String sql = "INSERT INTO Token_Table (AccountID, Token, Status, Time_Add, Time_Exp) VALUES (?, ?, 'Active', GETDATE(), DATEADD(MINUTE, 30, GETDATE()))";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.setString(2, token);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+// Lấy token hợp lệ
+    public Token getValidToken(Connection conn, String token) {
+        String sql = "SELECT * FROM Token_Table WHERE Token = ? AND Status = 'Active' AND Time_Exp > GETDATE()";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, token);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Token(
+                        rs.getInt("TokenID"),
+                        rs.getInt("AccountID"),
+                        rs.getString("Token"),
+                        rs.getString("Status"),
+                        rs.getTimestamp("Time_Add"),
+                        rs.getTimestamp("Time_Exp")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+// Đánh dấu token đã dùng
+    public void markTokenUsed(Connection conn, String token) {
+        String sql = "UPDATE Token_Table SET Status='Used' WHERE Token=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, token);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

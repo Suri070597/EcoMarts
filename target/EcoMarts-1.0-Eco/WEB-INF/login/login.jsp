@@ -84,7 +84,7 @@
             <button class="btn" type="submit">Sign in</button>
         </form>
         <div class="links">
-            <a href="<%= request.getContextPath() %>/register">Don't have an account?</a> | <a href="#">Forgot password?</a>
+            <a href="<%= request.getContextPath() %>/register">Don't have an account?</a> | <a href="<%= request.getContextPath() %>/forget-password"> Forgot password?</a>
         </div>
         <hr style="margin: 20px 0;">
         <a href="https://accounts.google.com/o/oauth2/auth?scope=email profile openid&redirect_uri=http://localhost:8080/FPT_XANH-1.0-SNAPSHOT/Logingoogle&response_type=code&client_id=565975258765-q57qb0mksqf8e0endoqkjojscnehluu9.apps.googleusercontent.com" class="google-btn">
