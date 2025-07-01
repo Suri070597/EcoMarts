@@ -15,11 +15,13 @@ controller\staff\StaffServlet.class
 controller\register\LoginServlet.class
 controller\ProductServlet.class
 controller\SearchProductServlet.class
+controller\forgetpassword\ResetPasswordServlet.class
 controller\staff\OrderServlet.class
 dao\OrderDetailDAO.class
 controller\ReorderServlet.class
 controller\AdminDashboardServlet.class
 dao\StaffDAO.class
+controller\forgetpassword\ForgetPasswordServlet.class
 controller\register\LogoutServlet.class
 model\Category.class
 controller\ImageServlet.class

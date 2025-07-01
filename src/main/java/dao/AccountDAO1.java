@@ -113,4 +113,42 @@ public class AccountDAO1 {
             System.out.println("Updated account status to " + status + " for AccountID=" + accountId);
         }
     }
+    // Lấy Account theo email
+    public Account getAccountByEmail(Connection conn, String email) {
+        String sql = "SELECT * FROM Account WHERE Email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Account(
+                        rs.getInt("AccountID"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Email"),
+                        rs.getString("FullName"),
+                        rs.getString("Phone"),
+                        rs.getString("Address"),
+                        rs.getString("Gender"),
+                        rs.getInt("Role"),
+                        rs.getString("Status")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+// Cập nhật mật khẩu mới
+    public void updatePassword(Connection conn, int accountId, String newPassword) {
+        String sql = "UPDATE Account SET Password=? WHERE AccountID=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPassword);
+            ps.setInt(2, accountId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
