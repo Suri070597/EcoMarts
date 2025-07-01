@@ -12,6 +12,7 @@
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
               type="image/x-icon">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
         <link rel="stylesheet"
@@ -44,7 +45,7 @@
                             <label class="form-label" for="password">Password</label>
                             <input type="password" class="form-control" id="password" name="password"
                                    required>
-                            <div class="invalid-feedback" id="passwordFeedback">Password must be at least 8 characters and include letters, numbers, and special characters</div>
+                            <div class="invalid-feedback" id="passwordFeedback">Password must be at least 6 characters and include letters, numbers, and special characters</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="email">Email</label>
@@ -127,12 +128,12 @@
             // Password validation
             document.getElementById('password').addEventListener('input', function() {
                 const password = this.value;
-                const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+                const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
                 
                 if (!passwordRegex.test(password)) {
-                    this.setCustomValidity('Password must contain at least 8 characters, including letters, numbers, and special characters');
+                    this.setCustomValidity('Password must contain at least 6 characters, including letters, numbers, and special characters');
                     document.getElementById('passwordFeedback').textContent = 
-                        'Password must contain at least 8 characters, including letters, numbers, and special characters';
+                        'Password must contain at least 6 characters, including letters, numbers, and special characters';
                 } else {
                     this.setCustomValidity('');
                 }
@@ -142,13 +143,13 @@
             document.getElementById('accountForm').addEventListener('submit', function(event) {
                 const passwordInput = document.getElementById('password');
                 const password = passwordInput.value;
-                const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+                const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
                 
                 if (!passwordRegex.test(password)) {
                     event.preventDefault();
-                    passwordInput.setCustomValidity('Password must contain at least 8 characters, including letters, numbers, and special characters');
+                    passwordInput.setCustomValidity('Password must contain at least 6 characters, including letters, numbers, and special characters');
                     document.getElementById('passwordFeedback').textContent = 
-                        'Password must contain at least 8 characters, including letters, numbers, and special characters';
+                        'Password must contain at least 6 characters, including letters, numbers, and special characters';
                     passwordInput.classList.add('is-invalid');
                 }
             });
