@@ -178,7 +178,7 @@
                 <option value="">-- Chọn giới tính --</option>
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
-                <option value="Khác">Khác</option>
+            
             </select>
 
             <label for="password">Mật khẩu:</label>
