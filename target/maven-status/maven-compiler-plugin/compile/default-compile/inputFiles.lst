@@ -8,6 +8,8 @@ C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controll
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\dangky\OtpVerificationServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\dangky\RegisterRedirectServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\dangky\RegistrationServlet.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\forgetpassword\ForgetPasswordServlet.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\forgetpassword\ResetPasswordServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\HomeServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ImageServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\LoadMoreFeaturedServlet.java
