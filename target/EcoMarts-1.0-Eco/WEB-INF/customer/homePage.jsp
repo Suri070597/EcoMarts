@@ -103,7 +103,7 @@
                     <!-- Vòng lặp hiển thị các danh mục cha từ database -->
                     <c:forEach var="cat" items="${categories}">
                         <div class="category-item">
-                            <a href="category?id=${cat.categoryID}">
+                            <a href="ViewAllProductServlet?categoryId=${cat.categoryID}">
                                 <div class="category-icon">
                                     <img src="${cat.imageURL}" alt="${cat.categoryName}">
                                 </div>
