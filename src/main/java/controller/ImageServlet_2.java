@@ -10,10 +10,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-@WebServlet(name = "ImageServlet", urlPatterns = { "/ImageServlet" })
-public class ImageServlet extends HttpServlet {
+@WebServlet(name = "ImageServlet_2", urlPatterns = { "/ImageServlet_2" })
+public class ImageServlet_2 extends HttpServlet {
 
-    private static final String IMAGE_UPLOAD_DIR = "C:/ProductImages";
+    private static final String IMAGE_UPLOAD_DIR = "C:/EcoMarts/ReviewImages";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -50,6 +50,6 @@ public class ImageServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "ImageServlet serves product images";
+        return "ImageServlet_2 serves review images from C:/EcoMarts/ReviewImages";
     }
 }

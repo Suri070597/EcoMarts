@@ -12,6 +12,7 @@ C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controll
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\forgetpassword\ResetPasswordServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\HomeServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ImageServlet.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ImageServlet_2.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\LoadMoreFeaturedServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ProductDetailServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ProductServlet.java
@@ -19,14 +20,18 @@ C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controll
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\register\LoginServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\register\LogoutServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ReorderServlet.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ReviewServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\SearchProductServlet.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\staff\ManageReviewServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\staff\OrderServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\staff\StaffServlet.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\StaffFeedBack.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\supplier\SupplierServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ViewAllProductServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\AccountDAO.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\AccountDAO1.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\CategoryDAO.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\FeedBackDAO.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\OrderDAO.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\OrderDetailDAO.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\ProductDAO.java

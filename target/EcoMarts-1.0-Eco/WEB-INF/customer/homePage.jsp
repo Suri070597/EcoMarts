@@ -5,7 +5,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%
-    ViewProductDAO dao = new ViewProductDAO();
+    //ViewProductDAO dao = new ViewProductDAO();
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
     List<Product> product = (List<Product>) request.getAttribute("data");
     List<Product> drinkProducts = (List<Product>) request.getAttribute("featuredProducts1");
@@ -139,12 +139,28 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
+                                <% 
+                                    double avg = 0.0;
+                                    int count = 0;
+                                    if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
+                                        java.util.Map<Integer, Double> avgRatingMap = (java.util.Map<Integer, Double>) request.getAttribute("avgRatingMap");
+                                        java.util.Map<Integer, Integer> reviewCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("reviewCountMap");
+                                        avg = avgRatingMap.getOrDefault(p.getProductID(), 0.0);
+                                        count = reviewCountMap.getOrDefault(p.getProductID(), 0);
+                                    }
+                                    int fullStars = (int) avg;
+                                    boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
+                                    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                                    for (int i = 0; i < fullStars; i++) { %>
+                                        <i class="fas fa-star"></i>
+                                <% } %>
+                                <% if (halfStar) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } %>
+                                <% for (int i = 0; i < emptyStars; i++) { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                                <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
                             <div class="button-group">
@@ -196,12 +212,28 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
+                                <% 
+                                    double avg = 0.0;
+                                    int count = 0;
+                                    if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
+                                        java.util.Map<Integer, Double> avgRatingMap = (java.util.Map<Integer, Double>) request.getAttribute("avgRatingMap");
+                                        java.util.Map<Integer, Integer> reviewCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("reviewCountMap");
+                                        avg = avgRatingMap.getOrDefault(p.getProductID(), 0.0);
+                                        count = reviewCountMap.getOrDefault(p.getProductID(), 0);
+                                    }
+                                    int fullStars = (int) avg;
+                                    boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
+                                    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                                    for (int i = 0; i < fullStars; i++) { %>
+                                        <i class="fas fa-star"></i>
+                                <% } %>
+                                <% if (halfStar) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } %>
+                                <% for (int i = 0; i < emptyStars; i++) { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                                <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
                             <div class="button-group">
@@ -255,12 +287,28 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
+                                <% 
+                                    double avg = 0.0;
+                                    int count = 0;
+                                    if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
+                                        java.util.Map<Integer, Double> avgRatingMap = (java.util.Map<Integer, Double>) request.getAttribute("avgRatingMap");
+                                        java.util.Map<Integer, Integer> reviewCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("reviewCountMap");
+                                        avg = avgRatingMap.getOrDefault(p.getProductID(), 0.0);
+                                        count = reviewCountMap.getOrDefault(p.getProductID(), 0);
+                                    }
+                                    int fullStars = (int) avg;
+                                    boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
+                                    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                                    for (int i = 0; i < fullStars; i++) { %>
+                                        <i class="fas fa-star"></i>
+                                <% } %>
+                                <% if (halfStar) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } %>
+                                <% for (int i = 0; i < emptyStars; i++) { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                                <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
                             <div class="button-group">
@@ -316,12 +364,28 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
+                                <% 
+                                    double avg = 0.0;
+                                    int count = 0;
+                                    if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
+                                        java.util.Map<Integer, Double> avgRatingMap = (java.util.Map<Integer, Double>) request.getAttribute("avgRatingMap");
+                                        java.util.Map<Integer, Integer> reviewCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("reviewCountMap");
+                                        avg = avgRatingMap.getOrDefault(p.getProductID(), 0.0);
+                                        count = reviewCountMap.getOrDefault(p.getProductID(), 0);
+                                    }
+                                    int fullStars = (int) avg;
+                                    boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
+                                    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                                    for (int i = 0; i < fullStars; i++) { %>
+                                        <i class="fas fa-star"></i>
+                                <% } %>
+                                <% if (halfStar) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } %>
+                                <% for (int i = 0; i < emptyStars; i++) { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                                <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
                             <div class="button-group">
@@ -377,12 +441,28 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
+                                <% 
+                                    double avg = 0.0;
+                                    int count = 0;
+                                    if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
+                                        java.util.Map<Integer, Double> avgRatingMap = (java.util.Map<Integer, Double>) request.getAttribute("avgRatingMap");
+                                        java.util.Map<Integer, Integer> reviewCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("reviewCountMap");
+                                        avg = avgRatingMap.getOrDefault(p.getProductID(), 0.0);
+                                        count = reviewCountMap.getOrDefault(p.getProductID(), 0);
+                                    }
+                                    int fullStars = (int) avg;
+                                    boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
+                                    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                                    for (int i = 0; i < fullStars; i++) { %>
+                                        <i class="fas fa-star"></i>
+                                <% } %>
+                                <% if (halfStar) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } %>
+                                <% for (int i = 0; i < emptyStars; i++) { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                                <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
                             <div class="button-group">
@@ -441,12 +521,28 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
+                                <% 
+                                    double avg = 0.0;
+                                    int count = 0;
+                                    if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
+                                        java.util.Map<Integer, Double> avgRatingMap = (java.util.Map<Integer, Double>) request.getAttribute("avgRatingMap");
+                                        java.util.Map<Integer, Integer> reviewCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("reviewCountMap");
+                                        avg = avgRatingMap.getOrDefault(p.getProductID(), 0.0);
+                                        count = reviewCountMap.getOrDefault(p.getProductID(), 0);
+                                    }
+                                    int fullStars = (int) avg;
+                                    boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
+                                    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                                    for (int i = 0; i < fullStars; i++) { %>
+                                        <i class="fas fa-star"></i>
+                                <% } %>
+                                <% if (halfStar) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } %>
+                                <% for (int i = 0; i < emptyStars; i++) { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                                <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
                             <div class="button-group">
@@ -502,12 +598,28 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
+                                <% 
+                                    double avg = 0.0;
+                                    int count = 0;
+                                    if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
+                                        java.util.Map<Integer, Double> avgRatingMap = (java.util.Map<Integer, Double>) request.getAttribute("avgRatingMap");
+                                        java.util.Map<Integer, Integer> reviewCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("reviewCountMap");
+                                        avg = avgRatingMap.getOrDefault(p.getProductID(), 0.0);
+                                        count = reviewCountMap.getOrDefault(p.getProductID(), 0);
+                                    }
+                                    int fullStars = (int) avg;
+                                    boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
+                                    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                                    for (int i = 0; i < fullStars; i++) { %>
+                                        <i class="fas fa-star"></i>
+                                <% } %>
+                                <% if (halfStar) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } %>
+                                <% for (int i = 0; i < emptyStars; i++) { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                                <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
                             <div class="button-group">
