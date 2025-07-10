@@ -12,4 +12,13 @@
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
+
+    <servlet>
+        <servlet-name>ImageServlet_2</servlet-name>
+        <servlet-class>controller.ImageServlet_2</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ImageServlet_2</servlet-name>
+        <url-pattern>/ImageServlet_2</url-pattern>
+    </servlet-mapping>
 </web-app> 

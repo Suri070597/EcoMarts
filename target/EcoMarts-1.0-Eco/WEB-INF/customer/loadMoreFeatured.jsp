@@ -5,7 +5,6 @@
 %>
 <% for (Product p : products) {%>
 <div class="product-card">
-    <div class="product-badge">Hot</div>
     <div class="product-image-container">
         <img src="ImageServlet?name=<%= java.net.URLEncoder.encode(p.getImageURL(), "UTF-8")%>" alt="<%= p.getProductName()%>" class="product-image">
         <div class="product-actions">

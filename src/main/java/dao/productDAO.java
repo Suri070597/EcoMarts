@@ -96,49 +96,51 @@ public class ProductDAO extends DBContext {
         return 0;
     }
 
-//    public Product getProductById(int id) {
-//        Product product = null;
-//        String sql = "SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName \n"
-//                + "FROM product p \n"
-//                + "LEFT JOIN Category c ON p.CategoryID = c.CategoryID \n"
-//                + "LEFT JOIN Supplier s ON p.SupplierID = s.SupplierID \n"
-//                + "WHERE p.ProductID = ?";
-//        try {
-//            PreparedStatement ps = conn.prepareStatement(sql);
-//            ps.setInt(1, id);
-//            ResultSet rs = ps.executeQuery();
-//
-//            if (rs.next()) {
-//                // Product info
-//                String proName = rs.getString("ProductName");
-//                double proPrice = rs.getDouble("Price");
-//                String description = rs.getString("Description");
-//                int quantity = rs.getInt("StockQuantity");
-//                String imageURL = rs.getString("ImageURL");
-//                String unit = rs.getString("Unit");
-//                Timestamp createdAt = rs.getTimestamp("CreatedAt");
-//
-//                Date manufactureDate = rs.getDate("ManufactureDate");
-//                Date expirationDate = rs.getDate("ExpirationDate");
-//
-//                int categoryId = rs.getInt("CategoryID");
-//                String categoryName = rs.getString("CategoryName");
-//                int parentId = rs.getInt("ParentID");
-//                Category category = new Category(categoryId, categoryName, parentId);
-//
-//                int supplierId = rs.getInt("SupplierID");
-//                String supplierName = rs.getString("CompanyName");
-//                Supplier supplier = new Supplier(supplierId, supplierName);
-//
-//                product = new Product(id, proName, proPrice, description, quantity, imageURL, unit, createdAt, manufactureDate, expirationDate);
-//                product.setCategory(category);
-//                product.setSupplier(supplier);
-//            }
-//        } catch (Exception e) {
-//            System.out.println("Error in getProductById: " + e.getMessage());
-//        }
-//        return product;
-//    }
+    // public Product getProductById(int id) {
+    // Product product = null;
+    // String sql = "SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID,
+    // s.CompanyName \n"
+    // + "FROM product p \n"
+    // + "LEFT JOIN Category c ON p.CategoryID = c.CategoryID \n"
+    // + "LEFT JOIN Supplier s ON p.SupplierID = s.SupplierID \n"
+    // + "WHERE p.ProductID = ?";
+    // try {
+    // PreparedStatement ps = conn.prepareStatement(sql);
+    // ps.setInt(1, id);
+    // ResultSet rs = ps.executeQuery();
+    //
+    // if (rs.next()) {
+    // // Product info
+    // String proName = rs.getString("ProductName");
+    // double proPrice = rs.getDouble("Price");
+    // String description = rs.getString("Description");
+    // int quantity = rs.getInt("StockQuantity");
+    // String imageURL = rs.getString("ImageURL");
+    // String unit = rs.getString("Unit");
+    // Timestamp createdAt = rs.getTimestamp("CreatedAt");
+    //
+    // Date manufactureDate = rs.getDate("ManufactureDate");
+    // Date expirationDate = rs.getDate("ExpirationDate");
+    //
+    // int categoryId = rs.getInt("CategoryID");
+    // String categoryName = rs.getString("CategoryName");
+    // int parentId = rs.getInt("ParentID");
+    // Category category = new Category(categoryId, categoryName, parentId);
+    //
+    // int supplierId = rs.getInt("SupplierID");
+    // String supplierName = rs.getString("CompanyName");
+    // Supplier supplier = new Supplier(supplierId, supplierName);
+    //
+    // product = new Product(id, proName, proPrice, description, quantity, imageURL,
+    // unit, createdAt, manufactureDate, expirationDate);
+    // product.setCategory(category);
+    // product.setSupplier(supplier);
+    // }
+    // } catch (Exception e) {
+    // System.out.println("Error in getProductById: " + e.getMessage());
+    // }
+    // return product;
+    // }
     public Product getProductById(int id) {
         Product product = null;
         String sql = "SELECT p.*, \n"
@@ -181,7 +183,8 @@ public class ProductDAO extends DBContext {
                 Timestamp lastUpdated = rs.getTimestamp("LastUpdated");
                 InventoryTransaction inventory = new InventoryTransaction(id, inventoryQty, lastUpdated);
 
-                product = new Product(id, proName, proPrice, description, quantity, imageURL, unit, createdAt, manufactureDate, expirationDate);
+                product = new Product(id, proName, proPrice, description, quantity, imageURL, unit, createdAt,
+                        manufactureDate, expirationDate);
                 product.setCategory(category);
                 product.setSupplier(supplier);
                 product.setInventory(inventory);
@@ -192,7 +195,7 @@ public class ProductDAO extends DBContext {
         return product;
     }
 
-//
+    //
     public boolean delete(int id) {
         String sqlCartItem = "DELETE FROM CartItem WHERE ProductID = ?";
         String sqlOrderDetail = "DELETE FROM OrderDetail WHERE ProductID = ?";
@@ -320,12 +323,12 @@ public class ProductDAO extends DBContext {
     public List<Product> searchProductsByName(String keyword) {
         List<Product> list = new ArrayList<>();
         String sql = """
-        SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
-        FROM Product p
-        JOIN Category c ON p.CategoryID = c.CategoryID
-        JOIN Supplier s ON p.SupplierID = s.SupplierID
-        WHERE p.ProductName LIKE ?
-    """;
+                    SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
+                    FROM Product p
+                    JOIN Category c ON p.CategoryID = c.CategoryID
+                    JOIN Supplier s ON p.SupplierID = s.SupplierID
+                    WHERE p.ProductName LIKE ?
+                """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
             ResultSet rs = ps.executeQuery();
@@ -389,15 +392,15 @@ public class ProductDAO extends DBContext {
         List<Product> list = new ArrayList<>();
 
         String sql = """
-        SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
-        FROM Product p
-        JOIN Category c ON p.CategoryID = c.CategoryID
-        JOIN Supplier s ON p.SupplierID = s.SupplierID
-        WHERE p.CategoryID IN (
-            SELECT CategoryID FROM Category
-            WHERE ParentID = ? OR CategoryID = ?
-        )
-    """;
+                    SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
+                    FROM Product p
+                    JOIN Category c ON p.CategoryID = c.CategoryID
+                    JOIN Supplier s ON p.SupplierID = s.SupplierID
+                    WHERE p.CategoryID IN (
+                        SELECT CategoryID FROM Category
+                        WHERE ParentID = ? OR CategoryID = ?
+                    )
+                """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, parentCategoryId); // danh mục con
@@ -442,7 +445,7 @@ public class ProductDAO extends DBContext {
         String categoryName = null;
         String sql = "SELECT c.CategoryName FROM Category as c WHERE c.CategoryID = ?";
 
-        try ( PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
@@ -473,7 +476,8 @@ public class ProductDAO extends DBContext {
                 System.out.println("Product ID: " + p.getProductID());
                 System.out.println("Name: " + p.getProductName());
                 System.out.println("Price: " + p.getPrice());
-                System.out.println("Category ID: " + (p.getCategory() != null ? p.getCategory().getCategoryID() : "null"));
+                System.out.println(
+                        "Category ID: " + (p.getCategory() != null ? p.getCategory().getCategoryID() : "null"));
                 System.out.println("-----------------------------");
             }
         }

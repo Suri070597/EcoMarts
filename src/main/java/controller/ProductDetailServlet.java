@@ -1,13 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.CategoryDAO;
 import dao.ProductDAO;
+import dao.FeedBackDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,54 +12,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import model.Category;
 import model.Product;
+import model.Account;
+import model.Review;
 
-/**
- *
- * @author LNQB
- */
-@WebServlet(name = "ProductDetailServlet", urlPatterns = {"/ProductDetail"})
+@WebServlet(name = "ProductDetailServlet", urlPatterns = { "/ProductDetail" })
 public class ProductDetailServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ProductDetailServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ProductDetailServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         CategoryDAO categoryDAO = new CategoryDAO();
         List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
         request.setAttribute("categories", categories);
-        String categoryIdRaw = request.getParameter("categoryId");
         ProductDAO dao = new ProductDAO();
         String idRaw = request.getParameter("id");
 
@@ -79,7 +39,6 @@ public class ProductDetailServlet extends HttpServlet {
 
             if (mo == null) {
                 request.setAttribute("errorMessage", "Sản phẩm với ID " + id + " không tồn tại");
-                request.setAttribute("productId", id);
                 request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
                 return;
             }
@@ -93,6 +52,55 @@ public class ProductDetailServlet extends HttpServlet {
             request.setAttribute("mo", mo);
             request.setAttribute("dataCate", dao.getCategory());
             request.setAttribute("dataSup", dao.getAllSuppliers());
+
+            // Lấy reviewList và orderId nếu có account đăng nhập
+            FeedBackDAO fbDao = new FeedBackDAO();
+            List<Review> allReviews = fbDao.getReviewsByProductId(mo.getProductID());
+            int pageSize = 5;
+            String pageStr = request.getParameter("page");
+            int currentPage = 1;
+            if (pageStr != null) {
+                try {
+                    currentPage = Integer.parseInt(pageStr);
+                } catch (Exception e) {
+                    currentPage = 1;
+                }
+            }
+            int totalPages = (int) Math.ceil(allReviews.size() / (double) pageSize);
+            if (currentPage < 1)
+                currentPage = 1;
+            if (currentPage > totalPages)
+                currentPage = totalPages > 0 ? totalPages : 1;
+            int fromIndex = (currentPage - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, allReviews.size());
+            List<Review> reviewList = allReviews.subList(fromIndex, toIndex);
+            request.setAttribute("reviewList", reviewList);
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            int reviewCount = fbDao.countReviewsByProductId(mo.getProductID());
+            request.setAttribute("reviewCount", reviewCount);
+            double avgRating = fbDao.getAverageRatingByProductId(mo.getProductID());
+            int fullStars = (int) avgRating;
+            boolean halfStar = (avgRating - fullStars) >= 0.25 && (avgRating - fullStars) < 0.75;
+            int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            request.setAttribute("avgRating", avgRating);
+            request.setAttribute("fullStars", fullStars);
+            request.setAttribute("halfStar", halfStar);
+            request.setAttribute("emptyStars", emptyStars);
+
+            Account acc = (Account) request.getSession().getAttribute("account");
+            if (acc != null) {
+                Integer orderId = fbDao.getOrderIdForReview(acc.getAccountID(), mo.getProductID());
+                request.setAttribute("orderId", orderId);
+            }
+
+            // Lấy message từ session nếu có
+            String message = (String) request.getSession().getAttribute("message");
+            if (message != null) {
+                request.setAttribute("message", message);
+                request.getSession().removeAttribute("message");
+            }
+
             request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
@@ -103,28 +111,14 @@ public class ProductDetailServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        doGet(request, response);
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Product detail page";
+    }
 }
