@@ -38,6 +38,38 @@ public class HomeServlet extends HttpServlet {
         request.setAttribute("featuredProducts6", viewDao.getFeaturedProductsByPage(6, 0, 6));
         request.setAttribute("featuredProducts7", viewDao.getFeaturedProductsByPage(7, 0, 6));
 
+        // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
+        try {
+            dao.FeedBackDAO fbDao = new dao.FeedBackDAO();
+            java.util.Map<Integer, Double> avgRatingMap = new java.util.HashMap<>();
+            java.util.Map<Integer, Integer> reviewCountMap = new java.util.HashMap<>();
+            List<List<Product>> allProductLists = java.util.Arrays.asList(
+                    (List<Product>) request.getAttribute("featuredProducts1"),
+                    (List<Product>) request.getAttribute("featuredProducts2"),
+                    (List<Product>) request.getAttribute("featuredProducts3"),
+                    (List<Product>) request.getAttribute("featuredProducts4"),
+                    (List<Product>) request.getAttribute("featuredProducts5"),
+                    (List<Product>) request.getAttribute("featuredProducts6"),
+                    (List<Product>) request.getAttribute("featuredProducts7"));
+            for (List<Product> plist : allProductLists) {
+                if (plist != null) {
+                    for (Product p : plist) {
+                        int pid = p.getProductID();
+                        if (!avgRatingMap.containsKey(pid)) {
+                            double avg = fbDao.getAverageRatingByProductId(pid);
+                            int count = fbDao.countReviewsByProductId(pid);
+                            avgRatingMap.put(pid, avg);
+                            reviewCountMap.put(pid, count);
+                        }
+                    }
+                }
+            }
+            request.setAttribute("avgRatingMap", avgRatingMap);
+            request.setAttribute("reviewCountMap", reviewCountMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         request.getRequestDispatcher("/WEB-INF/customer/homePage.jsp").forward(request, response);
     }
 }

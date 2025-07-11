@@ -10,6 +10,8 @@
                 Main dashboard</a></li>
         <li><a href="${pageContext.request.contextPath}/staff/order"><i class="fas fa-receipt"></i> Order Management</a>
         </li>
+        <li><a href="${pageContext.request.contextPath}/staff/manage-review"><i class="fas fa-receipt"></i> Feedback Management</a>
+        </li>
         <li><a href="${pageContext.request.contextPath}/logout"><i
                     class="fas fa-sign-out-alt"></i> Logout</a></li>
     </ul>
