@@ -66,7 +66,7 @@
                     <div class="category-content">
                         <c:if test="${not empty category.children}">
                             <c:forEach items="${category.children}" var="child">
-                                <a href="category?id=${child.categoryID}">${child.categoryName}</a>
+                                <a href="ViewAllProductServlet?categoryId=${child.categoryID}">${child.categoryName}</a>
                             </c:forEach>
                         </c:if>
                     </div>
