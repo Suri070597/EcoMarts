@@ -202,6 +202,15 @@ public class Product {
         this.status = status;
     }
 
+    /**
+     * Gets the quantity from stockQuantity field
+     *
+     * @return The stock quantity
+     */
+    public int getAvailableQuantity() {
+        return this.stockQuantity;
+    }
+
     @Override
     public String toString() {
         return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID=" + supplierID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate=" + expirationDate + ", category=" + category + ", supplier=" + supplier + '}';

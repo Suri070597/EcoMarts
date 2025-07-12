@@ -4,16 +4,15 @@
  */
 package dao;
 
-import db.DBContext;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import db.DBContext;
 import model.Category;
 import model.InventoryTransaction;
 import model.Product;
@@ -73,9 +72,11 @@ public class ProductDAO extends DBContext {
         }
 
         String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID, ManufactureDate, ExpirationDate) "
+                + "OUTPUT INSERTED.ProductID "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, name);
             ps.setDouble(2, price);
             ps.setString(3, description);
@@ -88,7 +89,10 @@ public class ProductDAO extends DBContext {
             ps.setDate(10, new java.sql.Date(manufactureDate.getTime()));
             ps.setDate(11, new java.sql.Date(expirationDate.getTime()));
 
-            return ps.executeUpdate();
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1); // Get the ID from the first column
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -459,6 +463,24 @@ public class ProductDAO extends DBContext {
         }
 
         return categoryName;
+    }
+    
+    public int getStockQuantityById(int productId) {
+        int stockQuantity = 0;
+        String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                stockQuantity = rs.getInt("StockQuantity");
+            }
+        } catch (Exception e) {
+            System.out.println("Error getting stock quantity: " + e.getMessage());
+        }
+        
+        return stockQuantity;
     }
 
     public static void main(String[] args) throws ParseException {
