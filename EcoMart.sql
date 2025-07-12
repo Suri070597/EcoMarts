@@ -1,4 +1,6 @@
-﻿USE master;
+﻿--Cần bổ sung: Copy đoạn trong commit rồi chạy thêm
+
+USE master;
 GO
 
 IF EXISTS (SELECT name FROM sys.databases WHERE name = 'EcoMart')
