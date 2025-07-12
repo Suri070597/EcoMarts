@@ -1,0 +1,99 @@
+/**
+ * EcoMarts - Cart Badge CSS
+ * 
+ * Tùy chỉnh hiển thị badge số lượng sản phẩm trong giỏ hàng
+ */
+
+.badge.bg-danger.rounded-pill {
+    position: relative;
+    top: -10px;
+    right: 5px;
+    font-size: 0.7rem;
+    padding: 0.35em 0.6em;
+    min-width: 1.5em;
+    text-align: center;
+    border: 2px solid #fff;
+    animation: badge-pulse 1s ease-out;
+    background-color: #9d9494 !important;
+}
+
+.header-icons a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Hiệu ứng nhấp nháy khi badge được cập nhật */
+@keyframes badge-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Hiệu ứng khi thêm sản phẩm vào giỏ hàng */
+.badge-update {
+    animation: badge-update 0.5s ease-in-out;
+}
+
+@keyframes badge-update {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.5);
+        background-color: #28a745;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Thông báo */
+#ecomart-notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ecomart-notification {
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    min-width: 250px;
+    transition: all 0.3s ease;
+    transform: translateX(100%);
+    opacity: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ecomart-notification.success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.ecomart-notification.error {
+    background-color: #f44336;
+    color: white;
+}
+
+.ecomart-notification button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+    padding: 0 5px;
+} 

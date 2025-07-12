@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/cart-badge.css?version=<%= System.currentTimeMillis() %>">
 <style>
     .suggestions-box {
         position: absolute;
@@ -34,7 +35,6 @@
         background-color: #eaf4ff;
         color: #007bff;
     }
-
 </style>
 
 <!-- Sidebar -->
@@ -92,17 +92,29 @@
 
 
     <div class="header-icons">
-        <% String username = (String) session.getAttribute("username"); %>
-        <% if (username != null) {%>
-        <span>Chào, <%= username%></span>
+        <%
+            String username = (String) session.getAttribute("username");
+            model.Account account = (model.Account) session.getAttribute("account");
+        %>
+        <% if (account != null) {
+                util.CartUtil cartUtil = new util.CartUtil();
+                int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
+        %>
+        <span>Chào, <%= account.getFullName()%></span>
+        <a href="<%= request.getContextPath()%>/cart">
+            <i class="fas fa-shopping-cart"></i>Giỏ hàng
+            <% if (cartItemCount > 0) {%>
+            <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
+            <% }%>
+        </a>
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i>Đăng Xuất</a>
-
         <% } else {%>
         <a href="<%= request.getContextPath()%>/cart"><i class="fas fa-shopping-cart"></i>Giỏ hàng</a>
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
         <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
         <% }%>
     </div>
+</div>
 </div>
 
 <!-- JS -->
