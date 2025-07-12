@@ -96,6 +96,38 @@ public class ViewProductDAO extends DBContext {
         System.out.println("\n=== SẢN PHẨM NỔI BẬT ===");
         printProductList(dao.getFeaturedProducts());
     }
+    
+    public List<Product> getFeaturedProductsByPage(int parentCategoryId, int offset, int limit) {
+    List<Product> list = new ArrayList<>();
+    String sql = """
+        SELECT p.productID, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity
+        FROM Product p
+        JOIN Category c ON p.CategoryID = c.CategoryID
+        WHERE c.ParentID = ?
+        ORDER BY p.ProductID
+        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+    """;
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, parentCategoryId);
+        ps.setInt(2, offset);
+        ps.setInt(3, limit);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Product p = new Product();
+            p.setProductID(rs.getInt("ProductID"));
+            p.setProductName(rs.getString("ProductName"));
+            p.setPrice(rs.getDouble("Price"));
+            p.setImageURL(rs.getString("ImageURL"));
+            p.setUnit(rs.getString("Unit"));
+            p.setStockQuantity(rs.getInt("StockQuantity"));
+            list.add(p);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return list;
+}
 
     // In danh sách sản phẩm
     private static void printProductList(List<Product> list) {

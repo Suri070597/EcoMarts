@@ -1,4 +1,5 @@
 dao\OrderDAO.class
+controller\CartServlet.class
 controller\AdminAccountServlet.class
 dao\SupplierDAO.class
 db\EmailUtil$1.class
@@ -14,6 +15,7 @@ model\Voucher.class
 controller\register\LoginServlet.class
 controller\ProductServlet.class
 controller\OrderServlet.class
+dao\CartItemDAO.class
 dao\OrderDetailDAO.class
 controller\AdminDashboardServlet.class
 dao\StaffDAO.class
@@ -31,7 +33,9 @@ db\DBContext1.class
 model\InventoryTransaction.class
 controller\AdminStaffServlet.class
 dao\AccountDAO.class
+dao\PromotionDAO.class
 model\Staff.class
+controller\AdminPromotionServlet.class
 db\EmailUtil.class
 model\Review.class
 dao\TokenDAO.class
@@ -46,7 +50,9 @@ model\Promotion.class
 controller\CategoryServlet.class
 db\MD5Util.class
 dao\ViewProductDAO.class
+controller\LoadMoreFeaturedServlet.class
 controller\register\AdminServlet.class
 model\Order.class
+util\CartUtil.class
 db\DBContext.class
 controller\HomeServlet.class

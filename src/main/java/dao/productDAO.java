@@ -384,6 +384,24 @@ public class ProductDAO extends DBContext {
         }
         return list;
     }
+    
+    public int getStockQuantityById(int productId) {
+        int stockQuantity = 0;
+        String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                stockQuantity = rs.getInt("StockQuantity");
+            }
+        } catch (Exception e) {
+            System.out.println("Error getting stock quantity: " + e.getMessage());
+        }
+        
+        return stockQuantity;
+    }
 
     public static void main(String[] args) throws ParseException {
         ProductDAO dao = new ProductDAO();

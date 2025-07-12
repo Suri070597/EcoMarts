@@ -1,14 +1,17 @@
 D:\EcoMarts\src\main\java\controller\AdminAccountServlet.java
 D:\EcoMarts\src\main\java\controller\AdminCategoryServlet.java
 D:\EcoMarts\src\main\java\controller\AdminDashboardServlet.java
+D:\EcoMarts\src\main\java\controller\AdminPromotionServlet.java
 D:\EcoMarts\src\main\java\controller\AdminStaffServlet.java
 D:\EcoMarts\src\main\java\controller\AdminVoucherServlet.java
+D:\EcoMarts\src\main\java\controller\CartServlet.java
 D:\EcoMarts\src\main\java\controller\CategoryServlet.java
 D:\EcoMarts\src\main\java\controller\dangky\OtpVerificationServlet.java
 D:\EcoMarts\src\main\java\controller\dangky\RegisterRedirectServlet.java
 D:\EcoMarts\src\main\java\controller\dangky\RegistrationServlet.java
 D:\EcoMarts\src\main\java\controller\HomeServlet.java
 D:\EcoMarts\src\main\java\controller\ImageServlet.java
+D:\EcoMarts\src\main\java\controller\LoadMoreFeaturedServlet.java
 D:\EcoMarts\src\main\java\controller\OrderServlet.java
 D:\EcoMarts\src\main\java\controller\ProductDetailServlet.java
 D:\EcoMarts\src\main\java\controller\ProductServlet.java
@@ -19,10 +22,12 @@ D:\EcoMarts\src\main\java\controller\register\StaffServlet.java
 D:\EcoMarts\src\main\java\controller\supplier\SupplierServlet.java
 D:\EcoMarts\src\main\java\dao\AccountDAO.java
 D:\EcoMarts\src\main\java\dao\AccountDAO1.java
+D:\EcoMarts\src\main\java\dao\CartItemDAO.java
 D:\EcoMarts\src\main\java\dao\CategoryDAO.java
 D:\EcoMarts\src\main\java\dao\OrderDAO.java
 D:\EcoMarts\src\main\java\dao\OrderDetailDAO.java
 D:\EcoMarts\src\main\java\dao\ProductDAO.java
+D:\EcoMarts\src\main\java\dao\PromotionDAO.java
 D:\EcoMarts\src\main\java\dao\StaffDAO.java
 D:\EcoMarts\src\main\java\dao\SupplierDAO.java
 D:\EcoMarts\src\main\java\dao\TokenDAO.java
@@ -49,3 +54,4 @@ D:\EcoMarts\src\main\java\model\Supplier.java
 D:\EcoMarts\src\main\java\model\Token.java
 D:\EcoMarts\src\main\java\model\Voucher.java
 D:\EcoMarts\src\main\java\model\VoucherUsage.java
+D:\EcoMarts\src\main\java\util\CartUtil.java

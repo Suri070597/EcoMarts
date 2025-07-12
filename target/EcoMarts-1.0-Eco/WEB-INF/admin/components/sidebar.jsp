@@ -26,6 +26,8 @@
                 Category</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/voucher"><i class="fas fa-ticket-alt"></i>
                 Voucher Manager</a></li>
+        <li><a href="${pageContext.request.contextPath}/admin/promotion"><i class="fas fas fa-percent"></i>
+                Promotion Manage</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/dashboard?view=top-products"><i
                     class="fas fa-shopping-bag"></i> Top 10 product</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/dashboard?view=top-customers"><i
