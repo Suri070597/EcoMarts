@@ -20,7 +20,7 @@ import model.Token;
 
 /**
  *
- * @author ADMIN
+ * @author HuuDuc
  */
 @WebServlet(name = "ResetPasswordServlet", urlPatterns = {"/reset-password"})
 public class ResetPasswordServlet extends HttpServlet {
