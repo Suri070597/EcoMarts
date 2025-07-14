@@ -9,7 +9,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Quên mật khẩu</title>
+        <title>Forget Password</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
