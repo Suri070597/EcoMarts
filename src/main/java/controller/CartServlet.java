@@ -54,6 +54,19 @@ public class CartServlet extends HttpServlet {
             return;
         }
 
+        // Check if user is a customer (role = 0)
+        if (account.getRole() != 0) {
+            // Not a customer, redirect based on role
+            if (account.getRole() == 1) {
+                response.sendRedirect("admin");
+            } else if (account.getRole() == 2) {
+                response.sendRedirect("staff");
+            } else {
+                response.sendRedirect("home");
+            }
+            return;
+        }
+
         // Get categories from database
         CategoryDAO categoryDAO = new CategoryDAO();
         List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
@@ -104,6 +117,12 @@ public class CartServlet extends HttpServlet {
             return;
         }
         
+        // If user is not a customer, return 0
+        if (account.getRole() != 0) {
+            response.getWriter().write("0");
+            return;
+        }
+        
         // Get cart item count
         int count = cartUtil.getCartItemCount(account.getAccountID());
         response.getWriter().write(String.valueOf(count));
@@ -142,6 +161,26 @@ public class CartServlet extends HttpServlet {
                 return;
             }
             response.sendRedirect("login");
+            return;
+        }
+        
+        // Check if user is a customer
+        if (account.getRole() != 0) {
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể sử dụng giỏ hàng\"}");
+                return;
+            }
+            
+            // Redirect based on role
+            if (account.getRole() == 1) {
+                response.sendRedirect("admin");
+            } else if (account.getRole() == 2) {
+                response.sendRedirect("staff");
+            } else {
+                response.sendRedirect("home");
+            }
             return;
         }
 
@@ -218,6 +257,24 @@ public class CartServlet extends HttpServlet {
                 }
 
                 response.sendRedirect("login");
+                return;
+            }
+            
+            // Check if user is a customer
+            if (account.getRole() != 0) {
+                if (isAjax) {
+                    response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể sử dụng giỏ hàng\"}");
+                    return;
+                }
+                
+                // Redirect based on role
+                if (account.getRole() == 1) {
+                    response.sendRedirect("admin");
+                } else if (account.getRole() == 2) {
+                    response.sendRedirect("staff");
+                } else {
+                    response.sendRedirect("home");
+                }
                 return;
             }
 
@@ -314,6 +371,13 @@ public class CartServlet extends HttpServlet {
             if (account == null) {
                 System.out.println("User not logged in");
                 response.getWriter().write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để cập nhật giỏ hàng\"}");
+                return;
+            }
+            
+            // Check if user is a customer
+            if (account.getRole() != 0) {
+                System.out.println("User is not a customer, role: " + account.getRole());
+                response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể cập nhật giỏ hàng\"}");
                 return;
             }
             
@@ -443,6 +507,12 @@ public class CartServlet extends HttpServlet {
                 return;
             }
             
+            // Check if user is a customer
+            if (account.getRole() != 0) {
+                response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể xóa sản phẩm khỏi giỏ hàng\"}");
+                return;
+            }
+            
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
             
             // Get the cart item to check account ID for cart total calculation
@@ -501,6 +571,21 @@ public class CartServlet extends HttpServlet {
     private void saveForLater(HttpServletRequest request, HttpServletResponse response, CartUtil cartUtil)
             throws IOException {
         try {
+            // Check if user is logged in
+            HttpSession session = request.getSession();
+            Account account = (Account) session.getAttribute("account");
+            
+            if (account == null) {
+                handleAjaxError(request, response, "Vui lòng đăng nhập để lưu sản phẩm");
+                return;
+            }
+            
+            // Check if user is a customer
+            if (account.getRole() != 0) {
+                handleAjaxError(request, response, "Chỉ khách hàng mới có thể lưu sản phẩm");
+                return;
+            }
+            
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
             cartUtil.saveForLater(cartItemID);
             response.sendRedirect("cart");
@@ -534,6 +619,17 @@ public class CartServlet extends HttpServlet {
                     response.getWriter().write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để cập nhật giỏ hàng\"}");
                 } else {
                     request.getSession().setAttribute("cartError", "Vui lòng đăng nhập để cập nhật giỏ hàng");
+                    response.sendRedirect("cart");
+                }
+                return;
+            }
+            
+            // Check if user is a customer
+            if (account.getRole() != 0) {
+                if (isAjax) {
+                    response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể cập nhật giỏ hàng\"}");
+                } else {
+                    request.getSession().setAttribute("cartError", "Chỉ khách hàng mới có thể cập nhật giỏ hàng");
                     response.sendRedirect("cart");
                 }
                 return;
@@ -626,6 +722,13 @@ public class CartServlet extends HttpServlet {
      */
     private void clearCart(HttpServletRequest request, HttpServletResponse response, Account account, CartUtil cartUtil)
             throws IOException {
+        // Check if user is a customer
+        if (account == null || account.getRole() != 0) {
+            request.getSession().setAttribute("cartError", "Chỉ khách hàng mới có thể xóa giỏ hàng");
+            response.sendRedirect("cart");
+            return;
+        }
+        
         cartUtil.clearCart(account.getAccountID(), "Active");
         response.sendRedirect("cart");
     }

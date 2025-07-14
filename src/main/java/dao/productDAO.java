@@ -72,11 +72,9 @@ public class ProductDAO extends DBContext {
         }
 
         String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID, ManufactureDate, ExpirationDate) "
-                + "OUTPUT INSERTED.ProductID "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ps.setDouble(2, price);
             ps.setString(3, description);
@@ -89,10 +87,7 @@ public class ProductDAO extends DBContext {
             ps.setDate(10, new java.sql.Date(manufactureDate.getTime()));
             ps.setDate(11, new java.sql.Date(expirationDate.getTime()));
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1); // Get the ID from the first column
-            }
+            return ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
