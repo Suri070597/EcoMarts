@@ -21,7 +21,7 @@ import model.Account;
 
 /**
  *
- * @author ADMIN
+ * @author HuuDuc
  */
 @WebServlet(name = "ForgetPasswordServlet", urlPatterns = {"/forget-password"})
 public class ForgetPasswordServlet extends HttpServlet {
@@ -82,7 +82,7 @@ public class ForgetPasswordServlet extends HttpServlet {
             // Gửi email
             String resetLink = "http://localhost:8080/EcoMart/reset-password?token=" + token;
             String subject = "Đặt lại mật khẩu EcoMart";
-            String body = "Bạn vừa yêu cầu đặt lại mật khẩu. Click vào link này để đặt lại mật khẩu (có hiệu lực 30 phút):\n" + resetLink;
+            String body = "Bạn vừa yêu cầu đặt lại mật khẩu. Click vào link này để đặt lại mật khẩu (có hiệu lực 1 phút):\n" + resetLink;
             EmailUtil.send(email, subject, body);
 
             request.setAttribute("message", "Vui lòng kiểm tra email để đặt lại mật khẩu.");
