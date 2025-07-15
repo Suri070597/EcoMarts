@@ -1,8 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
-    String username = (String) session.getAttribute("username");
-    model.Account account = (model.Account) session.getAttribute("account");
     Integer unreadCount = (Integer) request.getAttribute("unreadCount");
     if (unreadCount == null) unreadCount = 0;
     java.util.List<model.Review> unreadList = (java.util.List<model.Review>) request.getAttribute("unreadList");
@@ -99,9 +97,15 @@
 
 
     <div class="header-icons">
+        <%
+            String username = (String) session.getAttribute("username");
+            model.Account account = (model.Account) session.getAttribute("account");
+        %>
         <% if (account != null) {
-            util.CartUtil cartUtil = new util.CartUtil();
-            int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
+            // Only show cart for customers (role = 0)
+            if (account.getRole() == 0) {
+                util.CartUtil cartUtil = new util.CartUtil();
+                int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
         %>
         <span>Chào, <%= account.getFullName()%></span>
         <a href="<%= request.getContextPath()%>/cart">
@@ -110,25 +114,27 @@
             <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
             <% }%>
         </a>
-        <% if (account.getRole() == 0) { %>
+        <% } else { %>
+        <span>Chào, <%= account.getFullName()%></span>
+        <% } %>
+         <% if (account.getRole() == 0) { %>
         <a href="#" class="notification-link" data-toggle="modal" data-target="#notificationModal">
             <i class="fas fa-bell"></i>
             <% if (unreadCount > 0) { %>
             <span class="badge-notification"><%= unreadCount %></span>
             <% } %>
         </a>
+        <% } else { %>
+        <span>Chào, <%= account.getFullName()%></span>
         <% } %>
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i>Đăng Xuất</a>
-        <% } else { %>
-        <a href="<%= request.getContextPath()%>/cart"><i class="fas fa-shopping-cart"></i>Giỏ hàng</a>
+        <% } else {%>
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
         <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
         <% }%>
     </div>
 </div>
-</div>
-
-<!-- Đặt modal notification ở cuối file, ngoài mọi block -->
+    <!-- Đặt modal notification ở cuối file, ngoài mọi block -->
 <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -169,6 +175,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Đảm bảo Bootstrap JS/CSS chỉ import một lần ở cuối file -->
 
+</div>
+
 <!-- JS -->
 <script>
     function toggleCategory(button) {
@@ -201,4 +209,5 @@
                     });
                 });
     });
+    
 </script>
