@@ -127,7 +127,7 @@
 </div>
 </div>
 
-<!-- Modal notification -->
+<!-- Modal notification cho customer đặt ở cuối file, không ảnh hưởng logic khác -->
 <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -136,7 +136,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
-        <% if (account != null) { %>
+        <% if (account != null && account.getRole() == 0) { %>
           <% if (unreadCount == 0 || unreadList == null || unreadList.size() == 0) { %>
             <div class="text-center text-muted">Không có thông báo mới.</div>
           <% } else { %>
@@ -157,7 +157,7 @@
             </form>
           <% } %>
         <% } else { %>
-          <div class="text-center text-muted">Vui lòng đăng nhập để xem thông báo.</div>
+          <div class="text-center text-muted">Vui lòng đăng nhập bằng tài khoản khách hàng để xem thông báo.</div>
         <% } %>
       </div>
     </div>
