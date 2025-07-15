@@ -100,8 +100,8 @@
 
     <div class="header-icons">
         <% if (account != null) {
-                util.CartUtil cartUtil = new util.CartUtil();
-                int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
+            util.CartUtil cartUtil = new util.CartUtil();
+            int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
         %>
         <span>Chào, <%= account.getFullName()%></span>
         <a href="<%= request.getContextPath()%>/cart">
