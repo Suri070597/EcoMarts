@@ -97,6 +97,8 @@
             model.Account account = (model.Account) session.getAttribute("account");
         %>
         <% if (account != null) {
+            // Only show cart for customers (role = 0)
+            if (account.getRole() == 0) {
                 util.CartUtil cartUtil = new util.CartUtil();
                 int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
         %>
@@ -107,9 +109,11 @@
             <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
             <% }%>
         </a>
+        <% } else { %>
+        <span>Chào, <%= account.getFullName()%></span>
+        <% } %>
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i>Đăng Xuất</a>
         <% } else {%>
-        <a href="<%= request.getContextPath()%>/cart"><i class="fas fa-shopping-cart"></i>Giỏ hàng</a>
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
         <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
         <% }%>
