@@ -148,18 +148,18 @@ return;
                                 <input type="hidden" name="action" value="add">
                                 <input type="hidden" name="productID" value="<%= mo.getProductID()%>">
 
-                                <div class="d-flex gap-2 mb-3">
+                            <div class="d-flex gap-2 mb-3">
                                     <strong>Số Lượng: </strong>
                                     <input type="number" id="product-quantity" name="quantity" class="form-control w-25" value="1" min="1" max="<%= mo.getAvailableQuantity()%>">
                                     <div class="form-text text-danger" id="quantity-warning" style="display: none;">Số lượng vượt quá tồn kho!</div>
-                                </div>
+                            </div>
 
-                                <div>
+                            <div>
                                     <button type="submit" id="add-to-cart-btn" class="btn btn-outline-danger">
-                                        <i class="fa-solid fa-cart-shopping"></i> Thêm Vào Giỏ Hàng
-                                    </button>
+                                    <i class="fa-solid fa-cart-shopping"></i> Thêm Vào Giỏ Hàng
+                                </button>
                                     <a href="cart" class="btn btn-danger">Mua Ngay</a>
-                                </div>
+                            </div>
 
                                 <script>
                                     document.addEventListener('DOMContentLoaded', function () {
@@ -205,27 +205,27 @@ return;
                                 <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
                                 <a href="#"><i class="fab fa-instagram"></i></a>
                             </div>
-                        </div>
                     </div>
+                </div>
 
-                    <div class="row mt-5">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h4 class="product-text" class="card-title">Thông Tin Sản Phẩm</h4>
-                                    <p class="card-text"><%=mo.getDescription().replaceAll("\n", "<br/>")%></p>
-                                </div>
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="product-text" class="card-title">Thông Tin Sản Phẩm</h4>
+                                <p class="card-text"><%=mo.getDescription().replaceAll("\n", "<br/>")%></p>
                             </div>
                         </div>
                     </div>
-                    <%}%>
+                </div>
+                <%}%>
 
-                    <div class="row mt-5">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body">
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
                                     <h4 class="product-text" class="card-title">Đánh Giá (${reviewCount})</h4>                                
-                                    <div class="review-comments">
+                                <div class="review-comments">
                                         <c:if test="${empty reviewList}">
                                             <p class="text-muted">Không có đánh giá nào.</p>
                                         </c:if>
@@ -328,14 +328,14 @@ return;
                                                                     </c:forEach>
                                                                 </div>
                                                             </c:if>
-                                                        </div>
-                                                    </c:forEach>
-                                                </div>
-                                            </div>
-                                        </c:forEach>
                                     </div>
-                                    <nav aria-label="Page navigation">
-                                        <ul class="pagination justify-content-center">
+                                                    </c:forEach>
+                                    </div>
+                                    </div>
+                                        </c:forEach>
+                                </div>
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination justify-content-center">
                                             <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                                 <a class="page-link" href="ProductDetail?id=${mo.productID}&page=${currentPage - 1}">Trước</a>
                                             </li>
@@ -347,8 +347,8 @@ return;
                                             <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
                                                 <a class="page-link" href="ProductDetail?id=${mo.productID}&page=${currentPage + 1}">Sau</a>
                                             </li>
-                                        </ul>
-                                    </nav>
+                                    </ul>
+                                </nav>
                                     <c:if test="${not empty message}">
                                         <div class="alert alert-info text-center" style="margin-top: 10px">${message}</div>
                                     </c:if>
@@ -369,22 +369,22 @@ return;
                                             <input type="hidden" name="productId" value="<%=mo.getProductID()%>">
                                             <c:if test="${sessionScope.account != null && sessionScope.account.role == 0}">
                                                 <div class="mb-3" id="ratingSection" style="${empty editingReview ? 'display:block' : (editingReview.parentReviewID == null or editingReview.parentReviewID == 0 ? 'display:block' : 'display:none')}">
-                                                    <label for="rating" class="form-label">Xếp Hạng Của Bạn</label>
-                                                    <div class="star-rating">
+                                        <label for="rating" class="form-label">Xếp Hạng Của Bạn</label>
+                                        <div class="star-rating">
                                                         <input type="radio" id="star5" name="rating" value="5" ${not empty editingReview and editingReview.rating == 5 ? 'checked' : ''} ${empty editingReview or (editingReview.parentReviewID == null or editingReview.parentReviewID == 0) ? 'required' : ''}><label for="star5" class="fas fa-star"></label>
                                                         <input type="radio" id="star4" name="rating" value="4" ${not empty editingReview and editingReview.rating == 4 ? 'checked' : ''}><label for="star4" class="fas fa-star"></label>
                                                         <input type="radio" id="star3" name="rating" value="3" ${not empty editingReview and editingReview.rating == 3 ? 'checked' : ''}><label for="star3" class="fas fa-star"></label>
                                                         <input type="radio" id="star2" name="rating" value="2" ${not empty editingReview and editingReview.rating == 2 ? 'checked' : ''}><label for="star2" class="fas fa-star"></label>
                                                         <input type="radio" id="star1" name="rating" value="1" ${not empty editingReview and editingReview.rating == 1 ? 'checked' : ''}><label for="star1" class="fas fa-star"></label>
-                                                    </div>
-                                                </div>
+                                        </div>
+                                    </div>
                                             </c:if>
-                                            <div class="mb-3">
+                                    <div class="mb-3">
                                                 <label for="comment" class="form-label">Bình Luận/Trả Lời</label>
                                                 <textarea class="form-control" id="comment" name="comment" rows="6" required>${editingReview.comment}</textarea>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="image" class="form-label">Tải Ảnh Lên</label>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="image" class="form-label">Tải Ảnh Lên</label>
                                                 <input type="file" class="form-control" id="image" name="image" accept="image/*">
                                                 <c:if test="${not empty editingReview.imageURL}">
                                                     <div class="mt-2">
@@ -392,72 +392,72 @@ return;
                                                         <img src="${pageContext.request.contextPath}/ImageServlet_2?name=${editingReview.imageURL}" alt="Ảnh hiện tại" style="max-width:150px;max-height:150px;border-radius:5px;margin-top:5px;">
                                                     </div>
                                                 </c:if>
-                                            </div>
+                                    </div>
                                             <button type="submit" class="btn btn-success">${not empty editingReview ? 'Cập nhật' : 'Gửi'}</button>
                                             <c:if test="${not empty editingReview}">
                                                 <a href="ProductDetail?id=<%=mo.getProductID()%>" class="btn btn-secondary ms-2">Hủy</a>
                                             </c:if>
-                                        </form>
+                                </form>
                                     </c:if>
-                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <h4 class="mb-4 product-text">Sản Phẩm Liên Quan</h4>
-                    <div id="relatedProductCarousel" class="carousel slide" data-bs-ride="false">
-                        <div class="carousel-inner">
-                            <%
-                                List<Product> related = (List<Product>) request.getAttribute("relatedProducts");
-                                int count = 0;
-                                if (related != null && !related.isEmpty()) {
-                                    for (int i = 0; i < related.size(); i += 4) {
-                            %>
-                            <div class="carousel-item <%= (i == 0 ? "active" : "")%>">
-                                <div class="row">
-                                    <%
-                                        for (int j = i; j < i + 4 && j < related.size(); j++) {
-                                            Product p = related.get(j);
-                                    %>
-                                    <div class="col-md-3">
-                                        <div class="card h-100 text-center san-pham-lq" style="margin-top: 10px">
-                                            <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>">
-                                                <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= p.getImageURL()%>"
-                                                     class="card-img-top img-fluid product-image1" style="height: 350px; object-fit: cover;" alt="<%= p.getProductName()%>">
-                                                <div class="card-body">
-                                                    <p class="card-title mb-1"><%= p.getProductName()%></p>
-                                                    <p class="text-danger fw-bold"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%>đ</p>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <% } %>
-                                </div>
-                            </div>
-                            <% }
-                        } else { %>
-                            <p class="text-muted1">Không có sản phẩm liên quan.</p>
-                            <% }%>
-                        </div>
-
-                        <button class="carousel-control-prev custom-carousel-btn" type="button" data-bs-target="#relatedProductCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-
-                        <button class="carousel-control-next custom-carousel-btn" type="button" data-bs-target="#relatedProductCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
                     </div>
                 </div>
+
+                <h4 class="mb-4 product-text">Sản Phẩm Liên Quan</h4>
+                <div id="relatedProductCarousel" class="carousel slide" data-bs-ride="false">
+                    <div class="carousel-inner">
+                        <%
+                            List<Product> related = (List<Product>) request.getAttribute("relatedProducts");
+                            int count = 0;
+                            if (related != null && !related.isEmpty()) {
+                                for (int i = 0; i < related.size(); i += 4) {
+                        %>
+                        <div class="carousel-item <%= (i == 0 ? "active" : "")%>">
+                            <div class="row">
+                                <%
+                                    for (int j = i; j < i + 4 && j < related.size(); j++) {
+                                        Product p = related.get(j);
+                                %>
+                                <div class="col-md-3">
+                                        <div class="card h-100 text-center san-pham-lq" style="margin-top: 10px">
+                                        <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>">
+                                            <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= p.getImageURL()%>"
+                                                 class="card-img-top img-fluid product-image1" style="height: 350px; object-fit: cover;" alt="<%= p.getProductName()%>">
+                                            <div class="card-body">
+                                                <p class="card-title mb-1"><%= p.getProductName()%></p>
+                                                <p class="text-danger fw-bold"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%>đ</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% }
+                        } else { %>
+                        <p class="text-muted1">Không có sản phẩm liên quan.</p>
+                        <% }%>
+                    </div>
+
+                    <button class="carousel-control-prev custom-carousel-btn" type="button" data-bs-target="#relatedProductCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+
+                    <button class="carousel-control-next custom-carousel-btn" type="button" data-bs-target="#relatedProductCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
             </div>
-            <jsp:include page="footer.jsp" />
-            <%
-                }
-            %>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        </div>
+        <jsp:include page="footer.jsp" />
+        <%
+            }
+        %>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
             <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis() %>"></script>
             <script>
                                                                             function setReply(parentId, orderId, productId) {

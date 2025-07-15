@@ -20,6 +20,7 @@ public class Review {
     private Integer parentReviewID; // ID của review cha (null nếu là review gốc)
     private String productName;
     private String status;
+    private boolean isRead; // Thông báo đã đọc hay chưa
 
     // For joining with other tables
     private Product product;
@@ -173,6 +174,14 @@ public class Review {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean isIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
     }
 
     @Override
