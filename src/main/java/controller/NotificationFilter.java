@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 @WebFilter(filterName = "NotificationFilter", urlPatterns = { "/home", "/cart", "/ProductDetail",
-        "/ViewAllProductServlet", "/customer/*", "/SearchProduct" })
+        "/ViewAllProductServlet", "/customer/*", "/SearchProduct"})
 public class NotificationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

@@ -191,6 +191,10 @@ public class ProductDAO extends DBContext {
                 product.setCategory(category);
                 product.setSupplier(supplier);
                 product.setInventory(inventory);
+                // Bổ sung các trường đóng gói
+                product.setUnitPerBox(rs.getInt("UnitPerBox"));
+                product.setBoxUnitName(rs.getString("BoxUnitName"));
+                product.setItemUnitName(rs.getString("ItemUnitName"));
             }
         } catch (Exception e) {
             System.out.println("Error in getProductById: " + e.getMessage());
@@ -250,7 +254,10 @@ public class ProductDAO extends DBContext {
                 + "ManufactureDate = ?, "
                 + "ExpirationDate = ?, "
                 + "CategoryID = ?, "
-                + "SupplierID = ? "
+                + "SupplierID = ?, "
+                + "UnitPerBox = ?, "
+                + "BoxUnitName = ?, "
+                + "ItemUnitName = ? "
                 + "WHERE ProductID = ?";
 
         double price = product.getPrice();
@@ -271,7 +278,10 @@ public class ProductDAO extends DBContext {
             ps.setDate(9, new java.sql.Date(product.getExpirationDate().getTime()));
             ps.setInt(10, product.getCategory().getCategoryID());
             ps.setInt(11, product.getSupplier().getSupplierId());
-            ps.setInt(12, product.getProductID());
+            ps.setInt(12, product.getUnitPerBox());
+            ps.setString(13, product.getBoxUnitName());
+            ps.setString(14, product.getItemUnitName());
+            ps.setInt(15, product.getProductID());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;

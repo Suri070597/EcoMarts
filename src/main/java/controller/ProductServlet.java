@@ -219,9 +219,11 @@ public class ProductServlet extends HttpServlet {
                 try {
                     int id1 = Integer.parseInt(request.getParameter("id"));
                     String name = request.getParameter("pName");
-                    double price = Double.parseDouble(request.getParameter("pPrice"));
-                    int quantity = Integer.parseInt(request.getParameter("pQuantity"));
-                    String unit = request.getParameter("pUnit");
+                    double boxPrice = Double.parseDouble(request.getParameter("boxPrice"));
+                    int boxQuantity = Integer.parseInt(request.getParameter("boxQuantity"));
+                    int unitPerBox = Integer.parseInt(request.getParameter("unitPerBox"));
+                    String boxUnitName = request.getParameter("boxUnitName");
+                    String itemUnitName = request.getParameter("itemUnitName");
                     String description = request.getParameter("pDescription");
                     int categoryId = Integer.parseInt(request.getParameter("categoryID"));
                     int supplierId = Integer.parseInt(request.getParameter("supplierID"));
@@ -301,8 +303,17 @@ public class ProductServlet extends HttpServlet {
                     }
 
                     Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-                    Product product = new Product(id1, name, price, description, quantity, image, unit, createdAt,
+
+                    // Tính số lượng lẻ và giá lẻ
+                    int stockQuantity = boxQuantity * unitPerBox;
+                    double price = boxPrice / unitPerBox;
+
+                    Product product = new Product(id1, name, price, description, stockQuantity, image, itemUnitName,
+                            createdAt,
                             manufactureDate, expirationDate);
+                    product.setUnitPerBox(unitPerBox);
+                    product.setBoxUnitName(boxUnitName);
+                    product.setItemUnitName(itemUnitName);
 
                     Category category = new Category();
                     category.setCategoryID(categoryId);
