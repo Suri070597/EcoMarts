@@ -1,5 +1,6 @@
 controller\ViewAllProductServlet.class
 dao\OrderDAO.class
+controller\CartServlet.class
 controller\ImageServlet_2.class
 controller\AdminAccountServlet.class
 dao\SupplierDAO.class
@@ -20,6 +21,7 @@ controller\ProductServlet.class
 controller\SearchProductServlet.class
 controller\forgetpassword\ResetPasswordServlet.class
 controller\staff\OrderServlet.class
+dao\CartItemDAO.class
 dao\OrderDetailDAO.class
 controller\ReorderServlet.class
 controller\AdminDashboardServlet.class
@@ -53,13 +55,17 @@ controller\dangky\OtpVerificationServlet.class
 dao\VoucherDAO.class
 model\Account.class
 model\AccountManager.class
+controller\MarkNotificationsReadServlet.class
 model\Promotion.class
 controller\CategoryServlet.class
 db\MD5Util.class
 dao\ViewProductDAO.class
 controller\LoadMoreFeaturedServlet.class
+controller\ReadNotificationServlet.class
 controller\register\AdminServlet.class
 model\Order.class
 dao\SearchProductsDAO.class
+controller\NotificationFilter.class
+util\CartUtil.class
 db\DBContext.class
 controller\HomeServlet.class

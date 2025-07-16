@@ -551,6 +551,64 @@ public class FeedBackDAO extends DBContext {
         return list;
     }
 
+    // Lấy các phản hồi staff chưa đọc cho customer
+    public List<model.Review> getUnreadStaffRepliesForCustomer(int customerId) throws SQLException {
+        List<model.Review> list = new ArrayList<>();
+        String sql = "SELECT r.*, a.FullName, a.Username, a.Role, p.ProductName FROM Review r " +
+                "JOIN Account a ON r.AccountID = a.AccountID " +
+                "JOIN Product p ON r.ProductID = p.ProductID " +
+                "WHERE r.ParentReviewID IN (SELECT ReviewID FROM Review WHERE AccountID = ? AND ParentReviewID IS NULL) "
+                +
+                "AND a.Role = 2 AND r.IsRead = 0 AND r.Status = 'VISIBLE' ORDER BY r.CreatedAt DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                model.Review r = new model.Review();
+                r.setReviewID(rs.getInt("ReviewID"));
+                r.setOrderID(rs.getInt("OrderID"));
+                r.setProductID(rs.getInt("ProductID"));
+                r.setAccountID(rs.getInt("AccountID"));
+                r.setRating(rs.getInt("Rating"));
+                r.setComment(rs.getString("Comment"));
+                r.setImageURL(rs.getString("ImageURL"));
+                r.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                Integer parentReviewId = rs.getInt("ParentReviewID");
+                if (rs.wasNull()) {
+                    r.setParentReviewID(null);
+                } else {
+                    r.setParentReviewID(parentReviewId);
+                }
+                r.setAccountName(rs.getString("FullName"));
+                r.setUserName(rs.getString("Username"));
+                r.setAccountRole(rs.getInt("Role"));
+                r.setStatus(rs.getString("Status"));
+                r.setIsRead(rs.getBoolean("IsRead"));
+                r.setProductName(rs.getString("ProductName")); // Lấy tên sản phẩm
+                list.add(r);
+            }
+        }
+        return list;
+    }
+
+    // Đánh dấu tất cả phản hồi staff cho customer là đã đọc
+    public void markAllStaffRepliesAsRead(int customerId) throws SQLException {
+        String sql = "UPDATE Review SET IsRead = 1 WHERE ParentReviewID IN (SELECT ReviewID FROM Review WHERE AccountID = ? AND ParentReviewID IS NULL) AND IsRead = 0 AND (SELECT Role FROM Account WHERE AccountID = Review.AccountID) = 2";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ps.executeUpdate();
+        }
+    }
+
+    // Đánh dấu một reply là đã đọc
+    public void markReplyAsRead(int reviewId) throws SQLException {
+        String sql = "UPDATE Review SET IsRead = 1 WHERE ReviewID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, reviewId);
+            ps.executeUpdate();
+        }
+    }
+
     public static void main(String[] args) {
         FeedBackDAO dao = new FeedBackDAO();
         try {
