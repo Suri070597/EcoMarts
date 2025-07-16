@@ -42,25 +42,38 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Product Price</label>
-                            <input type="number" min="0" step="any" class="form-control" name="pPrice" required />
+                            <label class="form-label">Giá 1 thùng/hộp/kiện</label>
+                            <input type="number" min="0" step="any" class="form-control" name="boxPrice" required />
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Product Quantity</label>
-                            <input type="number" min="0" class="form-control" name="pQuanity" required />
+                            <label class="form-label">Số lượng thùng/hộp/kiện</label>
+                            <input type="number" min="0" class="form-control" name="boxQuantity" required />
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Product Unit</label>
-                            <select class="form-select" name="pUnit" required>
-                                <option value="">-- Chọn đơn vị --</option>
-                                <option value="kg">kg</option>
-                                <option value="gói">gói</option>
+                            <label class="form-label">Số lượng sản phẩm trong 1 thùng/hộp/kiện</label>
+                            <input type="number" min="1" class="form-control" name="unitPerBox" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Đơn vị thùng/hộp/kiện</label>
+                            <select class="form-select" name="boxUnitName" required>
+                                <option value="">-- Chọn đơn vị thùng/hộp/kiện --</option>
+                                <option value="thùng">thùng</option>
+                                <option value="hộp">hộp</option>
+                                <option value="kiện">kiện</option>
+                                <option value="lốc">lốc</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Đơn vị nhỏ nhất</label>
+                            <select class="form-select" name="itemUnitName" required>
+                                <option value="">-- Chọn đơn vị nhỏ nhất --</option>
                                 <option value="chai">chai</option>
                                 <option value="lon">lon</option>
-                                <option value="lốc">lốc</option>
-                                <option value="thùng">thùng</option>
+                                <option value="cái">cái</option>
                                 <option value="hộp">hộp</option>
                             </select>
                         </div>

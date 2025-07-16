@@ -22,7 +22,7 @@ import model.Category;
 import model.Product;
 import model.Supplier;
 
-@WebServlet(name = "ProductServlet", urlPatterns = {"/admin/product"})
+@WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
@@ -58,7 +58,8 @@ public class ProductServlet extends HttpServlet {
                     id = Integer.parseInt(idRaw);
                     mo = dao.getProductById(id);
                     request.setAttribute("mo", mo);
-                    request.getRequestDispatcher("/WEB-INF/admin/product/delete-product.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/admin/product/delete-product.jsp").forward(request,
+                            response);
                 } catch (Exception e) {
                     out.println(e.getMessage());
                 }
@@ -105,9 +106,11 @@ public class ProductServlet extends HttpServlet {
             case "create":
                 try {
                     String pName = request.getParameter("pName");
-                    double pPrice = Double.parseDouble(request.getParameter("pPrice"));
-                    int pQuantity = Integer.parseInt(request.getParameter("pQuanity"));
-                    String pUnit = request.getParameter("pUnit");
+                    double boxPrice = Double.parseDouble(request.getParameter("boxPrice"));
+                    int boxQuantity = Integer.parseInt(request.getParameter("boxQuantity"));
+                    int unitPerBox = Integer.parseInt(request.getParameter("unitPerBox"));
+                    String boxUnitName = request.getParameter("boxUnitName");
+                    String itemUnitName = request.getParameter("itemUnitName");
                     String pDescription = request.getParameter("pDescription");
 
                     int categoryID = Integer.parseInt(request.getParameter("categoryID"));
@@ -130,21 +133,23 @@ public class ProductServlet extends HttpServlet {
                         request.setAttribute("error", "Ngày sản xuất không được ở tương lai.");
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
                         return;
                     }
 
                     // Không cho phép ngày sản xuất quá 2 năm về trước
                     Calendar twoYearsAgo = Calendar.getInstance();
                     twoYearsAgo.setTime(today);
-                    twoYearsAgo.add(Calendar.YEAR, -2);  // Trừ đi 2 năm
+                    twoYearsAgo.add(Calendar.YEAR, -2); // Trừ đi 2 năm
                     Date twoYearsBefore = twoYearsAgo.getTime();
 
                     if (manufactureDate.before(twoYearsBefore)) {
                         request.setAttribute("error", "Ngày sản xuất không được quá 2 năm trước.");
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
                         return;
                     }
 
@@ -152,7 +157,8 @@ public class ProductServlet extends HttpServlet {
                         request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
                         return;
                     }
 
@@ -170,8 +176,13 @@ public class ProductServlet extends HttpServlet {
                     String pImage = fileName;
                     Timestamp createdAt = new Timestamp(System.currentTimeMillis());
 
-                    int res = dao.insert(pName, pPrice, pDescription, pQuantity, pImage, pUnit,
-                            createdAt, categoryID, supplierID, manufactureDate, expirationDate);
+                    // Tính số lượng lẻ và giá lẻ
+                    int stockQuantity = boxQuantity * unitPerBox;
+                    double price = boxPrice / unitPerBox;
+
+                    int res = dao.insert(pName, price, pDescription, stockQuantity, pImage, itemUnitName,
+                            createdAt, categoryID, supplierID, manufactureDate, expirationDate,
+                            unitPerBox, boxUnitName, itemUnitName);
 
                     if (res == 1) {
                         response.sendRedirect(request.getContextPath() + "/admin/product");
@@ -180,7 +191,8 @@ public class ProductServlet extends HttpServlet {
                         request.setAttribute("error", "❌ Thêm sản phẩm thất bại.");
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
                     }
 
                 } catch (Exception e) {
@@ -188,7 +200,8 @@ public class ProductServlet extends HttpServlet {
                     request.setAttribute("error", "❌ Đã xảy ra lỗi khi tạo sản phẩm.");
                     request.setAttribute("dataCate", dao.getCategory());
                     request.setAttribute("dataSup", dao.getAllSuppliers());
-                    request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                            response);
                 }
                 break;
 
@@ -231,7 +244,8 @@ public class ProductServlet extends HttpServlet {
                         request.setAttribute("dataSup", dao.getAllSuppliers());
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
+                                response);
                         return;
                     }
 
@@ -264,7 +278,8 @@ public class ProductServlet extends HttpServlet {
                         request.setAttribute("dataSup", dao.getAllSuppliers());
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
+                                response);
                         return;
                     }
 
@@ -286,7 +301,8 @@ public class ProductServlet extends HttpServlet {
                     }
 
                     Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-                    Product product = new Product(id1, name, price, description, quantity, image, unit, createdAt, manufactureDate, expirationDate);
+                    Product product = new Product(id1, name, price, description, quantity, image, unit, createdAt,
+                            manufactureDate, expirationDate);
 
                     Category category = new Category();
                     category.setCategoryID(categoryId);
@@ -308,7 +324,8 @@ public class ProductServlet extends HttpServlet {
                         request.setAttribute("dataSup", dao.getAllSuppliers());
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
+                                response);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

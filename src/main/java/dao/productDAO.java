@@ -65,14 +65,15 @@ public class ProductDAO extends DBContext {
     public int insert(String name, double price, String description, int quantity,
             String ImageURL, String unit, Timestamp createdAt,
             int categoryID, int supplierID,
-            Date manufactureDate, Date expirationDate) {
+            Date manufactureDate, Date expirationDate,
+            int unitPerBox, String boxUnitName, String itemUnitName) {
 
         if (price < 1000) {
             price *= 1000;
         }
 
-        String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID, ManufactureDate, ExpirationDate) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID, ManufactureDate, ExpirationDate, UnitPerBox, BoxUnitName, ItemUnitName) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
@@ -86,6 +87,9 @@ public class ProductDAO extends DBContext {
             ps.setInt(9, supplierID);
             ps.setDate(10, new java.sql.Date(manufactureDate.getTime()));
             ps.setDate(11, new java.sql.Date(expirationDate.getTime()));
+            ps.setInt(12, unitPerBox);
+            ps.setString(13, boxUnitName);
+            ps.setString(14, itemUnitName);
 
             return ps.executeUpdate();
         } catch (Exception e) {
@@ -459,22 +463,22 @@ public class ProductDAO extends DBContext {
 
         return categoryName;
     }
-    
+
     public int getStockQuantityById(int productId) {
         int stockQuantity = 0;
         String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
-        
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 stockQuantity = rs.getInt("StockQuantity");
             }
         } catch (Exception e) {
             System.out.println("Error getting stock quantity: " + e.getMessage());
         }
-        
+
         return stockQuantity;
     }
 

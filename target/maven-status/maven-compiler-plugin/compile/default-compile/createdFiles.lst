@@ -14,6 +14,7 @@ model\Product.class
 dao\AccountDAO1.class
 model\ProductPromotion.class
 model\Voucher.class
+ChangePasswordServlet.class
 controller\staff\StaffServlet.class
 controller\ReviewServlet.class
 controller\register\LoginServlet.class
@@ -21,11 +22,13 @@ controller\ProductServlet.class
 controller\SearchProductServlet.class
 controller\forgetpassword\ResetPasswordServlet.class
 controller\staff\OrderServlet.class
+controller\VerifyPasswordServlet.class
 dao\CartItemDAO.class
 dao\OrderDetailDAO.class
 controller\ReorderServlet.class
 controller\AdminDashboardServlet.class
 dao\StaffDAO.class
+model\AccountVoucher.class
 controller\forgetpassword\ForgetPasswordServlet.class
 controller\register\LogoutServlet.class
 model\Category.class
@@ -52,7 +55,9 @@ controller\dangky\RegisterRedirectServlet.class
 dao\FeedBackDAO.class
 model\VoucherUsage.class
 controller\dangky\OtpVerificationServlet.class
+controller\UpdateProfileServlet.class
 dao\VoucherDAO.class
+controller\MyVoucherServlet.class
 model\Account.class
 model\AccountManager.class
 controller\MarkNotificationsReadServlet.class

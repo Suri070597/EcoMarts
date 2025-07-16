@@ -3,6 +3,7 @@
 <%@page import="model.Product"%>
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -86,7 +87,7 @@
                                     <td><%= pro.getProductID()%></td>
                                     <td><%= parentName%></td>
                                     <td><%= pro.getProductName()%></td>
-                                    <td><%= new java.text.DecimalFormat("#,###").format(pro.getPrice())%></td>
+                                    <td><fmt:formatNumber value="${pro.price}" type="number" pattern=",###" /> VNĐ</td>
                                     <td><%= pro.getStockQuantity()%></td>
                                     <td><%= pro.getUnit()%></td>
                                     <td><%= pro.getDescription().replaceAll("\n", "<br/>")%></td>

@@ -163,7 +163,7 @@
                                 <% } %>
                                 <span>(<%= count %>)</span>
                             </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice()) %> VNĐ / <%= p.getUnit() %></div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
@@ -235,7 +235,7 @@
                                 <% } %>
                                 <span>(<%= count %>)</span>
                             </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice()) %> VNĐ / <%= p.getUnit() %></div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
@@ -309,7 +309,7 @@
                                 <% } %>
                                 <span>(<%= count %>)</span>
                             </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice()) %> VNĐ / <%= p.getUnit() %></div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
@@ -385,7 +385,7 @@
                                 <% } %>
                                 <span>(<%= count %>)</span>
                             </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice()) %> VNĐ / <%= p.getUnit() %></div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
@@ -461,7 +461,7 @@
                                 <% } %>
                                 <span>(<%= count %>)</span>
                             </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice()) %> VNĐ / <%= p.getUnit() %></div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
@@ -540,7 +540,7 @@
                                 <% } %>
                                 <span>(<%= count %>)</span>
                             </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice()) %> VNĐ / <%= p.getUnit() %></div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
@@ -616,7 +616,7 @@
                                 <% } %>
                                 <span>(<%= count %>)</span>
                             </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
+                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice()) %> VNĐ / <%= p.getUnit() %></div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>

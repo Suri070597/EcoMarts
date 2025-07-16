@@ -29,6 +29,9 @@ public class Product {
     private Category category;
     private Supplier supplier;
     private InventoryTransaction inventory;
+    private int unitPerBox;
+    private String boxUnitName;
+    private String itemUnitName;
 
     public InventoryTransaction getInventory() {
         return inventory;
@@ -202,6 +205,30 @@ public class Product {
         this.status = status;
     }
 
+    public int getUnitPerBox() {
+        return unitPerBox;
+    }
+
+    public void setUnitPerBox(int unitPerBox) {
+        this.unitPerBox = unitPerBox;
+    }
+
+    public String getBoxUnitName() {
+        return boxUnitName;
+    }
+
+    public void setBoxUnitName(String boxUnitName) {
+        this.boxUnitName = boxUnitName;
+    }
+
+    public String getItemUnitName() {
+        return itemUnitName;
+    }
+
+    public void setItemUnitName(String itemUnitName) {
+        this.itemUnitName = itemUnitName;
+    }
+
     /**
      * Gets the quantity from stockQuantity field
      *
@@ -213,6 +240,10 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID=" + supplierID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate=" + expirationDate + ", category=" + category + ", supplier=" + supplier + '}';
+        return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price
+                + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL
+                + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID="
+                + supplierID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate="
+                + expirationDate + ", category=" + category + ", supplier=" + supplier + '}';
     }
 }
