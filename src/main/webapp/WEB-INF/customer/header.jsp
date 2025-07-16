@@ -91,61 +91,63 @@
 
 
 
-    <div class="header-icons">
-        <%
-            String username = (String) session.getAttribute("username");
-            model.Account account = (model.Account) session.getAttribute("account");
-            Integer unreadCount = (Integer) request.getAttribute("unreadCount");
-            if (unreadCount == null) {
-                unreadCount = 0;
-            }
-            java.util.List<model.Review> unreadList = (java.util.List<model.Review>) request.getAttribute("unreadList");
-        %>
-        <% if (account != null) {
-                // Only show cart for customers (role = 0)
-                if (account.getRole() == 0) {
-                    util.CartUtil cartUtil = new util.CartUtil();
-                    int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
-        %>
-        <span>Chào, <%= account.getFullName()%></span>
-        <a href="<%= request.getContextPath()%>/cart">
-            <i class="fas fa-shopping-cart"></i>Giỏ hàng
-            <% if (cartItemCount > 0) {%>
-            <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
-            <% }%>
+<div class="header-icons">
+    <%
+        model.Account account = (model.Account) session.getAttribute("account");
+        Integer unreadCount = (Integer) request.getAttribute("unreadCount");
+        if (unreadCount == null) unreadCount = 0;
+
+        java.util.List<model.Review> unreadList = 
+            (java.util.List<model.Review>) request.getAttribute("unreadList");
+
+        int cartItemCount = 0;
+        if (account != null && account.getRole() == 0) {
+            util.CartUtil cartUtil = new util.CartUtil();
+            cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
+        }
+    %>
+
+    <% if (account != null && account.getRole() == 0) { %>
+        <span>Chào, <%= account.getFullName() %></span>
+
+        <!-- Icon giỏ hàng -->
+        <a href="<%= request.getContextPath() %>/cart">
+            <i class="fas fa-shopping-cart"></i> Giỏ hàng
+            <% if (cartItemCount > 0) { %>
+            <span class="badge bg-danger rounded-pill"><%= cartItemCount %></span>
+            <% } %>
         </a>
-<% } else { %>
-    <span>Chào, <%= account.getFullName() %></span>
 
-    <!-- Icon thông báo -->
-    <a href="#" class="notification-link" data-toggle="modal" data-target="#notificationModal">
-        <i class="fas fa-bell"></i>
-        <% if (unreadCount > 0) { %>
-        <span class="badge-notification"><%= unreadCount %></span>
-        <% } %>
-    </a>
+        <!-- Icon thông báo -->
+        <a href="#" class="notification-link" data-bs-toggle="modal" data-bs-target="#notificationModal">
+            <i class="fas fa-bell"></i>
+            <% if (unreadCount > 0) { %>
+            <span class="badge-notification"><%= unreadCount %></span>
+            <% } %>
+        </a>
 
-    <!-- Dropdown Hồ sơ -->
-    <div class="dropdown">
-        <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            Hồ sơ <i class="fas fa-user-circle"></i>
-        </button>
-        <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="UpdateProfileServlet">Xem thông tin</a></li>
-            <li><a class="dropdown-item" href="VerifyPasswordServlet">Đổi mật khẩu</a></li>
-            <li><a class="dropdown-item" href="MyVoucherServlet">Voucher của tôi</a></li>
-        </ul>
-    </div>
-<% } %>
+        <!-- Dropdown hồ sơ -->
+        <div class="dropdown">
+            <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Hồ sơ <i class="fas fa-user-circle"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="UpdateProfileServlet">Xem thông tin</a></li>
+                <li><a class="dropdown-item" href="VerifyPasswordServlet">Đổi mật khẩu</a></li>
+                <li><a class="dropdown-item" href="MyVoucherServlet">Voucher của tôi</a></li>
+            </ul>
+        </div>
 
-        <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i>Đăng Xuất</a>
-        <% } else {%>
-        <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
-        <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
-        <% }%>
+        <!-- Logout -->
+        <a href="<%= request.getContextPath() %>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
 
+    <% } else if (account == null) { %>
+        <!-- Chưa đăng nhập -->
+        <a href="<%= request.getContextPath() %>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
+        <a href="<%= request.getContextPath() %>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
+    <% } %>
+</div>
 
-    </div>
 </div>
 </div>
 <!-- Modal notification cho customer đặt ở cuối file, không ảnh hưởng logic khác -->
@@ -184,14 +186,14 @@
         </div>
     </div>
 </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- JS -->
 <script>
-    function toggleCategory(button) {
-        const content = button.nextElementSibling;
-        content.style.display = content.style.display === "block" ? "none" : "block";
-    }
+                        function toggleCategory(button) {
+                            const content = button.nextElementSibling;
+                            content.style.display = content.style.display === "block" ? "none" : "block";
+                        }
 </script>
 <script>
     document.getElementById("searchInput").addEventListener("input", function () {
