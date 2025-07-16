@@ -554,8 +554,9 @@ public class FeedBackDAO extends DBContext {
     // Lấy các phản hồi staff chưa đọc cho customer
     public List<model.Review> getUnreadStaffRepliesForCustomer(int customerId) throws SQLException {
         List<model.Review> list = new ArrayList<>();
-        String sql = "SELECT r.*, a.FullName, a.Username, a.Role FROM Review r " +
+        String sql = "SELECT r.*, a.FullName, a.Username, a.Role, p.ProductName FROM Review r " +
                 "JOIN Account a ON r.AccountID = a.AccountID " +
+                "JOIN Product p ON r.ProductID = p.ProductID " +
                 "WHERE r.ParentReviewID IN (SELECT ReviewID FROM Review WHERE AccountID = ? AND ParentReviewID IS NULL) "
                 +
                 "AND a.Role = 2 AND r.IsRead = 0 AND r.Status = 'VISIBLE' ORDER BY r.CreatedAt DESC";
@@ -583,6 +584,7 @@ public class FeedBackDAO extends DBContext {
                 r.setAccountRole(rs.getInt("Role"));
                 r.setStatus(rs.getString("Status"));
                 r.setIsRead(rs.getBoolean("IsRead"));
+                r.setProductName(rs.getString("ProductName")); // Lấy tên sản phẩm
                 list.add(r);
             }
         }
