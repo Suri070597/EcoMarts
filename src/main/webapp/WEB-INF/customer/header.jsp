@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/cart-badge.css?version=<%= System.currentTimeMillis() %>">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/cart-badge.css?version=<%= System.currentTimeMillis()%>">
 <style>
     .suggestions-box {
         position: absolute;
@@ -97,10 +97,10 @@
             model.Account account = (model.Account) session.getAttribute("account");
         %>
         <% if (account != null) {
-            // Only show cart for customers (role = 0)
-            if (account.getRole() == 0) {
-                util.CartUtil cartUtil = new util.CartUtil();
-                int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
+                // Only show cart for customers (role = 0)
+                if (account.getRole() == 0) {
+                    util.CartUtil cartUtil = new util.CartUtil();
+                    int cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
         %>
         <span>Chào, <%= account.getFullName()%></span>
         <a href="<%= request.getContextPath()%>/cart">
@@ -109,14 +109,26 @@
             <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
             <% }%>
         </a>
-        <% } else { %>
+        <% } else {%>
         <span>Chào, <%= account.getFullName()%></span>
-        <% } %>
+        <% }%>
+        <div class="dropdown">
+            <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Hồ sơ <i class="fas fa-user-circle"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="UpdateProfileServlet">Xem thông tin</a></li>
+                <li><a class="dropdown-item" href="VerifyPasswordServlet">Đổi mật khẩu</a></li>
+                <li><a class="dropdown-item" href="MyVoucherServlet">Voucher của tôi</a></li>
+            </ul>
+        </div>
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i>Đăng Xuất</a>
         <% } else {%>
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
         <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
         <% }%>
+
+
     </div>
 </div>
 </div>
@@ -154,3 +166,5 @@
                 });
     });
 </script>
+<!-- Bootstrap JS (cần cho dropdown hoạt động) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

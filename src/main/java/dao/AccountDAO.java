@@ -361,4 +361,23 @@ public class AccountDAO extends DBContext {
         account.setStatus(rs.getString("Status"));
         return account;
     }
+
+    public boolean updateBasicInfo(int accountId, String fullName, String phone, String address, String gender) {
+        String sql = "UPDATE Account SET FullName = ?, Phone = ?, Address = ?, Gender = ? WHERE AccountID = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, fullName);
+            ps.setString(2, phone);
+            ps.setString(3, address);
+            ps.setString(4, gender);
+            ps.setInt(5, accountId);
+            int rows = ps.executeUpdate();
+            ps.close();
+            return rows > 0;
+        } catch (SQLException e) {
+            System.out.println("Update basic info failed: " + e.getMessage());
+            return false;
+        }
+    }
+
 }
