@@ -95,6 +95,11 @@
         <%
             String username = (String) session.getAttribute("username");
             model.Account account = (model.Account) session.getAttribute("account");
+            Integer unreadCount = (Integer) request.getAttribute("unreadCount");
+            if (unreadCount == null) {
+                unreadCount = 0;
+            }
+            java.util.List<model.Review> unreadList = (java.util.List<model.Review>) request.getAttribute("unreadList");
         %>
         <% if (account != null) {
                 // Only show cart for customers (role = 0)
@@ -109,19 +114,30 @@
             <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
             <% }%>
         </a>
-        <% } else {%>
-        <span>Chào, <%= account.getFullName()%></span>
-        <% }%>
-        <div class="dropdown">
-            <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                Hồ sơ <i class="fas fa-user-circle"></i>
-            </button>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="UpdateProfileServlet">Xem thông tin</a></li>
-                <li><a class="dropdown-item" href="VerifyPasswordServlet">Đổi mật khẩu</a></li>
-                <li><a class="dropdown-item" href="MyVoucherServlet">Voucher của tôi</a></li>
-            </ul>
-        </div>
+<% } else { %>
+    <span>Chào, <%= account.getFullName() %></span>
+
+    <!-- Icon thông báo -->
+    <a href="#" class="notification-link" data-toggle="modal" data-target="#notificationModal">
+        <i class="fas fa-bell"></i>
+        <% if (unreadCount > 0) { %>
+        <span class="badge-notification"><%= unreadCount %></span>
+        <% } %>
+    </a>
+
+    <!-- Dropdown Hồ sơ -->
+    <div class="dropdown">
+        <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Hồ sơ <i class="fas fa-user-circle"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="UpdateProfileServlet">Xem thông tin</a></li>
+            <li><a class="dropdown-item" href="VerifyPasswordServlet">Đổi mật khẩu</a></li>
+            <li><a class="dropdown-item" href="MyVoucherServlet">Voucher của tôi</a></li>
+        </ul>
+    </div>
+<% } %>
+
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i>Đăng Xuất</a>
         <% } else {%>
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
@@ -132,7 +148,44 @@
     </div>
 </div>
 </div>
-
+<!-- Modal notification cho customer đặt ở cuối file, không ảnh hưởng logic khác -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">Thông báo phản hồi từ nhân viên</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <% if (account != null && account.getRole() == 0) { %>
+                <% if (unreadCount == 0 || unreadList == null || unreadList.size() == 0) { %>
+                <div class="text-center text-muted">Không có thông báo mới.</div>
+                <% } else { %>
+                <ul class="list-group">
+                    <% for (model.Review reply : unreadList) {%>
+                    <a href="<%= request.getContextPath()%>/read-notification?reviewId=<%= reply.getReviewID()%>" style="text-decoration:none;color:inherit;">
+                        <li class="list-group-item" style="cursor:pointer;">
+                            <div><b>Nhân viên:</b> <%= reply.getAccountName()%></div>
+                            <div><b>Sản phẩm:</b> <%= reply.getProductName() != null ? reply.getProductName() : ""%></div>
+                            <div><b>Phản hồi:</b> <%= reply.getComment()%></div>
+                            <div class="text-muted small"><%= reply.getCreatedAt()%></div>
+                        </li>
+                    </a>
+                    <% }%>
+                </ul>
+                <form method="post" action="<%= request.getContextPath()%>/mark-notifications-read" class="mt-3 text-end">
+                    <button type="submit" class="btn btn-sm btn-primary">Đã đọc tất cả</button>
+                </form>
+                <% } %>
+                <% } else { %>
+                <div class="text-center text-muted">Vui lòng đăng nhập bằng tài khoản khách hàng để xem thông báo.</div>
+                <% }%>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- JS -->
 <script>
     function toggleCategory(button) {
