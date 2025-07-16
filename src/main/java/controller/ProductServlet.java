@@ -87,6 +87,19 @@ public class ProductServlet extends HttpServlet {
                 request.setAttribute("keyword", keyword);
                 request.getRequestDispatcher("/WEB-INF/admin/product/product.jsp").forward(request, response);
                 break;
+            case "detail":
+                String idDetailRaw = request.getParameter("id");
+                try {
+                    int idDetail = Integer.parseInt(idDetailRaw);
+                    Product productDetail = dao.getProductById(idDetail);
+                    request.setAttribute("productDetail", productDetail);
+                    request.getRequestDispatcher("/WEB-INF/admin/product/product-detail.jsp").forward(request,
+                            response);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    response.sendRedirect(request.getContextPath() + "/admin/product");
+                }
+                break;
         }
     }
 

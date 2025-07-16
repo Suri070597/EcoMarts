@@ -47,6 +47,9 @@ public class ManageReviewServlet extends HttpServlet {
             } else {
                 reviewList = fbDao.getAllReviewsWithAccountAndProduct();
             }
+            // Đảm bảo reviewList không null
+            if (reviewList == null)
+                reviewList = new java.util.ArrayList<>();
             System.out.println(
                     "DEBUG: Review list size in servlet: " + (reviewList != null ? reviewList.size() : "null"));
             request.setAttribute("reviewList", reviewList);
