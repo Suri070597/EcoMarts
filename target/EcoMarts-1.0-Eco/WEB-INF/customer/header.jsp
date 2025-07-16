@@ -114,20 +114,37 @@
             <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
             <% }%>
         </a>
-        <a href="#" class="notification-link" data-toggle="modal" data-target="#notificationModal">
-            <i class="fas fa-bell"></i>
-            <% if (unreadCount > 0) {%>
-            <span class="badge-notification"><%= unreadCount%></span>
-            <% } %>
-        </a>
-        <% } else {%>
-        <span>Chào, <%= account.getFullName()%></span>
-        <% }%>
+<% } else { %>
+    <span>Chào, <%= account.getFullName() %></span>
+
+    <!-- Icon thông báo -->
+    <a href="#" class="notification-link" data-toggle="modal" data-target="#notificationModal">
+        <i class="fas fa-bell"></i>
+        <% if (unreadCount > 0) { %>
+        <span class="badge-notification"><%= unreadCount %></span>
+        <% } %>
+    </a>
+
+    <!-- Dropdown Hồ sơ -->
+    <div class="dropdown">
+        <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Hồ sơ <i class="fas fa-user-circle"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="UpdateProfileServlet">Xem thông tin</a></li>
+            <li><a class="dropdown-item" href="VerifyPasswordServlet">Đổi mật khẩu</a></li>
+            <li><a class="dropdown-item" href="MyVoucherServlet">Voucher của tôi</a></li>
+        </ul>
+    </div>
+<% } %>
+
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i>Đăng Xuất</a>
         <% } else {%>
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
         <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
         <% }%>
+
+
     </div>
 </div>
 </div>
@@ -202,3 +219,5 @@
                 });
     });
 </script>
+<!-- Bootstrap JS (cần cho dropdown hoạt động) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

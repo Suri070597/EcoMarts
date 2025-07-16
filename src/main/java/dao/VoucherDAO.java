@@ -72,7 +72,7 @@ public class VoucherDAO extends DBContext {
 
     public boolean insertVoucher(Voucher voucher) {
         String sql = "INSERT INTO Voucher (VoucherCode, Description, DiscountAmount, MinOrderValue, MaxUsage, UsageCount, StartDate, EndDate, IsActive, CategoryID) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, voucher.getVoucherCode());
@@ -101,7 +101,7 @@ public class VoucherDAO extends DBContext {
 
     public boolean updateVoucher(Voucher voucher) {
         String sql = "UPDATE Voucher SET VoucherCode = ?, Description = ?, DiscountAmount = ?, MinOrderValue = ?, MaxUsage = ?, UsageCount = ?, StartDate = ?, EndDate = ?, IsActive = ?, CategoryID = ? "
-                   + "WHERE VoucherID = ?";
+                + "WHERE VoucherID = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, voucher.getVoucherCode());
@@ -198,21 +198,41 @@ public class VoucherDAO extends DBContext {
         voucher.setCategoryID(rs.getObject("CategoryID") != null ? rs.getInt("CategoryID") : null);
         return voucher;
     }
-    
+
     public boolean updateVoucherStatus(int voucherId, boolean isActive) {
-    String sql = "UPDATE Voucher SET IsActive = ? WHERE VoucherID = ?";
-    try {
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setInt(1, isActive ? 1 : 0); // Vì cột BIT lưu 0/1
-        ps.setInt(2, voucherId);
+        String sql = "UPDATE Voucher SET IsActive = ? WHERE VoucherID = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, isActive ? 1 : 0); // Vì cột BIT lưu 0/1
+            ps.setInt(2, voucherId);
 
-        int rows = ps.executeUpdate();
-        ps.close();
-        return rows > 0;
-    } catch (SQLException e) {
-        System.out.println("Update status failed: " + e.getMessage());
-        return false;
+            int rows = ps.executeUpdate();
+            ps.close();
+            return rows > 0;
+        } catch (SQLException e) {
+            System.out.println("Update status failed: " + e.getMessage());
+            return false;
+        }
     }
-}
 
+    public List<Voucher> getVouchersByAccountId(int accountId) {
+        List<Voucher> list = new ArrayList<>();
+        String sql = "SELECT v.* FROM Voucher v "
+                + "JOIN AccountVoucher av ON v.VoucherID = av.VoucherID "
+                + "WHERE av.AccountID = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, accountId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Voucher voucher = mapResultSetToVoucher(rs);
+                list.add(voucher);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.err.println("Error in getVouchersByAccountId: " + e.getMessage());
+        }
+        return list;
+    }
 }
