@@ -11,6 +11,7 @@ import java.util.Map;
 import db.DBContext;
 import model.Order;
 import model.OrderDetail;
+import model.RevenueStats;
 
 public class OrderDAO extends DBContext {
 
@@ -440,32 +441,189 @@ public class OrderDAO extends DBContext {
         }
         return list;
     }
-public List<Order> getOrdersByAccountId(int accountId) {
-    List<Order> list = new ArrayList<>();
-    String sql = "SELECT o.*, a.FullName FROM [Order] o JOIN Account a ON o.AccountID = a.AccountID "
-               + "WHERE o.AccountID = ?";
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, accountId);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Order o = new Order();
-            o.setOrderID(rs.getInt("OrderID"));
-            o.setAccountID(rs.getInt("AccountID"));
-            o.setOrderDate(rs.getTimestamp("OrderDate"));
-            o.setTotalAmount(rs.getDouble("TotalAmount"));
-            o.setShippingAddress(rs.getString("ShippingAddress"));
-            o.setShippingPhone(rs.getString("ShippingPhone"));
-            o.setPaymentMethod(rs.getString("PaymentMethod"));
-            o.setPaymentStatus(rs.getString("PaymentStatus"));
-            o.setOrderStatus(rs.getString("OrderStatus"));
-            o.setNotes(rs.getString("Notes"));
-            o.setAccountName(rs.getString("FullName"));
-            list.add(o);
+
+    public List<Order> getOrdersByAccountId(int accountId) {
+        List<Order> list = new ArrayList<>();
+        String sql = "SELECT o.*, a.FullName FROM [Order] o JOIN Account a ON o.AccountID = a.AccountID "
+                + "WHERE o.AccountID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Order o = new Order();
+                o.setOrderID(rs.getInt("OrderID"));
+                o.setAccountID(rs.getInt("AccountID"));
+                o.setOrderDate(rs.getTimestamp("OrderDate"));
+                o.setTotalAmount(rs.getDouble("TotalAmount"));
+                o.setShippingAddress(rs.getString("ShippingAddress"));
+                o.setShippingPhone(rs.getString("ShippingPhone"));
+                o.setPaymentMethod(rs.getString("PaymentMethod"));
+                o.setPaymentStatus(rs.getString("PaymentStatus"));
+                o.setOrderStatus(rs.getString("OrderStatus"));
+                o.setNotes(rs.getString("Notes"));
+                o.setAccountName(rs.getString("FullName"));
+                list.add(o);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return list;
     }
-    return list;
-}
+
+    public List<RevenueStats> getMonthlyRevenueDetails(int month, int year) {
+        List<RevenueStats> list = new ArrayList<>();
+        String sql = """
+        SELECT p.ProductName, SUM(od.Quantity) AS TotalQuantity, SUM(od.SubTotal) AS TotalRevenue
+        FROM OrderDetail od
+        JOIN Product p ON od.ProductID = p.ProductID
+        JOIN [Order] o ON od.OrderID = o.OrderID
+        WHERE MONTH(o.OrderDate) = ? AND YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
+        GROUP BY p.ProductName
+        ORDER BY TotalQuantity DESC
+    """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, month);
+            ps.setInt(2, year);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString("ProductName");
+                int quantity = rs.getInt("TotalQuantity");
+                double revenue = rs.getDouble("TotalRevenue");
+                list.add(new RevenueStats(name, quantity, revenue));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public double getMonthlyRevenue(int month, int year) {
+        String sql = "SELECT SUM(TotalAmount) FROM [Order] WHERE MONTH(OrderDate) = ? AND YEAR(OrderDate) = ? AND OrderStatus = N'Đã giao'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, month);
+            ps.setInt(2, year);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countDeliveredOrdersInMonth(int month, int year) {
+        String sql = "SELECT COUNT(*) FROM [Order] WHERE MONTH(OrderDate) = ? AND YEAR(OrderDate) = ? AND OrderStatus = N'Đã giao'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, month);
+            ps.setInt(2, year);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getTotalProductSoldInMonth(int month, int year) {
+        String sql = """
+        SELECT SUM(od.Quantity) FROM [Order] o
+        JOIN OrderDetail od ON o.OrderID = od.OrderID
+        WHERE MONTH(o.OrderDate) = ? AND YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
+    """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, month);
+            ps.setInt(2, year);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+// Tổng doanh thu trong năm
+
+    public double getYearlyRevenue(int year) {
+        String sql = "SELECT SUM(TotalAmount) FROM [Order] "
+                + "WHERE YEAR(OrderDate) = ? AND OrderStatus = N'Đã giao'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+// Tổng số đơn đã giao trong năm
+    public int countDeliveredOrdersByYear(int year) {
+        String sql = "SELECT COUNT(*) FROM [Order] "
+                + "WHERE YEAR(OrderDate) = ? AND OrderStatus = N'Đã giao'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+// Tổng số lượng sản phẩm đã bán trong năm
+    public int countProductsSoldByYear(int year) {
+        String sql = """
+        SELECT SUM(od.Quantity) 
+        FROM OrderDetail od
+        JOIN [Order] o ON od.OrderID = o.OrderID
+        WHERE YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
+    """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+// Danh sách sản phẩm bán được trong năm
+    public List<Map<String, Object>> getProductSalesByYear(int year) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = """
+        SELECT p.ProductName, SUM(od.Quantity) AS totalQuantity, SUM(od.SubTotal) AS totalRevenue
+        FROM OrderDetail od
+        JOIN Product p ON od.ProductID = p.ProductID
+        JOIN [Order] o ON od.OrderID = o.OrderID
+        WHERE YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
+        GROUP BY p.ProductName
+        ORDER BY totalRevenue DESC
+    """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("productName", rs.getString("ProductName"));
+                row.put("totalQuantity", rs.getInt("totalQuantity"));
+                row.put("totalRevenue", rs.getDouble("totalRevenue"));
+                list.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
 }
