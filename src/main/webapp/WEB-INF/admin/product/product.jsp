@@ -63,7 +63,7 @@
                                     <th>Unit</th>
                                     <th>Description</th>
                                     <th>Image</th>
-                                    <th>Supplier</th>
+                                    <!--<th>Supplier</th>-->
                                     <th>Create Date</th>
                                     <th>Actions</th>
                                 </tr>
@@ -94,7 +94,6 @@
                                     <td>
                                         <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= pro.getImageURL()%>" alt="Product Image" style="width: 80px; height: auto;">
                                     </td>
-                                    <td><%= pro.getSupplier().getCompanyName()%></td>
                                     <td><%= pro.getCreatedAt()%></td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
