@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import db.DBContext;
+import model.CartItem;
 import model.Order;
 import model.OrderDetail;
 import model.RevenueStats;
@@ -626,4 +627,55 @@ public class OrderDAO extends DBContext {
         return list;
     }
 
+    public void deleteByOrderId(int orderId) {
+        String sql = "DELETE FROM OrderDetail WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("deleteByOrderId error: " + e.getMessage());
+        }
+    }
+
+    public void deleteOrder(int orderId) {
+        String sql = "DELETE FROM [Order] WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("deleteOrder error: " + e.getMessage());
+        }
+    }
+
+    public void cancelOrder(int orderId) {
+        String sql = "UPDATE [Order] SET OrderStatus = N'Đã hủy' WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<CartItem> getCartItemsFromOrder(int orderId) {
+        List<CartItem> items = new ArrayList<>();
+        String sql = "SELECT ProductID, Quantity FROM OrderDetail WHERE OrderID = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CartItem item = new CartItem();
+                item.setProductID(rs.getInt("ProductID"));
+                item.setQuantity(rs.getInt("Quantity"));
+                items.add(item);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return items;
+    }
 }

@@ -10,6 +10,7 @@ public class OrderDetail {
     private double subTotal;
     private String productName;
     private Product product;
+    private String orderStatus;
 
     public OrderDetail() {
     }
@@ -87,6 +88,14 @@ public class OrderDetail {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public void setOrderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
+    }
+
+    public String getOrderStatus() {
+        return orderStatus;
     }
 
     @Override
