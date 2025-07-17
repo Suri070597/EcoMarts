@@ -9,13 +9,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class AccountDAO1 {
+
     private final DBContext1 dbContext = new DBContext1();
+// Trong class AccountDAO1
+    private static AccountDAO1 instance = null;
+
+    public static AccountDAO1 getInstance() {
+        if (instance == null) {
+            instance = new AccountDAO1();
+        }
+        return instance;
+    }
 
     public int insertAccount(Account account) throws SQLException {
         String sql = "INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status]) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = dbContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, account.getUsername());
-            stmt.setString(2, account.getRole() == 0 ? MD5Util.hash(account.getPassword()) : account.getPassword()); // MD5 cho khách hàng, plain text cho admin/staff
+            // Sửa đoạn set password cho hợp lý với Google Login
+            stmt.setString(2,
+                    (account.getPassword() == null || account.getPassword().equals("") || account.getPassword().equals("GOOGLE_LOGIN"))
+                    ? account.getPassword()
+                    : (account.getRole() == 0 ? MD5Util.hash(account.getPassword()) : account.getPassword())
+            );
             stmt.setString(3, account.getEmail());
             stmt.setString(4, account.getFullName());
             stmt.setString(5, account.getPhone());
@@ -113,6 +128,7 @@ public class AccountDAO1 {
             System.out.println("Updated account status to " + status + " for AccountID=" + accountId);
         }
     }
+
     // Lấy Account theo email
     public Account getAccountByEmail(Connection conn, String email) {
         String sql = "SELECT * FROM Account WHERE Email = ?";
@@ -150,5 +166,46 @@ public class AccountDAO1 {
             e.printStackTrace();
         }
     }
+// Cập nhật bổ sung thông tin cho tài khoản đã có bằng email (dùng cho Google Login)
 
+    public boolean updateAccountByEmail(Account acc) throws SQLException {
+        String sql = "UPDATE Account SET Username=?, FullName=?, Phone=?, [Address]=?, Gender=?, [Role]=?, [Status]=? WHERE Email=?";
+        try (Connection conn = dbContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, acc.getUsername());
+            ps.setString(2, acc.getFullName());
+            ps.setString(3, acc.getPhone());
+            ps.setString(4, acc.getAddress());
+            ps.setString(5, acc.getGender());
+            ps.setInt(6, acc.getRole());
+            ps.setString(7, acc.getStatus());
+            ps.setString(8, acc.getEmail());
+            return ps.executeUpdate() > 0;
+        }
+    }
+// Overload: Lấy account theo email, tự tạo connection, KHÔNG cần truyền connection vào
+
+    public Account getAccountByEmail(String email) {
+        String sql = "SELECT * FROM Account WHERE Email = ?";
+        try (Connection conn = dbContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Account(
+                        rs.getInt("AccountID"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Email"),
+                        rs.getString("FullName"),
+                        rs.getString("Phone"),
+                        rs.getString("Address"),
+                        rs.getString("Gender"),
+                        rs.getInt("Role"),
+                        rs.getString("Status")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
