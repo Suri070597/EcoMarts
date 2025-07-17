@@ -87,7 +87,7 @@
                                     <td><%= pro.getProductID()%></td>
                                     <td><%= parentName%></td>
                                     <td><%= pro.getProductName()%></td>
-                                    <td><fmt:formatNumber value="${pro.price}" type="number" pattern=",###" /> VNĐ</td>
+                                    <td><fmt:formatNumber value="<%= pro.getPrice()%>" type="number" pattern=",###" /> VNĐ</td>
                                     <td><%= pro.getStockQuantity()%></td>
                                     <td><%= pro.getUnit()%></td>
                                     <td><%= pro.getDescription().replaceAll("\n", "<br/>")%></td>

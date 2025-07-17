@@ -58,6 +58,7 @@ controller\dangky\OtpVerificationServlet.class
 controller\UpdateProfileServlet.class
 dao\VoucherDAO.class
 controller\MyVoucherServlet.class
+controller\StaffProductServlet.class
 model\Account.class
 model\AccountManager.class
 controller\MarkNotificationsReadServlet.class

@@ -31,16 +31,12 @@
                         <div class="header-actions d-flex justify-content-between align-items-center">
                             <h1 class="card-title">Product List</h1>
                             <div class="d-flex gap-2">
-                                <form action="${pageContext.request.contextPath}/admin/product" method="get" class="search-box">
+                                <form action="${pageContext.request.contextPath}/staff/product" method="get" class="search-box">
                                     <input type="hidden" name="action" value="search" />
                                     <i class="fas fa-search"></i>
                                     <input type="text" name="keyword" placeholder="Search products..." value="${keyword != null ? keyword : ''}">
                                     <button type="submit" class="btn btn-sm btn-primary">Search</button>
                                 </form>
-
-                                <a href="${pageContext.request.contextPath}/admin/product?action=create" class="btn btn-success">
-                                    <i class="fas fa-plus"></i> Create
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -98,17 +94,9 @@
                                     <td><%= pro.getCreatedAt()%></td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
-                                             <a href="${pageContext.request.contextPath}/admin/product?action=detail&id=<%= pro.getProductID()%>" class="btn btn-sm btn-info">
+                                             <a href="${pageContext.request.contextPath}/staff/product?action=detail&id=<%= pro.getProductID()%>" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="${pageContext.request.contextPath}/admin/product?action=update&id=<%= pro.getProductID()%>" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                           
-                                            <a  href="${pageContext.request.contextPath}/admin/product?action=delete&id=<%= pro.getProductID()%>" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-
                                         </div>
                                     </td>
                                 </tr>
