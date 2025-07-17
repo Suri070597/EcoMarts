@@ -79,7 +79,13 @@
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
             <version>3.0.1</version>
         </dependency>
-
+        <!-- thư vien googole-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>4.5.13</version> <!-- Hoặc version mới nhất -->
+        </dependency>
+        
         <!-- Apache HTTP Client -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
