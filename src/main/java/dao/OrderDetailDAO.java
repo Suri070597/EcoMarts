@@ -1,19 +1,35 @@
 package dao;
 
 import db.DBContext;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import model.CartItem;
 import model.OrderDetail;
+import model.Product;
 
 public class OrderDetailDAO extends DBContext {
 
     public List<OrderDetail> getOrderDetailsByOrderId(int orderId) {
         List<OrderDetail> orderDetails = new ArrayList<>();
-        String sql = "SELECT OrderDetailID, OrderID, ProductID, Quantity, UnitPrice " +
-                "FROM OrderDetail WHERE OrderID = ?";
+        String sql = "SELECT \n"
+                + "    od.OrderDetailID,\n"
+                + "    od.OrderID,\n"
+                + "    od.ProductID,\n"
+                + "    p.ProductName,\n"
+                + "    od.Quantity,\n"
+                + "    od.UnitPrice,\n"
+                + "    od.SubTotal,\n"
+                + "    o.OrderStatus\n"
+                + "FROM OrderDetail od\n"
+                + "JOIN Product p ON od.ProductID = p.ProductID\n"
+                + "JOIN [Order] o ON od.OrderID = o.OrderID\n"
+                + "WHERE od.OrderID = ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -26,9 +42,17 @@ public class OrderDetailDAO extends DBContext {
                         rs.getInt("OrderID"),
                         rs.getInt("ProductID"),
                         rs.getInt("Quantity"),
-                        rs.getDouble("UnitPrice"));
+                        rs.getDouble("UnitPrice")
+                );
+
+                // Set thêm thông tin phụ
+                orderDetail.setProductName(rs.getString("ProductName"));
+                orderDetail.setOrderStatus(rs.getString("OrderStatus"));
+                orderDetail.setSubTotal(rs.getDouble("SubTotal")); // nếu không tính trong constructor
+
                 orderDetails.add(orderDetail);
             }
+
             rs.close();
             ps.close();
         } catch (SQLException e) {
@@ -39,8 +63,8 @@ public class OrderDetailDAO extends DBContext {
     }
 
     public boolean addOrderDetail(OrderDetail orderDetail) {
-        String sql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
-                "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) "
+                + "VALUES (?, ?, ?, ?)";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -59,8 +83,8 @@ public class OrderDetailDAO extends DBContext {
     }
 
     public boolean updateOrderDetail(OrderDetail orderDetail) {
-        String sql = "UPDATE OrderDetail SET Quantity = ?, UnitPrice = ? " +
-                "WHERE OrderDetailID = ?";
+        String sql = "UPDATE OrderDetail SET Quantity = ?, UnitPrice = ? "
+                + "WHERE OrderDetailID = ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -92,4 +116,76 @@ public class OrderDetailDAO extends DBContext {
             return false;
         }
     }
+
+    public Map<Integer, Integer> getProductCountByOrderIDs(List<Integer> orderIDs) {
+        Map<Integer, Integer> result = new HashMap<>();
+        if (orderIDs == null || orderIDs.isEmpty()) {
+            return result;
+        }
+
+        StringBuilder queryBuilder = new StringBuilder(
+                "SELECT OrderID, SUM(Quantity) as TotalQty FROM OrderDetail WHERE OrderID IN ("
+        );
+        for (int i = 0; i < orderIDs.size(); i++) {
+            queryBuilder.append("?");
+            if (i < orderIDs.size() - 1) {
+                queryBuilder.append(",");
+            }
+        }
+        queryBuilder.append(") GROUP BY OrderID");
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(queryBuilder.toString())) {
+
+            for (int i = 0; i < orderIDs.size(); i++) {
+                ps.setInt(i + 1, orderIDs.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.put(rs.getInt("OrderID"), rs.getInt("TotalQty"));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public List<CartItem> getCartItemsFromOrder(int orderId) {
+        List<CartItem> items = new ArrayList<>();
+        String sql = "SELECT od.ProductID, od.Quantity, p.ProductName, p.Price, p.ImageURL "
+                + "FROM OrderDetail od JOIN Product p ON od.ProductID = p.ProductID "
+                + "WHERE od.OrderID = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CartItem item = new CartItem();
+                item.setProductID(rs.getInt("ProductID"));
+                item.setQuantity(rs.getInt("Quantity"));
+
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                p.setPrice(rs.getDouble("Price"));
+                p.setImageURL(rs.getString("ImageURL"));
+
+                item.setProduct(p);
+                items.add(item);
+            }
+
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return items;
+    }
+
 }
