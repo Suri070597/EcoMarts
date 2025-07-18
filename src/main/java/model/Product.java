@@ -17,7 +17,7 @@ public class Product {
     private String productName;
     private double price;
     private String description;
-    private int stockQuantity;
+    private double stockQuantity;
     private String imageURL;
     private String unit;
     private Timestamp createdAt;
@@ -78,7 +78,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(int productID, String productName, double price, String description, int stockQuantity,
+    public Product(int productID, String productName, double price, String description, double stockQuantity,
             String imageURL, String unit, Timestamp createdAt) {
         this.productID = productID;
         this.productName = productName;
@@ -93,7 +93,7 @@ public class Product {
         // this.status = status;
     }
 
-    public Product(int productID, String productName, double price, String description, int stockQuantity,
+    public Product(int productID, String productName, double price, String description, double stockQuantity,
             String imageURL, String unit, Timestamp createdAt,
             Date manufactureDate, Date expirationDate) {
         this.productID = productID;
@@ -157,11 +157,11 @@ public class Product {
         this.description = description;
     }
 
-    public int getStockQuantity() {
+    public double getStockQuantity() {
         return stockQuantity;
     }
 
-    public void setStockQuantity(int stockQuantity) {
+    public void setStockQuantity(double stockQuantity) {
         this.stockQuantity = stockQuantity;
     }
 
@@ -234,7 +234,7 @@ public class Product {
      *
      * @return The stock quantity
      */
-    public int getAvailableQuantity() {
+    public double getAvailableQuantity() {
         return this.stockQuantity;
     }
 

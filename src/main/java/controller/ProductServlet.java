@@ -119,31 +119,39 @@ public class ProductServlet extends HttpServlet {
             case "create":
                 try {
                     String pName = request.getParameter("pName");
-                    double boxPrice = Double.parseDouble(request.getParameter("boxPrice"));
-                    int boxQuantity = Integer.parseInt(request.getParameter("boxQuantity"));
-                    int unitPerBox = Integer.parseInt(request.getParameter("unitPerBox"));
-                    String boxUnitName = request.getParameter("boxUnitName");
-                    String itemUnitName = request.getParameter("itemUnitName");
                     String pDescription = request.getParameter("pDescription");
-
-                    int categoryID = Integer.parseInt(request.getParameter("categoryID"));
-                    int supplierID = Integer.parseInt(request.getParameter("supplierID"));
-
+                    String categoryIDStr = request.getParameter("categoryID");
+                    String supplierIDStr = request.getParameter("supplierID");
                     String manufactureDateStr = request.getParameter("manufactureDate");
                     String expiryMonthsStr = request.getParameter("expirySelect");
 
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    Date manufactureDate = sdf.parse(manufactureDateStr);
-
-                    int months = Integer.parseInt(expiryMonthsStr);
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(manufactureDate);
-                    cal.add(Calendar.MONTH, months);
-                    Date expirationDate = cal.getTime();
-
-                    Date today = new Date();
-                    if (manufactureDate.after(today)) {
-                        request.setAttribute("error", "Ngày sản xuất không được ở tương lai.");
+                    // Validate required fields
+                    if (pName == null || pName.trim().isEmpty()) {
+                        request.setAttribute("error", "Vui lòng nhập tên sản phẩm.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
+                        return;
+                    }
+                    if (categoryIDStr == null || categoryIDStr.trim().isEmpty()) {
+                        request.setAttribute("error", "Vui lòng chọn danh mục sản phẩm.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
+                        return;
+                    }
+                    if (supplierIDStr == null || supplierIDStr.trim().isEmpty()) {
+                        request.setAttribute("error", "Vui lòng chọn nhà cung cấp.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
+                        return;
+                    }
+                    if (manufactureDateStr == null || manufactureDateStr.trim().isEmpty()) {
+                        request.setAttribute("error", "Vui lòng nhập ngày sản xuất.");
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
@@ -151,12 +159,55 @@ public class ProductServlet extends HttpServlet {
                         return;
                     }
 
+                    int categoryID = Integer.parseInt(categoryIDStr);
+                    int supplierID = Integer.parseInt(supplierIDStr);
+                    // Lấy danh sách category để xác định trái cây
+                    List<Category> allCate = dao.getCategory();
+                    boolean isFruit = (categoryID == 3);
+                    for (Category c : allCate) {
+                        if (c.getCategoryID() == categoryID && c.getParentID() != null && c.getParentID() == 3) {
+                            isFruit = true;
+                            break;
+                        }
+                    }
+                    // Chỉ kiểm tra hạn sử dụng nếu không phải trái cây
+                    if (!isFruit && (expiryMonthsStr == null || expiryMonthsStr.trim().isEmpty())) {
+                        request.setAttribute("error", "Vui lòng chọn hạn sử dụng.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
+                        return;
+                    }
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date manufactureDate = sdf.parse(manufactureDateStr);
+                    int months = 0;
+                    if (!isFruit) {
+                        months = Integer.parseInt(expiryMonthsStr);
+                    }
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(manufactureDate);
+                    if (!isFruit) {
+                        cal.add(Calendar.MONTH, months);
+                    }
+                    Date expirationDate = cal.getTime();
+                    Date today = new Date();
+                    // Chuẩn hóa ngày về 00:00:00 để so sánh
+                    Date todayTrunc = truncateTime(today);
+                    if (manufactureDate.after(todayTrunc)) {
+                        request.setAttribute("error", "Ngày sản xuất không được ở tương lai.");
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                response);
+                        return;
+                    }
                     // Không cho phép ngày sản xuất quá 2 năm về trước
                     Calendar twoYearsAgo = Calendar.getInstance();
                     twoYearsAgo.setTime(today);
                     twoYearsAgo.add(Calendar.YEAR, -2); // Trừ đi 2 năm
                     Date twoYearsBefore = twoYearsAgo.getTime();
-
                     if (manufactureDate.before(twoYearsBefore)) {
                         request.setAttribute("error", "Ngày sản xuất không được quá 2 năm trước.");
                         request.setAttribute("dataCate", dao.getCategory());
@@ -165,8 +216,7 @@ public class ProductServlet extends HttpServlet {
                                 response);
                         return;
                     }
-
-                    if (expirationDate.before(today)) {
+                    if (expirationDate.before(todayTrunc)) {
                         request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
@@ -174,7 +224,6 @@ public class ProductServlet extends HttpServlet {
                                 response);
                         return;
                     }
-
                     // Xử lý ảnh
                     Part filePart = request.getPart("pImage");
                     String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
@@ -185,14 +234,97 @@ public class ProductServlet extends HttpServlet {
                         }
                         filePart.write(IMAGE_UPLOAD_DIR + File.separator + fileName);
                     }
-
                     String pImage = fileName;
                     Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-
-                    // Tính số lượng lẻ và giá lẻ
-                    int stockQuantity = boxQuantity * unitPerBox;
-                    double price = boxPrice / unitPerBox;
-
+                    double price;
+                    double stockQuantity;
+                    int unitPerBox;
+                    String boxUnitName;
+                    String itemUnitName;
+                    if (isFruit) {
+                        String fruitPriceStr = request.getParameter("fruitPrice");
+                        String fruitQtyStr = request.getParameter("fruitQuantity");
+                        String fruitExpiryDaysStr = request.getParameter("fruitExpiryDays");
+                        if (fruitPriceStr == null || fruitPriceStr.trim().isEmpty()) {
+                            request.setAttribute("error", "Vui lòng nhập giá cho trái cây.");
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        if (fruitQtyStr == null || fruitQtyStr.trim().isEmpty()) {
+                            request.setAttribute("error", "Vui lòng nhập số lượng (kg) cho trái cây.");
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        if (fruitExpiryDaysStr == null || fruitExpiryDaysStr.trim().isEmpty()) {
+                            request.setAttribute("error", "Vui lòng nhập hạn sử dụng (ngày) cho trái cây.");
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        price = Double.parseDouble(fruitPriceStr);
+                        stockQuantity = Double.parseDouble(fruitQtyStr);
+                        int fruitExpiryDays = Integer.parseInt(fruitExpiryDaysStr);
+                        // Chỉ cho phép số lượng là số nguyên dương
+                        if (stockQuantity <= 0 || stockQuantity != Math.floor(stockQuantity)) {
+                            request.setAttribute("error", "Số lượng trái cây phải là số nguyên dương (kg).");
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        if (price <= 0 || fruitExpiryDays <= 0) {
+                            request.setAttribute("error", "Giá và hạn sử dụng phải lớn hơn 0.");
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        Calendar calFruit = Calendar.getInstance();
+                        calFruit.setTime(manufactureDate);
+                        calFruit.add(Calendar.DATE, fruitExpiryDays);
+                        expirationDate = calFruit.getTime();
+                        unitPerBox = 1;
+                        boxUnitName = "kg";
+                        itemUnitName = "kg";
+                        // Chuẩn hóa ngày hết hạn
+                        Date expirationTrunc = truncateTime(expirationDate);
+                        if (expirationTrunc.before(todayTrunc)) {
+                            request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    } else {
+                        double boxPrice = Double.parseDouble(request.getParameter("boxPrice"));
+                        int boxQuantity = Integer.parseInt(request.getParameter("boxQuantity"));
+                        unitPerBox = Integer.parseInt(request.getParameter("unitPerBox"));
+                        boxUnitName = request.getParameter("boxUnitName");
+                        itemUnitName = request.getParameter("itemUnitName");
+                        stockQuantity = boxQuantity * unitPerBox;
+                        price = boxPrice / unitPerBox;
+                        // Chuẩn hóa ngày hết hạn
+                        Date expirationTrunc = truncateTime(expirationDate);
+                        if (expirationTrunc.before(todayTrunc)) {
+                            request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
                     int res = dao.insert(pName, price, pDescription, stockQuantity, pImage, itemUnitName,
                             createdAt, categoryID, supplierID, manufactureDate, expirationDate,
                             unitPerBox, boxUnitName, itemUnitName);
@@ -210,7 +342,7 @@ public class ProductServlet extends HttpServlet {
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    request.setAttribute("error", "❌ Đã xảy ra lỗi khi tạo sản phẩm.");
+                    request.setAttribute("error", "❌ Đã xảy ra lỗi khi tạo sản phẩm: " + e.getMessage());
                     request.setAttribute("dataCate", dao.getCategory());
                     request.setAttribute("dataSup", dao.getAllSuppliers());
                     request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
@@ -364,5 +496,15 @@ public class ProductServlet extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "ProductServlet handles CRUD for products";
+    }
+
+    private Date truncateTime(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
     }
 }

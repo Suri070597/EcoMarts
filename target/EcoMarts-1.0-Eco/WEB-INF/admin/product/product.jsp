@@ -87,8 +87,21 @@
                                     <td><%= pro.getProductID()%></td>
                                     <td><%= parentName%></td>
                                     <td><%= pro.getProductName()%></td>
-                                    <td><fmt:formatNumber value="<%= pro.getPrice()%>" type="number" pattern=",###" /> VNĐ</td>
-                                    <td><%= pro.getStockQuantity()%></td>
+                                    <td>
+                                        <% double price = pro.getPrice();
+                                           long roundedPrice = Math.round(price / 1000.0) * 1000;
+                                           out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
+                                        %> VNĐ
+                                    </td>
+                                    <td>
+                                        <% double qty = pro.getStockQuantity();
+                                           if (qty == Math.floor(qty)) {
+                                               out.print((long)qty);
+                                           } else {
+                                               out.print(new java.text.DecimalFormat("#,##0.##").format(qty));
+                                           }
+                                        %>
+                                    </td>
                                     <td><%= pro.getUnit()%></td>
                                     <td><%= pro.getDescription().replaceAll("\n", "<br/>")%></td>
                                     <td>

@@ -60,7 +60,7 @@
                                     <th>Description</th>
                                     <th>Image</th>
                                     <th>Create Date</th>
-                                    <th>Actions</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>

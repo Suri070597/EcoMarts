@@ -25,7 +25,7 @@ public class CartUtil {
      * @param quantity The quantity to add
      * @return true if successfully added, false otherwise
      */
-    public boolean addToCart(int accountID, int productID, int quantity) {
+    public boolean addToCart(int accountID, int productID, double quantity) {
         // Check if product exists in the cart already
         CartItem existingItem = cartItemDAO.getCartItemByProductId(accountID, productID, "Active");
         
@@ -78,7 +78,7 @@ public class CartUtil {
      * @param newQuantity The new quantity
      * @return true if successfully updated, false otherwise
      */
-    public boolean updateCartItemQuantity(int cartItemID, int newQuantity) {
+    public boolean updateCartItemQuantity(int cartItemID, double newQuantity) {
         if (newQuantity <= 0) {
             // If quantity is 0 or negative, remove the item from cart
             return removeCartItem(cartItemID);

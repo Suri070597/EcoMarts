@@ -47,7 +47,7 @@ public class ProductDAO extends DBContext {
                 p.setProductName(rs.getString("productName"));
                 p.setPrice(rs.getDouble("price"));
                 p.setDescription(rs.getString("description"));
-                p.setStockQuantity(rs.getInt("StockQuantity"));
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
                 p.setImageURL(rs.getString("ImageURL"));
                 p.setUnit(rs.getString("unit"));
                 p.setCreatedAt(rs.getTimestamp("createdAt"));
@@ -62,7 +62,7 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
-    public int insert(String name, double price, String description, int quantity,
+    public int insert(String name, double price, String description, double quantity,
             String ImageURL, String unit, Timestamp createdAt,
             int categoryID, int supplierID,
             Date manufactureDate, Date expirationDate,
@@ -79,7 +79,7 @@ public class ProductDAO extends DBContext {
             ps.setString(1, name);
             ps.setDouble(2, price);
             ps.setString(3, description);
-            ps.setInt(4, quantity);
+            ps.setDouble(4, quantity);
             ps.setString(5, ImageURL);
             ps.setString(6, unit);
             ps.setTimestamp(7, createdAt);
@@ -165,7 +165,7 @@ public class ProductDAO extends DBContext {
                 String proName = rs.getString("ProductName");
                 double proPrice = rs.getDouble("Price");
                 String description = rs.getString("Description");
-                int quantity = rs.getInt("StockQuantity");
+                double quantity = rs.getDouble("StockQuantity");
                 String imageURL = rs.getString("ImageURL");
                 String unit = rs.getString("Unit");
                 Timestamp createdAt = rs.getTimestamp("CreatedAt");
@@ -270,7 +270,7 @@ public class ProductDAO extends DBContext {
             ps.setString(1, product.getProductName());
             ps.setDouble(2, price);
             ps.setString(3, product.getDescription());
-            ps.setInt(4, product.getStockQuantity());
+            ps.setDouble(4, product.getStockQuantity());
             ps.setString(5, product.getImageURL());
             ps.setString(6, product.getUnit());
             ps.setTimestamp(7, product.getCreatedAt());
@@ -351,7 +351,7 @@ public class ProductDAO extends DBContext {
                 p.setProductName(rs.getString("ProductName"));
                 p.setPrice(rs.getDouble("Price"));
                 p.setDescription(rs.getString("Description"));
-                p.setStockQuantity(rs.getInt("StockQuantity"));
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
                 p.setImageURL(rs.getString("ImageURL"));
                 p.setUnit(rs.getString("Unit"));
                 p.setCreatedAt(rs.getTimestamp("CreatedAt"));
@@ -426,7 +426,7 @@ public class ProductDAO extends DBContext {
                 p.setProductName(rs.getString("ProductName"));
                 p.setPrice(rs.getDouble("Price"));
                 p.setDescription(rs.getString("Description"));
-                p.setStockQuantity(rs.getInt("StockQuantity"));
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
                 p.setImageURL(rs.getString("ImageURL"));
                 p.setUnit(rs.getString("Unit"));
                 p.setCreatedAt(rs.getTimestamp("CreatedAt"));
@@ -474,8 +474,8 @@ public class ProductDAO extends DBContext {
         return categoryName;
     }
 
-    public int getStockQuantityById(int productId) {
-        int stockQuantity = 0;
+    public double getStockQuantityById(int productId) {
+        double stockQuantity = 0;
         String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -483,7 +483,7 @@ public class ProductDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                stockQuantity = rs.getInt("StockQuantity");
+                stockQuantity = rs.getDouble("StockQuantity");
             }
         } catch (Exception e) {
             System.out.println("Error getting stock quantity: " + e.getMessage());
