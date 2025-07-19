@@ -8,90 +8,97 @@
         <style>
             body {
                 font-family: 'Segoe UI', sans-serif;
-                background: linear-gradient(to right, #e1f5fe, #ffffff);
+                background: linear-gradient(to right, #fff6ec, #fff);
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 height: 100vh;
                 margin: 0;
             }
-
             .form-container {
-                background-color: #ffffff;
-                padding: 30px 40px;
-                border-radius: 12px;
-                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+                background-color: #fff;
+                padding: 32px 24px;
+                border-radius: 15px;
+                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+                max-width: 420px;
                 width: 100%;
-                max-width: 450px;
+                margin: 0 18px;
+                box-sizing: border-box;
             }
-
             h2 {
                 text-align: center;
-                color: #0288d1;
-                margin-bottom: 25px;
+                color: #4CAF50;
+                margin-bottom: 26px;
+                letter-spacing: 0.5px;
             }
-
             label {
                 display: block;
-                margin-bottom: 6px;
-                font-weight: bold;
+                margin-bottom: 7px;
                 color: #333;
+                font-weight: 500;
+                margin-left: 0;
+                padding-left: 0;
             }
-
             input[type="password"] {
                 width: 100%;
-                padding: 10px;
-                margin-bottom: 20px;
-                border: 1px solid #ccc;
-                border-radius: 8px;
+                padding: 11px 12px;
+                border: 1.5px solid #ddd;
+                border-radius: 12px;
+                margin-bottom: 17px;
+                margin-left: 0;
+                margin-right: 0;
+                font-size: 16px;
+                background: #fff;
                 transition: border-color 0.3s;
+                box-sizing: border-box;
             }
-
             input[type="password"]:focus {
-                border-color: #0288d1;
+                border-color: #4CAF50;
                 outline: none;
             }
-
             .btn-group {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                gap: 18px;
+                margin-top: 8px;
             }
-
             button, .back-btn {
-                padding: 10px 20px;
+                flex: 1;
+                padding: 10px 0;
                 border: none;
                 border-radius: 8px;
-                font-size: 14px;
+                font-size: 16px;
+                font-weight: 600;
                 cursor: pointer;
-                transition: background-color 0.3s;
-            }
-
-            button {
-                background-color: #0288d1;
-                color: #fff;
-            }
-
-            button:hover {
-                background-color: #01579b;
-            }
-
-            .back-btn {
-                background-color: #cfd8dc;
-                color: #000;
-                text-decoration: none;
+                transition: background 0.3s, color 0.3s;
                 text-align: center;
             }
-
-            .back-btn:hover {
-                background-color: #b0bec5;
+            button {
+                background-color: #4CAF50;
+                color: #fff;
             }
-
+            button:hover {
+                background-color: #388E3C;
+            }
+            .back-btn {
+                background-color: #f5f5f5;
+                color: #4CAF50;
+                border: 1px solid #4CAF50;
+                text-decoration: none;
+                display: inline-block;
+            }
+            .back-btn:hover {
+                background-color: #e8f5e9;
+                color: #388E3C;
+                border-color: #388E3C;
+            }
             .message {
                 color: red;
                 font-weight: bold;
                 text-align: center;
                 margin-top: 15px;
+                font-size: 17px;
             }
         </style>
     </head>
