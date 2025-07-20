@@ -26,12 +26,14 @@ import model.OrderDetail;
  * @author nguye
  */
 @WebServlet("/customer/reorder")
-
 public class ReorderServlet extends HttpServlet {
+
     OrderDAO orderDAO = new OrderDAO();
+    OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         HttpSession session = req.getSession();
         Account acc = (Account) session.getAttribute("account");
 
@@ -43,8 +45,35 @@ public class ReorderServlet extends HttpServlet {
         List<Order> orders = orderDAO.getOrdersByCustomerName(acc.getFullName());
         req.setAttribute("orders", orders);
         req.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(req, resp);
+    }
 
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        Account acc = (Account) session.getAttribute("account");
+
+        if (acc == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
+        int orderId = Integer.parseInt(req.getParameter("orderId"));
+        List<OrderDetail> oldDetails = orderDetailDAO.getOrderDetailsByOrderId(orderId);
+
+        // Tạo giỏ hàng tạm thời trong session (giả sử đang dùng Map<Integer, Integer> để lưu ProductID và Quantity)
+        Map<Integer, Integer> cart = (Map<Integer, Integer>) session.getAttribute("cart");
+        if (cart == null) {
+            cart = new HashMap<>();
+        }
+
+        for (OrderDetail od : oldDetails) {
+            int pid = od.getProductID();
+            int qty = od.getQuantity();
+            cart.put(pid, cart.getOrDefault(pid, 0) + qty);
+        }
+
+        session.setAttribute("cart", cart);
+        resp.sendRedirect(req.getContextPath() + "/WEB-INF/customer/cart"); // chuyển hướng về trang giỏ hàng
     }
 }
-
-

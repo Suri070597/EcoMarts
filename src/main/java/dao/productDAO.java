@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 import db.DBContext;
+import java.sql.SQLException;
 import model.Category;
 import model.InventoryTransaction;
 import model.Product;
@@ -478,23 +479,23 @@ public class ProductDAO extends DBContext {
         return categoryName;
     }
 
-    public double getStockQuantityById(int productId) {
-        double stockQuantity = 0;
-        String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
+public double getStockQuantityById(int productId) {
+    double stockQuantity = 0;
+    String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, productId);
-            ResultSet rs = ps.executeQuery();
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, productId);
+        ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                stockQuantity = rs.getDouble("StockQuantity");
-            }
-        } catch (Exception e) {
-            System.out.println("Error getting stock quantity: " + e.getMessage());
+        if (rs.next()) {
+            stockQuantity = rs.getDouble("StockQuantity");
         }
-
-        return stockQuantity;
+    } catch (Exception e) {
+        System.out.println("Error getting stock quantity: " + e.getMessage());
     }
+
+    return stockQuantity;
+}
 
     public static void main(String[] args) throws ParseException {
         ProductDAO dao = new ProductDAO();
@@ -517,4 +518,16 @@ public class ProductDAO extends DBContext {
             }
         }
     }
+
+    public void updateQuantity(int productId, int addQuantity) {
+        String sql = "UPDATE Product SET Quantity = Quantity + ? WHERE ProductID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, addQuantity);
+            ps.setInt(2, productId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
