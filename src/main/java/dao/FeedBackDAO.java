@@ -328,8 +328,7 @@ public class FeedBackDAO extends DBContext {
                 replies.add(r);
             }
         }
-        // Đảm bảo luôn trả về empty list, không trả về null
-        return replies == null ? new ArrayList<>() : replies;
+        return replies;
     }
 
     // Lấy danh sách review gốc cho 1 sản phẩm, kèm replies và accountRole
@@ -359,8 +358,7 @@ public class FeedBackDAO extends DBContext {
                 list.add(r);
             }
         }
-        // Đảm bảo luôn trả về empty list, không trả về null
-        return list == null ? new ArrayList<>() : list;
+        return list;
     }
 
     public int countReviewsByProductId(int productId) throws SQLException {
@@ -467,10 +465,12 @@ public class FeedBackDAO extends DBContext {
                 r.setProductName(rs.getString("ProductName"));
                 r.setStatus(rs.getString("Status"));
                 list.add(r);
+                System.out.println("DEBUG: Review loaded: ID=" + r.getReviewID() + ", Status=" + r.getStatus()
+                        + ", Product=" + r.getProductName() + ", User=" + r.getUserName());
             }
         }
-        // Đảm bảo luôn trả về empty list, không trả về null
-        return list == null ? new ArrayList<>() : list;
+        System.out.println("DEBUG: Total reviews loaded: " + list.size());
+        return list;
     }
 
     // Cập nhật trạng thái review (VISIBLE/HIDDEN)
@@ -483,19 +483,9 @@ public class FeedBackDAO extends DBContext {
         }
     }
 
-    // Xóa review (cập nhật: xóa đệ quy toàn bộ reply con trước)
+    // Xóa review
     public void deleteReview(int reviewId) throws SQLException {
-        // Xóa tất cả reply con trước (đệ quy)
-        String getRepliesSql = "SELECT ReviewID FROM Review WHERE ParentReviewID = ?";
-        try (PreparedStatement ps = conn.prepareStatement(getRepliesSql)) {
-            ps.setInt(1, reviewId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                int childId = rs.getInt("ReviewID");
-                deleteReview(childId); // Đệ quy xóa reply con
-            }
-        }
-        // Lấy imageURL trước khi xóa review này
+        // Lấy imageURL trước khi xóa
         String imageUrl = null;
         String getSql = "SELECT ImageURL FROM Review WHERE ReviewID = ?";
         try (PreparedStatement ps = conn.prepareStatement(getSql)) {
@@ -558,8 +548,7 @@ public class FeedBackDAO extends DBContext {
                 list.add(r);
             }
         }
-        // Đảm bảo luôn trả về empty list, không trả về null
-        return list == null ? new ArrayList<>() : list;
+        return list;
     }
 
     // Lấy các phản hồi staff chưa đọc cho customer
@@ -599,8 +588,7 @@ public class FeedBackDAO extends DBContext {
                 list.add(r);
             }
         }
-        // Đảm bảo luôn trả về empty list, không trả về null
-        return list == null ? new ArrayList<>() : list;
+        return list;
     }
 
     // Đánh dấu tất cả phản hồi staff cho customer là đã đọc

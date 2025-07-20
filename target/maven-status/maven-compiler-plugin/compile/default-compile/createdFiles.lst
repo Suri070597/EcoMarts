@@ -26,6 +26,7 @@ controller\VerifyPasswordServlet.class
 dao\CartItemDAO.class
 dao\OrderDetailDAO.class
 controller\ReorderServlet.class
+controller\StaffFeedBack.class
 controller\AdminDashboardServlet.class
 dao\StaffDAO.class
 model\AccountVoucher.class
