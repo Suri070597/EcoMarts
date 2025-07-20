@@ -16,7 +16,7 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(int cartItemID, int accountID, int productID, int quantity, Timestamp addedAt, String status) {
+    public CartItem(int cartItemID, int accountID, int productID, double quantity, Timestamp addedAt, String status) {
         this.cartItemID = cartItemID;
         this.accountID = accountID;
         this.productID = productID;

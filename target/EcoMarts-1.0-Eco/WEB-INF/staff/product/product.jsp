@@ -83,7 +83,15 @@
                                     <td><%= parentName%></td>
                                     <td><%= pro.getProductName()%></td>
                                     <td><fmt:formatNumber value="<%= pro.getPrice()%>" type="number" pattern=",###" /> VNĐ</td>
-                                    <td><%= pro.getStockQuantity()%></td>
+                                    <td>
+                                    <% double qty = pro.getStockQuantity();
+                                       if (qty == Math.floor(qty)) {
+                                           out.print((long)qty);
+                                       } else {
+                                           out.print(qty);
+                                       }
+                                    %>
+                                    </td>
                                     <td><%= pro.getUnit()%></td>
                                     <td><%= pro.getDescription().replaceAll("\n", "<br/>")%></td>
                                     <td>

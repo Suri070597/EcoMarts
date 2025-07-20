@@ -407,26 +407,25 @@
                     e.preventDefault();
                     const form = button.closest('form');
                     const quantityInput = form.querySelector('input[name="quantity"]');
-                    const currentVal = parseInt(quantityInput.value);
+                    const currentVal = parseFloat(quantityInput.value);
+                    // Nếu đơn vị là kg thì step = 0.1, ngược lại lấy step từ input hoặc mặc định 1
+                    const unit = quantityInput.closest('.cart-item')?.querySelector('.product-name + p')?.textContent?.trim();
+                    let step = 1;
+                    if (unit && unit.includes('kg')) {
+                        step = 0.1;
+                    } else {
+                        step = parseFloat(quantityInput.getAttribute('step')) || 1;
+                    }
 
-                    // Luôn cho phép giảm số lượng, kể cả khi vượt quá tồn kho
-                    if (!isNaN(currentVal) && currentVal > 1) {
-                        const newVal = currentVal - 1;
-
-                        // Lưu giá trị hiện tại trước khi cập nhật
+                    if (!isNaN(currentVal) && currentVal > step) {
+                        const newVal = Math.max(currentVal - step, step);
                         quantityInput.setAttribute('data-original-value', currentVal);
-                        quantityInput.value = newVal;
-
-                        // Lấy cartItemID từ form
+                        quantityInput.value = (step < 1 ? newVal.toFixed(1) : newVal.toFixed(0));
                         const cartItemID = form.querySelector('input[name="cartItemID"]').value;
-
-                        // Cập nhật số lượng qua AJAX
                         this.updateCartItemQuantity(cartItemID, newVal, form);
-                    } else if (!isNaN(currentVal) && currentVal === 1) {
-                        // Xác nhận xóa khi giảm số lượng từ 1
+                    } else if (!isNaN(currentVal) && currentVal <= step) {
                         const cartItemID = form.querySelector('input[name="cartItemID"]').value;
                         this.showConfirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?', () => {
-                            // Xóa sản phẩm khỏi giỏ hàng
                             this.removeCartItem(cartItemID, form);
                         });
                     }
@@ -440,24 +439,25 @@
                     e.preventDefault();
                     const form = button.closest('form');
                     const quantityInput = form.querySelector('input[name="quantity"]');
-                    const currentVal = parseInt(quantityInput.value);
-                    const maxStock = parseInt(quantityInput.getAttribute('data-max-stock') || quantityInput.getAttribute('max') || Number.MAX_SAFE_INTEGER);
+                    const currentVal = parseFloat(quantityInput.value);
+                    // Nếu đơn vị là kg thì step = 0.1, ngược lại lấy step từ input hoặc mặc định 1
+                    const unit = quantityInput.closest('.cart-item')?.querySelector('.product-name + p')?.textContent?.trim();
+                    let step = 1;
+                    if (unit && unit.includes('kg')) {
+                        step = 0.1;
+                    } else {
+                        step = parseFloat(quantityInput.getAttribute('step')) || 1;
+                    }
+                    const maxStock = parseFloat(quantityInput.getAttribute('data-max-stock') || quantityInput.getAttribute('max') || Number.MAX_SAFE_INTEGER);
 
                     if (!isNaN(currentVal)) {
-                        if (currentVal < maxStock) {
-                            const newVal = currentVal + 1;
-
-                            // Lưu giá trị hiện tại trước khi cập nhật
+                        if (currentVal + step <= maxStock) {
+                            const newVal = currentVal + step;
                             quantityInput.setAttribute('data-original-value', currentVal);
-                            quantityInput.value = newVal;
-
-                            // Lấy cartItemID từ form
+                            quantityInput.value = (step < 1 ? newVal.toFixed(1) : newVal.toFixed(0));
                             const cartItemID = form.querySelector('input[name="cartItemID"]').value;
-
-                            // Cập nhật số lượng qua AJAX
                             this.updateCartItemQuantity(cartItemID, newVal, form);
                         } else {
-                            // Hiển thị thông báo bằng notification
                             this.showNotification(`Chỉ còn ${maxStock} sản phẩm trong kho`, 'warning');
                         }
                     }
@@ -480,14 +480,14 @@
                     e.preventDefault();
                     const form = input.closest('form');
                     const cartItemID = form.querySelector('input[name="cartItemID"]').value;
-                    const newVal = parseInt(input.value);
-                    const maxStock = parseInt(input.getAttribute('data-max-stock') || input.getAttribute('max') || Number.MAX_SAFE_INTEGER);
+                    const newVal = parseFloat(input.value);
+                    const maxStock = parseFloat(input.getAttribute('data-max-stock') || input.getAttribute('max') || Number.MAX_SAFE_INTEGER);
 
                     // Tìm thông báo lỗi nếu có
                     const stockWarning = form.querySelector('.stock-warning');
 
                     // Kiểm tra giá trị hợp lệ
-                    if (isNaN(newVal) || newVal < 1) {
+                    if (isNaN(newVal) || newVal < 0.01) {
                         input.value = 1;
                         if (stockWarning) stockWarning.style.display = 'none';
                         this.updateCartItemQuantity(cartItemID, 1, form);
@@ -505,6 +505,26 @@
                     } else {
                         if (stockWarning) stockWarning.style.display = 'none';
                         this.updateCartItemQuantity(cartItemID, newVal, form);
+                    }
+                });
+
+                // Thêm sự kiện keydown để xử lý Enter
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const form = input.closest('form');
+                        const cartItemID = form.querySelector('input[name="cartItemID"]').value;
+                        const newVal = parseFloat(input.value);
+                        const maxStock = parseFloat(input.getAttribute('data-max-stock') || input.getAttribute('max') || Number.MAX_SAFE_INTEGER);
+                        if (isNaN(newVal) || newVal < 0.01) {
+                            input.value = 1;
+                            this.updateCartItemQuantity(cartItemID, 1, form);
+                        } else if (newVal > maxStock) {
+                            input.value = maxStock;
+                            this.updateCartItemQuantity(cartItemID, maxStock, form);
+                        } else {
+                            this.updateCartItemQuantity(cartItemID, newVal, form);
+                        }
                     }
                 });
             });
@@ -771,8 +791,8 @@
                         }
 
                         // Cập nhật số lượng sản phẩm trong badge
-                        if (data.totalItems !== undefined) {
-                            this.updateCartBadge(data.totalItems);
+                        if (data.itemCount !== undefined) {
+                            this.updateAllCartBadges(data.itemCount);
                         }
 
                         // Cập nhật giá trị input
@@ -783,6 +803,8 @@
                             quantityInput.setAttribute('data-original-value', data.updatedQuantity);
                         }
 
+                        // Hiển thị thông báo thành công
+                        this.showNotification(data.message || 'Đã cập nhật số lượng');
                         console.log('Cập nhật giỏ hàng thành công');
                     } else {
                         // Hiển thị thông báo lỗi bằng notification

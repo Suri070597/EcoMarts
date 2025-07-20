@@ -67,7 +67,29 @@
                                 <% } else { %>
                                     <tr><th>Giá lẻ:</th><td><%= new java.text.DecimalFormat("#,###").format(product.getPrice()) %> VNĐ / <%= product.getUnit() %></td></tr>
                                     <tr><th>Giá thùng:</th><td><%= product.getUnitPerBox() > 0 ? new java.text.DecimalFormat("#,###").format(product.getPrice() * product.getUnitPerBox()) : "-" %> VNĐ / <%= product.getBoxUnitName() %></td></tr>
-                                    <tr><th>Số lượng tồn kho:</th><td><%= product.getStockQuantity() %> <%= product.getUnit() %> (<%= product.getUnitPerBox() > 0 ? (product.getStockQuantity() / product.getUnitPerBox()) : "-" %> <%= product.getBoxUnitName() %>)</td></tr>
+                                    <tr><th>Số lượng tồn kho:</th><td>
+    <% double qty = product.getStockQuantity();
+       int unitPerBox = product.getUnitPerBox();
+       String boxUnit = product.getBoxUnitName();
+       String itemUnit = product.getItemUnitName();
+       if (qty == Math.floor(qty)) {
+           out.print((long)qty);
+       } else {
+           out.print(new java.text.DecimalFormat("#").format(qty));
+       }
+       out.print(" " + (itemUnit != null ? itemUnit : product.getUnit()));
+       if (unitPerBox > 1 && boxUnit != null && !boxUnit.isEmpty()) {
+           double boxQty = qty / unitPerBox;
+           out.print(" (");
+           if (boxQty == Math.floor(boxQty)) {
+               out.print((long)boxQty);
+           } else {
+               out.print(new java.text.DecimalFormat("#").format(boxQty));
+           }
+           out.print(" " + boxUnit + ")");
+       }
+    %>
+</td></tr>
                                     <tr><th>Số lượng trong 1 thùng:</th><td><%= product.getUnitPerBox() %> <%= product.getItemUnitName() %> / <%= product.getBoxUnitName() %></td></tr>
                                     <tr><th>Đơn vị thùng:</th><td><%= product.getBoxUnitName() %></td></tr>
                                     <tr><th>Đơn vị nhỏ nhất:</th><td><%= product.getItemUnitName() %></td></tr>

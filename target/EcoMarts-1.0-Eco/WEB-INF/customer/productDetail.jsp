@@ -111,7 +111,11 @@ return;
                                 <span class="text-warning">
                                     <c:forEach begin="1" end="${fullStars}"><i class="fas fa-star"></i></c:forEach><c:if test="${halfStar}"><i class="fas fa-star-half-alt"></i></c:if><c:forEach begin="1" end="${emptyStars}"><i class="far fa-star"></i></c:forEach>
                                 </span> | <span class="sao">${reviewCount}</span> Đánh Giá</p>
-                            <p class="price-range"><fmt:formatNumber value="${mo.price}" type="number" pattern=",###" /> VNĐ</p>
+                            <p class="price-range">
+                                <% long roundedPrice = Math.round(mo.getPrice() / 1000.0) * 1000;
+                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
+                                %> VNĐ
+                            </p>
                             <%
                                 Category child = mo.getCategory();
                                 String parentName = "N/A";

@@ -59,7 +59,9 @@
                                         <i class="fas fa-star-half-alt"></i>
                                         <span>(29)</span>
                                     </div>
-                                    <div class="product-price"><fmt:formatNumber value="${p.price}" type="number" pattern=",###" /> VNĐ / ${p.unit}</div>
+                                    <div class="product-price">
+                                        <fmt:formatNumber value="${p.price}" type="number" pattern=",###" /> VNĐ / ${p.unit}
+                                    </div>
                                     <div class="button-group">
                                         <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                         <a href="${pageContext.request.contextPath}/ProductDetail?id=${p.productID}" class="buy-now-btn">Mua ngay</a>

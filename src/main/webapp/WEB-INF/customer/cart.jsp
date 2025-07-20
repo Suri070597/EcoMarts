@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -196,8 +197,17 @@
                                                         <input type="hidden" name="cartItemID" value="${item.cartItemID}">
                                                         <div class="input-group">
                                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-decrease">-</button>
-                                                            <input type="number" name="quantity" value="${item.quantity}" min="1" 
-                                                                class="form-control form-control-sm quantity-input text-center" data-max-stock="${item.product.stockQuantity}">
+                                                            <%-- Hiển thị số lượng không có .0 nếu không phải sầu riêng (kg) --%>
+                                                            <c:choose>
+                                                                <c:when test="${item.product.unit eq 'kg'}">
+                                                                    <input type="number" name="quantity" value="${item.quantity}" min="0.1" step="0.1" class="form-control form-control-sm quantity-input text-center" data-max-stock="${item.product.stockQuantity}">
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <input type="number" name="quantity"
+                                                                        value="${fn:endsWith(item.quantity, '.0') ? fn:substringBefore(item.quantity, '.0') : item.quantity}"
+                                                                        min="1" step="1" class="form-control form-control-sm quantity-input text-center" data-max-stock="${item.product.stockQuantity}" pattern="\d*">
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-increase">+</button>
                                                         </div>
                                                         <div class="invalid-feedback stock-warning" style="display: none;">

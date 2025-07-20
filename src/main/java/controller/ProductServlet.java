@@ -364,16 +364,19 @@ public class ProductServlet extends HttpServlet {
                 try {
                     int id1 = Integer.parseInt(request.getParameter("id"));
                     String name = request.getParameter("pName");
-                    double boxPrice = Double.parseDouble(request.getParameter("boxPrice"));
-                    int boxQuantity = Integer.parseInt(request.getParameter("boxQuantity"));
-                    int unitPerBox = Integer.parseInt(request.getParameter("unitPerBox"));
-                    String boxUnitName = request.getParameter("boxUnitName");
-                    String itemUnitName = request.getParameter("itemUnitName");
                     String description = request.getParameter("pDescription");
                     int categoryId = Integer.parseInt(request.getParameter("categoryID"));
                     int supplierId = Integer.parseInt(request.getParameter("supplierID"));
                     String manufactureDateStr1 = request.getParameter("manufactureDate");
                     String expirySelect = request.getParameter("expirySelect");
+                    String fruitExpiryDaysStr = request.getParameter("fruitExpiryDays");
+                    String fruitPriceStr = request.getParameter("fruitPrice");
+                    String fruitQtyStr = request.getParameter("fruitQuantity");
+                    String boxPriceStr = request.getParameter("boxPrice");
+                    String boxQuantityStr = request.getParameter("boxQuantity");
+                    String unitPerBoxStr = request.getParameter("unitPerBox");
+                    String boxUnitName = request.getParameter("boxUnitName");
+                    String itemUnitName = request.getParameter("itemUnitName");
 
                     // Kiểm tra và chuyển đổi ngày sản xuất
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -389,25 +392,90 @@ public class ProductServlet extends HttpServlet {
                         request.setAttribute("mo", existing); // <-- fix ở đây
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllSuppliers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
                                 response);
                         return;
                     }
 
-                    // Tính ngày hết hạn
-                    int months = Integer.parseInt(expirySelect);
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(manufactureDate);
-                    cal.add(Calendar.MONTH, months);
-                    Date expirationDate = cal.getTime();
+                    // Xác định có phải trái cây không
+                    List<Category> allCate = dao.getCategory();
+                    boolean isFruit = (categoryId == 3);
+                    for (Category c : allCate) {
+                        if (c.getCategoryID() == categoryId && c.getParentID() != null && c.getParentID() == 3) {
+                            isFruit = true;
+                            break;
+                        }
+                    }
 
+                    double price = 0;
+                    int stockQuantity = 0;
+                    int unitPerBox = 1;
+                    String image;
+                    Date expirationDate = null;
+
+                    if (isFruit) {
+                        // Validate các trường trái cây
+                        if (fruitPriceStr == null || fruitPriceStr.trim().isEmpty()) {
+                            request.setAttribute("error", "Vui lòng nhập giá cho trái cây.");
+                            Product existing = dao.getProductById(id1);
+                            request.setAttribute("mo", existing);
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        if (fruitQtyStr == null || fruitQtyStr.trim().isEmpty()) {
+                            request.setAttribute("error", "Vui lòng nhập số lượng (kg) cho trái cây.");
+                            Product existing = dao.getProductById(id1);
+                            request.setAttribute("mo", existing);
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        if (fruitExpiryDaysStr == null || fruitExpiryDaysStr.trim().isEmpty()) {
+                            request.setAttribute("error", "Vui lòng nhập hạn sử dụng (ngày) cho trái cây.");
+                            Product existing = dao.getProductById(id1);
+                            request.setAttribute("mo", existing);
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.setAttribute("dataSup", dao.getAllSuppliers());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        price = Double.parseDouble(fruitPriceStr);
+                        stockQuantity = Integer.parseInt(fruitQtyStr);
+                        int fruitExpiryDays = Integer.parseInt(fruitExpiryDaysStr);
+                        // Tính ngày hết hạn
+                        Calendar calFruit = Calendar.getInstance();
+                        calFruit.setTime(manufactureDate);
+                        calFruit.add(Calendar.DATE, fruitExpiryDays);
+                        expirationDate = calFruit.getTime();
+                        unitPerBox = 1;
+                        boxUnitName = "kg";
+                        itemUnitName = "kg";
+                    } else {
+                        // Sản phẩm thường
+                        double boxPrice = Double.parseDouble(boxPriceStr);
+                        int boxQuantity = Integer.parseInt(boxQuantityStr);
+                        unitPerBox = Integer.parseInt(unitPerBoxStr);
+                        boxUnitName = boxUnitName;
+                        itemUnitName = itemUnitName;
+                        stockQuantity = boxQuantity * unitPerBox;
+                        price = boxPrice / unitPerBox;
+                        int months = Integer.parseInt(expirySelect);
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(manufactureDate);
+                        cal.add(Calendar.MONTH, months);
+                        expirationDate = cal.getTime();
+                    }
+
+                    // Kiểm tra hợp lệ ngày
                     Date today = new Date();
                     Calendar twoYearsAgo = Calendar.getInstance();
                     twoYearsAgo.add(Calendar.YEAR, -2);
-
-                    // Kiểm tra hợp lệ ngày
                     String err = null;
                     if (manufactureDate.after(today)) {
                         err = "Ngày sản xuất không được ở tương lai.";
@@ -416,13 +484,10 @@ public class ProductServlet extends HttpServlet {
                     } else if (expirationDate.before(today)) {
                         err = "Ngày hết hạn đã trôi qua.";
                     }
-
                     if (err != null) {
                         request.setAttribute("error", err);
                         Product existing = dao.getProductById(id1);
-                        request.setAttribute("mo", existing); // <-- fix ở đây
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.setAttribute("mo", existing);
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
@@ -433,8 +498,6 @@ public class ProductServlet extends HttpServlet {
                     // Xử lý ảnh
                     Part filePart1 = request.getPart("pImage");
                     String fileName1 = Paths.get(filePart1.getSubmittedFileName()).getFileName().toString();
-                    String image;
-
                     if (!fileName1.isEmpty()) {
                         File uploadDir = new File(IMAGE_UPLOAD_DIR);
                         if (!uploadDir.exists()) {
@@ -448,10 +511,6 @@ public class ProductServlet extends HttpServlet {
                     }
 
                     Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-
-                    // Tính số lượng lẻ và giá lẻ
-                    int stockQuantity = boxQuantity * unitPerBox;
-                    double price = boxPrice / unitPerBox;
 
                     Product product = new Product(id1, name, price, description, stockQuantity, image, itemUnitName,
                             createdAt,
@@ -475,9 +534,7 @@ public class ProductServlet extends HttpServlet {
                     } else {
                         request.setAttribute("error", "❌ Cập nhật sản phẩm thất bại.");
                         Product existing = dao.getProductById(id1);
-                        request.setAttribute("mo", existing); // <-- fix ở đây
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                        request.setAttribute("mo", existing);
                         request.setAttribute("dataCate", dao.getCategory());
                         request.setAttribute("dataSup", dao.getAllSuppliers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,

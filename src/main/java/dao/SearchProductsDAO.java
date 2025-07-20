@@ -58,7 +58,9 @@ public class SearchProductsDAO extends DBContext {
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 p.setDescription(rs.getString("Description"));
-                p.setPrice(rs.getDouble("Price"));
+                double rawPrice = rs.getDouble("Price");
+                long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
+                p.setPrice(roundedPrice);
                 p.setStockQuantity(rs.getDouble("StockQuantity"));
                 p.setImageURL(rs.getString("ImageURL"));
                 p.setUnit(rs.getString("Unit"));

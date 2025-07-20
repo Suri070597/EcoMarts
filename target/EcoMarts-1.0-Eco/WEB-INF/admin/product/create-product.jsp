@@ -55,11 +55,12 @@
                         </div>
                         <div class="mb-3 box-related">
                             <label class="form-label">Quantity 1 box/pack/case</label>
-                            <input type="number" min="0" class="form-control" name="boxQuantity" id="boxQuantity" />
+                            <input type="number" min="0" class="form-control" name="boxQuantity" id="boxQuantity" oninput="updateBoxPreview()" />
+                            <div id="box-preview" class="form-text text-primary"></div>
                         </div>
                         <div class="mb-3 box-related">
                             <label class="form-label">Quantity of products in 1 box/pack/case</label>
-                            <input type="number" min="1" class="form-control" name="unitPerBox" id="unitPerBox" />
+                            <input type="number" min="1" class="form-control" name="unitPerBox" id="unitPerBox" oninput="updateBoxPreview()" />
                         </div>
                         <div class="mb-3 box-related">
                             <label class="form-label">Unit 1 box/pack/case</label>
@@ -251,6 +252,19 @@
                     cateSelect.addEventListener('change', updateForm);
                     updateForm();
                 });
+            </script>
+            <script>
+                function updateBoxPreview() {
+                    var boxQty = parseInt(document.getElementById('boxQuantity').value) || 0;
+                    var unitPerBox = parseInt(document.getElementById('unitPerBox').value) || 0;
+                    var itemUnit = document.getElementById('itemUnitName') ? document.getElementById('itemUnitName').value : '';
+                    if (boxQty > 0 && unitPerBox > 0) {
+                        var total = boxQty * unitPerBox;
+                        document.getElementById('box-preview').textContent = boxQty + ' x ' + unitPerBox + ' = ' + total + (itemUnit ? ' ' + itemUnit : '');
+                    } else {
+                        document.getElementById('box-preview').textContent = '';
+                    }
+                }
             </script>
     </body>
 </html>

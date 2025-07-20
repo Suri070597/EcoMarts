@@ -83,7 +83,7 @@ public class CartItemDAO extends DBContext {
                 item.setCartItemID(rs.getInt("CartItemID"));
                 item.setAccountID(rs.getInt("AccountID"));
                 item.setProductID(rs.getInt("ProductID"));
-                item.setQuantity(rs.getInt("Quantity"));
+                item.setQuantity(rs.getDouble("Quantity"));
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
@@ -134,7 +134,7 @@ public class CartItemDAO extends DBContext {
                 item.setCartItemID(rs.getInt("CartItemID"));
                 item.setAccountID(rs.getInt("AccountID"));
                 item.setProductID(rs.getInt("ProductID"));
-                item.setQuantity(rs.getInt("Quantity"));
+                item.setQuantity(rs.getDouble("Quantity"));
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
@@ -187,7 +187,7 @@ public class CartItemDAO extends DBContext {
                 item.setCartItemID(rs.getInt("CartItemID"));
                 item.setAccountID(rs.getInt("AccountID"));
                 item.setProductID(rs.getInt("ProductID"));
-                item.setQuantity(rs.getInt("Quantity"));
+                item.setQuantity(rs.getDouble("Quantity"));
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
@@ -329,7 +329,7 @@ public class CartItemDAO extends DBContext {
      * @param requestedQuantity The quantity requested
      * @return true if stock is sufficient, false otherwise
      */
-    public boolean isStockSufficient(int productID, int requestedQuantity) {
+    public boolean isStockSufficient(int productID, double requestedQuantity) {
         String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
 
         try {

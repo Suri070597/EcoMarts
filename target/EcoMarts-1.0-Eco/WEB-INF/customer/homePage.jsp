@@ -402,9 +402,6 @@
                                    out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
                                 %> VNĐ / <%= p.getUnit() %>
                             </div>
-                            <% if ("kg".equals(p.getUnit())) { %>
-                            <div class="product-stock">Còn lại: <%= new java.text.DecimalFormat("#,##0.##").format(p.getStockQuantity()) %> kg</div>
-                            <% } %>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>

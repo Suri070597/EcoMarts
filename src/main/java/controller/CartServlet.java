@@ -284,7 +284,7 @@ public class CartServlet extends HttpServlet {
             }
 
             int productID = Integer.parseInt(request.getParameter("productID"));
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
+            double quantity = Double.parseDouble(request.getParameter("quantity"));
 
             // Validate quantity
             if (quantity <= 0) {
@@ -395,7 +395,7 @@ public class CartServlet extends HttpServlet {
             }
 
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
+            double quantity = Double.parseDouble(request.getParameter("quantity"));
 
             // Validate quantity
             if (quantity <= 0) {
@@ -477,7 +477,7 @@ public class CartServlet extends HttpServlet {
                                 "\"message\":\"Đã cập nhật số lượng\"," +
                                 "\"cartTotal\":%d," +
                                 "\"itemTotal\":%d," +
-                                "\"updatedQuantity\":%d," +
+                                "\"updatedQuantity\":%.2f," +
                                 "\"totalItems\":%d," +
                                 "\"itemCount\":%d}",
                         roundedCartTotal,

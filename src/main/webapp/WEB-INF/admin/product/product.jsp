@@ -89,16 +89,29 @@
                                     <td><%= pro.getProductName()%></td>
                                     <td>
                                         <% double price = pro.getPrice();
-                                           long roundedPrice = Math.round(price / 1000.0) * 1000;
-                                           out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
+                                           out.print(new java.text.DecimalFormat("#,###").format(price));
                                         %> VNĐ
                                     </td>
                                     <td>
                                         <% double qty = pro.getStockQuantity();
+                                           int unitPerBox = pro.getUnitPerBox();
+                                           String boxUnit = pro.getBoxUnitName();
+                                           String itemUnit = pro.getItemUnitName();
                                            if (qty == Math.floor(qty)) {
                                                out.print((long)qty);
                                            } else {
-                                               out.print(new java.text.DecimalFormat("#,##0.##").format(qty));
+                                               out.print(new java.text.DecimalFormat("#").format(qty));
+                                           }
+                                           out.print(" " + (itemUnit != null ? itemUnit : ""));
+                                           if (unitPerBox > 1 && boxUnit != null && !boxUnit.isEmpty()) {
+                                               double boxQty = qty / unitPerBox;
+                                               out.print(" (");
+                                               if (boxQty == Math.floor(boxQty)) {
+                                                   out.print((long)boxQty);
+                                               } else {
+                                                   out.print(new java.text.DecimalFormat("#").format(boxQty));
+                                               }
+                                               out.print(" " + boxUnit + ")");
                                            }
                                         %>
                                     </td>
