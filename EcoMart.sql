@@ -261,13 +261,21 @@ CREATE TABLE Review (
     ReviewID INT PRIMARY KEY IDENTITY(1,1),
     ProductID INT NOT NULL,
     AccountID INT NOT NULL,
-    Rating INT CHECK (Rating BETWEEN 1 AND 5) NOT NULL,
+    OrderID INT NULL,
+    ParentReviewID INT NULL,
+    Rating INT NULL CHECK (Rating BETWEEN 1 AND 5),
     Comment NVARCHAR(MAX),
     ImageURL NVARCHAR(255),
     CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME NULL DEFAULT GETDATE(),
+    IsRead BIT DEFAULT 0,
+    Status NVARCHAR(20) DEFAULT 'VISIBLE',
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
-    FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE
+    FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE,
+    FOREIGN KEY (OrderID) REFERENCES [Order](OrderID),
+    FOREIGN KEY (ParentReviewID) REFERENCES Review(ReviewID)
 );
+
 
 -- Get additional product IDs
 DECLARE @Keo INT = (SELECT ProductID FROM Product WHERE ProductName = N'Kẹo Socola M&M gói 100g');
