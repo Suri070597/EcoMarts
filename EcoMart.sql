@@ -55,22 +55,15 @@ CREATE TABLE Token_Table (
 INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
 VALUES
 -- Admin
-(N'admin123', N'admin123@', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
+--(N'admin123', N'admin123@', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
 
 -- Staff
-(N'Thacnha', N'Thacnha02@', N'thacnha2@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
-(N'Mantue', N'Mantue03@', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Active'),
-(N'Truongsinh', N'Truongsinh04@', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Active'),
-(N'Tuenhi', N'Tuenhi05@', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', 'Bạc Liêu', N'Nữ', 2, N'Active');
+--(N'Thacnha', N'Thacnha02@', N'thacnha2@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
+--(N'Mantue', N'Mantue03@', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Active'),
+--(N'Truongsinh', N'Truongsinh04@', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Active'),
+--(N'Tuenhi', N'Tuenhi05@', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', 'Bạc Liêu', N'Nữ', 2, N'Active');
 
 
--- Insert Staff data with correct AccountID references
-INSERT INTO Staff (AccountID, FullName, Email, Phone, Gender, [Address], [Status])
-VALUES
-(2, N'Trương Thác Nhã', N'thacnha2@ecomart.vn', '0909123456', N'Nữ', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Active'),
-(3, N'Trần Mẫn Tuệ', N'mantue@ecomart.vn', '0912345678', N'Nữ', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Active'),
-(4, N'Lê Trường Sinh', N'truongsinh@ecomart.vn', '0923456789', N'Nam', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Active'),
-(5, N'Nguyễn Tuệ Nhi', N'tuenhi@ecomart.vn', '0977527752', N'Nữ', N'Bạc Liêu', N'Active');
 
 CREATE TABLE Supplier (
     SupplierID INT PRIMARY KEY IDENTITY(1,1),
@@ -344,4 +337,18 @@ CREATE TABLE Inventory (
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
 );
 
+-- Chạy hết cái trên ròi, mới chạy trigger này xong ròi mới insert dữ liệu vô  bảng account sao nha !!!!!!!!!
 
+CREATE TRIGGER trg_AfterInsert_Account_ToStaff
+ON Account
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO Staff (AccountID, FullName, Email, Phone, Gender, [Address])
+    SELECT 
+        i.AccountID, i.FullName, i.Email, i.Phone, i.Gender, i.[Address]
+    FROM 
+        inserted i
+    WHERE 
+        i.[Role] = 2;
+END
