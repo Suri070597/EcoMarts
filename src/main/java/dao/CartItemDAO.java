@@ -353,4 +353,40 @@ public class CartItemDAO extends DBContext {
 
         return false;
     }
+    
+    public void upsertCartItem(int accountID, int productID, double quantity) {
+        String select = "SELECT Quantity FROM CartItem WHERE AccountID = ? AND ProductID = ? AND Status = N'Active'";
+        String update = "UPDATE CartItem SET Quantity = Quantity + ? WHERE AccountID = ? AND ProductID = ? AND Status = N'Active'";
+        String insert = "INSERT INTO CartItem (AccountID, ProductID, Quantity) VALUES (?, ?, ?)";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(select);
+            ps.setInt(1, accountID);
+            ps.setInt(2, productID);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                // Nếu đã tồn tại thì cập nhật số lượng
+                PreparedStatement ups = conn.prepareStatement(update);
+                ups.setDouble(1, quantity);
+                ups.setInt(2, accountID);
+                ups.setInt(3, productID);
+                ups.executeUpdate();
+                ups.close();
+            } else {
+                // Nếu chưa có thì thêm mới
+                PreparedStatement ins = conn.prepareStatement(insert);
+                ins.setInt(1, accountID);  // <-- sửa: set từ tham số 1
+                ins.setInt(2, productID);
+                ins.setDouble(3, quantity);
+                ins.executeUpdate();
+                ins.close();
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
 }
