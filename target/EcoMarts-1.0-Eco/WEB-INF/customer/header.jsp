@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/cart-badge.css?version=<%= System.currentTimeMillis()%>">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
     .suggestions-box {
         position: absolute;
@@ -35,6 +37,9 @@
         background-color: #eaf4ff;
         color: #007bff;
     }
+    
+
+
 </style>
 
 <!-- Sidebar -->
@@ -91,39 +96,41 @@
 
 
 
-<div class="header-icons">
-    <%
-        model.Account account = (model.Account) session.getAttribute("account");
-        Integer unreadCount = (Integer) request.getAttribute("unreadCount");
-        if (unreadCount == null) unreadCount = 0;
+    <div class="header-icons">
+        <%
+            model.Account account = (model.Account) session.getAttribute("account");
+            Integer unreadCount = (Integer) request.getAttribute("unreadCount");
+            if (unreadCount == null) {
+                unreadCount = 0;
+            }
 
-        java.util.List<model.Review> unreadList = 
-            (java.util.List<model.Review>) request.getAttribute("unreadList");
+            java.util.List<model.Review> unreadList
+                    = (java.util.List<model.Review>) request.getAttribute("unreadList");
 
-        int cartItemCount = 0;
-        if (account != null && account.getRole() == 0) {
-            util.CartUtil cartUtil = new util.CartUtil();
-            cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
-        }
-    %>
+            int cartItemCount = 0;
+            if (account != null && account.getRole() == 0) {
+                util.CartUtil cartUtil = new util.CartUtil();
+                cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
+            }
+        %>
 
-    <% if (account != null && account.getRole() == 0) { %>
-        <span>Chào, <%= account.getFullName() %></span>
+        <% if (account != null && account.getRole() == 0) {%>
+        <span>Chào, <%= account.getFullName()%></span>
 
         <!-- Icon giỏ hàng -->
-        <a href="<%= request.getContextPath() %>/cart">
+        <a href="<%= request.getContextPath()%>/cart">
             <i class="fas fa-shopping-cart"></i> Giỏ hàng
-            <% if (cartItemCount > 0) { %>
-            <span class="badge bg-danger rounded-pill"><%= cartItemCount %></span>
+            <% if (cartItemCount > 0) {%>
+            <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
             <% } %>
         </a>
 
         <!-- Icon thông báo -->
         <a href="#" class="notification-link" data-bs-toggle="modal" data-bs-target="#notificationModal">
             <i class="fas fa-bell"></i>
-            <% if (unreadCount > 0) { %>
-            <span class="badge-notification"><%= unreadCount %></span>
-            <% } %>
+            <% if (unreadCount > 0) {%>
+            <span class="badge-notification"><%= unreadCount%></span>
+            <% }%>
         </a>
 
         <!-- Dropdown hồ sơ -->
@@ -139,14 +146,14 @@
         </div>
 
         <!-- Logout -->
-        <a href="<%= request.getContextPath() %>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+        <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
 
-    <% } else if (account == null) { %>
+        <% } else if (account == null) {%>
         <!-- Chưa đăng nhập -->
-        <a href="<%= request.getContextPath() %>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
-        <a href="<%= request.getContextPath() %>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
-    <% } %>
-</div>
+        <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
+        <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
+        <% } %>
+    </div>
 
 </div>
 </div>

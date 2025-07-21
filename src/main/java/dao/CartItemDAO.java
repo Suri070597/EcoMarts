@@ -17,13 +17,13 @@ public class CartItemDAO extends DBContext {
 
     /**
      * Add a product to the user's cart
-     *
+     * 
      * @param accountID The ID of the account
      * @param productID The ID of the product to add
-     * @param quantity The quantity to add
+     * @param quantity  The quantity to add
      * @return true if successfully added, false otherwise
      */
-    public boolean addToCart(int accountID, int productID, int quantity) {
+    public boolean addToCart(int accountID, int productID, double quantity) {
         String sql = "INSERT INTO CartItem (AccountID, ProductID, Quantity, AddedAt, Status) VALUES (?, ?, ?, GETDATE(), 'Active')";
 
         try {
@@ -33,12 +33,13 @@ public class CartItemDAO extends DBContext {
                 return false;
             }
 
-            System.out.println("Attempting to add to cart: accountID=" + accountID + ", productID=" + productID + ", quantity=" + quantity);
+            System.out.println("Attempting to add to cart: accountID=" + accountID + ", productID=" + productID
+                    + ", quantity=" + quantity);
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, accountID);
             ps.setInt(2, productID);
-            ps.setInt(3, quantity);
+            ps.setDouble(3, quantity);
 
             int affectedRows = ps.executeUpdate();
             ps.close();
@@ -55,20 +56,21 @@ public class CartItemDAO extends DBContext {
 
     /**
      * Get all cart items for a specific user with a specific status
-     *
+     * 
      * @param accountID The ID of the account
-     * @param status The status of cart items to retrieve (Active,
-     * SavedForLater, Removed)
+     * @param status    The status of cart items to retrieve (Active, SavedForLater,
+     *                  Removed)
      * @return List of CartItem objects
      */
     public List<CartItem> getCartItems(int accountID, String status) {
         List<CartItem> cartItems = new ArrayList<>();
 
         String sql = "SELECT ci.*, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.Status as ProductStatus "
-                + "FROM CartItem ci "
-                + "JOIN Product p ON ci.ProductID = p.ProductID "
-                + "WHERE ci.AccountID = ? AND ci.Status = ? "
-                + "ORDER BY ci.AddedAt DESC";
+                +
+                "FROM CartItem ci " +
+                "JOIN Product p ON ci.ProductID = p.ProductID " +
+                "WHERE ci.AccountID = ? AND ci.Status = ? " +
+                "ORDER BY ci.AddedAt DESC";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -81,7 +83,7 @@ public class CartItemDAO extends DBContext {
                 item.setCartItemID(rs.getInt("CartItemID"));
                 item.setAccountID(rs.getInt("AccountID"));
                 item.setProductID(rs.getInt("ProductID"));
-                item.setQuantity(rs.getInt("Quantity"));
+                item.setQuantity(rs.getDouble("Quantity"));
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
@@ -92,7 +94,7 @@ public class CartItemDAO extends DBContext {
                 product.setPrice(rs.getDouble("Price"));
                 product.setImageURL(rs.getString("ImageURL"));
                 product.setUnit(rs.getString("Unit"));
-                product.setStockQuantity(rs.getInt("StockQuantity"));
+                product.setStockQuantity(rs.getDouble("StockQuantity"));
                 product.setStatus(rs.getString("ProductStatus"));
 
                 // Set the product to the cart item
@@ -111,15 +113,16 @@ public class CartItemDAO extends DBContext {
 
     /**
      * Get a specific cart item by its ID
-     *
+     * 
      * @param cartItemID The ID of the cart item
      * @return CartItem object or null if not found
      */
     public CartItem getCartItemById(int cartItemID) {
         String sql = "SELECT ci.*, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.Status as ProductStatus "
-                + "FROM CartItem ci "
-                + "JOIN Product p ON ci.ProductID = p.ProductID "
-                + "WHERE ci.CartItemID = ?";
+                +
+                "FROM CartItem ci " +
+                "JOIN Product p ON ci.ProductID = p.ProductID " +
+                "WHERE ci.CartItemID = ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -131,7 +134,7 @@ public class CartItemDAO extends DBContext {
                 item.setCartItemID(rs.getInt("CartItemID"));
                 item.setAccountID(rs.getInt("AccountID"));
                 item.setProductID(rs.getInt("ProductID"));
-                item.setQuantity(rs.getInt("Quantity"));
+                item.setQuantity(rs.getDouble("Quantity"));
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
@@ -142,7 +145,7 @@ public class CartItemDAO extends DBContext {
                 product.setPrice(rs.getDouble("Price"));
                 product.setImageURL(rs.getString("ImageURL"));
                 product.setUnit(rs.getString("Unit"));
-                product.setStockQuantity(rs.getInt("StockQuantity"));
+                product.setStockQuantity(rs.getDouble("StockQuantity"));
                 product.setStatus(rs.getString("ProductStatus"));
 
                 // Set the product to the cart item
@@ -163,10 +166,10 @@ public class CartItemDAO extends DBContext {
 
     /**
      * Get a cart item by product ID for a specific user and status
-     *
+     * 
      * @param accountID The ID of the account
      * @param productID The ID of the product
-     * @param status The status to check for (Active, SavedForLater, Removed)
+     * @param status    The status to check for (Active, SavedForLater, Removed)
      * @return CartItem object or null if not found
      */
     public CartItem getCartItemByProductId(int accountID, int productID, String status) {
@@ -184,7 +187,7 @@ public class CartItemDAO extends DBContext {
                 item.setCartItemID(rs.getInt("CartItemID"));
                 item.setAccountID(rs.getInt("AccountID"));
                 item.setProductID(rs.getInt("ProductID"));
-                item.setQuantity(rs.getInt("Quantity"));
+                item.setQuantity(rs.getDouble("Quantity"));
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
@@ -203,17 +206,17 @@ public class CartItemDAO extends DBContext {
 
     /**
      * Update the quantity of a cart item
-     *
-     * @param cartItemID The ID of the cart item
+     * 
+     * @param cartItemID  The ID of the cart item
      * @param newQuantity The new quantity
      * @return true if successfully updated, false otherwise
      */
-    public boolean updateCartItemQuantity(int cartItemID, int newQuantity) {
+    public boolean updateCartItemQuantity(int cartItemID, double newQuantity) {
         String sql = "UPDATE CartItem SET Quantity = ? WHERE CartItemID = ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, newQuantity);
+            ps.setDouble(1, newQuantity);
             ps.setInt(2, cartItemID);
 
             int affectedRows = ps.executeUpdate();
@@ -227,9 +230,9 @@ public class CartItemDAO extends DBContext {
 
     /**
      * Update the status of a cart item
-     *
+     * 
      * @param cartItemID The ID of the cart item
-     * @param status The new status
+     * @param status     The new status
      * @return true if successfully updated, false otherwise
      */
     public boolean updateCartItemStatus(int cartItemID, String status) {
@@ -251,10 +254,10 @@ public class CartItemDAO extends DBContext {
 
     /**
      * Clear all items from a user's cart by updating status
-     *
-     * @param accountID The ID of the account
+     * 
+     * @param accountID     The ID of the account
      * @param currentStatus The current status of items to update
-     * @param newStatus The new status for the items
+     * @param newStatus     The new status for the items
      * @return true if successfully cleared, false otherwise
      */
     public boolean updateCartItemsStatus(int accountID, String currentStatus, String newStatus) {
@@ -277,9 +280,9 @@ public class CartItemDAO extends DBContext {
 
     /**
      * Count the number of items in a user's cart with a specific status
-     *
+     * 
      * @param accountID The ID of the account
-     * @param status The status of items to count
+     * @param status    The status of items to count
      * @return The number of items
      */
     public int countCartItems(int accountID, String status) {
@@ -301,7 +304,8 @@ public class CartItemDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 int count = rs.getInt("ItemCount");
-                System.out.println("Found " + count + " items in cart for accountID=" + accountID + " with status=" + status);
+                System.out.println(
+                        "Found " + count + " items in cart for accountID=" + accountID + " with status=" + status);
                 rs.close();
                 ps.close();
                 return count;
@@ -319,14 +323,13 @@ public class CartItemDAO extends DBContext {
     }
 
     /**
-     * Check if the product stock quantity is sufficient for the requested
-     * quantity
-     *
-     * @param productID The ID of the product
+     * Check if the product stock quantity is sufficient for the requested quantity
+     * 
+     * @param productID         The ID of the product
      * @param requestedQuantity The quantity requested
      * @return true if stock is sufficient, false otherwise
      */
-    public boolean isStockSufficient(int productID, int requestedQuantity) {
+    public boolean isStockSufficient(int productID, double requestedQuantity) {
         String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
 
         try {
@@ -335,7 +338,7 @@ public class CartItemDAO extends DBContext {
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                int stockQuantity = rs.getInt("StockQuantity");
+                double stockQuantity = rs.getDouble("StockQuantity");
                 boolean isEnough = stockQuantity >= requestedQuantity;
 
                 rs.close();
@@ -350,8 +353,8 @@ public class CartItemDAO extends DBContext {
 
         return false;
     }
-
-    public void upsertCartItem(int accountID, int productID, int quantity) {
+    
+    public void upsertCartItem(int accountID, int productID, double quantity) {
         String select = "SELECT Quantity FROM CartItem WHERE AccountID = ? AND ProductID = ? AND Status = N'Active'";
         String update = "UPDATE CartItem SET Quantity = Quantity + ? WHERE AccountID = ? AND ProductID = ? AND Status = N'Active'";
         String insert = "INSERT INTO CartItem (AccountID, ProductID, Quantity) VALUES (?, ?, ?)";
@@ -365,7 +368,7 @@ public class CartItemDAO extends DBContext {
             if (rs.next()) {
                 // Nếu đã tồn tại thì cập nhật số lượng
                 PreparedStatement ups = conn.prepareStatement(update);
-                ups.setInt(1, quantity);
+                ups.setDouble(1, quantity);
                 ups.setInt(2, accountID);
                 ups.setInt(3, productID);
                 ups.executeUpdate();
@@ -375,7 +378,7 @@ public class CartItemDAO extends DBContext {
                 PreparedStatement ins = conn.prepareStatement(insert);
                 ins.setInt(1, accountID);  // <-- sửa: set từ tham số 1
                 ins.setInt(2, productID);
-                ins.setInt(3, quantity);
+                ins.setDouble(3, quantity);
                 ins.executeUpdate();
                 ins.close();
             }
@@ -385,5 +388,5 @@ public class CartItemDAO extends DBContext {
             e.printStackTrace();
         }
     }
-
+    
 }

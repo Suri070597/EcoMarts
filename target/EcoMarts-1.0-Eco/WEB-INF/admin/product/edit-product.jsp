@@ -8,6 +8,31 @@
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
     List<Supplier> sup = (List<Supplier>) request.getAttribute("dataSup");
 %>
+<%-- Thêm biến xác định sản phẩm là trái cây --%>
+<%
+    boolean isFruit = false;
+    if (mo.getCategory() != null) {
+        int catId = mo.getCategory().getCategoryID();
+        Integer parentId = mo.getCategory().getParentID();
+        isFruit = (catId == 3) || (parentId != null && parentId == 3);
+    }
+%>
+<% int fruitExpiryDays = 0;
+   if (isFruit && mo.getManufactureDate() != null && mo.getExpirationDate() != null) {
+       long diff = mo.getExpirationDate().getTime() - mo.getManufactureDate().getTime();
+       fruitExpiryDays = (int) (diff / (1000 * 60 * 60 * 24));
+   }
+%>
+<%
+    // Xác định sản phẩm ban đầu có phải trái cây không
+    boolean isOriginalFruit = false;
+    if (mo.getCategory() != null) {
+        int catId = mo.getCategory().getCategoryID();
+        Integer parentId = mo.getCategory().getParentID();
+        isOriginalFruit = (catId == 3) || (parentId != null && parentId == 3);
+    }
+%>
+<div id="fruit-block-warning" class="alert alert-danger mt-2 ms-auto" style="display:none; max-width: 1190px;">Không thể chuyển sản phẩm thường sang trái cây. Vui lòng tạo mới sản phẩm trái cây nếu cần.</div>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -36,6 +61,7 @@
                     <% if (error != null) {%>
                     <div class="alert alert-danger"><%= error%></div>
                     <% }%>
+                    <div id="fruit-block-warning" class="alert alert-danger mt-2 ms-auto" style="display:none; max-width: 1190px;">Không thể chuyển sản phẩm thường sang trái cây. Vui lòng tạo mới sản phẩm trái cây nếu cần.</div>
                     <% if (mo == null) { %>
                     <div class="alert alert-danger">❌ Không tìm thấy sản phẩm với ID yêu cầu.</div>
                     <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary">Trở về</a>
@@ -53,29 +79,48 @@
                             <label class="form-label">Product Name</label>
                             <input type="text" class="form-control" name="pName" required value="<%= mo.getProductName()%>" />
                         </div>
-
+                        <% if (isFruit) { %>
+                            <div class="mb-3">
+                                <label class="form-label">Price (VND/kg)</label>
+                                <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" value="<%= (int)Math.round(mo.getPrice()) %>" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Stock Quantity (kg)</label>
+                                <input type="number" min="1" step="1" class="form-control" name="fruitQuantity" value="<%= (int)Math.round(mo.getStockQuantity()) %>" required />
+                            </div>
+                        <% } else { %>
+                            <div class="mb-3">
+                                <label class="form-label">Giá 1 thùng/hộp/kiện</label>
+                                <input type="number" min="0" step="1" class="form-control" name="boxPrice" required value="<%= mo.getUnitPerBox() > 0 ? (int)Math.round(mo.getPrice() * mo.getUnitPerBox()) : "" %>" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số lượng thùng/hộp/kiện</label>
+                                <input type="number" min="0" step="1" class="form-control" name="boxQuantity" required value="<%= mo.getUnitPerBox() > 0 ? (long)(mo.getStockQuantity() / mo.getUnitPerBox()) : (long)mo.getStockQuantity() %>" id="boxQuantity" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số lượng sản phẩm trong 1 thùng/hộp/kiện</label>
+                                <input type="number" min="1" step="1" class="form-control" name="unitPerBox" required value="<%= (long)mo.getUnitPerBox() %>" id="unitPerBox" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Đơn vị thùng/hộp/kiện</label>
+                                <select class="form-select" name="boxUnitName" required>
+                                    <option value="">-- Chọn đơn vị thùng/hộp/kiện --</option>
+                                    <option value="thùng" <%= "thùng".equals(mo.getBoxUnitName()) ? "selected" : ""%>>thùng</option>
+                                    <option value="hộp" <%= "hộp".equals(mo.getBoxUnitName()) ? "selected" : ""%>>hộp</option>
+                                    <option value="kiện" <%= "kiện".equals(mo.getBoxUnitName()) ? "selected" : ""%>>kiện</option>
+                                    <option value="lốc" <%= "lốc".equals(mo.getBoxUnitName()) ? "selected" : ""%>>lốc</option>
+                                </select>
+                            </div>
+                        <% } %>
                         <div class="mb-3">
-                            <label class="form-label">Product Price</label>
-                            <input type="number" min="0" step="any" class="form-control" name="pPrice" required
-                                   value="<%= new java.text.DecimalFormat("0.##").format(mo.getPrice())%>" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Product Quantity</label>
-                            <input type="number" min="0" class="form-control" name="pQuantity" required value="<%= mo.getStockQuantity()%>" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Product Unit</label>
-                            <select class="form-select" name="pUnit" required>
-                                <option value="">-- Chọn đơn vị --</option>
-                                <option value="kg" <%= "kg".equals(mo.getUnit()) ? "selected" : ""%>>kg</option>
-                                <option value="gói" <%= "gói".equals(mo.getUnit()) ? "selected" : ""%>>gói</option>
-                                <option value="chai" <%= "chai".equals(mo.getUnit()) ? "selected" : ""%>>chai</option>
-                                <option value="lon" <%= "lon".equals(mo.getUnit()) ? "selected" : ""%>>lon</option>
-                                <option value="lốc" <%= "lốc".equals(mo.getUnit()) ? "selected" : ""%>>lốc</option>
-                                <option value="thùng" <%= "thùng".equals(mo.getUnit()) ? "selected" : ""%>>thùng</option>
-                                <option value="hộp" <%= "hộp".equals(mo.getUnit()) ? "selected" : ""%>>hộp</option>
+                            <label class="form-label">Đơn vị nhỏ nhất</label>
+                            <select class="form-select" name="itemUnitName" required>
+                                <option value="">-- Chọn đơn vị nhỏ nhất --</option>
+                                <option value="chai" <%= "chai".equals(mo.getItemUnitName()) ? "selected" : ""%>>chai</option>
+                                <option value="lon" <%= "lon".equals(mo.getItemUnitName()) ? "selected" : ""%>>lon</option>
+                                <option value="cái" <%= "cái".equals(mo.getItemUnitName()) ? "selected" : ""%>>cái</option>
+                                <option value="hộp" <%= "hộp".equals(mo.getItemUnitName()) ? "selected" : ""%>>hộp</option>
+                                <option value="kg" <%= "kg".equals(mo.getItemUnitName()) ? "selected" : ""%>>kg</option>
                             </select>
                         </div>
 
@@ -96,36 +141,42 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Manufacture Date</label>
+                            <label class="form-label" id="importOrManufactureLabel"><% if (isFruit) { %>Import Date<% } else { %>Manufacture Date<% } %></label>
                             <%
                                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
                                 String manufactureDateStr = (mo.getManufactureDate() != null) ? sdf.format(mo.getManufactureDate()) : "";
                             %>
                             <input type="date" class="form-control" name="manufactureDate" value="<%= manufactureDateStr%>" required />
                         </div>
+                        <% if (isFruit) { %>
+                            <div class="mb-3">
+                                <label class="form-label">Expiration (days)</label>
+                                <input type="number" min="1" step="1" class="form-control" name="fruitExpiryDays" value="<%= fruitExpiryDays %>" placeholder="Enter shelf life in days (e.g., 3, 7, 14...)" />
+                            </div>
+                        <% } else { %>
+                            <div class="mb-3">
+                                <label class="form-label">Expiration Period</label>
+                                <%
+                                    int expiryMonths = 0;
+                                    if (mo.getManufactureDate() != null && mo.getExpirationDate() != null) {
+                                        java.util.Calendar manu = java.util.Calendar.getInstance();
+                                        java.util.Calendar exp = java.util.Calendar.getInstance();
+                                        manu.setTime(mo.getManufactureDate());
+                                        exp.setTime(mo.getExpirationDate());
 
-                        <div class="mb-3">
-                            <label class="form-label">Expiration Period</label>
-                            <%
-                                int expiryMonths = 0;
-                                if (mo.getManufactureDate() != null && mo.getExpirationDate() != null) {
-                                    java.util.Calendar manu = java.util.Calendar.getInstance();
-                                    java.util.Calendar exp = java.util.Calendar.getInstance();
-                                    manu.setTime(mo.getManufactureDate());
-                                    exp.setTime(mo.getExpirationDate());
-
-                                    expiryMonths = (exp.get(java.util.Calendar.YEAR) - manu.get(java.util.Calendar.YEAR)) * 12
-                                            + (exp.get(java.util.Calendar.MONTH) - manu.get(java.util.Calendar.MONTH));
-                                }
-                            %>
-                            <select class="form-select" name="expirySelect" required>
-                                <option value="">-- Select Expiration Period --</option>
-                                <option value="3" <%= (expiryMonths == 3) ? "selected" : ""%>>3 months</option>
-                                <option value="6" <%= (expiryMonths == 6) ? "selected" : ""%>>6 months</option>
-                                <option value="12" <%= (expiryMonths == 12) ? "selected" : ""%>>1 year</option>
-                                <option value="24" <%= (expiryMonths == 24) ? "selected" : ""%>>2 years</option>
-                            </select>
-                        </div>
+                                        expiryMonths = (exp.get(java.util.Calendar.YEAR) - manu.get(java.util.Calendar.YEAR)) * 12
+                                                + (exp.get(java.util.Calendar.MONTH) - manu.get(java.util.Calendar.MONTH));
+                                    }
+                                %>
+                                <select class="form-select" name="expirySelect" required>
+                                    <option value="">-- Select Expiration Period --</option>
+                                    <option value="3" <%= (expiryMonths == 3) ? "selected" : ""%>>3 months</option>
+                                    <option value="6" <%= (expiryMonths == 6) ? "selected" : ""%>>6 months</option>
+                                    <option value="12" <%= (expiryMonths == 12) ? "selected" : ""%>>1 year</option>
+                                    <option value="24" <%= (expiryMonths == 24) ? "selected" : ""%>>2 years</option>
+                                </select>
+                            </div>
+                        <% } %>
 
 
                         <div class="mb-3">
@@ -171,5 +222,42 @@
             </div>
         </div>
         <script src="${pageContext.request.contextPath}/assets/js/handelImg.js"></script>
+        <!-- Xóa script updateBoxPreview và div box-preview -->
+        <script>
+function isFruitCategory(selectedId) {
+    var fruitParentId = 3;
+    var cateList = <%= cate != null ? new com.google.gson.Gson().toJson(cate) : "[]" %>;
+    selectedId = parseInt(selectedId);
+    if (selectedId === fruitParentId) return true;
+    for (var i = 0; i < cateList.length; i++) {
+        if (cateList[i].categoryID === selectedId && cateList[i].parentID === fruitParentId) return true;
+    }
+    return false;
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var cateSelect = document.querySelector('select[name="categoryID"]');
+    var updateBtn = document.querySelector('button[type="submit"]');
+    var fruitBlockWarning = document.getElementById('fruit-block-warning');
+    var isOriginalFruit = <%= isOriginalFruit ? "true" : "false" %>;
+    function checkBlockFruitChange() {
+        var selected = cateSelect.value;
+        var isFruit = isFruitCategory(selected);
+        if ((!isOriginalFruit && isFruit) || (isOriginalFruit && !isFruit)) {
+            fruitBlockWarning.style.display = '';
+            if (updateBtn) updateBtn.disabled = true;
+            if (!isOriginalFruit && isFruit) {
+                fruitBlockWarning.textContent = 'Không thể chuyển sản phẩm thường sang trái cây. Vui lòng tạo mới sản phẩm trái cây nếu cần.';
+            } else if (isOriginalFruit && !isFruit) {
+                fruitBlockWarning.textContent = 'Không thể chuyển sản phẩm trái cây sang loại khác. Vui lòng tạo mới sản phẩm nếu cần.';
+            }
+        } else {
+            fruitBlockWarning.style.display = 'none';
+            if (updateBtn) updateBtn.disabled = false;
+        }
+    }
+    cateSelect.addEventListener('change', checkBlockFruitChange);
+    checkBlockFruitChange();
+});
+</script>
     </body>
 </html>

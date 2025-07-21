@@ -41,26 +41,44 @@
                             <input type="text" class="form-control" name="pName" required />
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Product Price</label>
-                            <input type="number" min="0" step="any" class="form-control" name="pPrice" required />
+                        <div class="mb-3" id="fruit-price-group" style="display:none">
+                            <label class="form-label">Price (VND/kg)</label>
+                            <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" id="fruitPrice" placeholder="Enter price per kg" />
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Product Quantity</label>
-                            <input type="number" min="0" class="form-control" name="pQuanity" required />
+                        <div class="mb-3" id="fruit-qty-group" style="display:none">
+                            <label class="form-label">Stock Quantity (kg)</label>
+                            <input type="number" min="1" step="1" class="form-control" name="fruitQuantity" id="fruitQuantity" placeholder="Enter quantity in kg (integer only, e.g., 10, 20, 50...)" />
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Product Unit</label>
-                            <select class="form-select" name="pUnit" required>
-                                <option value="">-- Chọn đơn vị --</option>
-                                <option value="kg">kg</option>
-                                <option value="gói">gói</option>
+                        <div class="mb-3 box-related">
+                            <label class="form-label">Price 1 box/pack/case</label>
+                            <input type="number" min="0" step="any" class="form-control" name="boxPrice" id="boxPrice" />
+                        </div>
+                        <div class="mb-3 box-related">
+                            <label class="form-label">Quantity 1 box/pack/case</label>
+                            <input type="number" min="0" class="form-control" name="boxQuantity" id="boxQuantity" oninput="updateBoxPreview()" />
+                            <div id="box-preview" class="form-text text-primary"></div>
+                        </div>
+                        <div class="mb-3 box-related">
+                            <label class="form-label">Quantity of products in 1 box/pack/case</label>
+                            <input type="number" min="1" class="form-control" name="unitPerBox" id="unitPerBox" oninput="updateBoxPreview()" />
+                        </div>
+                        <div class="mb-3 box-related">
+                            <label class="form-label">Unit 1 box/pack/case</label>
+                            <select class="form-select" name="boxUnitName" id="boxUnitName">
+                                <option value="">-- Chọn đơn vị thùng/hộp/kiện --</option>
+                                <option value="thùng">thùng</option>
+                                <option value="hộp">hộp</option>
+                                <option value="kiện">kiện</option>
+                                <option value="lốc">lốc</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="item-unit-group">
+                            <label class="form-label">Smallest unit</label>
+                            <select class="form-select" name="itemUnitName" id="itemUnitName" required>
+                                <option value="">-- Chọn đơn vị nhỏ nhất --</option>
                                 <option value="chai">chai</option>
                                 <option value="lon">lon</option>
-                                <option value="lốc">lốc</option>
-                                <option value="thùng">thùng</option>
+                                <option value="cái">cái</option>
                                 <option value="hộp">hộp</option>
                             </select>
                         </div>
@@ -77,11 +95,15 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Manufacture Date</label>
+                            <label class="form-label" id="importOrManufactureLabel">Manufacture Date</label>
                             <input type="date" class="form-control" name="manufactureDate" id="manufactureDate" required />
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-3" id="fruit-expiry-group" style="display:none">
+                            <label class="form-label">Expiration (days)</label>
+                            <input type="number" min="1" step="1" class="form-control" name="fruitExpiryDays" id="fruitExpiryDays" placeholder="Enter shelf life in days (e.g., 3, 7, 14...)" />
+                        </div>
+                        <div class="mb-3" id="expiry-select-group">
                             <label class="form-label">Expiration Period</label>
                             <select class="form-select" id="expirySelect" name="expirySelect" required>
                                 <option value="">-- Select Expiration Period --</option>
@@ -139,5 +161,110 @@
             </div>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
             <script src="${pageContext.request.contextPath}/assets/js/handelImg.js"></script>
+            <script>
+                // Danh sách ID trái cây (cha = 3 hoặc chính nó = 3)
+                function isFruitCategory(selectedId) {
+                    // ID 3 là trái cây, các danh mục con cũng có parentID = 3
+                    var fruitParentId = 3;
+                    var cateList = <%= cate != null ? new com.google.gson.Gson().toJson(cate) : "[]" %>;
+                    selectedId = parseInt(selectedId);
+                    if (selectedId === fruitParentId) return true;
+                    for (var i = 0; i < cateList.length; i++) {
+                        if (cateList[i].categoryID === selectedId && cateList[i].parentID === fruitParentId) return true;
+                    }
+                    return false;
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    var cateSelect = document.querySelector('select[name="categoryID"]');
+                    var boxFields = document.querySelectorAll('.box-related');
+                    var fruitPriceGroup = document.getElementById('fruit-price-group');
+                    var fruitQtyGroup = document.getElementById('fruit-qty-group');
+                    var itemUnitGroup = document.getElementById('item-unit-group');
+                    var itemUnitSelect = document.getElementById('itemUnitName');
+                    var fruitPriceInput = document.getElementById('fruitPrice');
+                    var fruitQtyInput = document.getElementById('fruitQuantity');
+                    var boxPriceInput = document.getElementById('boxPrice');
+                    var boxQtyInput = document.getElementById('boxQuantity');
+                    var unitPerBoxInput = document.getElementById('unitPerBox');
+                    var boxUnitNameInput = document.getElementById('boxUnitName');
+                    var fruitExpiryGroup = document.getElementById('fruit-expiry-group');
+                    var expirySelectGroup = document.getElementById('expiry-select-group');
+                    var expirySelect = document.getElementById('expirySelect');
+                    var fruitExpiryDaysInput = document.getElementById('fruitExpiryDays');
+                    function updateForm() {
+                        var selected = cateSelect.value;
+                        if (isFruitCategory(selected)) {
+                            boxFields.forEach(f => {
+                                f.style.display = 'none';
+                                var input = f.querySelector('input, select');
+                                if (input) {
+                                    input.required = false;
+                                    input.disabled = true;
+                                }
+                            });
+                            fruitPriceGroup.style.display = '';
+                            fruitQtyGroup.style.display = '';
+                            fruitExpiryGroup.style.display = '';
+                            fruitPriceInput.required = true;
+                            fruitPriceInput.disabled = false;
+                            fruitQtyInput.required = true;
+                            fruitQtyInput.disabled = false;
+                            fruitExpiryDaysInput.required = true;
+                            fruitExpiryDaysInput.disabled = false;
+                            expirySelectGroup.style.display = 'none';
+                            expirySelect.required = false;
+                            expirySelect.disabled = true;
+                            // Đơn vị nhỏ nhất chỉ là kg
+                            itemUnitSelect.innerHTML = '<option value="kg">kg</option>';
+                            var label = document.getElementById('importOrManufactureLabel');
+                            label.textContent = 'Import Date';
+                        } else {
+                            boxFields.forEach(f => {
+                                f.style.display = '';
+                                var input = f.querySelector('input, select');
+                                if (input) {
+                                    input.required = true;
+                                    input.disabled = false;
+                                }
+                            });
+                            fruitPriceGroup.style.display = 'none';
+                            fruitQtyGroup.style.display = 'none';
+                            fruitExpiryGroup.style.display = 'none';
+                            fruitPriceInput.required = false;
+                            fruitPriceInput.disabled = true;
+                            fruitQtyInput.required = false;
+                            fruitQtyInput.disabled = true;
+                            fruitExpiryDaysInput.required = false;
+                            fruitExpiryDaysInput.disabled = true;
+                            expirySelectGroup.style.display = '';
+                            expirySelect.required = true;
+                            expirySelect.disabled = false;
+                            // Khôi phục các đơn vị nhỏ nhất khác
+                            itemUnitSelect.innerHTML = '<option value="">-- Chọn đơn vị nhỏ nhất --</option>' +
+                                '<option value="chai">chai</option>' +
+                                '<option value="lon">lon</option>' +
+                                '<option value="cái">cái</option>' +
+                                '<option value="hộp">hộp</option>';
+                            var label = document.getElementById('importOrManufactureLabel');
+                            label.textContent = 'Manufacture Date';
+                        }
+                    }
+                    cateSelect.addEventListener('change', updateForm);
+                    updateForm();
+                });
+            </script>
+            <script>
+                function updateBoxPreview() {
+                    var boxQty = parseInt(document.getElementById('boxQuantity').value) || 0;
+                    var unitPerBox = parseInt(document.getElementById('unitPerBox').value) || 0;
+                    var itemUnit = document.getElementById('itemUnitName') ? document.getElementById('itemUnitName').value : '';
+                    if (boxQty > 0 && unitPerBox > 0) {
+                        var total = boxQty * unitPerBox;
+                        document.getElementById('box-preview').textContent = boxQty + ' x ' + unitPerBox + ' = ' + total + (itemUnit ? ' ' + itemUnit : '');
+                    } else {
+                        document.getElementById('box-preview').textContent = '';
+                    }
+                }
+            </script>
     </body>
 </html>

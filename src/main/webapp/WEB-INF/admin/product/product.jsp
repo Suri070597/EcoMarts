@@ -3,6 +3,7 @@
 <%@page import="model.Product"%>
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -62,7 +63,7 @@
                                     <th>Unit</th>
                                     <th>Description</th>
                                     <th>Image</th>
-                                    <th>Supplier</th>
+                                    <!--<th>Supplier</th>-->
                                     <th>Create Date</th>
                                     <th>Actions</th>
                                 </tr>
@@ -86,20 +87,49 @@
                                     <td><%= pro.getProductID()%></td>
                                     <td><%= parentName%></td>
                                     <td><%= pro.getProductName()%></td>
-                                    <td><%= new java.text.DecimalFormat("#,###").format(pro.getPrice())%></td>
-                                    <td><%= pro.getStockQuantity()%></td>
+                                    <td>
+                                        <% double price = pro.getPrice();
+                                           out.print(new java.text.DecimalFormat("#,###").format(price));
+                                        %> VNĐ
+                                    </td>
+                                    <td>
+                                        <% double qty = pro.getStockQuantity();
+                                           int unitPerBox = pro.getUnitPerBox();
+                                           String boxUnit = pro.getBoxUnitName();
+                                           String itemUnit = pro.getItemUnitName();
+                                           if (qty == Math.floor(qty)) {
+                                               out.print((long)qty);
+                                           } else {
+                                               out.print(new java.text.DecimalFormat("#").format(qty));
+                                           }
+                                           out.print(" " + (itemUnit != null ? itemUnit : ""));
+                                           if (unitPerBox > 1 && boxUnit != null && !boxUnit.isEmpty()) {
+                                               double boxQty = qty / unitPerBox;
+                                               out.print(" (");
+                                               if (boxQty == Math.floor(boxQty)) {
+                                                   out.print((long)boxQty);
+                                               } else {
+                                                   out.print(new java.text.DecimalFormat("#").format(boxQty));
+                                               }
+                                               out.print(" " + boxUnit + ")");
+                                           }
+                                        %>
+                                    </td>
                                     <td><%= pro.getUnit()%></td>
                                     <td><%= pro.getDescription().replaceAll("\n", "<br/>")%></td>
                                     <td>
                                         <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= pro.getImageURL()%>" alt="Product Image" style="width: 80px; height: auto;">
                                     </td>
-                                    <td><%= pro.getSupplier().getCompanyName()%></td>
                                     <td><%= pro.getCreatedAt()%></td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
+                                             <a href="${pageContext.request.contextPath}/admin/product?action=detail&id=<%= pro.getProductID()%>" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                             <a href="${pageContext.request.contextPath}/admin/product?action=update&id=<%= pro.getProductID()%>" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                           
                                             <a  href="${pageContext.request.contextPath}/admin/product?action=delete&id=<%= pro.getProductID()%>" class="btn btn-sm btn-danger">
                                                 <i class="fas fa-trash"></i>
                                             </a>

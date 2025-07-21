@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <c:forEach items="${products}" var="p">
     <div class="product-card">
@@ -20,7 +21,7 @@
                 <i class="far fa-star"></i>
                 <span>(0)</span>
             </div>
-            <div class="product-price">${p.price} VNĐ / ${p.unit}</div>
+            <div class="product-price"><fmt:formatNumber value="${p.price}" type="number" pattern=",###" /> VNĐ / ${p.unit}</div>
             <div class="button-group">
                 <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                 <a href="${pageContext.request.contextPath}/ProductDetail?id=${p.productID}" class="buy-now-btn">Mua ngay</a>

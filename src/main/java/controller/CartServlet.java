@@ -20,7 +20,7 @@ import util.CartUtil;
 /**
  * Servlet for handling shopping cart operations
  */
-@WebServlet(name = "CartServlet", urlPatterns = {"/cart"})
+@WebServlet(name = "CartServlet", urlPatterns = { "/cart" })
 public class CartServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -76,7 +76,8 @@ public class CartServlet extends HttpServlet {
         List<CartItem> activeItems = cartUtil.getCartItems(account.getAccountID(), "Active");
         List<CartItem> savedItems = cartUtil.getCartItems(account.getAccountID(), "Saved");
 
-        System.out.println("Cart page request: Found " + activeItems.size() + " active items for user " + account.getUsername());
+        System.out.println(
+                "Cart page request: Found " + activeItems.size() + " active items for user " + account.getUsername());
 
         // Calculate cart total
         double cartTotal = cartUtil.calculateCartTotal(account.getAccountID());
@@ -106,23 +107,24 @@ public class CartServlet extends HttpServlet {
     /**
      * Get cart item count for AJAX requests
      */
-    private void getCartCount(HttpServletRequest request, HttpServletResponse response, Account account, CartUtil cartUtil)
+    private void getCartCount(HttpServletRequest request, HttpServletResponse response, Account account,
+            CartUtil cartUtil)
             throws IOException {
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
-        
+
         // If user is not logged in, return 0
         if (account == null) {
             response.getWriter().write("0");
             return;
         }
-        
+
         // If user is not a customer, return 0
         if (account.getRole() != 0) {
             response.getWriter().write("0");
             return;
         }
-        
+
         // Get cart item count
         int count = cartUtil.getCartItemCount(account.getAccountID());
         response.getWriter().write(String.valueOf(count));
@@ -163,16 +165,17 @@ public class CartServlet extends HttpServlet {
             response.sendRedirect("login");
             return;
         }
-        
+
         // Check if user is a customer
         if (account.getRole() != 0) {
             if (isAjax) {
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể sử dụng giỏ hàng\"}");
+                response.getWriter()
+                        .write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể sử dụng giỏ hàng\"}");
                 return;
             }
-            
+
             // Redirect based on role
             if (account.getRole() == 1) {
                 response.sendRedirect("admin");
@@ -194,7 +197,7 @@ public class CartServlet extends HttpServlet {
             response.sendRedirect("cart");
             return;
         }
-        
+
         // Process based on action
         switch (action) {
             case "add":
@@ -241,32 +244,34 @@ public class CartServlet extends HttpServlet {
         // Check if this is an AJAX request
         String xRequestedWith = request.getHeader("X-Requested-With");
         boolean isAjax = "XMLHttpRequest".equals(xRequestedWith);
-        
+
         // Thiết lập content-type cho AJAX request
         if (isAjax) {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
         }
-        
+
         try {
             // Check if user is logged in
             if (account == null) {
                 if (isAjax) {
-                    response.getWriter().write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng\"}");
+                    response.getWriter().write(
+                            "{\"success\":false,\"message\":\"Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng\"}");
                     return;
                 }
 
                 response.sendRedirect("login");
                 return;
             }
-            
+
             // Check if user is a customer
             if (account.getRole() != 0) {
                 if (isAjax) {
-                    response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể sử dụng giỏ hàng\"}");
+                    response.getWriter()
+                            .write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể sử dụng giỏ hàng\"}");
                     return;
                 }
-                
+
                 // Redirect based on role
                 if (account.getRole() == 1) {
                     response.sendRedirect("admin");
@@ -279,26 +284,28 @@ public class CartServlet extends HttpServlet {
             }
 
             int productID = Integer.parseInt(request.getParameter("productID"));
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
+            double quantity = Double.parseDouble(request.getParameter("quantity"));
 
             // Validate quantity
             if (quantity <= 0) {
                 quantity = 1;
             }
-            
+
             // Get the actual stock quantity
             ProductDAO productDAO = new ProductDAO();
-            int stockQuantity = productDAO.getStockQuantityById(productID);
+            double stockQuantity = productDAO.getStockQuantityById(productID);
 
             // Check if stock is sufficient
             if (stockQuantity < quantity) {
                 if (isAjax) {
-                    String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.";
+                    String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity
+                            + " sản phẩm.";
                     response.getWriter().write("{\"success\":false,\"message\":\"" + errorMessage + "\"}");
                     return;
                 }
 
-                request.getSession().setAttribute("cartError", "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.");
+                request.getSession().setAttribute("cartError",
+                        "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.");
                 response.sendRedirect("ProductDetail?id=" + productID);
                 return;
             }
@@ -310,12 +317,15 @@ public class CartServlet extends HttpServlet {
                 if (success) {
                     // Tính toán số lượng sản phẩm trong giỏ hàng
                     int cartCount = cartUtil.getCartItemCount(account.getAccountID());
-                    
+
                     // Trả về JSON với thông tin cập nhật
-                    String json = String.format("{\"success\":true,\"message\":\"Đã thêm sản phẩm vào giỏ hàng\",\"cartSize\":%d}", cartCount);
+                    String json = String.format(
+                            "{\"success\":true,\"message\":\"Đã thêm sản phẩm vào giỏ hàng\",\"cartSize\":%d}",
+                            cartCount);
                     response.getWriter().write(json);
                 } else {
-                    response.getWriter().write("{\"success\":false,\"message\":\"Không thể thêm sản phẩm vào giỏ hàng\"}");
+                    response.getWriter()
+                            .write("{\"success\":false,\"message\":\"Không thể thêm sản phẩm vào giỏ hàng\"}");
                 }
                 return;
             }
@@ -324,7 +334,8 @@ public class CartServlet extends HttpServlet {
             if (success) {
                 // Get referring URL or default to product page
                 String referer = request.getHeader("Referer");
-                String redirectURL = (referer != null && !referer.isEmpty()) ? referer : "ProductDetail?id=" + productID;
+                String redirectURL = (referer != null && !referer.isEmpty()) ? referer
+                        : "ProductDetail?id=" + productID;
 
                 request.getSession().setAttribute("cartMessage", "Đã thêm sản phẩm vào giỏ hàng");
                 response.sendRedirect(redirectURL);
@@ -357,32 +368,34 @@ public class CartServlet extends HttpServlet {
         // Đảm bảo content-type được thiết lập ngay từ đầu
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        
+
         try {
             // Log request parameters
             System.out.println("updateCartItem called with parameters:");
             System.out.println("cartItemID: " + request.getParameter("cartItemID"));
             System.out.println("quantity: " + request.getParameter("quantity"));
-            
+
             // Check if user is logged in
             HttpSession session = request.getSession();
             Account account = (Account) session.getAttribute("account");
-            
+
             if (account == null) {
                 System.out.println("User not logged in");
-                response.getWriter().write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để cập nhật giỏ hàng\"}");
+                response.getWriter()
+                        .write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để cập nhật giỏ hàng\"}");
                 return;
             }
-            
+
             // Check if user is a customer
             if (account.getRole() != 0) {
                 System.out.println("User is not a customer, role: " + account.getRole());
-                response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể cập nhật giỏ hàng\"}");
+                response.getWriter()
+                        .write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể cập nhật giỏ hàng\"}");
                 return;
             }
-            
+
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
+            double quantity = Double.parseDouble(request.getParameter("quantity"));
 
             // Validate quantity
             if (quantity <= 0) {
@@ -393,31 +406,32 @@ public class CartServlet extends HttpServlet {
             CartItem cartItem = cartUtil.getCartItemById(cartItemID);
             if (cartItem == null) {
                 System.out.println("Cart item not found: " + cartItemID);
-                response.getWriter().write("{\"success\":false,\"message\":\"Không tìm thấy sản phẩm trong giỏ hàng\"}");
+                response.getWriter()
+                        .write("{\"success\":false,\"message\":\"Không tìm thấy sản phẩm trong giỏ hàng\"}");
                 return;
             }
 
             // Get current quantity in cart
-            int currentQuantity = cartItem.getQuantity();
+            double currentQuantity = cartItem.getQuantity();
 
             // Check if stock is sufficient using ProductDAO directly
             ProductDAO productDAO = new ProductDAO();
-            int stockQuantity = productDAO.getStockQuantityById(cartItem.getProductID());
-            
-            System.out.println("Updating cart item: ID=" + cartItemID + ", Current quantity=" + currentQuantity + 
-                ", New quantity=" + quantity + ", Stock quantity=" + stockQuantity);
-            
+            double stockQuantity = productDAO.getStockQuantityById(cartItem.getProductID());
+
+            System.out.println("Updating cart item: ID=" + cartItemID + ", Current quantity=" + currentQuantity +
+                    ", New quantity=" + quantity + ", Stock quantity=" + stockQuantity);
+
             // Only validate stock if increasing quantity
             // Always allow decreasing quantity even if current quantity exceeds stock
             if (quantity > currentQuantity && stockQuantity < quantity) {
                 String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.";
                 System.out.println("Stock insufficient: " + errorMessage);
                 String json = String.format(
-                    "{\"success\":false," +
-                    "\"message\":\"%s\"," +
-                    "\"validQuantity\":%d}",
-                    errorMessage,
-                    Math.min(currentQuantity, stockQuantity) // Ensure valid quantity doesn't exceed stock
+                        "{\"success\":false," +
+                                "\"message\":\"%s\"," +
+                                "\"validQuantity\":%d}",
+                        errorMessage,
+                        Math.min(currentQuantity, stockQuantity) // Ensure valid quantity doesn't exceed stock
                 );
                 response.getWriter().write(json);
                 return;
@@ -426,45 +440,51 @@ public class CartServlet extends HttpServlet {
             // Update cart item quantity
             boolean success = cartUtil.updateCartItemQuantity(cartItemID, quantity);
             System.out.println("Update result: " + (success ? "success" : "failed"));
-            
+
             // Get updated cart item to calculate total
             CartItem updatedItem = cartUtil.getCartItemById(cartItemID);
             double itemTotal = 0;
             if (updatedItem != null && updatedItem.getProduct() != null) {
                 itemTotal = updatedItem.getProduct().getPrice() * updatedItem.getQuantity();
             }
-            
+            // Làm tròn itemTotal về nghìn đồng
+            long roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;
+
             if (success) {
                 // Calculate new cart total
                 double cartTotal = cartUtil.calculateCartTotal(account.getAccountID());
+                // Làm tròn cartTotal về nghìn đồng
+                long roundedCartTotal = Math.round(cartTotal / 1000.0) * 1000;
                 int totalItems = cartUtil.getCartItemCount(account.getAccountID());
-                
-                System.out.println("Cart update successful: Item total=" + itemTotal + ", Cart total=" + cartTotal + 
-                    ", Total items=" + totalItems);
-                
+
+                System.out.println(
+                        "Cart update successful: Item total=" + roundedItemTotal + ", Cart total=" + roundedCartTotal +
+                                ", Total items=" + totalItems);
+
                 // Ensure values are valid numbers and properly formatted for JSON
-                if (Double.isNaN(cartTotal)) cartTotal = 0;
-                if (Double.isNaN(itemTotal)) itemTotal = 0;
-                
+                if (Double.isNaN(cartTotal))
+                    cartTotal = 0;
+                if (Double.isNaN(itemTotal))
+                    itemTotal = 0;
+
                 // Get active cart items count
                 List<CartItem> activeItems = cartUtil.getCartItems(account.getAccountID(), "Active");
                 int activeItemsCount = activeItems.size();
-                
+
                 // Return JSON with updated information
-                String json = String.format(Locale.US,
-                    "{\"success\":true," +
-                    "\"message\":\"Đã cập nhật số lượng\"," +
-                    "\"cartTotal\":%.2f," +
-                    "\"itemTotal\":%.2f," +
-                    "\"updatedQuantity\":%d," +
-                    "\"totalItems\":%d," +
-                    "\"itemCount\":%d}",
-                    cartTotal,
-                    itemTotal,
-                    quantity,
-                    totalItems,
-                    activeItemsCount
-                );
+                String json = String.format(java.util.Locale.US,
+                        "{\"success\":true," +
+                                "\"message\":\"Đã cập nhật số lượng\"," +
+                                "\"cartTotal\":%d," +
+                                "\"itemTotal\":%d," +
+                                "\"updatedQuantity\":%.2f," +
+                                "\"totalItems\":%d," +
+                                "\"itemCount\":%d}",
+                        roundedCartTotal,
+                        roundedItemTotal,
+                        quantity,
+                        totalItems,
+                        activeItemsCount);
                 response.getWriter().write(json);
                 System.out.println("Response sent: " + json);
             } else {
@@ -496,61 +516,64 @@ public class CartServlet extends HttpServlet {
         // Đảm bảo content-type được thiết lập ngay từ đầu
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        
+
         try {
             // Check if user is logged in
             HttpSession session = request.getSession();
             Account account = (Account) session.getAttribute("account");
-            
+
             if (account == null) {
-                response.getWriter().write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để xóa sản phẩm khỏi giỏ hàng\"}");
+                response.getWriter()
+                        .write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để xóa sản phẩm khỏi giỏ hàng\"}");
                 return;
             }
-            
+
             // Check if user is a customer
             if (account.getRole() != 0) {
-                response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể xóa sản phẩm khỏi giỏ hàng\"}");
+                response.getWriter().write(
+                        "{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể xóa sản phẩm khỏi giỏ hàng\"}");
                 return;
             }
-            
+
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
-            
+
             // Get the cart item to check account ID for cart total calculation
             CartItem item = cartUtil.getCartItemById(cartItemID);
             if (item == null) {
                 response.getWriter().write("{\"success\":false,\"message\":\"Không tìm thấy sản phẩm\"}");
                 return;
             }
-            
+
             // Store account ID for later use
             int accountID = item.getAccountID();
-            
+
             // Remove item
             boolean success = cartUtil.removeCartItem(cartItemID);
-            
+
             if (success) {
                 // Calculate new cart total
                 double cartTotal = cartUtil.calculateCartTotal(accountID);
                 int cartCount = cartUtil.getCartItemCount(accountID);
-                
+
                 // Ensure cartTotal is a valid number
-                if (Double.isNaN(cartTotal)) cartTotal = 0;
-                
+                if (Double.isNaN(cartTotal))
+                    cartTotal = 0;
+
                 // Get active cart items count
                 List<CartItem> activeItems = cartUtil.getCartItems(accountID, "Active");
                 int activeItemsCount = activeItems.size();
-                
-                // Return JSON with updated info - use raw numeric value instead of formatted string
+
+                // Return JSON with updated info - use raw numeric value instead of formatted
+                // string
                 String json = String.format(Locale.US,
-                    "{\"success\":true," +
-                    "\"message\":\"Đã xóa sản phẩm khỏi giỏ hàng\"," +
-                    "\"cartTotal\":%.2f," +
-                    "\"cartCount\":%d," +
-                    "\"itemCount\":%d}",
-                    cartTotal,
-                    cartCount,
-                    activeItemsCount
-                );
+                        "{\"success\":true," +
+                                "\"message\":\"Đã xóa sản phẩm khỏi giỏ hàng\"," +
+                                "\"cartTotal\":%.2f," +
+                                "\"cartCount\":%d," +
+                                "\"itemCount\":%d}",
+                        cartTotal,
+                        cartCount,
+                        activeItemsCount);
                 response.getWriter().write(json);
             } else {
                 response.getWriter().write("{\"success\":false,\"message\":\"Không thể xóa sản phẩm\"}");
@@ -561,7 +584,8 @@ public class CartServlet extends HttpServlet {
         } catch (Exception e) {
             System.err.println("Error removing cart item: " + e.getMessage());
             e.printStackTrace();
-            response.getWriter().write("{\"success\":false,\"message\":\"Lỗi: " + e.getMessage().replace("\"", "'") + "\"}");
+            response.getWriter()
+                    .write("{\"success\":false,\"message\":\"Lỗi: " + e.getMessage().replace("\"", "'") + "\"}");
         }
     }
 
@@ -574,18 +598,18 @@ public class CartServlet extends HttpServlet {
             // Check if user is logged in
             HttpSession session = request.getSession();
             Account account = (Account) session.getAttribute("account");
-            
+
             if (account == null) {
                 handleAjaxError(request, response, "Vui lòng đăng nhập để lưu sản phẩm");
                 return;
             }
-            
+
             // Check if user is a customer
             if (account.getRole() != 0) {
                 handleAjaxError(request, response, "Chỉ khách hàng mới có thể lưu sản phẩm");
                 return;
             }
-            
+
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
             cartUtil.saveForLater(cartItemID);
             response.sendRedirect("cart");
@@ -602,39 +626,41 @@ public class CartServlet extends HttpServlet {
         // Check if this is an AJAX request
         String xRequestedWith = request.getHeader("X-Requested-With");
         boolean isAjax = "XMLHttpRequest".equals(xRequestedWith);
-        
+
         // Thiết lập content-type cho AJAX request
         if (isAjax) {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
         }
-        
+
         try {
             // Check if user is logged in
             HttpSession session = request.getSession();
             Account account = (Account) session.getAttribute("account");
-            
+
             if (account == null) {
                 if (isAjax) {
-                    response.getWriter().write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để cập nhật giỏ hàng\"}");
+                    response.getWriter()
+                            .write("{\"success\":false,\"message\":\"Vui lòng đăng nhập để cập nhật giỏ hàng\"}");
                 } else {
                     request.getSession().setAttribute("cartError", "Vui lòng đăng nhập để cập nhật giỏ hàng");
                     response.sendRedirect("cart");
                 }
                 return;
             }
-            
+
             // Check if user is a customer
             if (account.getRole() != 0) {
                 if (isAjax) {
-                    response.getWriter().write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể cập nhật giỏ hàng\"}");
+                    response.getWriter()
+                            .write("{\"success\":false,\"message\":\"Chỉ khách hàng mới có thể cập nhật giỏ hàng\"}");
                 } else {
                     request.getSession().setAttribute("cartError", "Chỉ khách hàng mới có thể cập nhật giỏ hàng");
                     response.sendRedirect("cart");
                 }
                 return;
             }
-            
+
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
 
             // Get the cart item to check product details
@@ -651,11 +677,11 @@ public class CartServlet extends HttpServlet {
 
             // Check if stock is sufficient using ProductDAO directly
             ProductDAO productDAO = new ProductDAO();
-            int stockQuantity = productDAO.getStockQuantityById(item.getProductID());
-            
+            double stockQuantity = productDAO.getStockQuantityById(item.getProductID());
+
             if (stockQuantity < item.getQuantity()) {
                 String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.";
-                
+
                 if (isAjax) {
                     response.getWriter().write("{\"success\":false,\"message\":\"" + errorMessage + "\"}");
                 } else {
@@ -666,29 +692,29 @@ public class CartServlet extends HttpServlet {
             }
 
             boolean success = cartUtil.moveToCart(cartItemID);
-            
+
             if (isAjax) {
                 if (success) {
                     // Calculate new cart total
                     double cartTotal = cartUtil.calculateCartTotal(account.getAccountID());
                     int cartCount = cartUtil.getCartItemCount(account.getAccountID());
-                    
+
                     // Format cart total
                     java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
                     String formattedTotal = df.format(cartTotal) + " VNĐ";
-                    
+
                     // Return JSON with updated info
                     String json = String.format(
-                        "{\"success\":true," +
-                        "\"message\":\"Đã chuyển sản phẩm vào giỏ hàng\"," +
-                        "\"cartTotal\":\"%s\"," +
-                        "\"cartCount\":%d}",
-                        formattedTotal,
-                        cartCount
-                    );
+                            "{\"success\":true," +
+                                    "\"message\":\"Đã chuyển sản phẩm vào giỏ hàng\"," +
+                                    "\"cartTotal\":\"%s\"," +
+                                    "\"cartCount\":%d}",
+                            formattedTotal,
+                            cartCount);
                     response.getWriter().write(json);
                 } else {
-                    response.getWriter().write("{\"success\":false,\"message\":\"Không thể chuyển sản phẩm vào giỏ hàng\"}");
+                    response.getWriter()
+                            .write("{\"success\":false,\"message\":\"Không thể chuyển sản phẩm vào giỏ hàng\"}");
                 }
             } else {
                 // For non-AJAX requests
@@ -728,7 +754,7 @@ public class CartServlet extends HttpServlet {
             response.sendRedirect("cart");
             return;
         }
-        
+
         cartUtil.clearCart(account.getAccountID(), "Active");
         response.sendRedirect("cart");
     }

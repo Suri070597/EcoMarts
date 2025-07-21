@@ -17,7 +17,7 @@ public class Product {
     private String productName;
     private double price;
     private String description;
-    private int stockQuantity;
+    private double stockQuantity;
     private String imageURL;
     private String unit;
     private Timestamp createdAt;
@@ -29,6 +29,9 @@ public class Product {
     private Category category;
     private Supplier supplier;
     private InventoryTransaction inventory;
+    private int unitPerBox;
+    private String boxUnitName;
+    private String itemUnitName;
 
     public InventoryTransaction getInventory() {
         return inventory;
@@ -75,7 +78,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(int productID, String productName, double price, String description, int stockQuantity,
+    public Product(int productID, String productName, double price, String description, double stockQuantity,
             String imageURL, String unit, Timestamp createdAt) {
         this.productID = productID;
         this.productName = productName;
@@ -90,7 +93,7 @@ public class Product {
         // this.status = status;
     }
 
-    public Product(int productID, String productName, double price, String description, int stockQuantity,
+    public Product(int productID, String productName, double price, String description, double stockQuantity,
             String imageURL, String unit, Timestamp createdAt,
             Date manufactureDate, Date expirationDate) {
         this.productID = productID;
@@ -154,11 +157,11 @@ public class Product {
         this.description = description;
     }
 
-    public int getStockQuantity() {
+    public double getStockQuantity() {
         return stockQuantity;
     }
 
-    public void setStockQuantity(int stockQuantity) {
+    public void setStockQuantity(double stockQuantity) {
         this.stockQuantity = stockQuantity;
     }
 
@@ -202,17 +205,45 @@ public class Product {
         this.status = status;
     }
 
+    public int getUnitPerBox() {
+        return unitPerBox;
+    }
+
+    public void setUnitPerBox(int unitPerBox) {
+        this.unitPerBox = unitPerBox;
+    }
+
+    public String getBoxUnitName() {
+        return boxUnitName;
+    }
+
+    public void setBoxUnitName(String boxUnitName) {
+        this.boxUnitName = boxUnitName;
+    }
+
+    public String getItemUnitName() {
+        return itemUnitName;
+    }
+
+    public void setItemUnitName(String itemUnitName) {
+        this.itemUnitName = itemUnitName;
+    }
+
     /**
      * Gets the quantity from stockQuantity field
      *
      * @return The stock quantity
      */
-    public int getAvailableQuantity() {
+    public double getAvailableQuantity() {
         return this.stockQuantity;
     }
 
     @Override
     public String toString() {
-        return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID=" + supplierID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate=" + expirationDate + ", category=" + category + ", supplier=" + supplier + '}';
+        return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price
+                + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL
+                + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID="
+                + supplierID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate="
+                + expirationDate + ", category=" + category + ", supplier=" + supplier + '}';
     }
 }

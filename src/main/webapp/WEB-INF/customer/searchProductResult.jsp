@@ -6,6 +6,7 @@
 <%@ page import="model.*" %>
 <%@ page import="dao.*" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%
     List<Product> products = (List<Product>) request.getAttribute("searchResult");
@@ -37,37 +38,42 @@
         <div class="main-content1">
             <h2 class="search-title">Kết quả tìm kiếm cho: "<%= keyword%>"</h2>
             <div class="product-grid">
-                <% if (products != null && !products.isEmpty()) {
-                        for (Product p : products) {%>
-                <div class="product-card">
-                    <div class="product-image-container">
-                        <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
-                        <div class="product-actions">
-                            <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
-                            <a href="ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name"><%= p.getProductName()%></h3>
-                        <div class="product-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <span>(29)</span>
-                        </div>
-                        <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%> VNĐ / <%= p.getUnit()%></div>
-                        <div class="button-group">
-                            <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                            <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
-                        </div>
-                    </div>
-                </div>
-                <% }
-                } else { %>
-                <p class="no-result-message"><i class="fas fa-exclamation-circle"></i> Không tìm thấy sản phẩm phù hợp.</p>
-                <% }%>
+                <c:choose>
+                    <c:when test="${not empty searchResult}">
+                        <c:forEach var="p" items="${searchResult}">
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    <img src="ImageServlet?name=${p.imageURL}" alt="${p.productName}" class="product-image">
+                                    <div class="product-actions">
+                                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                                        <a href="ProductDetail?id=${p.productID}" class="action-btn"><i class="fas fa-eye"></i></a>
+                                    </div>
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-name">${p.productName}</h3>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <span>(29)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        <fmt:formatNumber value="${p.price}" type="number" pattern=",###" /> VNĐ / ${p.unit}
+                                    </div>
+                                    <div class="button-group">
+                                        <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                        <a href="${pageContext.request.contextPath}/ProductDetail?id=${p.productID}" class="buy-now-btn">Mua ngay</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <p class="no-result-message"><i class="fas fa-exclamation-circle"></i> Không tìm thấy sản phẩm phù hợp.</p>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
         <jsp:include page="footer.jsp" />

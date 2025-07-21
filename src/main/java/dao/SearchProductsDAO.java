@@ -27,18 +27,19 @@ public class SearchProductsDAO extends DBContext {
 
         String[] words = keyword.trim().split("\\s+");
         StringBuilder sql = new StringBuilder("""
-        SELECT p.*
-        FROM Product p
-        JOIN Category c ON p.CategoryID = c.CategoryID
-        LEFT JOIN Category pc ON c.ParentID = pc.CategoryID
-        JOIN Supplier s ON p.SupplierID = s.SupplierID
-        WHERE 
-    """);
+                    SELECT p.*
+                    FROM Product p
+                    JOIN Category c ON p.CategoryID = c.CategoryID
+                    LEFT JOIN Category pc ON c.ParentID = pc.CategoryID
+                    JOIN Supplier s ON p.SupplierID = s.SupplierID
+                    WHERE
+                """);
 
         // Tạo điều kiện cho mỗi từ khóa với OR logic
         List<String> conditions = new ArrayList<>();
         for (int i = 0; i < words.length; i++) {
-            conditions.add("(p.ProductName LIKE ? OR c.CategoryName LIKE ? OR pc.CategoryName LIKE ? OR s.CompanyName LIKE ?)");
+            conditions.add(
+                    "(p.ProductName LIKE ? OR c.CategoryName LIKE ? OR pc.CategoryName LIKE ? OR s.CompanyName LIKE ?)");
         }
         sql.append(String.join(" OR ", conditions)); // Sử dụng OR cho các từ
 
@@ -57,8 +58,10 @@ public class SearchProductsDAO extends DBContext {
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 p.setDescription(rs.getString("Description"));
-                p.setPrice(rs.getDouble("Price"));
-                p.setStockQuantity(rs.getInt("StockQuantity"));
+                double rawPrice = rs.getDouble("Price");
+                long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
+                p.setPrice(roundedPrice);
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
                 p.setImageURL(rs.getString("ImageURL"));
                 p.setUnit(rs.getString("Unit"));
                 p.setManufactureDate(rs.getDate("ManufactureDate"));

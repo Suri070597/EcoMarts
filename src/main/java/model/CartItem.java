@@ -6,7 +6,7 @@ public class CartItem {
     private int cartItemID;
     private int accountID;
     private int productID;
-    private int quantity;
+    private double quantity;
     private Timestamp addedAt;
     private String status; // Active, SavedForLater, Removed
 
@@ -16,7 +16,7 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(int cartItemID, int accountID, int productID, int quantity, Timestamp addedAt, String status) {
+    public CartItem(int cartItemID, int accountID, int productID, double quantity, Timestamp addedAt, String status) {
         this.cartItemID = cartItemID;
         this.accountID = accountID;
         this.productID = productID;
@@ -49,11 +49,11 @@ public class CartItem {
         this.productID = productID;
     }
 
-    public int getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(double quantity) {
         this.quantity = quantity;
     }
 

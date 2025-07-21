@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -196,8 +197,17 @@
                                                         <input type="hidden" name="cartItemID" value="${item.cartItemID}">
                                                         <div class="input-group">
                                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-decrease">-</button>
-                                                            <input type="number" name="quantity" value="${item.quantity}" min="1" 
-                                                                class="form-control form-control-sm quantity-input text-center" data-max-stock="${item.product.stockQuantity}">
+                                                            <%-- Hiển thị số lượng không có .0 nếu không phải sầu riêng (kg) --%>
+                                                            <c:choose>
+                                                                <c:when test="${item.product.unit eq 'kg'}">
+                                                                    <input type="number" name="quantity" value="${item.quantity}" min="0.1" step="0.1" class="form-control form-control-sm quantity-input text-center" data-max-stock="${item.product.stockQuantity}">
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <input type="number" name="quantity"
+                                                                        value="${fn:endsWith(item.quantity, '.0') ? fn:substringBefore(item.quantity, '.0') : item.quantity}"
+                                                                        min="1" step="1" class="form-control form-control-sm quantity-input text-center" data-max-stock="${item.product.stockQuantity}" pattern="\d*">
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-increase">+</button>
                                                         </div>
                                                         <div class="invalid-feedback stock-warning" style="display: none;">
@@ -206,13 +216,21 @@
                                                     </form>
                                                 </div>
                                                 
-                                                <!-- Price -->
+                                                <!-- Price (thành tiền) -->
+                                                <c:set var="price" value="${item.product.price}" />
+                                                <c:set var="quantity" value="${item.quantity}" />
                                                 <div class="col-md-2 mb-2 mb-md-0 text-md-end">
                                                     <div class="fw-bold text-success item-total">
-                                                        <fmt:formatNumber value="${item.product.price * item.quantity}" pattern="#,###" /> ₫
+                                                        <% double price = (Double) pageContext.getAttribute("price");
+                                                           int quantity = ((Number) pageContext.getAttribute("quantity")).intValue();
+                                                           long roundedTotal = Math.round((price * quantity) / 1000.0) * 1000;
+                                                           out.print(new java.text.DecimalFormat("#,###").format(roundedTotal));
+                                                        %> ₫
                                                     </div>
                                                     <div class="text-muted small">
-                                                        <fmt:formatNumber value="${item.product.price}" pattern="#,###" /> ₫ / ${item.product.unit}
+                                                        <% long roundedPrice = Math.round(price / 1000.0) * 1000;
+                                                           out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
+                                                        %> ₫ / ${item.product.unit}
                                                     </div>
                                                 </div>
                                                 
@@ -266,8 +284,13 @@
                                                     <h5 class="product-name">${item.product.productName}</h5>
                                                 </a>
                                                 <p class="text-muted small">${item.product.unit}</p>
+                                                <!-- Saved for later price -->
+                                                <c:set var="savedPrice" value="${item.product.price}" />
                                                 <div class="fw-bold text-success">
-                                                    <fmt:formatNumber value="${item.product.price}" pattern="#,###" /> ₫
+                                                    <% double savedPrice = (Double) pageContext.getAttribute("savedPrice");
+                                                       long roundedSavedPrice = Math.round(savedPrice / 1000.0) * 1000;
+                                                       out.print(new java.text.DecimalFormat("#,###").format(roundedSavedPrice));
+                                                    %> ₫
                                                 </div>
                                             </div>
                                             
@@ -304,7 +327,13 @@
                         <h4 class="mb-3 cart-title">Tóm tắt đơn hàng</h4>
                         <div class="d-flex justify-content-between mb-2" id="cart-subtotal-container">
                             <span id="cart-item-count">Tạm tính (${activeItems.size()} sản phẩm)</span>
-                            <span id="cart-subtotal-amount"><fmt:formatNumber value="${cartTotal}" pattern="#,###" /> ₫</span>
+                            <c:set var="cartTotalVal" value="${cartTotal}" />
+                            <span id="cart-subtotal-amount">
+                                <% double cartTotalVal = (Double) pageContext.getAttribute("cartTotalVal");
+                                   long roundedSubtotal = Math.round(cartTotalVal / 1000.0) * 1000;
+                                   out.print(new java.text.DecimalFormat("#,###").format(roundedSubtotal));
+                                %> ₫
+                            </span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Phí vận chuyển</span>
@@ -313,7 +342,11 @@
                         <hr>
                         <div class="d-flex justify-content-between mb-4">
                             <strong>Tổng cộng</strong>
-                            <strong class="text-success fs-5 cart-total"><fmt:formatNumber value="${cartTotal}" pattern="#,###" /> ₫</strong>
+                            <strong class="text-success fs-5 cart-total">
+                                <% long roundedTotal = Math.round(cartTotalVal / 1000.0) * 1000;
+                                   out.print(new java.text.DecimalFormat("#,###").format(roundedTotal));
+                                %> ₫
+                            </strong>
                         </div>
                         
                         <c:if test="${not empty activeItems}">

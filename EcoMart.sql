@@ -191,6 +191,27 @@ CREATE TABLE Product (
     FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID)
 );
 
+select * from Product
+ALTER TABLE Product
+ADD 
+    UnitPerBox INT NOT NULL DEFAULT 1,
+    BoxUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
+    ItemUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ';
+
+
+	-- Xóa toàn bộ dữ liệu
+DELETE FROM Product;
+delete from CartItem;
+delete from OrderDetail;
+delete from Review;
+-- Reset lại ID tự tăng về 1 (nếu muốn)
+DBCC CHECKIDENT ('Product', RESEED, 0);
+
+   ALTER TABLE Product DROP CONSTRAINT DF__Product__StockQu__49C3F6B7;
+	ALTER TABLE Product ALTER COLUMN StockQuantity DECIMAL(10,2);
+	   ALTER TABLE Product ADD CONSTRAINT DF_Product_StockQuantity DEFAULT 0 FOR StockQuantity;
+
+
 -- Get the correct category IDs dynamically
 DECLARE @NuocNgot INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Nước ngọt' AND ParentID = @NuocGiaiKhat);
 DECLARE @NuocTra INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Nước trà' AND ParentID = @NuocGiaiKhat);
@@ -330,3 +351,21 @@ CREATE TABLE Inventory (
     LastUpdated DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
 );
+
+
+SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CartItem';
+    ALTER TABLE CartItem ALTER COLUMN Quantity DECIMAL(10,2);
+	ALTER TABLE CartItem DROP CONSTRAINT DF__CartItem__Quanti__5070F446; -- xóa ràng buộc
+	ALTER TABLE CartItem ADD CONSTRAINT DF_CartItem_Quantity DEFAULT 1 FOR Quantity;
+
+select * from Account
+
+	INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus)
+VALUES (7, GETDATE(), 100000, N'Địa chỉ test', '0123456789', N'Cash', N'Đã thanh toán', N'Đã giao');
+
+INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice)
+VALUES (1, 1, 1, 100000);
+
+
+
+select * from Product
