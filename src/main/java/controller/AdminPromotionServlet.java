@@ -1,5 +1,6 @@
 package controller;
 
+import dao.ProductDAO;
 import dao.PromotionDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,8 +11,9 @@ import model.Promotion;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
-import model.Promotion;
+import model.Product;
 
 @WebServlet(name = "AdminPromotionServlet", urlPatterns = {"/admin/promotion"})
 public class AdminPromotionServlet extends HttpServlet {
@@ -23,6 +25,7 @@ public class AdminPromotionServlet extends HttpServlet {
         String view = request.getParameter("view");
         String action = request.getParameter("action");
         PromotionDAO promotionDAO = new PromotionDAO();
+        ProductDAO productDAO = new ProductDAO();
 
         if (action != null && action.equals("delete")) {
             int id = Integer.parseInt(request.getParameter("id"));
@@ -31,6 +34,7 @@ public class AdminPromotionServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Không thể xóa promotion này do có dữ liệu liên quan!");
                 List<Promotion> promotions = promotionDAO.getAllPromotions();
                 request.setAttribute("promotions", promotions);
+                request.setAttribute("now", new Date()); // ✅ Thêm tại đây
                 request.getRequestDispatcher("/WEB-INF/admin/promotion/manage-promotion.jsp").forward(request, response);
                 return;
             }
@@ -74,6 +78,20 @@ public class AdminPromotionServlet extends HttpServlet {
                     }
                     break;
                 }
+                case "assign-products": {
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    Promotion promotion = promotionDAO.getPromotionById(id);
+
+                    List<Product> allProducts = productDAO.getAll(); // dùng getAll() của bạn đã có
+                    List<Integer> assignedProductIDs = promotionDAO.getAssignedProductIDsByPromotion(id);
+
+                    request.setAttribute("promotion", promotion);
+                    request.setAttribute("allProducts", allProducts);
+                    request.setAttribute("assignedIDs", assignedProductIDs);
+
+                    request.getRequestDispatcher("/WEB-INF/admin/promotion/assign-products.jsp").forward(request, response);
+                    break;
+                }
                 default: {
                     String keyword = request.getParameter("search");
                     List<Promotion> promotions;
@@ -88,15 +106,16 @@ public class AdminPromotionServlet extends HttpServlet {
 
                     request.setAttribute("promotions", promotions);
                     request.setAttribute("totalPromotions", totalPromotions);
+                    request.setAttribute("now", new Date()); // ✅ Thêm tại đây
 
                     request.getRequestDispatcher("/WEB-INF/admin/promotion/manage-promotion.jsp").forward(request, response);
                     break;
                 }
-
             }
         } else {
             List<Promotion> promotions = promotionDAO.getAllPromotions();
             request.setAttribute("promotions", promotions);
+            request.setAttribute("now", new Date()); // ✅ Thêm tại đây
             request.getRequestDispatcher("/WEB-INF/admin/promotion/manage-promotion.jsp").forward(request, response);
         }
     }
@@ -142,7 +161,17 @@ public class AdminPromotionServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Error: " + e.getMessage());
                 request.getRequestDispatcher("/WEB-INF/admin/promotion/edit-promotion.jsp").forward(request, response);
             }
+        } else if ("assign-products".equals(action)) {
+            int promotionID = Integer.parseInt(request.getParameter("promotionID"));
+            String[] productIDs = request.getParameterValues("productIDs");
+
+            // Cập nhật bảng Product_Promotion
+            promotionDAO.updateProductAssignments(promotionID, productIDs);
+
+            response.sendRedirect(request.getContextPath() + "/admin/promotion");
+            return;
         }
+
     }
 
     private Promotion extractPromotionFromRequest(HttpServletRequest request) {
