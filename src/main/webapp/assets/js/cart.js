@@ -49,7 +49,7 @@
 
                 // Cập nhật số lượng sản phẩm trong giỏ hàng khi trang tải xong
                 this.updateCartCount();
-
+                
                 console.log('EcoMarts Cart initialized successfully');
             } catch (error) {
                 console.error('Error initializing EcoMarts Cart:', error);
@@ -952,7 +952,7 @@
                     this.showNotification('Có lỗi xảy ra khi xóa sản phẩm khỏi giỏ hàng: ' + error.message, 'error');
                 });
         }
-
+        
         /**
          * Hiển thị thông báo
          * @param {string} message - Nội dung thông báo

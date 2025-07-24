@@ -20,7 +20,7 @@ import util.CartUtil;
 /**
  * Servlet for handling shopping cart operations
  */
-@WebServlet(name = "CartServlet", urlPatterns = { "/cart" })
+@WebServlet(name = "CartServlet", urlPatterns = {"/cart"})
 public class CartServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -205,7 +205,7 @@ public class CartServlet extends HttpServlet {
                 break;
 
             case "update":
-                updateCartItem(request, response, cartUtil);
+                updateCartItem(request, response, isAjax, cartUtil);
                 break;
 
             case "remove":
@@ -363,7 +363,7 @@ public class CartServlet extends HttpServlet {
     /**
      * Update cart item quantity
      */
-    private void updateCartItem(HttpServletRequest request, HttpServletResponse response, CartUtil cartUtil)
+    private void updateCartItem(HttpServletRequest request, HttpServletResponse response, boolean isAjax, CartUtil cartUtil)
             throws IOException {
         // Đảm bảo content-type được thiết lập ngay từ đầu
         response.setContentType("application/json");
@@ -417,23 +417,27 @@ public class CartServlet extends HttpServlet {
             // Check if stock is sufficient using ProductDAO directly
             ProductDAO productDAO = new ProductDAO();
             double stockQuantity = productDAO.getStockQuantityById(cartItem.getProductID());
-
-            System.out.println("Updating cart item: ID=" + cartItemID + ", Current quantity=" + currentQuantity +
-                    ", New quantity=" + quantity + ", Stock quantity=" + stockQuantity);
+            System.out.println("Updating cart item: ID=" + cartItemID + ", Current quantity=" + currentQuantity
+                    + ", New quantity=" + quantity + ", Stock quantity=" + stockQuantity);
 
             // Only validate stock if increasing quantity
             // Always allow decreasing quantity even if current quantity exceeds stock
             if (quantity > currentQuantity && stockQuantity < quantity) {
                 String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.";
                 System.out.println("Stock insufficient: " + errorMessage);
-                String json = String.format(
-                        "{\"success\":false," +
-                                "\"message\":\"%s\"," +
-                                "\"validQuantity\":%d}",
-                        errorMessage,
-                        Math.min(currentQuantity, stockQuantity) // Ensure valid quantity doesn't exceed stock
-                );
-                response.getWriter().write(json);
+                if (isAjax) {
+                    String json = String.format(
+                            "{\"success\":false,"
+                            + "\"message\":\"%s\","
+                            + "\"validQuantity\":%d}",
+                            errorMessage,
+                            Math.min(currentQuantity, stockQuantity) // Ensure valid quantity doesn't exceed stock
+                    );
+                    response.getWriter().write(json);
+                } else {
+                    session.setAttribute("errorMessage", errorMessage);
+                    response.sendRedirect(request.getContextPath() + "/cart");
+                }
                 return;
             }
 
@@ -441,12 +445,8 @@ public class CartServlet extends HttpServlet {
             boolean success = cartUtil.updateCartItemQuantity(cartItemID, quantity);
             System.out.println("Update result: " + (success ? "success" : "failed"));
 
-            // Get updated cart item to calculate total
-            CartItem updatedItem = cartUtil.getCartItemById(cartItemID);
             double itemTotal = 0;
-            if (updatedItem != null && updatedItem.getProduct() != null) {
-                itemTotal = updatedItem.getProduct().getPrice() * updatedItem.getQuantity();
-            }
+            itemTotal = cartItem.getProduct().getPrice() * quantity;
             // Làm tròn itemTotal về nghìn đồng
             long roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;
 
@@ -458,35 +458,42 @@ public class CartServlet extends HttpServlet {
                 int totalItems = cartUtil.getCartItemCount(account.getAccountID());
 
                 System.out.println(
-                        "Cart update successful: Item total=" + roundedItemTotal + ", Cart total=" + roundedCartTotal +
-                                ", Total items=" + totalItems);
+                        "Cart update successful: Item total=" + roundedItemTotal + ", Cart total=" + roundedCartTotal
+                        + ", Total items=" + totalItems);
 
                 // Ensure values are valid numbers and properly formatted for JSON
-                if (Double.isNaN(cartTotal))
+                if (Double.isNaN(cartTotal)) {
                     cartTotal = 0;
-                if (Double.isNaN(itemTotal))
+                }
+                if (Double.isNaN(itemTotal)) {
                     itemTotal = 0;
+                }
 
                 // Get active cart items count
                 List<CartItem> activeItems = cartUtil.getCartItems(account.getAccountID(), "Active");
                 int activeItemsCount = activeItems.size();
+                System.out.println("isAjax: " + isAjax);
+                if (isAjax) {
+                    // Return JSON with updated information
+                    String json = String.format(java.util.Locale.US,
+                            "{\"success\":true,"
+                            + "\"message\":\"Đã cập nhật số lượng\","
+                            + "\"cartTotal\":%d,"
+                            + "\"itemTotal\":%d,"
+                            + "\"updatedQuantity\":%.2f,"
+                            + "\"totalItems\":%d,"
+                            + "\"itemCount\":%d}",
+                            roundedCartTotal,
+                            roundedItemTotal,
+                            quantity,
+                            totalItems,
+                            activeItemsCount);
+                    response.getWriter().write(json);
+                    System.out.println("Response sent: " + json);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/cart");
+                }
 
-                // Return JSON with updated information
-                String json = String.format(java.util.Locale.US,
-                        "{\"success\":true," +
-                                "\"message\":\"Đã cập nhật số lượng\"," +
-                                "\"cartTotal\":%d," +
-                                "\"itemTotal\":%d," +
-                                "\"updatedQuantity\":%.2f," +
-                                "\"totalItems\":%d," +
-                                "\"itemCount\":%d}",
-                        roundedCartTotal,
-                        roundedItemTotal,
-                        quantity,
-                        totalItems,
-                        activeItemsCount);
-                response.getWriter().write(json);
-                System.out.println("Response sent: " + json);
             } else {
                 System.out.println("Failed to update cart item quantity");
                 response.getWriter().write("{\"success\":false,\"message\":\"Không thể cập nhật số lượng\"}");
@@ -556,8 +563,9 @@ public class CartServlet extends HttpServlet {
                 int cartCount = cartUtil.getCartItemCount(accountID);
 
                 // Ensure cartTotal is a valid number
-                if (Double.isNaN(cartTotal))
+                if (Double.isNaN(cartTotal)) {
                     cartTotal = 0;
+                }
 
                 // Get active cart items count
                 List<CartItem> activeItems = cartUtil.getCartItems(accountID, "Active");
@@ -566,11 +574,11 @@ public class CartServlet extends HttpServlet {
                 // Return JSON with updated info - use raw numeric value instead of formatted
                 // string
                 String json = String.format(Locale.US,
-                        "{\"success\":true," +
-                                "\"message\":\"Đã xóa sản phẩm khỏi giỏ hàng\"," +
-                                "\"cartTotal\":%.2f," +
-                                "\"cartCount\":%d," +
-                                "\"itemCount\":%d}",
+                        "{\"success\":true,"
+                        + "\"message\":\"Đã xóa sản phẩm khỏi giỏ hàng\","
+                        + "\"cartTotal\":%.2f,"
+                        + "\"cartCount\":%d,"
+                        + "\"itemCount\":%d}",
                         cartTotal,
                         cartCount,
                         activeItemsCount);
@@ -705,10 +713,10 @@ public class CartServlet extends HttpServlet {
 
                     // Return JSON with updated info
                     String json = String.format(
-                            "{\"success\":true," +
-                                    "\"message\":\"Đã chuyển sản phẩm vào giỏ hàng\"," +
-                                    "\"cartTotal\":\"%s\"," +
-                                    "\"cartCount\":%d}",
+                            "{\"success\":true,"
+                            + "\"message\":\"Đã chuyển sản phẩm vào giỏ hàng\","
+                            + "\"cartTotal\":\"%s\","
+                            + "\"cartCount\":%d}",
                             formattedTotal,
                             cartCount);
                     response.getWriter().write(json);
