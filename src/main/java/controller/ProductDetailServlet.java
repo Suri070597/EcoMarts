@@ -3,19 +3,22 @@ package controller;
 import dao.CategoryDAO;
 import dao.ProductDAO;
 import dao.FeedBackDAO;
+import dao.PromotionDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.List;
 import model.Category;
 import model.Product;
 import model.Account;
+import model.Promotion;
 import model.Review;
 
-@WebServlet(name = "ProductDetailServlet", urlPatterns = { "/ProductDetail" })
+@WebServlet(name = "ProductDetailServlet", urlPatterns = {"/ProductDetail" })
 public class ProductDetailServlet extends HttpServlet {
 
     @Override
@@ -37,6 +40,15 @@ public class ProductDetailServlet extends HttpServlet {
             int id = Integer.parseInt(idRaw);
             Product mo = dao.getProductById(id);
 
+PromotionDAO promotionDAO = new PromotionDAO();
+Promotion appliedPromotion = promotionDAO.getValidPromotionForProduct(mo.getProductID());
+
+
+if (appliedPromotion != null) {
+    request.setAttribute("appliedPromotion", appliedPromotion);
+}
+
+            
             if (mo == null) {
                 request.setAttribute("errorMessage", "Sản phẩm với ID " + id + " không tồn tại");
                 request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
