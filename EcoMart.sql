@@ -52,8 +52,8 @@ CREATE TABLE Token_Table (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE
 );
 
-INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
-VALUES
+--INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
+--VALUES
 -- Admin
 --(N'admin123', N'admin123@', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
 
@@ -337,6 +337,14 @@ CREATE TABLE Inventory (
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
 );
 
+CREATE TABLE AccountVoucher (
+    AccountVoucherID INT PRIMARY KEY IDENTITY(1,1),
+    AccountID INT NOT NULL,
+    VoucherID INT NOT NULL,
+    DateAssigned DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (AccountID) REFERENCES Account(AccountID),
+    FOREIGN KEY (VoucherID) REFERENCES Voucher(VoucherID)
+);
 -- Chạy hết cái trên ròi, mới chạy trigger này xong ròi mới insert dữ liệu vô  bảng account sao nha !!!!!!!!!
 
 CREATE TRIGGER trg_AfterInsert_Account_ToStaff
