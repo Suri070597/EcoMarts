@@ -45,6 +45,8 @@ public class MonthlyRevenueServlet extends HttpServlet {
         int totalOrders = dao.countDeliveredOrdersInMonth(month, year);
         int totalProducts = dao.getTotalProductSoldInMonth(month, year);
         List<RevenueStats> productList = dao.getMonthlyRevenueDetails(month, year);
+        List<RevenueStats> revenuePerMonth = dao.getMonthlyRevenueInYear(year);
+        request.setAttribute("revenuePerMonth", revenuePerMonth);
 
         // Truyền dữ liệu sang JSP
         request.setAttribute("month", month);

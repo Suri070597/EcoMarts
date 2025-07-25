@@ -27,6 +27,8 @@ public class YearlyRevenueServlet extends HttpServlet {
         int totalOrders = orderDAO.countDeliveredOrdersByYear(year);
         int totalProducts = orderDAO.countProductsSoldByYear(year);
         List<Map<String, Object>> productList = orderDAO.getProductSalesByYear(year);
+        Map<Integer, Double> last5YearsRevenue = orderDAO.getLast5YearsRevenue();
+        request.setAttribute("last5YearsRevenue", last5YearsRevenue);
 
         request.setAttribute("year", year);
         request.setAttribute("revenue", revenue);

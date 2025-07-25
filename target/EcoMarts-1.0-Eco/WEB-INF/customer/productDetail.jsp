@@ -99,7 +99,7 @@ return;
                         <h2 class="product-name"><%= mo.getProductName()%></h2>
                         <div class="promotion-section">
                             <div>
-                                <span class="price-discount">đ28.000</span> <span class="original-price">đ47.000</span> <span
+                                <span class="price-discount">đ28.000</span> <span class="original-price"><%=mo.getPrice()%></span> <span
                                     class="text-success">-40%</span>
                             </div>
                             <div class="promotion-timer mt-2">⏳ KẾT THÚC TRONG 01:04:09</div>
@@ -144,7 +144,7 @@ return;
                                     }
                                 %>
                             </p>
-                            <p><strong>Số Lượng Tồn Kho:</strong> <%=mo.getInventory().getQuantity()%></p>
+                            <p><strong>Số Lượng Tồn Kho:</strong> <%=mo.getStockQuantity()%></p>
                             <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p>
                             <p><strong>Nhà Cung Cấp:</strong> <%=mo.getSupplier().getCompanyName()%></p>
 
