@@ -82,6 +82,9 @@ public class AdminStaffServlet extends HttpServlet {
             String status = request.getParameter("status");
             String newStatus = status.equals("Active") ? "Inactive" : "Active";
             boolean result = staffDAO.updateStaffStatus(id, newStatus);
+            Staff staff = staffDAO.getStaffById(id);
+            int accId = staff.getAccountID();
+            boolean updateAccountStaff = accDAO.updateAccountStatus(accId, newStatus);
             response.sendRedirect(request.getContextPath() + "/admin/staff");
             return;
         }
