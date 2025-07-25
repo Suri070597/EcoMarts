@@ -158,7 +158,7 @@ public class AdminStaffServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/admin/staff/manage-staff.jsp").forward(request, response);
         }
     }
-
+// Huuduc đã chỉnh sửa 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -168,24 +168,27 @@ public class AdminStaffServlet extends HttpServlet {
 
         if ("create".equals(action)) {
             try {
-                String username = request.getParameter("username");
-                String password = request.getParameter("password");
-                String email = request.getParameter("email");
-                String fullName = request.getParameter("fullName");
-                String phone = request.getParameter("phone");
-                String address = request.getParameter("address");
-                String gender = request.getParameter("gender");
+                String username = request.getParameter("username").trim();
+                String password = request.getParameter("password").trim();
+                String email = request.getParameter("email").trim();
+                String fullName = request.getParameter("fullName").trim();
+                String phone = request.getParameter("phone").trim();
+                String address = request.getParameter("address").trim();
+                String gender = request.getParameter("gender").trim();
+                String status = request.getParameter("status").trim();
+                int role = 2;
 
-                // Check for null role parameter and set default to 2 (Staff)
-                String roleParam = request.getParameter("role");
-                int role = 2; // Default to Staff role
-                if (roleParam != null && !roleParam.trim().isEmpty()) {
-                    role = Integer.parseInt(roleParam);
+                // KIỂM TRA TRÙNG
+                if (accDAO.isUsernameExists(username)) {
+                    request.setAttribute("errorMessage", "Username already exists.");
+                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+                    return;
                 }
-
-                String status = request.getParameter("status");
-
-                // Validate required fields
+                if (accDAO.isEmailExists(email)) {
+                    request.setAttribute("errorMessage", "Email already exists.");
+                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+                    return;
+                }
                 if (username == null || username.trim().isEmpty()) {
                     request.setAttribute("errorMessage", "Username is required.");
                     request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
@@ -228,6 +231,7 @@ public class AdminStaffServlet extends HttpServlet {
                 }
 
                 // Create account first
+                // Tạo account
                 Account account = new Account();
                 account.setUsername(username);
                 account.setPassword(MD5Util.hash(password));
@@ -241,43 +245,138 @@ public class AdminStaffServlet extends HttpServlet {
 
                 boolean accountCreated = accDAO.insertFullAccount(account);
                 if (!accountCreated) {
-                    request.setAttribute("errorMessage", "Failed to create account. Username or email may already exist.");
+                    request.setAttribute("errorMessage", "Failed to create account. Unknown error.");
                     request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
                     return;
                 }
 
-                // Get the created account ID
-                Account createdAccount = accDAO.getAccountByUsername(username);
-                if (createdAccount == null) {
-                    request.setAttribute("errorMessage", "Failed to retrieve created account.");
-                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
-                    return;
-                }
-
-                // Create staff record
-                Staff staff = new Staff();
-                staff.setAccountID(createdAccount.getAccountID());
-                staff.setFullName(fullName);
-                staff.setEmail(email);
-                staff.setPhone(phone);
-                staff.setGender(gender);
-                staff.setAddress(address);
-                staff.setStatus(status);
-
-                boolean staffCreated = staffDAO.insertStaff(staff);
-                if (staffCreated) {
-                    response.sendRedirect(request.getContextPath() + "/admin/staff");
-                } else {
-                    // If staff creation fails, delete the account
-                    accDAO.deleteAccount(createdAccount.getAccountID());
-                    request.setAttribute("errorMessage", "Failed to create staff record. Please try again.");
-                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
-                }
+                // KHÔNG insert staff nữa! Trigger đã tự tạo staff rồi
+                response.sendRedirect(request.getContextPath() + "/admin/staff");
             } catch (Exception e) {
                 e.printStackTrace();
                 request.setAttribute("errorMessage", "Error: " + e.getMessage());
                 request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
             }
+
+//    @Override
+//    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+//            throws ServletException, IOException {
+//        String action = request.getParameter("action");
+//        StaffDAO staffDAO = new StaffDAO();
+//        AccountDAO accDAO = new AccountDAO();
+//
+//        if ("create".equals(action)) {
+//            try {
+//                String username = request.getParameter("username");
+//                String password = request.getParameter("password");
+//                String email = request.getParameter("email");
+//                String fullName = request.getParameter("fullName");
+//                String phone = request.getParameter("phone");
+//                String address = request.getParameter("address");
+//                String gender = request.getParameter("gender");
+//
+//                // Check for null role parameter and set default to 2 (Staff)
+//                String roleParam = request.getParameter("role");
+//                int role = 2; // Default to Staff role
+//                if (roleParam != null && !roleParam.trim().isEmpty()) {
+//                    role = Integer.parseInt(roleParam);
+//                }
+//
+//                String status = request.getParameter("status");
+//
+//                // Validate required fields
+//                if (username == null || username.trim().isEmpty()) {
+//                    request.setAttribute("errorMessage", "Username is required.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//                if (password == null || password.trim().isEmpty()) {
+//                    request.setAttribute("errorMessage", "Password is required.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//                if (email == null || email.trim().isEmpty()) {
+//                    request.setAttribute("errorMessage", "Email is required.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//                if (fullName == null || fullName.trim().isEmpty()) {
+//                    request.setAttribute("errorMessage", "Full name is required.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//                if (phone == null || phone.trim().isEmpty()) {
+//                    request.setAttribute("errorMessage", "Phone is required.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//                if (address == null || address.trim().isEmpty()) {
+//                    request.setAttribute("errorMessage", "Address is required.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//                if (gender == null || gender.trim().isEmpty()) {
+//                    request.setAttribute("errorMessage", "Gender is required.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//                if (status == null || status.trim().isEmpty()) {
+//                    request.setAttribute("errorMessage", "Status is required.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//
+//                // Create account first
+//                Account account = new Account();
+//                account.setUsername(username);
+//                account.setPassword(MD5Util.hash(password));
+//                account.setEmail(email);
+//                account.setFullName(fullName);
+//                account.setPhone(phone);
+//                account.setAddress(address);
+//                account.setGender(gender);
+//                account.setRole(role);
+//                account.setStatus(status);
+//
+//                boolean accountCreated = accDAO.insertFullAccount(account);
+//                if (!accountCreated) {
+//                    request.setAttribute("errorMessage", "Failed to create account. Username or email may already exist.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//
+//                // Get the created account ID
+//                Account createdAccount = accDAO.getAccountByUsername(username);
+//                if (createdAccount == null) {
+//                    request.setAttribute("errorMessage", "Failed to retrieve created account.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                    return;
+//                }
+//
+//                // Create staff record
+//                Staff staff = new Staff();
+//                staff.setAccountID(createdAccount.getAccountID());
+//                staff.setFullName(fullName);
+//                staff.setEmail(email);
+//                staff.setPhone(phone);
+//                staff.setGender(gender);
+//                staff.setAddress(address);
+//                staff.setStatus(status);
+//
+//                boolean staffCreated = staffDAO.insertStaff(staff);
+//                if (staffCreated) {
+//                    response.sendRedirect(request.getContextPath() + "/admin/staff");
+//                } else {
+//                    // If staff creation fails, delete the account
+//                    accDAO.deleteAccount(createdAccount.getAccountID());
+//                    request.setAttribute("errorMessage", "Failed to create staff record. Please try again.");
+//                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                request.setAttribute("errorMessage", "Error: " + e.getMessage());
+//                request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+//            }
         } else if ("edit".equals(action)) {
             try {
                 String staffIDParam = request.getParameter("staffID");
