@@ -379,5 +379,32 @@ public class AccountDAO extends DBContext {
             return false;
         }
     }
+// HuuDuc đã thêm 2 public này 
+    public boolean isUsernameExists(String username) {
+        String sql = "SELECT 1 FROM Account WHERE Username = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            boolean exists = rs.next();
+            rs.close();
+            return exists;
+        } catch (SQLException e) {
+            System.out.println("Check username exists failed: " + e.getMessage());
+            return false; // Có thể đổi thành throw exception nếu cần
+        }
+    }
 
+    public boolean isEmailExists(String email) {
+        String sql = "SELECT 1 FROM Account WHERE Email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            boolean exists = rs.next();
+            rs.close();
+            return exists;
+        } catch (SQLException e) {
+            System.out.println("Check email exists failed: " + e.getMessage());
+            return false;
+        }
+    }
 }

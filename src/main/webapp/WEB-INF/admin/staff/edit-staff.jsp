@@ -138,7 +138,7 @@
         document.getElementById('staffForm').addEventListener('submit', function(event) {
             const passwordInput = document.getElementById('password');
             const password = passwordInput.value;
-            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+            <!--const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;-->
             
             if (!passwordRegex.test(password)) {
                 event.preventDefault();

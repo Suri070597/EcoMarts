@@ -12,23 +12,23 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Account;
-import model.Staff;
+
 
 /**
  *
  * @author ADMIN
  */
-@WebServlet(name = "verifypasswordServlet", urlPatterns = { "/verifypasswordServlet" })
+@WebServlet(name = "verifypasswordServlet", urlPatterns = {"/verifypasswordServlet"})
 public class verifypasswordServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -52,10 +52,10 @@ public class verifypasswordServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -70,26 +70,23 @@ public class verifypasswordServlet extends HttpServlet {
      * @param req
      * @param resp
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String currentPassword = req.getParameter("currentPassword");
-
         Account account = (Account) req.getSession().getAttribute("account");
 
-        // KHÔNG dùng dòng này nữa
-        // String hashedPassword = db.MD5Util.hash(currentPassword);
+        // LUÔN hash password nhập vào trước khi so sánh với DB
+        String hashedInput = db.MD5Util.hash(currentPassword);
 
-        // So sánh trực tiếp
-        if (account != null && account.getRole() == 2 && account.getPassword().equals(currentPassword)) {
-            // Đúng mật khẩu
+        if (account != null && account.getRole() == 2 && account.getPassword().equals(hashedInput)) {
+            // Mật khẩu đúng, chuyển sang trang đổi mật khẩu
             req.getRequestDispatcher("/WEB-INF/staff/staffs/changepasswordstaff.jsp").forward(req, resp);
         } else {
             req.setAttribute("message", "Mật khẩu không chính xác!");
             req.getRequestDispatcher("/WEB-INF/staff/staffs/verifypassword.jsp").forward(req, resp);
         }
-
     }
 
     /**

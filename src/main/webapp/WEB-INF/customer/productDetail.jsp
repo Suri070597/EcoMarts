@@ -98,12 +98,48 @@ return;
                     <div class="col-md-6">
                         <h2 class="product-name"><%= mo.getProductName()%></h2>
                         <div class="promotion-section">
-                            <div>
-                                <span class="price-discount">đ28.000</span> <span class="original-price"><%=mo.getPrice()%></span> <span
-                                    class="text-success">-40%</span>
-                            </div>
-                            <div class="promotion-timer mt-2">⏳ KẾT THÚC TRONG 01:04:09</div>
+
+                            <c:choose>
+                                <c:when test="${not empty appliedPromotion}">
+                                    <div class="flash-sale-banner mt-3">
+                                        <div class="flash-sale-header">
+                                            <div class="flash-sale-label">FLASH SALE</div>
+                                            <div class="countdown-text">
+                                                <i class="bi bi-clock"></i> KẾT THÚC TRONG 
+                                                <span class="countdown-box" id="timer-dd">--</span> :
+                                                <span class="countdown-box" id="timer-hh">--</span> :
+                                                <span class="countdown-box" id="timer-mm">--</span> :
+                                                <span class="countdown-box" id="timer-ss">--</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <span class="flash-sale-price">
+                                                <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number"/> đ
+                                            </span>
+                                            <span class="original-price">
+                                                <fmt:formatNumber value="${mo.price}" type="number"/> đ
+                                            </span>
+                                            <span class="discount-percent">
+                                                -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
+                                            </span>
+                                        </div>
+                                    </div>
+                                </c:when>
+
+                                <c:otherwise>
+                                    <div class="flash-sale-banner mt-3">
+                                        <div class="flash-sale-header">
+                                        <span class="flash-sale-price">
+                                            <fmt:formatNumber value="${mo.price}" type="number"/> đ
+                                        </span>
+                                        </div>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
+
+
                         <div class="product-detail">
                             <p><span class="sao">
                                     <fmt:formatNumber value="${avgRating}" maxFractionDigits="1" minFractionDigits="1"/>
@@ -111,27 +147,22 @@ return;
                                 <span class="text-warning">
                                     <c:forEach begin="1" end="${fullStars}"><i class="fas fa-star"></i></c:forEach><c:if test="${halfStar}"><i class="fas fa-star-half-alt"></i></c:if><c:forEach begin="1" end="${emptyStars}"><i class="far fa-star"></i></c:forEach>
                                 </span> | <span class="sao">${reviewCount}</span> Đánh Giá</p>
-                            <p class="price-range">
-                                <% long roundedPrice = Math.round(mo.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ
-                            </p>
-                            <%
-                                Category child = mo.getCategory();
-                                String parentName = "N/A";
-                                String childName = (child != null) ? child.getCategoryName() : "Unknown";
-                                int parentId = -1;
+                                <%
+                                    Category child = mo.getCategory();
+                                    String parentName = "N/A";
+                                    String childName = (child != null) ? child.getCategoryName() : "Unknown";
+                                    int parentId = -1;
 
-                                if (child != null) {
-                                    parentId = child.getParentID();
-                                    for (Category c : dataCate) {
-                                        if (c.getCategoryID() == parentId) {
-                                            parentName = c.getCategoryName();
-                                            break;
+                                    if (child != null) {
+                                        parentId = child.getParentID();
+                                        for (Category c : dataCate) {
+                                            if (c.getCategoryID() == parentId) {
+                                                parentName = c.getCategoryName();
+                                                break;
+                                            }
                                         }
                                     }
-                                }
-                            %>
+                                %>
 
                             <p><strong>Thể Loại:</strong>
                                 <%
@@ -439,7 +470,7 @@ return;
                                 </div>
                             </div>
                             <% }
-                        } else { %>
+                            } else { %>
                             <p class="text-muted1">Không có sản phẩm liên quan.</p>
                             <% }%>
                         </div>
@@ -462,7 +493,7 @@ return;
             %>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-            <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis() %>"></script>
+            <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
             <script>
                                                                             function setReply(parentId, orderId, productId) {
                                                                                 document.getElementById('parentReviewId').value = parentId;
@@ -556,6 +587,108 @@ return;
                 .review-reply {
                     border-left-color: #dee2e6;
                 }
+                .flash-sale-banner {
+                    background: linear-gradient(to right, #ff512f, #dd2476);
+                    border-radius: 8px;
+                    padding: 15px;
+                    color: #fff;
+                    font-family: 'Arial', sans-serif;
+                }
+
+                .flash-sale-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 1rem;
+                    font-weight: bold;
+                }
+
+                .flash-sale-label {
+                    font-size: 1.2rem;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .flash-sale-label::before {
+                    content: "⚡";
+                    margin-right: 5px;
+                    font-size: 1.4rem;
+                }
+
+                .countdown-text {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .countdown-text i {
+                    margin-right: 4px;
+                }
+
+                .countdown-box {
+                    display: inline-block;
+                    background-color: #000;
+                    color: #fff;
+                    font-weight: bold;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-family: 'Courier New', monospace;
+                    min-width: 30px;
+                    text-align: center;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                }
+
+                .flash-sale-price {
+                    font-size: 2rem;
+                    color: #fefefe;
+                    font-weight: bold;
+                }
+
+                .original-price {
+                    color: #ccc;
+                    text-decoration: line-through;
+                    margin-left: 10px;
+                }
+
+                .discount-percent {
+                    color: #ffcccb;
+                    font-weight: bold;
+                    margin-left: 10px;
+                }
+
             </style>
+            <script>
+                (function () {
+                    const endTime = new Date("${appliedPromotion.endDate}").getTime();
+
+                    const dd = document.getElementById("timer-dd");
+                    const hh = document.getElementById("timer-hh");
+                    const mm = document.getElementById("timer-mm");
+                    const ss = document.getElementById("timer-ss");
+
+                    const timer = setInterval(function () {
+                        const now = new Date().getTime();
+                        const distance = endTime - now;
+
+                        if (distance < 0) {
+                            clearInterval(timer);
+                            dd.innerHTML = hh.innerHTML = mm.innerHTML = ss.innerHTML = "00";
+                            return;
+                        }
+
+                        const days = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, "0");
+                        const hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, "0");
+                        const minutes = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, "0");
+                        const seconds = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, "0");
+
+                        dd.innerHTML = days;
+                        hh.innerHTML = hours;
+                        mm.innerHTML = minutes;
+                        ss.innerHTML = seconds;
+                    }, 1000);
+                })();
+            </script>
+
+
     </body>
 </html>

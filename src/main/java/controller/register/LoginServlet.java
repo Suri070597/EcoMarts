@@ -5,6 +5,7 @@
 package controller.register;
 
 import dao.AccountDAO1;
+import db.MD5Util;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -74,27 +75,34 @@ public class LoginServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+        System.out.println("================ LOGIN DEBUG ================");
+        System.out.println("EMAIL FIELD VALUE: [" + email + "]");
+        System.out.println("PASSWORD FIELD VALUE: [" + password + "]");
+        System.out.println("PASSWORD LENGTH: " + (password == null ? "null" : password.length()));
+        String hashedPassword = MD5Util.hash(password);
+        System.out.println("HASHED PASSWORD: [" + hashedPassword + "]");
 
+        // *** Bổ sung hash password ***
+        // String hashedPassword = MD5Util.hash(password);
         AccountDAO1 accountDAO = new AccountDAO1();
         try {
-            Account account = accountDAO.checkLogin(email, password);
+            // Truyền hashedPassword vào checkLogin!
+            Account account = accountDAO.checkLogin(email, hashedPassword);
             if (account != null) {
                 System.out.println("Login successful: email=" + email + ", role=" + account.getRole());
-                request.getSession().setAttribute("account", account); // thêm dòng này để lưu Account vào session
+                request.getSession().setAttribute("account", account);
                 request.getSession().setAttribute("email", account.getEmail());
                 request.getSession().setAttribute("username", account.getUsername());
                 request.getSession().setAttribute("fullName", account.getFullName());
                 request.getSession().setAttribute("role", account.getRole());
 
-                if (account.getRole() == 1) {
-                    System.out.println("Redirecting to admin page for email=" + email);
-                    response.sendRedirect(request.getContextPath() + "/admin");
-                } else if (account.getRole() == 2) {
-                    System.out.println("Redirecting to staff page for email=" + email);
-                    response.sendRedirect(request.getContextPath() + "/staff");
-                } else {
-                    System.out.println("Redirecting to home page for email=" + email);
-                    response.sendRedirect(request.getContextPath() + "/home");
+                switch (account.getRole()) {
+                    case 1 ->
+                        response.sendRedirect(request.getContextPath() + "/admin");
+                    case 2 ->
+                        response.sendRedirect(request.getContextPath() + "/staff");
+                    default ->
+                        response.sendRedirect(request.getContextPath() + "/home");
                 }
             } else {
                 System.out.println("Login failed: invalid email or password for email=" + email);
