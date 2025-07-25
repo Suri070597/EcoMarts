@@ -4,10 +4,7 @@
  */
 package controller.viewstaff;
 
-import dao.AccountDAO;
-import dao.FeedBackDAO;
 import dao.StaffDAO;
-import dao.SupplierDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -16,11 +13,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.List;
 import model.Account;
-import model.Review;
 import model.Staff;
-import model.Supplier;
 
 /**
  *
@@ -109,7 +103,7 @@ public class ManageStaffServlet extends HttpServlet {
                 req.setAttribute("message", "Không tìm thấy thông tin nhân viên.");
             }
             req.getRequestDispatcher("/WEB-INF/staff/staffs/manage-staff.jsp").forward(req, resp);
-        } catch (Exception e) {
+        } catch (ServletException | IOException | NumberFormatException e) {
             req.setAttribute("message", "Cập nhật thất bại: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/staff/staffs/manage-staff.jsp").forward(req, resp);
         }

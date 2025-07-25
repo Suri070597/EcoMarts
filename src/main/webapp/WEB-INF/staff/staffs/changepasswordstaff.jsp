@@ -120,7 +120,7 @@
 
                 <div class="btn-group">
                     <button type="submit">Xác nhận</button>
-                    <a href="home" class="back-btn">Quay lại</a>
+                    <a href="staff" class="back-btn">Quay lại</a>
                 </div>
 
                 <c:if test="${not empty message}">

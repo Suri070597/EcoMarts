@@ -48,46 +48,29 @@ public class AccountDAO1 {
         return -1;
     }
 
-    public Account checkLogin(String email, String password) throws SQLException {
+    public Account checkLogin(String email, String hashedPassword) throws SQLException {
         String sql = "SELECT AccountID, Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status] FROM Account WHERE Email = ? AND [Status] = 'Active'";
         try (Connection conn = dbContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, email.trim());
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    Account account = new Account();
-                    account.setAccountID(rs.getInt("AccountID"));
-                    account.setUsername(rs.getString("Username"));
-                    account.setPassword(rs.getString("Password"));
-                    account.setEmail(rs.getString("Email"));
-                    account.setFullName(rs.getString("FullName"));
-                    account.setPhone(rs.getString("Phone"));
-                    account.setAddress(rs.getString("Address"));
-                    account.setGender(rs.getString("Gender"));
-                    account.setRole(rs.getInt("Role"));
-                    account.setStatus(rs.getString("Status"));
-
-                    System.out.println("Found account: email=" + email + ", role=" + account.getRole() + ", dbPassword=" + account.getPassword());
-
-                    // Kiểm tra mật khẩu theo Role
-                    if (account.getRole() == 1 || account.getRole() == 2) {
-                        // Admin hoặc Staff: So sánh plain text
-                        if (password.trim().equals(account.getPassword().trim())) {
-                            System.out.println((account.getRole() == 1 ? "Admin" : "Staff") + " login successful: email=" + email);
-                            return account;
-                        } else {
-                            System.out.println((account.getRole() == 1 ? "Admin" : "Staff") + " password mismatch: input=" + password + ", db=" + account.getPassword());
-                        }
-                    } else if (account.getRole() == 0) {
-                        // Khách hàng: So sánh MD5
-                        String hashedPassword = MD5Util.hash(password);
-                        if (hashedPassword.equals(account.getPassword())) {
-                            System.out.println("Customer login successful: email=" + email);
-                            return account;
-                        } else {
-                            System.out.println("Customer password mismatch: inputHash=" + hashedPassword + ", db=" + account.getPassword());
-                        }
+                    String dbPassword = rs.getString("Password");
+                    if (hashedPassword.equals(dbPassword)) {
+                        Account account = new Account();
+                        account.setAccountID(rs.getInt("AccountID"));
+                        account.setUsername(rs.getString("Username"));
+                        account.setPassword(dbPassword);
+                        account.setEmail(rs.getString("Email"));
+                        account.setFullName(rs.getString("FullName"));
+                        account.setPhone(rs.getString("Phone"));
+                        account.setAddress(rs.getString("Address"));
+                        account.setGender(rs.getString("Gender"));
+                        account.setRole(rs.getInt("Role"));
+                        account.setStatus(rs.getString("Status"));
+                        return account;
+                    } else {
+                        System.out.println("Password mismatch: inputHash=" + hashedPassword + ", db=" + dbPassword);
                     }
-                    System.out.println("Invalid password for email=" + email + ", role=" + account.getRole());
                 } else {
                     System.out.println("No active account found for email=" + email);
                 }

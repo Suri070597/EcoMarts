@@ -52,19 +52,6 @@ CREATE TABLE Token_Table (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE
 );
 
---INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
---VALUES
--- Admin
---(N'admin123', N'admin123@', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'235 Nguyễn Văn Cừ, Q.5, TP.HCM', N'Nữ', 1, N'Active'),
-
--- Staff
---(N'Thacnha', N'Thacnha02@', N'thacnha2@ecomart.vn', N'Trương Thác Nhã', '0909123456', N'12 Lý Thường Kiệt, Q.10, TP.HCM', N'Nữ', 2, N'Active'),
---(N'Mantue', N'Mantue03@', N'mantue@ecomart.vn', N'Trần Mẫn Tuệ', '0912345678', N'45 Phan Đình Phùng, Q.Phú Nhuận, TP.HCM', N'Nữ', 2, N'Active'),
---(N'Truongsinh', N'Truongsinh04@', N'truongsinh@ecomart.vn', N'Lê Trường Sinh', '0923456789', N'87 Nguyễn Trãi, Q.5, TP.HCM', N'Nam', 2, N'Active'),
---(N'Tuenhi', N'Tuenhi05@', N'tuenhi@ecomart.vn', N'Nguyễn Tuệ Nhi', '0977527752', 'Bạc Liêu', N'Nữ', 2, N'Active');
-
-
-
 CREATE TABLE Supplier (
     SupplierID INT PRIMARY KEY IDENTITY(1,1),
     BrandName NVARCHAR(100) NOT NULL,
@@ -345,7 +332,14 @@ CREATE TABLE AccountVoucher (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID),
     FOREIGN KEY (VoucherID) REFERENCES Voucher(VoucherID)
 );
--- Chạy hết cái trên ròi, mới chạy trigger này xong ròi mới insert dữ liệu vô  bảng account sao nha !!!!!!!!!
+
+
+
+
+
+
+-- Chạy hết cái trên ròi, mới chạy trigger này xong ròi mới insert dữ liệu admin vô  bảng account 
+--ròi muốn chạy staff thì vô staff tạo tài khoản cho staff ròi lấy đó đăng nhập qua cho satff nha !!!!!!!!!
 
 CREATE TRIGGER trg_AfterInsert_Account_ToStaff
 ON Account
@@ -360,3 +354,9 @@ BEGIN
     WHERE 
         i.[Role] = 2;
 END
+
+
+INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
+VALUES
+-- Admin = admin123@
+(N'admin123', N'ecd00aa1acd325ba7575cb0f638b04a5', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'Nguyễn Văn Cừ, TP.Cần Thơ', N'Nữ', 1, N'Active')
