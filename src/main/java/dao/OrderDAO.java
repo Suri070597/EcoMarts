@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import db.DBContext;
+import java.util.LinkedHashMap;
 import model.CartItem;
 import model.Order;
 import model.OrderDetail;
@@ -648,12 +649,55 @@ public class OrderDAO extends DBContext {
     }
 
     public void cancelOrder(int orderId) {
-        String sql = "UPDATE [Order] SET OrderStatus = N'Đã hủy' WHERE OrderID = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
-            ps.executeUpdate();
+        String cancelOrderSQL = "UPDATE [Order] SET OrderStatus = N'Đã hủy' WHERE OrderID = ?";
+        String getOrderDetailsSQL = "SELECT ProductID, Quantity FROM OrderDetail WHERE OrderID = ?";
+        String updateStockSQL = "UPDATE Product SET StockQuantity = StockQuantity + ? WHERE ProductID = ?";
+
+        try {
+            conn.setAutoCommit(false); // Bắt đầu transaction
+
+            // 1. Hủy đơn hàng
+            try (PreparedStatement cancelStmt = conn.prepareStatement(cancelOrderSQL)) {
+                cancelStmt.setInt(1, orderId);
+                cancelStmt.executeUpdate();
+            }
+
+            // 2. Lấy chi tiết đơn hàng
+            List<OrderDetail> orderDetails = new ArrayList<>();
+            try (PreparedStatement detailStmt = conn.prepareStatement(getOrderDetailsSQL)) {
+                detailStmt.setInt(1, orderId);
+                ResultSet rs = detailStmt.executeQuery();
+                while (rs.next()) {
+                    int productId = rs.getInt("ProductID");
+                    int quantity = rs.getInt("Quantity");
+                    orderDetails.add(new OrderDetail(productId, quantity)); // ✅ sửa chỗ này
+                }
+            }
+
+            // 3. Cập nhật tồn kho
+            try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSQL)) {
+                for (OrderDetail od : orderDetails) {
+                    stockStmt.setInt(1, od.getQuantity());
+                    stockStmt.setInt(2, od.getProductID());
+                    stockStmt.addBatch();
+                }
+                stockStmt.executeBatch();
+            }
+
+            conn.commit(); // Ghi nhận thay đổi
         } catch (SQLException e) {
+            try {
+                conn.rollback(); // Nếu lỗi, rollback toàn bộ
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(true); // Trả lại trạng thái ban đầu
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -678,4 +722,71 @@ public class OrderDAO extends DBContext {
 
         return items;
     }
+
+public List<RevenueStats> getMonthlyRevenueInYear(int year) {
+    List<RevenueStats> list = new ArrayList<>();
+
+    // Khởi tạo map mặc định 12 tháng doanh thu = 0
+    Map<Integer, Double> revenueMap = new HashMap<>();
+    for (int i = 1; i <= 12; i++) {
+        revenueMap.put(i, 0.0);
+    }
+
+    String sql = "SELECT MONTH(OrderDate) AS Month, SUM(TotalAmount) AS Revenue "
+               + "FROM [Order] WHERE YEAR(OrderDate) = ? AND OrderStatus = N'Đã giao' "
+               + "GROUP BY MONTH(OrderDate)";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, year);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            int month = rs.getInt("Month");
+            double revenue = rs.getDouble("Revenue");
+            revenueMap.put(month, revenue); // Ghi đè doanh thu thực tế
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    // Chuyển map thành danh sách RevenueStats
+    for (int i = 1; i <= 12; i++) {
+        RevenueStats stat = new RevenueStats();
+        stat.setMonth(i);
+        stat.setTotalRevenue(revenueMap.get(i));
+        list.add(stat);
+    }
+
+    return list;
+}
+public Map<Integer, Double> getLast5YearsRevenue() {
+    Map<Integer, Double> revenueMap = new LinkedHashMap<>();
+    String sql = "SELECT YEAR(OrderDate) AS Year, SUM(TotalAmount) AS Revenue " +
+                 "FROM [Order] " +
+                 "WHERE OrderStatus = N'Đã giao' AND YEAR(OrderDate) BETWEEN ? AND ? " +
+                 "GROUP BY YEAR(OrderDate) ORDER BY YEAR(OrderDate)";
+
+    int currentYear = java.time.Year.now().getValue();
+    int startYear = currentYear - 4;
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, startYear);
+        ps.setInt(2, currentYear);
+        ResultSet rs = ps.executeQuery();
+
+        for (int year = startYear; year <= currentYear; year++) {
+            revenueMap.put(year, 0.0); // mặc định = 0
+        }
+
+        while (rs.next()) {
+            int year = rs.getInt("Year");
+            double revenue = rs.getDouble("Revenue");
+            revenueMap.put(year, revenue);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return revenueMap;
+}
+
+
 }

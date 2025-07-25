@@ -97,6 +97,10 @@ public class OrderDetail {
     public String getOrderStatus() {
         return orderStatus;
     }
+public OrderDetail(int productID, int quantity) {
+    this.productID = productID;
+    this.quantity = quantity;
+}
 
     @Override
     public String toString() {

@@ -95,14 +95,11 @@
                     <td>
                         <%
                             dao.OrderDetailDAO detailDAO = new dao.OrderDetailDAO();
-                            int quantity = 0;
-                            for (model.OrderDetail od : detailDAO.getOrderDetailsByOrderId(((model.Order) pageContext.getAttribute("order")).getOrderID())) {
-                                quantity += od.getQuantity();
-                            }
+                            int count = detailDAO.countDistinctProductsInOrder(((model.Order) pageContext.getAttribute("order")).getOrderID());
                         %>
-
-                        <%= quantity%> sản phẩm
+                        <%= count%> sản phẩm
                     </td>
+
                     <td>
                         <form action="${pageContext.request.contextPath}/customer/orderDetail" method="get">
                             <input type="hidden" name="orderID" value="${order.orderID}" />
@@ -110,9 +107,10 @@
                         </form>
 
 
-                        <form action="${pageContext.request.contextPath}/reorder" method="post" style="display:inline;">
+
+                        <form method="post" action="${pageContext.request.contextPath}/customer/orderDetail">
                             <input type="hidden" name="orderId" value="${order.orderID}">
-                            <button class="reorder-btn" type="submit">Mua lại</button>
+                            <button type="submit" name="action" value="reorder">Mua lại</button>
                         </form>
                     </td>
 

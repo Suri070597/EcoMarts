@@ -98,6 +98,7 @@ return;
                     <div class="col-md-6">
                         <h2 class="product-name"><%= mo.getProductName()%></h2>
                         <div class="promotion-section">
+
                             <c:choose>
                                 <c:when test="${not empty appliedPromotion}">
                                     <div class="flash-sale-banner mt-3">
@@ -174,7 +175,7 @@ return;
                                     }
                                 %>
                             </p>
-                            <p><strong>Số Lượng Tồn Kho:</strong> <%=mo.getInventory().getQuantity()%></p>
+                            <p><strong>Số Lượng Tồn Kho:</strong> <%=mo.getStockQuantity()%></p>
                             <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p>
                             <p><strong>Nhà Cung Cấp:</strong> <%=mo.getSupplier().getCompanyName()%></p>
 

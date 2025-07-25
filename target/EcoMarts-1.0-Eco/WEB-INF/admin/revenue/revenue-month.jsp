@@ -1,3 +1,4 @@
+<%@page import="java.util.List"%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -12,6 +13,7 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
             body {
                 background-color: #f8f9fa;
@@ -48,78 +50,156 @@
             .btn-primary, .btn-success {
                 border-radius: 10px;
             }
+            .chart-container {
+                margin-top: 40px;
+            }
         </style>
     </head>
     <body>
 
         <jsp:include page="../components/sidebar.jsp" />
+        <div class="row">
+            <div class="col-md-2">
+            </div>
+            <div class="container-fuild col-md-10">
 
-        <div class="container">
-            <div class="dashboard-card">
-                <div class="dashboard-header">
-                    <h2><i class="fas fa-chart-line"></i> Revenue Summary - <c:out value="${month}"/> / <c:out value="${year}"/></h2>
-                    <form class="d-flex" method="get" action="${pageContext.request.contextPath}/admin/statistic/monthly">
-                        <select class="form-select" name="month" id="month">
-                            <c:forEach var="i" begin="1" end="12">
-                                <option value="${i}" ${i == month ? 'selected' : ''}>Tháng ${i}</option>
-                            </c:forEach>
-                        </select>
+                <div class="dashboard-card">
+                    <div class="dashboard-header">
+                        <h2><i class="fas fa-chart-line"></i> Revenue Summary - <c:out value="${month}"/> / <c:out value="${year}"/></h2>
 
-                        <input type="number" class="form-control" name="year" id="year" value="${year}" min="2000" max="2100"/>
+                        <form class="d-flex" method="get" action="${pageContext.request.contextPath}/admin/statistic/monthly">
+                            <select class="form-select" name="month" id="month">
+                                <c:forEach var="i" begin="1" end="12">
+                                    <option value="${i}" ${i == month ? 'selected' : ''}>Tháng ${i}</option>
+                                </c:forEach>
+                            </select>
 
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> View</button>
-                    </form>
-                </div>
+                            <input type="number" class="form-control" name="year" id="year" value="${year}" min="2000" max="2100"/>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> View</button>
 
-                <div class="row text-center mb-4">
-                    <div class="col-md-4">
-                        <div class="p-3 bg-light border rounded shadow-sm">
-                            <h5><i class="fas fa-dollar-sign text-success"></i> Total Revenue</h5>
-                            <p class="fw-bold text-success fs-5"><fmt:formatNumber value="${revenue}" type="currency"/></p>
+                        </form>
+                        <div class="mb-4">
+                            <form action="${pageContext.request.contextPath}/admin/export-monthly-revenue" method="post" class="text-end mt-3">
+                                <input type="hidden" name="month" value="${month}"/>
+                                <input type="hidden" name="year" value="${year}"/>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-file-excel"></i> Export to Excel
+                                </button>
+                            </form>
+                        </div>                  
+                    </div>
+
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light border rounded shadow-sm">
+                                <h5><i class="fas fa-dollar-sign text-success"></i> Total Revenue</h5>
+                                <p class="fw-bold text-success fs-5"><fmt:formatNumber value="${revenue}" type="currency"/></p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light border rounded shadow-sm">
+                                <h5><i class="fas fa-receipt text-primary"></i> Total Orders</h5>
+                                <p class="fw-bold fs-5">${totalOrders}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light border rounded shadow-sm">
+                                <h5><i class="fas fa-boxes text-warning"></i> Total Products Sold</h5>
+                                <p class="fw-bold fs-5">${totalProducts}</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="p-3 bg-light border rounded shadow-sm">
-                            <h5><i class="fas fa-receipt text-primary"></i> Total Orders</h5>
-                            <p class="fw-bold fs-5">${totalOrders}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3 bg-light border rounded shadow-sm">
-                            <h5><i class="fas fa-boxes text-warning"></i> Total Products Sold</h5>
-                            <p class="fw-bold fs-5">${totalProducts}</p>
-                        </div>
-                    </div>
-                </div>
 
-                <table class="table table-bordered text-center">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-box"></i> Product</th>
-                            <th><i class="fas fa-sort-amount-up-alt"></i> Quantity Sold</th>
-                            <th><i class="fas fa-sack-dollar"></i> Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${productList}" var="item">
+                    <!-- Biểu đồ doanh thu 12 tháng -->
+                    <div class="chart-container mt-5">
+                        <h4 class="text-center mb-4">Revenue of 12 Months in <c:out value="${year}"/></h4>
+
+                        <canvas id="monthlyRevenueChart" height="100"></canvas>
+                    </div>
+
+                    <table class="table table-bordered text-center">
+                        <thead>
                             <tr>
-                                <td>${item.productName}</td>
-                                <td>${item.totalQuantity}</td>
-                                <td><fmt:formatNumber value="${item.totalRevenue}" type="currency"/></td>
+                                <th><i class="fas fa-box"></i> Product</th>
+                                <th><i class="fas fa-sort-amount-up-alt"></i> Quantity Sold</th>
+                                <th><i class="fas fa-sack-dollar"></i> Revenue</th>
                             </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${productList}" var="item">
+                                <tr>
+                                    <td>${item.productName}</td>
+                                    <td>${item.totalQuantity}</td>
+                                    <td><fmt:formatNumber value="${item.totalRevenue}" type="currency"/></td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
 
-                <form action="${pageContext.request.contextPath}/admin/export-monthly-revenue" method="post" class="text-end mt-3">
-                    <input type="hidden" name="month" value="${month}"/>
-                    <input type="hidden" name="year" value="${year}"/>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-file-excel"></i> Export to Excel
-                    </button>
-                </form>
+
+                </div>
+
+
             </div>
         </div>
+        <%
+            // Tạo mảng 12 tháng mặc định bằng 0
+            double[] revenueByMonth = new double[12];
+            for (int i = 0; i < revenueByMonth.length; i++) {
+                revenueByMonth[i] = 0.0;
+            }
+
+            // Gán doanh thu cho từng tháng nếu có
+            List<model.RevenueStats> stats = (List<model.RevenueStats>) request.getAttribute("revenuePerMonth");
+            if (stats != null) {
+                for (model.RevenueStats stat : stats) {
+                    int month = stat.getMonth(); // từ 1–12
+                    double revenue = stat.getTotalRevenue();
+                    revenueByMonth[month - 1] = revenue; // tháng 1 sẽ nằm ở index 0
+                }
+            }
+        %>
+
+        <script>
+            const ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
+            const revenueData = [
+            <%= revenueByMonth[0]%>, <%= revenueByMonth[1]%>, <%= revenueByMonth[2]%>, <%= revenueByMonth[3]%>,
+            <%= revenueByMonth[4]%>, <%= revenueByMonth[5]%>, <%= revenueByMonth[6]%>, <%= revenueByMonth[7]%>,
+            <%= revenueByMonth[8]%>, <%= revenueByMonth[9]%>, <%= revenueByMonth[10]%>, <%= revenueByMonth[11]%>
+            ];
+
+            const monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                    datasets: [{
+                            label: 'Revenue (VND)',
+                            data: revenueData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND'
+                                    }).format(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+
 
     </body>
 </html>

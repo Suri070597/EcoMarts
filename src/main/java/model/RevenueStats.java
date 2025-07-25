@@ -1,11 +1,14 @@
 package model;
 
 public class RevenueStats {
+
     private String productName;
     private int totalQuantity;
     private double totalRevenue;
+    private int month;
 
-    public RevenueStats() {}
+    public RevenueStats() {
+    }
 
     public RevenueStats(String productName, int totalQuantity, double totalRevenue) {
         this.productName = productName;
@@ -14,7 +17,6 @@ public class RevenueStats {
     }
 
     // Getters & Setters
-
     public void setProductName(String productName) {
         this.productName = productName;
     }
@@ -38,5 +40,12 @@ public class RevenueStats {
     public double getTotalRevenue() {
         return totalRevenue;
     }
-    
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
 }

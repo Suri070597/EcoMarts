@@ -187,5 +187,18 @@ public class OrderDetailDAO extends DBContext {
 
         return items;
     }
+public int countDistinctProductsInOrder(int orderId) {
+    String sql = "SELECT COUNT(DISTINCT ProductID) FROM OrderDetail WHERE OrderID = ?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, orderId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 
 }
