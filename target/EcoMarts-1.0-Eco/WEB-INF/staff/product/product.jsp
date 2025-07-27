@@ -29,13 +29,13 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions d-flex justify-content-between align-items-center">
-                            <h1 class="card-title">Product List</h1>
+                            <h1 class="card-title">Danh sách sản phẩm</h1>
                             <div class="d-flex gap-2">
                                 <form action="${pageContext.request.contextPath}/staff/product" method="get" class="search-box">
                                     <input type="hidden" name="action" value="search" />
                                     <i class="fas fa-search"></i>
-                                    <input type="text" name="keyword" placeholder="Search products..." value="${keyword != null ? keyword : ''}">
-                                    <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                                    <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." value="${keyword != null ? keyword : ''}">
+                                    <button type="submit" class="btn btn-sm btn-primary">Tìm kiếm</button>
                                 </form>
                             </div>
                         </div>
@@ -52,15 +52,15 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Category</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Unit</th>
-                                    <th>Description</th>
-                                    <th>Image</th>
-                                    <th>Create Date</th>
-                                    <th>Action</th>
+                                    <th>Danh mục</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn vị</th>
+                                    <th>Mô tả</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -111,7 +111,7 @@
                         </table>
                         <% } else { %>
                         <div class="text-center">
-                            <h1 class="text-danger my-4">There is no data!</h1>
+                            <h1 class="text-danger my-4">Không có dữ liệu!</h1>
                         </div>
                         <% }%>
                     </div>

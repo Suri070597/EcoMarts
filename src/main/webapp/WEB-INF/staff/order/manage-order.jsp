@@ -5,7 +5,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Manage Orders</title>
+        <title>Quản lý đơn hàng</title>
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -23,10 +23,10 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions d-flex justify-content-between align-items-center">
-                            <h1 class="card-title mb-0">Order Management</h1>
+                            <h1 class="card-title mb-0">Quản lý đơn hàng</h1>
                             <form action="${pageContext.request.contextPath}/staff/order" method="get" class="d-flex gap-2">
                                 <input type="text" name="search" class="form-control form-control-sm"
-                                       placeholder="Search Orders..." value="${param.search}">
+                                       placeholder="Tìm kiếm đơn hàng..." value="${param.search}">
                                 <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="fas fa-search"></i>
                                 </button>
@@ -42,7 +42,7 @@
                                 </div>
                                 <div>
                                     <h5>${total}</h5>
-                                    <p class="mb-0">Total Orders</p>
+                                    <p class="mb-0">Tổng đơn hàng</p>
                                 </div>
                             </div>
                         </div>
@@ -53,7 +53,7 @@
                                 </div>
                                 <div>
                                     <h5>${delivered}</h5>
-                                    <p class="mb-0">Delivered Orders</p>
+                                    <p class="mb-0">Đơn hàng đã giao</p>
                                 </div>
                             </div>
                         </div>
@@ -64,7 +64,7 @@
                                 </div>
                                 <div>
                                     <h5>${cancelled}</h5>
-                                    <p class="mb-0">Cancelled Orders</p>
+                                    <p class="mb-0">Đơn hàng đã hủy</p>
                                 </div>
                             </div>
                         </div>
@@ -75,12 +75,12 @@
                         <table class="table table-striped table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Order Date</th>
-                                    <th>Status</th>
-                                    <th>Total</th>
-                                    <th>Action</th>
+                                    <th>Mã đơn hàng</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày đặt hàng</th>
+                                    <th>Trạng thái</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>

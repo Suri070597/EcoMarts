@@ -8,7 +8,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Account Manager</title>
+        <title>Thêm Tài Khoản</title>
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
               type="image/x-icon">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,12 +21,12 @@
 
     <body>
         <div class="container-fluid">
-            <%-- Include admin sidebar --%>
+            <%-- Bao gồm sidebar của quản trị viên --%>
             <jsp:include page="../components/sidebar.jsp" />
 
             <div class="main-content">
                 <div class="container">
-                    <h1>Create New Account</h1>
+                    <h1>Tạo Tài Khoản Mới</h1>
                     <c:if test="${not empty errorMessage}">
                         <div class="alert alert-danger" role="alert">
                             ${errorMessage}
@@ -36,72 +36,69 @@
                           class="needs-validation" novalidate id="accountForm">
                         <input type="hidden" name="action" value="create">
                         <div class="mb-3">
-                            <label class="form-label" for="username">Username</label>
+                            <label class="form-label" for="username">Tên đăng nhập</label>
                             <input type="text" class="form-control" id="username" name="username"
                                    value="${param.username}" required>
-                            <div class="invalid-feedback">Please enter a username</div>
+                            <div class="invalid-feedback">Vui lòng nhập tên đăng nhập</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="password">Password</label>
+                            <label class="form-label" for="password">Mật khẩu</label>
                             <input type="password" class="form-control" id="password" name="password"
                                    required>
-                            <div class="invalid-feedback" id="passwordFeedback">Password must be at least 6 characters and include letters, numbers, and special characters</div>
+                            <div class="invalid-feedback" id="passwordFeedback">Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email"
                                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                                    value="${param.email}" required>
-                            <div class="invalid-feedback">Please enter a valid email address (e.g.,
-                                abc12@gmail.com)</div>
+                            <div class="invalid-feedback">Vui lòng nhập địa chỉ email hợp lệ (vd: abc12@gmail.com)</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="fullName">Full Name</label>
+                            <label class="form-label" for="fullName">Họ và tên</label>
                             <input type="text" class="form-control" id="fullName" name="fullName"
                                    value="${param.fullName}" required>
-                            <div class="invalid-feedback">Please enter a full name</div>
+                            <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="phone">Phone</label>
+                            <label class="form-label" for="phone">Số điện thoại</label>
                             <input type="tel" class="form-control" id="phone" name="phone"
                                    pattern="[0-9]{10}" maxlength="10" value="${param.phone}" required>
-                            <div class="invalid-feedback">Please enter a valid 10-digit phone number</div>
+                            <div class="invalid-feedback">Vui lòng nhập số điện thoại gồm 10 chữ số</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="address">Address</label>
+                            <label class="form-label" for="address">Địa chỉ</label>
                             <input type="text" class="form-control" id="address" name="address"
                                    value="${param.address}">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="gender">Gender</label>
+                            <label class="form-label" for="gender">Giới tính</label>
                             <select class="form-control" name="gender" id="gender">
+                                <option value="">-- Chọn giới tính --</option>
                                 <option value="Nam" ${param.gender eq 'Nam' ? 'selected' : '' }>Nam</option>
                                 <option value="Nữ" ${param.gender eq 'Nữ' ? 'selected' : '' }>Nữ</option>
-                                </option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="role">Role</label>
+                            <label class="form-label" for="role">Vai trò</label>
                             <select class="form-control" name="role" id="role" required>
-                                <option value="0" ${param.role eq '0' ? 'selected' : '' }>Customer</option>
-                                <option value="1" ${param.role eq '1' ? 'selected' : '' }>Admin</option>
+                                <option value="0" ${param.role eq '0' ? 'selected' : '' }>Khách hàng</option>
+                                <option value="1" ${param.role eq '1' ? 'selected' : '' }>Quản trị viên</option>
                             </select>
-                            <div class="invalid-feedback">Please select a role</div>
+                            <div class="invalid-feedback">Vui lòng chọn vai trò</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="status">Status</label>
+                            <label class="form-label" for="status">Trạng thái</label>
                             <select class="form-control" name="status" id="status" required>
-                                <option value="Active" ${param.status eq 'Active' ? 'selected' : '' }>Active
-                                </option>
-                                <option value="Inactive" ${param.status eq 'Inactive' ? 'selected' : '' }>
-                                    Inactive</option>
+                                <option value="Active" ${param.status eq 'Active' ? 'selected' : '' }>Hoạt động</option>
+                                <option value="Inactive" ${param.status eq 'Inactive' ? 'selected' : '' }>Ngừng hoạt động</option>
                             </select>
-                            <div class="invalid-feedback">Please select a status</div>
+                            <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
                         </div>
                         <div class="btn-group">
                             <a href="${pageContext.request.contextPath}/admin/account"
-                               class="btn btn-secondary">Back</a>
-                            <button type="submit" class="btn btn-primary">Create Account</button>
+                               class="btn btn-secondary">Quay lại</a>
+                            <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
                         </div>
                     </form>
                 </div>
@@ -110,7 +107,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // Form validation
+            // Xác thực biểu mẫu
             (function () {
                 'use strict'
                 var forms = document.querySelectorAll('.needs-validation')
@@ -125,62 +122,62 @@
                 })
             })()
 
-            // Password validation
-            document.getElementById('password').addEventListener('input', function() {
+            // Kiểm tra hợp lệ của mật khẩu
+            document.getElementById('password').addEventListener('input', function () {
                 const password = this.value;
                 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
-                
+
                 if (!passwordRegex.test(password)) {
-                    this.setCustomValidity('Password must contain at least 6 characters, including letters, numbers, and special characters');
-                    document.getElementById('passwordFeedback').textContent = 
-                        'Password must contain at least 6 characters, including letters, numbers, and special characters';
+                    this.setCustomValidity('Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt');
+                    document.getElementById('passwordFeedback').textContent =
+                            'Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt';
                 } else {
                     this.setCustomValidity('');
                 }
             });
 
-            // Custom form validation
-            document.getElementById('accountForm').addEventListener('submit', function(event) {
+            // Kiểm tra mật khẩu khi gửi biểu mẫu
+            document.getElementById('accountForm').addEventListener('submit', function (event) {
                 const passwordInput = document.getElementById('password');
                 const password = passwordInput.value;
                 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
-                
+
                 if (!passwordRegex.test(password)) {
                     event.preventDefault();
-                    passwordInput.setCustomValidity('Password must contain at least 6 characters, including letters, numbers, and special characters');
-                    document.getElementById('passwordFeedback').textContent = 
-                        'Password must contain at least 6 characters, including letters, numbers, and special characters';
+                    passwordInput.setCustomValidity('Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt');
+                    document.getElementById('passwordFeedback').textContent =
+                            'Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt';
                     passwordInput.classList.add('is-invalid');
                 }
             });
 
-            // Phone number validation
+            // Kiểm tra hợp lệ số điện thoại
             document.getElementById('phone').addEventListener('input', function (e) {
-                // Remove any non-digit characters
+                // Xóa ký tự không phải số
                 this.value = this.value.replace(/[^0-9]/g, '');
 
-                // Limit to 10 digits
+                // Giới hạn 10 số
                 if (this.value.length > 10) {
                     this.value = this.value.slice(0, 10);
                 }
             });
 
-            // Email validation
+            // Kiểm tra hợp lệ email
             document.getElementById('email').addEventListener('input', function (e) {
                 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                 if (!emailPattern.test(this.value)) {
-                    this.setCustomValidity('Please enter a valid email address (e.g., abc12@gmail.com)');
+                    this.setCustomValidity('Vui lòng nhập địa chỉ email hợp lệ (vd: abc12@gmail.com)');
                 } else {
                     this.setCustomValidity('');
                 }
             });
 
-            // Show/hide position field based on role
+            // Hiển thị/ẩn trường vị trí nếu chọn vai trò là nhân viên
             document.getElementById('role').addEventListener('change', function () {
                 const positionField = document.getElementById('position');
                 const positionContainer = positionField?.closest('.mb-3');
 
-                if (this.value === '2' && positionContainer) { // Staff
+                if (this.value === '2' && positionContainer) {
                     positionContainer.style.display = 'block';
                     positionField.setAttribute('required', 'required');
                 } else if (positionContainer) {
@@ -189,7 +186,7 @@
                 }
             });
 
-            // Trigger role change event on page load
+            // Kích hoạt sự kiện change khi tải trang
             document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('role').dispatchEvent(new Event('change'));
             });

@@ -7,7 +7,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Revenue Dashboard</title>
+        <title>Doanh thu theo tháng</title>
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -65,7 +65,7 @@
 
                 <div class="dashboard-card">
                     <div class="dashboard-header">
-                        <h2><i class="fas fa-chart-line"></i> Revenue Summary - <c:out value="${month}"/> / <c:out value="${year}"/></h2>
+                        <h2><i class="fas fa-chart-line"></i> Tổng quan doanh thu - <c:out value="${month}"/> / <c:out value="${year}"/></h2>
 
                         <form class="d-flex" method="get" action="${pageContext.request.contextPath}/admin/statistic/monthly">
                             <select class="form-select" name="month" id="month">
@@ -75,7 +75,7 @@
                             </select>
 
                             <input type="number" class="form-control" name="year" id="year" value="${year}" min="2000" max="2100"/>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> View</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Xem</button>
 
                         </form>
                         <div class="mb-4">
@@ -83,7 +83,7 @@
                                 <input type="hidden" name="month" value="${month}"/>
                                 <input type="hidden" name="year" value="${year}"/>
                                 <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-file-excel"></i> Export to Excel
+                                    <i class="fas fa-file-excel"></i> Xuất ra Excel
                                 </button>
                             </form>
                         </div>                  
@@ -92,19 +92,19 @@
                     <div class="row text-center mb-4">
                         <div class="col-md-4">
                             <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5><i class="fas fa-dollar-sign text-success"></i> Total Revenue</h5>
+                                <h5><i class="fas fa-dollar-sign text-success"></i> Tổng doanh thu</h5>
                                 <p class="fw-bold text-success fs-5"><fmt:formatNumber value="${revenue}" type="currency"/></p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5><i class="fas fa-receipt text-primary"></i> Total Orders</h5>
+                                <h5><i class="fas fa-receipt text-primary"></i> Tổng số đơn hàng</h5>
                                 <p class="fw-bold fs-5">${totalOrders}</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5><i class="fas fa-boxes text-warning"></i> Total Products Sold</h5>
+                                <h5><i class="fas fa-boxes text-warning"></i> Tổng số sản phẩm đã bán</h5>
                                 <p class="fw-bold fs-5">${totalProducts}</p>
                             </div>
                         </div>
@@ -112,7 +112,7 @@
 
                     <!-- Biểu đồ doanh thu 12 tháng -->
                     <div class="chart-container mt-5">
-                        <h4 class="text-center mb-4">Revenue of 12 Months in <c:out value="${year}"/></h4>
+                        <h4 class="text-center mb-4">Doanh thu 12 tháng năm <c:out value="${year}"/></h4>
 
                         <canvas id="monthlyRevenueChart" height="100"></canvas>
                     </div>
@@ -120,10 +120,11 @@
                     <table class="table table-bordered text-center">
                         <thead>
                             <tr>
-                                <th><i class="fas fa-box"></i> Product</th>
-                                <th><i class="fas fa-sort-amount-up-alt"></i> Quantity Sold</th>
-                                <th><i class="fas fa-sack-dollar"></i> Revenue</th>
+                                <th><i class="fas fa-box"></i> Sản phẩm</th>
+                                <th><i class="fas fa-sort-amount-up-alt"></i> Số lượng đã bán</th>
+                                <th><i class="fas fa-sack-dollar"></i> Doanh thu</th>
                             </tr>
+
                         </thead>
                         <tbody>
                             <c:forEach items="${productList}" var="item">

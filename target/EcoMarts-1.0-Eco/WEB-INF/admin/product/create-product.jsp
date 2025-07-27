@@ -11,7 +11,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Create Product</title>
+        <title>Tạo sản phẩm mới</title>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -28,7 +28,7 @@
 
             <div class="main-content">
                 <div class="container">
-                    <h1 style="margin-top: 45px;">Create product</h1>
+                    <h1 style="margin-top: 45px;">Tạo sản phẩm mới</h1>
                     <div id="imageError" class="alert alert-danger d-none" role="alert"></div>
 
                     <% String error = (String) request.getAttribute("error"); %>
@@ -37,33 +37,33 @@
                     <% } %>
                     <form id="createForm" method="post" action="${pageContext.request.contextPath}/admin/product?action=create" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label class="form-label">Product Name</label>
+                            <label class="form-label">Tên sản phẩm</label>
                             <input type="text" class="form-control" name="pName" required />
                         </div>
 
                         <div class="mb-3" id="fruit-price-group" style="display:none">
-                            <label class="form-label">Price (VND/kg)</label>
-                            <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" id="fruitPrice" placeholder="Enter price per kg" />
+                            <label class="form-label">Giá (VNĐ/kg)</label>
+                            <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" id="fruitPrice" placeholder="Nhập giá theo kg" />
                         </div>
                         <div class="mb-3" id="fruit-qty-group" style="display:none">
-                            <label class="form-label">Stock Quantity (kg)</label>
-                            <input type="number" min="1" step="1" class="form-control" name="fruitQuantity" id="fruitQuantity" placeholder="Enter quantity in kg (integer only, e.g., 10, 20, 50...)" />
+                            <label class="form-label">Số lượng tồn kho (kg)</label>
+                            <input type="number" min="1" step="1" class="form-control" name="fruitQuantity" id="fruitQuantity" placeholder="Nhập số lượng theo kg (chỉ số nguyên, ví dụ: 10, 20, 50...)" />
                         </div>
                         <div class="mb-3 box-related">
-                            <label class="form-label">Price 1 box/pack/case</label>
+                            <label class="form-label">Giá 1 thùng/hộp/kiện</label>
                             <input type="number" min="0" step="any" class="form-control" name="boxPrice" id="boxPrice" />
                         </div>
                         <div class="mb-3 box-related">
-                            <label class="form-label">Quantity 1 box/pack/case</label>
+                            <label class="form-label">Số lượng 1 thùng/hộp/kiện</label>
                             <input type="number" min="0" class="form-control" name="boxQuantity" id="boxQuantity" oninput="updateBoxPreview()" />
                             <div id="box-preview" class="form-text text-primary"></div>
                         </div>
                         <div class="mb-3 box-related">
-                            <label class="form-label">Quantity of products in 1 box/pack/case</label>
+                            <label class="form-label">Số lượng sản phẩm trong 1 thùng/hộp/kiện</label>
                             <input type="number" min="1" class="form-control" name="unitPerBox" id="unitPerBox" oninput="updateBoxPreview()" />
                         </div>
                         <div class="mb-3 box-related">
-                            <label class="form-label">Unit 1 box/pack/case</label>
+                            <label class="form-label">Đơn vị 1 thùng/hộp/kiện</label>
                             <select class="form-select" name="boxUnitName" id="boxUnitName">
                                 <option value="">-- Chọn đơn vị thùng/hộp/kiện --</option>
                                 <option value="thùng">thùng</option>
@@ -73,7 +73,7 @@
                             </select>
                         </div>
                         <div class="mb-3" id="item-unit-group">
-                            <label class="form-label">Smallest unit</label>
+                            <label class="form-label">Đơn vị nhỏ nhất</label>
                             <select class="form-select" name="itemUnitName" id="itemUnitName" required>
                                 <option value="">-- Chọn đơn vị nhỏ nhất --</option>
                                 <option value="chai">chai</option>
@@ -84,29 +84,29 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Product Description</label>
+                            <label class="form-label">Mô tả sản phẩm</label>
                             <textarea class="form-control" name="pDescription" rows="4" required></textarea>
                         </div>
 
 
                         <div class="mb-3">
-                            <label class="form-label">Product Image</label>
+                            <label class="form-label">Hình ảnh sản phẩm</label>
                             <input type="file" class="form-control" name="pImage" id="pImage" accept=".jpg,.jpeg,.png" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label" id="importOrManufactureLabel">Manufacture Date</label>
+                            <label class="form-label" id="importOrManufactureLabel">Ngày sản xuất</label>
                             <input type="date" class="form-control" name="manufactureDate" id="manufactureDate" required />
                         </div>
 
                         <div class="mb-3" id="fruit-expiry-group" style="display:none">
-                            <label class="form-label">Expiration (days)</label>
+                            <label class="form-label">Hạn sử dụng (ngày)</label>
                             <input type="number" min="1" step="1" class="form-control" name="fruitExpiryDays" id="fruitExpiryDays" placeholder="Enter shelf life in days (e.g., 3, 7, 14...)" />
                         </div>
                         <div class="mb-3" id="expiry-select-group">
-                            <label class="form-label">Expiration Period</label>
+                            <label class="form-label">Thời hạn sử dụng</label>
                             <select class="form-select" id="expirySelect" name="expirySelect" required>
-                                <option value="">-- Select Expiration Period --</option>
+                                <option value="">-- Chọn thời hạn sử dụng --</option>
                                 <option value="3">3 months</option>
                                 <option value="6">6 months</option>
                                 <option value="12">1 year</option>

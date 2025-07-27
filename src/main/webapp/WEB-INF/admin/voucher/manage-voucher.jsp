@@ -9,7 +9,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
-        <title>Manage Vouchers</title>
+        <title>Quản Lý Voucher</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet"
@@ -27,19 +27,18 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions">
-                            <h1 class="card-title">Voucher Management</h1>
+                            <h1 class="card-title">Quản Lý Voucher</h1>
                             <div class="d-flex gap-3">
                                 <form action="${pageContext.request.contextPath}/admin/voucher" method="get"
                                       class="search-box">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" name="search" placeholder="Search vouchers..."
+                                    <input type="text" name="search" placeholder="Tìm kiếm voucher..."
                                            value="${keyword != null ? keyword : ''}">
-                                    <button type="submit" class="btn btn-sm btn-primary">Search</button>
                                 </form>
                                 <a href="${pageContext.request.contextPath}/admin/voucher?view=create"
                                    class="btn btn-success">
                                     <i class="fas fa-plus"></i>
-                                    Create Voucher
+                                    Tạo voucher
                                 </a>
                             </div>
                         </div>
@@ -53,15 +52,15 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Code</th>
-                                    <th>Description</th>
-                                    <th>Discount</th>
-                                    <th>Min Order</th>
-                                    <th>Usage</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>Mã</th>
+                                    <th>Mô tả</th>
+                                    <th>Giảm giá</th>
+                                    <th>Đơn hàng tối thiểu</th>
+                                    <th>Sử dụng</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -128,14 +127,14 @@
                                                        function confirmDelete(event, voucherId) {
                                                            event.preventDefault();
                                                            Swal.fire({
-                                                               title: 'Confirm Delete Voucher',
-                                                               text: 'Are you sure you want to delete this voucher?',
+                                                               title: 'Xác nhận xóa voucher',
+                                                               text: 'Bạn có chắc chắn muốn xóa voucher này không?',
                                                                icon: 'warning',
                                                                showCancelButton: true,
                                                                confirmButtonColor: '#d33',
                                                                cancelButtonColor: '#3085d6',
-                                                               confirmButtonText: 'Yes',
-                                                               cancelButtonText: 'Cancel'
+                                                               confirmButtonText: 'Có',
+                                                               cancelButtonText: 'Hủy'
                                                            }).then((result) => {
                                                                if (result.isConfirmed) {
                                                                    window.location.href = '${pageContext.request.contextPath}/admin/voucher?action=delete&id=' + voucherId;
@@ -149,14 +148,14 @@
                 const isActive = String(active).trim().toLowerCase() === "true";
 
                 Swal.fire({
-                    title: 'Confirm Status Change',
-                    text: isActive ? 'Do you want to deactivate this voucher?' : 'Do you want to activate this voucher?',
+                    title: 'Xác nhận thay đổi trạng thái',
+                    text: isActive ? 'Bạn có muốn vô hiệu hóa voucher này không?' : 'Bạn có muốn kích hoạt voucher này không?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes',
-                    cancelButtonText: 'Cancel'
+                    confirmButtonText: 'Có',
+                    cancelButtonText: 'Hủy'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = url;

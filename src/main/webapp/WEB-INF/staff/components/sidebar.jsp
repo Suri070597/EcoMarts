@@ -7,20 +7,19 @@
     </div>
     <ul class="menu">
         <li><a href="${pageContext.request.contextPath}/staff/dashboard"><i class="fas fa-tachometer-alt"></i>
-                Main dashboard</a></li>
-        <li><a href="${pageContext.request.contextPath}/staff/order"><i class="fas fa-receipt"></i> Order Management</a>
+                Bảng điều khiển chính</a></li>
+        <li><a href="${pageContext.request.contextPath}/staff/order"><i class="fas fa-receipt"></i> Quản lý đơn hàng</a>
         </li>
-        <li><a href="${pageContext.request.contextPath}/staff/product"><i class="fas fa-box"></i> Product
-                Management</a></li>
-        <li><a href="${pageContext.request.contextPath}/staff/manage-review"><i class="fas fa-receipt"></i> Feedback Management</a>
+        <li><a href="${pageContext.request.contextPath}/staff/product"><i class="fas fa-box"></i> Quản lý sản phẩm</a></li>
+        <li><a href="${pageContext.request.contextPath}/staff/manage-review"><i class="fas fa-receipt"></i> Quản lý phản hồi</a>
         </li>
          </li>
-        <li><a href="${pageContext.request.contextPath}/ManageStaffServlet"><i class="fas fa-receipt"></i>View Staff profile</a>
+        <li><a href="${pageContext.request.contextPath}/ManageStaffServlet"><i class="fas fa-receipt"></i>Xem hồ sơ nhân viên</a>
         </li>
         </li>
-        <li><a href="${pageContext.request.contextPath}/verifypasswordServlet"><i class="fas fa-receipt"></i>Update Staff profile</a>
+        <li><a href="${pageContext.request.contextPath}/verifypasswordServlet"><i class="fas fa-receipt"></i>Cập nhật hồ sơ nhân viên</a>
         </li>
         <li><a href="${pageContext.request.contextPath}/logout"><i
-                    class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
     </ul>
 </aside>

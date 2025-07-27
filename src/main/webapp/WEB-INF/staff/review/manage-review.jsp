@@ -139,7 +139,7 @@
                         </table>
                         <% } else { %>
                         <div class="text-center">
-                            <h1 class="text-danger my-4">There is no review data!</h1>
+                            <h1 class="text-danger my-4">Không có dữ liệu đánh giá!</h1>
                         </div>
                         <% } %>
                     </div>
@@ -152,14 +152,14 @@
             function confirmDelete(event, reviewId) {
                 event.preventDefault();
                 Swal.fire({
-                    title: 'Confirm Delete Review',
-                    text: 'Are you sure you want to delete this review?',
+                    title: 'Xác nhận xóa đánh giá',
+                    text: 'Bạn có chắc chắn muốn xóa đánh giá này không?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Delete',
-                    cancelButtonText: 'Cancel'
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = '<%= request.getContextPath() %>/staff/manage-review?action=delete&id=' + reviewId;

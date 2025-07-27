@@ -14,48 +14,48 @@
         <div class="main-content">
             <div class="container">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <a href="<c:url value='/staff/order' />" class="btn-back">← Back</a>
+                    <a href="<c:url value='/staff/order' />" class="btn-back">← Quay lại</a>
 
-                    <h1>Order Detail</h1>
+                    <h1>Chi tiết đơn hàng</h1>
                 </div>
 
 
                 <!-- Thông tin đơn hàng -->
                 <div class="order-info">
-                    <p><strong>Order ID:</strong> ${order.orderID}</p>
-                    <p><strong>Customer:</strong> ${order.accountName}</p>
-                    <p><strong>Phone:</strong> ${order.shippingPhone}</p>
-                    <p><strong>Shipping Address:</strong> ${order.shippingAddress}</p>
-                    <p><strong>Order Date:</strong> ${order.orderDate}</p>
+                    <p><strong>Mã đơn hàng:</strong> ${order.orderID}</p>
+                    <p><strong>Khách hàng:</strong> ${order.accountName}</p>
+                    <p><strong>Số điện thoại:</strong> ${order.shippingPhone}</p>
+                    <p><strong>Địa chỉ giao hàng:</strong> ${order.shippingAddress}</p>
+                    <p><strong>Ngày đặt hàng:</strong> ${order.orderDate}</p>
                     <form action="${pageContext.request.contextPath}/staff/order/updateStatus" method="post" style="margin-top: 10px;">
                         <input type="hidden" name="orderId" value="${order.orderID}" />
-                        <label for="status"><strong>Change Order Status:</strong></label>
+                        <label for="status"><strong>Thay đổi trạng thái đơn hàng:</strong></label>
                         <select name="status" id="status" required>
                             <option value="Đang xử lý" ${order.orderStatus == 'Đang xử lý' ? 'selected' : ''}>Đang xử lý</option>
                             <option value="Đang giao hàng" ${order.orderStatus == 'Đang giao hàng' ? 'selected' : ''}>Đang giao hàng</option>
                             <option value="Đã giao" ${order.orderStatus == 'Đã giao' ? 'selected' : ''}>Đã giao</option>
                             <option value="Đã hủy" ${order.orderStatus == 'Đã hủy' ? 'selected' : ''}>Đã hủy</option>
                         </select>
-                        <button type="submit" style="margin-left: 10px;">Cập nhật</button>
+                        <button type="submit" style="margin-left: 10px;">Cập nhật trạng thái</button>
                     </form>
 
                     <c:if test="${not empty message}">
                         <p style="color: green; font-weight: bold;">${message}</p>
                     </c:if>
 
-                    <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
-                    <p><strong>Payment Status:</strong> ${order.paymentStatus}</p>
+                    <p><strong>Phương thức thanh toán:</strong> ${order.paymentMethod}</p>
+                    <p><strong>Trạng thái thanh toán:</strong> ${order.paymentStatus}</p>
                 </div>
 
                 <!-- Danh sách sản phẩm -->
-                <h3>Products in this order:</h3>
+                <h3>Sản phẩm trong đơn hàng:</h3>
                 <table class="order-table">
                     <thead>
                         <tr>
-                            <th>Product</th>
-                            <th>Unit Price</th>
-                            <th>Quantity</th>
-                            <th>Subtotal</th>
+                            <th>Sản phẩm</th>
+                            <th>Đơn giá</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,7 +73,7 @@
 
                 <!-- Tổng tiền -->
                 <div class="order-total">
-                    <p><strong>Total Amount:</strong> ${order.totalAmount} VND</p>
+                    <p><strong>Tổng tiền:</strong> ${order.totalAmount} VND</p>
                 </div>
             </div>
         </div>

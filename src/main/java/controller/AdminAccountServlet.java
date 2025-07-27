@@ -26,7 +26,7 @@ public class AdminAccountServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             boolean result = accDAO.deleteAccount(id);
             if (!result) {
-                request.setAttribute("errorMessage", "Không thể xóa tài khoản này do đã phát sinh dữ liệu liên quan!");
+                request.setAttribute("errorMessage", "Không thể xóa tài khoản này vì có dữ liệu liên quan!");
                 List<Account> accounts = accDAO.getAllAccountsFull();
                 request.setAttribute("accounts", accounts);
                 request.getRequestDispatcher("/WEB-INF/admin/account/manage-account.jsp").forward(request, response);
@@ -40,7 +40,7 @@ public class AdminAccountServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             String status = request.getParameter("status");
             String newStatus = status.equals("Active") ? "Inactive" : "Active";
-            boolean result = accDAO.updateAccountStatus(id, newStatus);
+            accDAO.updateAccountStatus(id, newStatus);
             response.sendRedirect(request.getContextPath() + "/admin/account");
             return;
         }
@@ -48,16 +48,14 @@ public class AdminAccountServlet extends HttpServlet {
         if (view != null) {
             switch (view) {
                 case "create":
-                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request,
-                            response);
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
                     break;
                 case "edit":
                     int id = Integer.parseInt(request.getParameter("id"));
                     Account account = accDAO.getFullAccountById(id);
                     if (account != null) {
                         request.setAttribute("account", account);
-                        request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request,
-                                response);
+                        request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     } else {
                         response.sendRedirect(request.getContextPath() + "/admin/account");
                     }
@@ -67,14 +65,12 @@ public class AdminAccountServlet extends HttpServlet {
                     Account accountDetail = accDAO.getFullAccountById(accountId);
                     if (accountDetail != null) {
                         request.setAttribute("account", accountDetail);
-                        request.getRequestDispatcher("/WEB-INF/admin/account/account-detail.jsp").forward(request,
-                                response);
+                        request.getRequestDispatcher("/WEB-INF/admin/account/account-detail.jsp").forward(request, response);
                     } else {
                         response.sendRedirect(request.getContextPath() + "/admin/account");
                     }
                     break;
                 default:
-                    // Show the account list
                     String keyword = request.getParameter("search");
                     List<Account> accounts;
                     if (keyword != null && !keyword.trim().isEmpty()) {
@@ -84,7 +80,6 @@ public class AdminAccountServlet extends HttpServlet {
                         accounts = accDAO.getAllAccountsFull();
                     }
 
-                    // Get statistics for dashboard
                     int totalAccounts = accDAO.countAccounts();
                     int customerCount = accDAO.countAccountsByRole(0);
                     int adminCount = accDAO.countAccountsByRole(1);
@@ -94,15 +89,12 @@ public class AdminAccountServlet extends HttpServlet {
                     request.setAttribute("customerCount", customerCount);
                     request.setAttribute("adminCount", adminCount);
 
-                    request.getRequestDispatcher("/WEB-INF/admin/account/manage-account.jsp").forward(request,
-                            response);
+                    request.getRequestDispatcher("/WEB-INF/admin/account/manage-account.jsp").forward(request, response);
                     break;
             }
         } else {
-            // If no view parameter, show the account list
             List<Account> accounts = accDAO.getAllAccountsFull();
 
-            // Get statistics for dashboard
             int totalAccounts = accDAO.countAccounts();
             int customerCount = accDAO.countAccountsByRole(0);
             int adminCount = accDAO.countAccountsByRole(1);
@@ -124,15 +116,67 @@ public class AdminAccountServlet extends HttpServlet {
 
         if ("create".equals(action)) {
             try {
-                String username = request.getParameter("username");
-                String password = request.getParameter("password");
-                String email = request.getParameter("email");
-                String fullName = request.getParameter("fullName");
-                String phone = request.getParameter("phone");
-                String address = request.getParameter("address");
-                String gender = request.getParameter("gender");
+                String username = request.getParameter("username").trim();
+                String password = request.getParameter("password").trim();
+                String email = request.getParameter("email").trim();
+                String fullName = request.getParameter("fullName").trim();
+                String phone = request.getParameter("phone").trim();
+                String address = request.getParameter("address").trim();
+                String gender = request.getParameter("gender").trim();
                 int role = Integer.parseInt(request.getParameter("role"));
-                String status = request.getParameter("status");
+                String status = request.getParameter("status").trim();
+
+                if (accDAO.isUsernameExists(username)) {
+                    request.setAttribute("errorMessage", "Tên đăng nhập đã tồn tại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                if (accDAO.isEmailExists(email)) {
+                    request.setAttribute("errorMessage", "Email đã tồn tại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+
+                if (username == null || username.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng nhập tên đăng nhập.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                if (password == null || password.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng nhập mật khẩu.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                if (email == null || email.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng nhập email.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                if (fullName == null || fullName.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng nhập họ tên.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                if (phone == null || phone.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng nhập số điện thoại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                if (address == null || address.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng nhập địa chỉ.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                if (gender == null || gender.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng chọn giới tính.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                if (status == null || status.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng chọn trạng thái.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
 
                 Account account = new Account();
                 account.setUsername(username);
@@ -150,40 +194,61 @@ public class AdminAccountServlet extends HttpServlet {
                 if (res) {
                     response.sendRedirect(request.getContextPath() + "/admin/account");
                 } else {
-                    request.setAttribute("errorMessage", "Failed to create account. Please try again.");
-                    request.setAttribute("account", account); // Return the data back to the form
-                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request,
-                            response);
+                    request.setAttribute("errorMessage", "Tạo tài khoản thất bại. Vui lòng thử lại.");
+                    request.setAttribute("account", account);
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
                 }
             } catch (Exception e) {
-                request.setAttribute("errorMessage", "Error: " + e.getMessage());
+                e.printStackTrace();
+                request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
                 request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
             }
         } else if ("edit".equals(action)) {
             try {
                 int id = Integer.parseInt(request.getParameter("id"));
-                String username = request.getParameter("username");
-                String password = request.getParameter("password");
-                String email = request.getParameter("email");
-                String fullName = request.getParameter("fullName");
-                String phone = request.getParameter("phone");
-                String address = request.getParameter("address");
-                String gender = request.getParameter("gender");
+                String username = request.getParameter("username").trim();
+                String password = request.getParameter("password").trim();
+                String email = request.getParameter("email").trim();
+                String fullName = request.getParameter("fullName").trim();
+                String phone = request.getParameter("phone").trim();
+                String address = request.getParameter("address").trim();
+                String gender = request.getParameter("gender").trim();
                 int role = Integer.parseInt(request.getParameter("role"));
-                String status = request.getParameter("status");
+                String status = request.getParameter("status").trim();
+
+                Account existingAccount = accDAO.getFullAccountById(id);
+
+                if (username.isEmpty() || email.isEmpty() || fullName.isEmpty() ||
+                    phone.isEmpty() || address.isEmpty() || gender.isEmpty() || status.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin.");
+                    request.setAttribute("account", existingAccount);
+                    request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
+                    return;
+                }
+
+                Account checkUsername = accDAO.getAccountByUsername(username);
+                if (checkUsername != null && checkUsername.getAccountID() != id) {
+                    request.setAttribute("errorMessage", "Tên đăng nhập đã tồn tại.");
+                    request.setAttribute("account", existingAccount);
+                    request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
+                    return;
+                }
+
+                Account checkEmail = accDAO.getAccountByEmail(email);
+                if (checkEmail != null && checkEmail.getAccountID() != id) {
+                    request.setAttribute("errorMessage", "Email đã tồn tại.");
+                    request.setAttribute("account", existingAccount);
+                    request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
+                    return;
+                }
 
                 Account account = new Account();
                 account.setAccountID(id);
                 account.setUsername(username);
-                // If password field is not empty, update with new MD5 hashed password
-                if (password != null && !password.trim().isEmpty()) {
+                if (!password.isEmpty()) {
                     account.setPassword(MD5Util.hash(password));
                 } else {
-                    // Retrieve current password from database if not changed
-                    Account existingAccount = accDAO.getFullAccountById(id);
-                    if (existingAccount != null) {
-                        account.setPassword(existingAccount.getPassword());
-                    }
+                    account.setPassword(existingAccount.getPassword());
                 }
                 account.setEmail(email);
                 account.setFullName(fullName);
@@ -198,12 +263,21 @@ public class AdminAccountServlet extends HttpServlet {
                 if (res) {
                     response.sendRedirect(request.getContextPath() + "/admin/account");
                 } else {
-                    request.setAttribute("errorMessage", "Failed to update account. Please try again.");
-                    request.setAttribute("account", account); // Return the data back to the form
+                    request.setAttribute("errorMessage", "Cập nhật tài khoản thất bại. Vui lòng thử lại.");
+                    request.setAttribute("account", account);
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                 }
+
             } catch (Exception e) {
-                request.setAttribute("errorMessage", "Error: " + e.getMessage());
+                e.printStackTrace();
+                request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
+                try {
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    Account acc = accDAO.getFullAccountById(id);
+                    request.setAttribute("account", acc);
+                } catch (Exception ex) {
+                    // Bỏ qua
+                }
                 request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
             }
         }

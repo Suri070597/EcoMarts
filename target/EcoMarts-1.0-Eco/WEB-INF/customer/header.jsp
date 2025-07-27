@@ -49,7 +49,7 @@
     <c:choose>
         <c:when test="${empty categories}">
             <!-- Debug message if categories is empty -->
-            <div style="color:red">No categories available!</div>
+            <div style="color:red">Không có danh mục nào!</div>
         </c:when>
         <c:otherwise>
             <c:forEach items="${categories}" var="category">

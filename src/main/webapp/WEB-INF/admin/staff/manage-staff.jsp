@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
           type="image/x-icon">
-    <title>Manage Staff</title>
+    <title>Quản Lý Nhân Viên</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet"
@@ -27,19 +27,19 @@
             <div class="card">
                 <div class="card-header">
                     <div class="header-actions">
-                        <h1 class="card-title">Staff Management</h1>
+                        <h1 class="card-title">Quản Lý Nhân Viên</h1>
                         <div class="d-flex gap-3">
                             <form action="${pageContext.request.contextPath}/admin/staff" method="get"
                                   class="search-box">
                                 <i class="fas fa-search"></i>
-                                <input type="text" name="search" placeholder="Search staff..."
+                                <input type="text" name="search" placeholder="Tìm kiếm nhân viên..."
                                        value="${keyword != null ? keyword : ''}">
                             </form>
-                            <a href="${pageContext.request.contextPath}/admin/staff?view=create"
-                               class="btn btn-success">
-                                <i class="fas fa-plus"></i>
-                                Create Staff
-                            </a>
+                                                            <a href="${pageContext.request.contextPath}/admin/staff?view=create"
+                                   class="btn btn-success">
+                                    <i class="fas fa-plus"></i>
+                                    Tạo nhân viên
+                                </a>
                         </div>
                     </div>
                 </div>
@@ -49,28 +49,28 @@
                         <div class="stat-icon bg-primary">
                             <i class="fas fa-users"></i>
                         </div>
-                        <div class="stat-details">
-                            <h3>${totalStaff}</h3>
-                            <p>Total Staff</p>
-                        </div>
+                                                    <div class="stat-details">
+                                <h3>${totalStaff}</h3>
+                                <p>Tổng nhân viên</p>
+                            </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon bg-success">
                             <i class="fas fa-user-check"></i>
                         </div>
-                        <div class="stat-details">
-                            <h3>${activeStaffCount}</h3>
-                            <p>Active Staff</p>
-                        </div>
+                                                    <div class="stat-details">
+                                <h3>${activeStaffCount}</h3>
+                                <p>Nhân viên hoạt động</p>
+                            </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon bg-warning">
                             <i class="fas fa-user-times"></i>
                         </div>
-                        <div class="stat-details">
-                            <h3>${inactiveStaffCount}</h3>
-                            <p>Inactive Staff</p>
-                        </div>
+                                                    <div class="stat-details">
+                                <h3>${inactiveStaffCount}</h3>
+                                <p>Nhân viên ngừng hoạt động</p>
+                            </div>
                     </div>
                 </div>
 
@@ -80,16 +80,16 @@
                     </c:if>
                     <table class="table table-striped table-hover">
                         <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Gender</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
+                                                            <tr>
+                                    <th>ID</th>
+                                    <th>Tên đăng nhập</th>
+                                    <th>Họ và tên</th>
+                                    <th>Email</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Giới tính</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
                         </thead>
                         <tbody>
                             <c:forEach items="${staffList}" var="staff">
@@ -152,30 +152,29 @@
             if (!staffId || staffId === 'undefined' || staffId.includes('undefined')) {
                 console.error('Invalid staff ID:', staffId);
                 Swal.fire({
-                    title: 'Error',
-                    text: 'Invalid staff ID. Please try again.',
+                    title: 'Lỗi',
+                    text: 'ID nhân viên không hợp lệ. Vui lòng thử lại.',
                     icon: 'error',
                     confirmButtonColor: '#3085d6'
                 });
                 return;
             }
-            
-            // Chuáº©n hÃ³a tráº¡ng thÃ¡i (loáº¡i bá» khoáº£ng tráº¯ng, chuyá»n vá» chá»¯ thÆ°á»ng)
+
             const normalizedStatus = String(status).trim().toLowerCase();
             const isActive = normalizedStatus === "active";
             const newStatus = isActive ? "Inactive" : "Active";
 
             Swal.fire({
-                title: 'Confirm Status Change',
+                title: 'Xác nhận thay đổi trạng thái',
                 text: isActive
-                        ? 'Do you want to deactivate this staff?'
-                        : 'Do you want to activate this staff?',
+                        ? 'Bạn có muốn vô hiệu hóa nhân viên này không?'
+                        : 'Bạn có muốn kích hoạt nhân viên này không?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: 'Có',
+                cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
                     const url = '${pageContext.request.contextPath}/admin/staff?action=status&id=' + staffId + '&status=' + status;
@@ -207,8 +206,8 @@
             if (!deleteUrl || deleteUrl === 'undefined' || deleteUrl.includes('undefined')) {
                 console.error('Invalid delete URL:', deleteUrl);
                 Swal.fire({
-                    title: 'Error',
-                    text: 'Invalid delete URL. Please try again.',
+                    title: 'Lỗi',
+                    text: 'URL xóa không hợp lệ. Vui lòng thử lại.',
                     icon: 'error',
                     confirmButtonColor: '#3085d6'
                 });
@@ -216,14 +215,14 @@
             }
             
             Swal.fire({
-                title: 'Confirm Delete Staff',
-                text: 'Are you sure you want to delete this staff?',
+                title: 'Xác nhận xóa nhân viên',
+                text: 'Bạn có chắc chắn muốn xóa nhân viên này không?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: 'Có',
+                cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
                     console.log('Redirecting to delete URL:', deleteUrl);

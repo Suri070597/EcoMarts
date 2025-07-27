@@ -19,11 +19,11 @@
         <div class="main-content">
             <div class="category-container">
                 <div class="category-header">
-                    <h1><i class="fas fa-plus-circle"></i> Add Subcategory</h1>
+                    <h1><i class="fas fa-plus-circle"></i> Thêm danh mục con</h1>
                 </div>
                 <form action="createCategory" method="post">
                     <div class="mb-3">
-                        <label for="parentID" class="form-label">Select parent category:</label>
+                        <label for="parentID" class="form-label">Chọn danh mục cha:</label>
                         <select name="parentID" id="parentID" class="form-control" required>
                             <c:forEach var="cat" items="${parents}">
                                 <option value="${cat.categoryID}">${cat.categoryName}</option>
@@ -31,12 +31,12 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="categoryName" class="form-label">Subcategory name:</label>
+                        <label for="categoryName" class="form-label">Tên danh mục con:</label>
                         <input type="text" name="categoryName" id="categoryName" class="form-control" required>
                     </div>
                     <div class="btn-group">
-                        <a href="${pageContext.request.contextPath}/admin/category" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Add</button>
+                        <a href="${pageContext.request.contextPath}/admin/category" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Thêm</button>
                     </div>
                 </form>
             </div>

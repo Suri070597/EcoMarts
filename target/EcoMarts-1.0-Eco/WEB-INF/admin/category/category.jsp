@@ -13,7 +13,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
               type="image/x-icon">
-        <title>Manage Categories</title>
+        <title>Quản lý danh mục</title>
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
         <link rel="stylesheet"
@@ -32,9 +32,9 @@
             <div class="main-content">
                 <div class="category-container">
                     <div class="category-header">
-                        <h1><i class="fas fa-sitemap"></i> Category Management</h1>
+                        <h1><i class="fas fa-sitemap"></i> Quản lý danh mục</h1>
                         <a href="${pageContext.request.contextPath}/admin/createCategory" class="btn btn-primary">
-                            + Add Category
+                            + Thêm danh mục
                         </a>
                     </div>
 
@@ -47,7 +47,7 @@
                                         <li>
                                             <span>${child.categoryName}</span>
                                             <button class="btn-delete" onclick="confirmDelete('${child.categoryID}', '${child.categoryName}')">
-                                                <i class="fas fa-trash"></i> Delete
+                                                <i class="fas fa-trash"></i> Xóa
                                             </button>
                                         </li>
                                     </c:forEach>
@@ -75,14 +75,14 @@
                                                     event.stopPropagation(); // Prevent event bubbling
 
                                                     Swal.fire({
-                                                        title: 'Confirm Delete Subfolder',
-                                                        text: 'Are you sure you want to delete this subcategory?',
+                                                        title: 'Xác nhận xóa danh mục con',
+                                                        text: 'Bạn có chắc chắn muốn xóa danh mục con này không?',
                                                         icon: 'warning',
                                                         showCancelButton: true,
                                                         confirmButtonColor: '#c35f5f',
                                                         cancelButtonColor: '#8b6c42',
-                                                        confirmButtonText: 'Yes',
-                                                        cancelButtonText: 'Cancel',
+                                                        confirmButtonText: 'Có',
+                                                        cancelButtonText: 'Hủy',
                                                         reverseButtons: false,
                                                         customClass: {
                                                             popup: 'swal-custom-popup',
@@ -93,8 +93,8 @@
                                                         if (result.isConfirmed) {
                                                             // Show loading state
                                                             Swal.fire({
-                                                                title: 'Deleting...',
-                                                                text: 'Please wait a moment',
+                                                                title: 'Đang xóa...',
+                                                                text: 'Vui lòng chờ một chút',
                                                                 allowOutsideClick: false,
                                                                 didOpen: () => {
                                                                     Swal.showLoading();

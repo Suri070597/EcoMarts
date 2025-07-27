@@ -1,7 +1,7 @@
 <%-- 
-    Document   : supplier-detail
-    Created on : Jun 17, 2025, 9:53:18 PM
-    Author     : ADMIN
+    Tài liệu   : supplier-detail
+    Tạo ngày   : 17/06/2025, 21:53:18
+    Tác giả    : ADMIN
 --%>
 
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
@@ -13,7 +13,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
-        <title>Supplier Details</title>
+        <title>Chi Tiết Nhà Sản Xuất</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
@@ -21,19 +21,19 @@
     </head>
     <body>
         <div class="container-fluid">
-            <%-- Include admin sidebar --%>
+            <%-- Bao gồm thanh bên quản trị --%>
             <jsp:include page="../components/sidebar.jsp" />
             <div class="main-content">
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions">
-                            <h1 class="card-title">Supplier Details</h1>
+                            <h1 class="card-title">Chi Tiết Nhà Sản Xuất</h1>
                             <div class="d-flex gap-3">
                                 <a href="${pageContext.request.contextPath}/admin/supplier" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Back to Suppliers
+                                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
                                 </a>
                                 <a href="${pageContext.request.contextPath}/admin/supplier?view=edit&id=${supplier.supplierID}" class="btn btn-primary">
-                                    <i class="fas fa-edit"></i> Edit Supplier
+                                    <i class="fas fa-edit"></i> Chỉnh sửa
                                 </a>
                             </div>
                         </div>
@@ -49,29 +49,29 @@
                                     <p class="text-muted">${supplier.brandName}</p>
                                     <div class="supplier-status">
                                         <span class="status-badge ${supplier.status == 1 ? 'status-active' : 'status-inactive'}">
-                                            ${supplier.status == 1 ? 'Cooperating' : 'In Cooperating'}
+                                            ${supplier.status == 1 ? 'Đang hợp tác' : 'Ngừng hợp tác'}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-8">
                                 <div class="supplier-details">
-                                    <h4>Supplier Information</h4>
+                                    <h4>Thông Tin Nhà Sản Xuất</h4>
                                     <table class="table table-striped">
                                         <tr>
-                                            <th>Supplier ID:</th>
+                                            <th>ID nhà sản xuất:</th>
                                             <td>${supplier.supplierID}</td>
                                         </tr>
                                         <tr>
-                                            <th>Brand Name:</th>
+                                            <th>Tên thương hiệu:</th>
                                             <td>${supplier.brandName}</td>
                                         </tr>
                                         <tr>
-                                            <th>Company Name:</th>
+                                            <th>Tên công ty:</th>
                                             <td>${supplier.companyName}</td>
                                         </tr>
                                         <tr>
-                                            <th>Address:</th>
+                                            <th>Địa chỉ:</th>
                                             <td>${supplier.address}</td>
                                         </tr>
                                         <tr>
@@ -79,12 +79,12 @@
                                             <td>${supplier.email}</td>
                                         </tr>
                                         <tr>
-                                            <th>Phone:</th>
+                                            <th>Số điện thoại:</th>
                                             <td>${supplier.phone}</td>
                                         </tr>
                                         <tr>
-                                            <th>Status:</th>
-                                            <td>${supplier.status == 1 ? 'Cooperating' : 'In Cooperating'}</td>
+                                            <th>Trạng thái:</th>
+                                            <td>${supplier.status == 1 ? 'Đang hợp tác' : 'Ngừng hợp tác'}</td>
                                         </tr>
                                     </table>
                                 </div>

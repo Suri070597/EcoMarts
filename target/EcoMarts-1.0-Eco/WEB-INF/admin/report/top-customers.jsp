@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
               type="image/x-icon">
-        <title>Top 10 Customer</title>
+        <title>Top 5 khách hàng</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet"
@@ -27,7 +27,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions">
-                            <h1 class="card-title">Top 5 Customer</h1>
+                            <h1 class="card-title">Top 5 khách hàng</h1>
                             <div class="d-flex gap-3">
                                 <form action="${pageContext.request.contextPath}/admin/report/top-customers" method="get">
                                 </form>
@@ -40,9 +40,9 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
-                                    <th>Username</th>
-                                    <th>Total Orders</th>
-                                    <th>Total Spent</th>
+                                    <th>Tên đăng nhập</th>
+                                    <th>Tổng đơn hàng</th>
+                                    <th>Tổng chi tiêu</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
               type="image/x-icon">
-        <title>Manage Accounts</title>
+        <title>Quản Lý Tài Khoản</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet"
@@ -27,18 +27,18 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions">
-                            <h1 class="card-title">Account Management</h1>
+                            <h1 class="card-title">Quản Lý Tài Khoản</h1>
                             <div class="d-flex gap-3">
                                 <form action="${pageContext.request.contextPath}/admin/account" method="get"
                                       class="search-box">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" name="search" placeholder="Search accounts..."
+                                    <input type="text" name="search" placeholder="Tìm kiếm tài khoản..."
                                            value="${keyword != null ? keyword : ''}">
                                 </form>
                                 <a href="${pageContext.request.contextPath}/admin/account?view=create"
                                    class="btn btn-success">
                                     <i class="fas fa-plus"></i>
-                                    Create Account
+                                    Tạo tài khoản
                                 </a>
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                             </div>
                             <div class="stat-details">
                                 <h3>${totalAccounts}</h3>
-                                <p>Total Customers & Admins</p>
+                                <p>Tổng khách hàng & Quản trị viên</p>
                             </div>
                         </div>
                         <div class="stat-card">
@@ -60,7 +60,7 @@
                             </div>
                             <div class="stat-details">
                                 <h3>${customerCount}</h3>
-                                <p>Customers</p>
+                                <p>Khách hàng</p>
                             </div>
                         </div>
                         <div class="stat-card">
@@ -69,7 +69,7 @@
                             </div>
                             <div class="stat-details">
                                 <h3>${adminCount}</h3>
-                                <p>Admins</p>
+                                <p>Quản trị viên</p>
                             </div>
                         </div>
                     </div>
@@ -82,13 +82,13 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Username</th>
-                                    <th>Full Name</th>
+                                    <th>Tên đăng nhập</th>
+                                    <th>Họ và tên</th>
                                     <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Vai trò</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -103,10 +103,10 @@
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${acc.role == 0}">
-                                                        <span class="badge bg-info">Customer</span>
+                                                        <span class="badge bg-info">Khách hàng</span>
                                                     </c:when>
                                                     <c:when test="${acc.role == 1}">
-                                                        <span class="badge bg-warning">Admin</span>
+                                                        <span class="badge bg-warning">Quản trị viên</span>
                                                     </c:when>
                                                 </c:choose>
                                             </td>
@@ -157,16 +157,16 @@
                                                                const isActive = normalizedStatus === "active";
 
                                                                Swal.fire({
-                                                                   title: 'Confirm Status Change',
+                                                                   title: 'Xác nhận thay đổi trạng thái',
                                                                    text: isActive
-                                                                           ? 'Do you want to deactivate this account?'
-                                                                           : 'Do you want to activate this account?',
+                                                                           ? 'Bạn có muốn vô hiệu hóa tài khoản này không?'
+                                                                           : 'Bạn có muốn kích hoạt tài khoản này không?',
                                                                    icon: 'question',
                                                                    showCancelButton: true,
                                                                    confirmButtonColor: '#3085d6',
                                                                    cancelButtonColor: '#d33',
-                                                                   confirmButtonText: 'Yes',
-                                                                   cancelButtonText: 'Cancel'
+                                                                   confirmButtonText: 'Có',
+                                                                   cancelButtonText: 'Hủy'
                                                                }).then((result) => {
                                                                    if (result.isConfirmed) {
                                                                        window.location.href = url;
@@ -188,14 +188,14 @@
                                                            function confirmDelete(event, accountId) {
                                                                event.preventDefault();
                                                                Swal.fire({
-                                                                   title: 'Confirm Delete Account',
-                                                                   text: 'Are you sure you want to delete this account?',
+                                                                   title: 'Xác nhận xóa tài khoản',
+                                                                   text: 'Bạn có chắc chắn muốn xóa tài khoản này không?',
                                                                    icon: 'warning',
                                                                    showCancelButton: true,
                                                                    confirmButtonColor: '#d33',
                                                                    cancelButtonColor: '#3085d6',
-                                                                   confirmButtonText: 'Yes',
-                                                                   cancelButtonText: 'Cancel'
+                                                                   confirmButtonText: 'Có',
+                                                                   cancelButtonText: 'Hủy'
                                                                }).then((result) => {
                                                                    if (result.isConfirmed) {
                                                                        window.location.href = '${pageContext.request.contextPath}/admin/account?action=delete&id=' + accountId;

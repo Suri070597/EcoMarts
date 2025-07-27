@@ -7,7 +7,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Promotion Manager</title>
+        <title>Quản Lý Khuyến Mãi</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet"
@@ -24,18 +24,17 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions">
-                            <h1 class="card-title">Promotion Management</h1>
+                            <h1 class="card-title">Quản Lý Khuyến Mãi</h1>
                             <div class="d-flex gap-3">
                                 <form action="${pageContext.request.contextPath}/admin/promotion" method="get"
                                       class="search-box">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" name="search" placeholder="Search promotions..."
+                                    <input type="text" name="search" placeholder="Tìm kiếm khuyến mãi..."
                                            value="${keyword}">
-                                    <button type="submit" class="btn btn-sm btn-primary">Search</button>
                                 </form>
                                 <a href="${pageContext.request.contextPath}/admin/promotion?view=create"
                                    class="btn btn-success">
-                                    <i class="fas fa-plus"></i> Create Promotion
+                                    <i class="fas fa-plus"></i> Tạo khuyến mãi
                                 </a>
                             </div>
                         </div>
@@ -50,14 +49,14 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Discount</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                    <th>Time left</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>Tên</th>
+                                    <th>Mô tả</th>
+                                    <th>Giảm giá</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Thời gian còn lại</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -92,7 +91,7 @@
                                                         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                                                         document.getElementById(timerId).innerHTML =
-                                                                days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+                                                                days + "ng " + hours + "h " + minutes + "m " + seconds + "s ";
                                                     }, 1000);
                                                 })();
                                             </script>

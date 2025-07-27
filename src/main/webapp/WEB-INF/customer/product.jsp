@@ -13,7 +13,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Product Management</title>
+        <title>Quản lý sản phẩm</title>
         <link rel="stylesheet" href="../assets/css/admin.css"/>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -35,9 +35,9 @@
     </head>
     <body>
         <div class="container">
-            <h1>Product list</h1>
+            <h1>Danh sách sản phẩm</h1>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end" style="margin: 5px;">
-                <a href="./CRUD_Product/create-product.jsp" class="btn btn-success me-md-2">Create</a>
+                <a href="./CRUD_Product/create-product.jsp" class="btn btn-success me-md-2">Tạo mới</a>
             </div>
         </div>
         <%
@@ -48,14 +48,14 @@
                 <tbody>
                     <tr style="font-weight: bold">
                         <td>ID</td>
-                        <td>Product Name</td>
-                        <td>Price</td>
-                        <td>Quantity</td>
-                        <td>Unit</td>                        
-                        <td>Description</td>
-                        <td>Image</td>
-                        <td class="date-column">Create Date</td>
-                        <td>Action</td>
+                        <td>Tên sản phẩm</td>
+                        <td>Giá</td>
+                        <td>Số lượng</td>
+                        <td>Đơn vị</td>                        
+                        <td>Mô tả</td>
+                        <td>Hình ảnh</td>
+                        <td class="date-column">Ngày tạo</td>
+                        <td>Thao tác</td>
                     </tr>
                     <%
                         for (Product pro : product) {
@@ -73,8 +73,8 @@
 
                         <td class="date-column"><%= pro.getCreatedAt()%></td>
                         <td class="action-buttons">
-                            <a href="edit.jsp" class="btn btn-primary">Edit</a>
-                            <a href="" class="btn btn-danger">Delete</a>
+                            <a href="edit.jsp" class="btn btn-primary">Sửa</a>
+                            <a href="" class="btn btn-danger">Xóa</a>
                         </td>
                     </tr>
                     <%
@@ -85,7 +85,7 @@
             <% } else {
             %>
             <div class="container">
-                <h1 style="color: red; text-align: center; margin: 30px">There is no data!</h1>
+                <h1 style="color: red; text-align: center; margin: 30px">Không có dữ liệu!</h1>
             </div>
             <%
                 }

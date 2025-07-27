@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
               type="image/x-icon">
-        <title>EcoMart Staff Dashboard</title>
+        <title>EcoMart - Bảng điều khiển Nhân viên</title>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
               rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -31,11 +31,11 @@
             <jsp:include page="./components/sidebar.jsp" />
 
             <main class="main">
-                <h1 class="page-title">Staff Dashboard</h1>
+                <h1 class="page-title">Bảng điều khiển Nhân viên</h1>
 
                 <div class="date-indicator">
                     <i class="fas fa-calendar-alt"></i>
-                    <span>Today: <fmt:formatDate value="<%= new java.util.Date()%>" pattern="EEEE, dd MMMM yyyy" /></span>
+                    <span>Hôm nay: <fmt:formatDate value="<%= new java.util.Date()%>" pattern="EEEE, dd MMMM yyyy" /></span>
                 </div>
 
                 <!-- Statistics Cards -->
@@ -44,28 +44,28 @@
                         <div class="stat-icon">
                             <i class="fas fa-shopping-cart"></i>
                         </div>
-                        <div class="stat-title">Today's Orders</div>
+                        <div class="stat-title">Đơn hàng hôm nay</div>
                         <div class="stat-value">${todayOrders}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-box"></i>
                         </div>
-                        <div class="stat-title">Processing</div>
+                        <div class="stat-title">Đang xử lý</div>
                         <div class="stat-value">${processingOrders}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-truck"></i>
                         </div>
-                        <div class="stat-title">Shipping</div>
+                        <div class="stat-title">Đang giao hàng</div>
                         <div class="stat-value">${shippingOrders}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-exchange-alt"></i>
                         </div>
-                        <div class="stat-title">Returns/Refunds</div>
+                        <div class="stat-title">Hoàn trả/Đổi trả</div>
                         <div class="stat-value">${returnOrders}</div>
                     </div>
                 </div>
@@ -73,15 +73,15 @@
                 <!-- Work Shift Information -->
                 <div class="work-shift-card">
                     <div class="work-shift-title">
-                        <i class="fas fa-clock"></i>Today's Work Shift
+                        <i class="fas fa-clock"></i>Ca làm việc hôm nay
                     </div>
                     <div class="work-shift-info">
                         <div class="shift-time">
-                            <div class="shift-time-label">Check-in</div>
+                            <div class="shift-time-label">Giờ vào</div>
                             <div class="shift-time-value">${workShift.checkIn}</div>
                         </div>
                         <div class="shift-time">
-                            <div class="shift-time-label">Check-out</div>
+                            <div class="shift-time-label">Giờ ra</div>
                             <div class="shift-time-value">${workShift.checkOut}</div>
                         </div>
                     </div>

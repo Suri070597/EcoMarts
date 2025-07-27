@@ -7,7 +7,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Promotion Detail</title>
+        <title>Chi Tiết Khuyến Mãi</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet"
@@ -23,43 +23,43 @@
             <div class="main-content">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h1 class="card-title">Promotion Detail</h1>
+                        <h1 class="card-title">Chi tiết Khuyến Mãi</h1>
                         <a href="${pageContext.request.contextPath}/admin/promotion" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to List
+                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
                         </a>
                     </div>
 
                     <div class="card-body">
                         <table class="table table-bordered">
                             <tr>
-                                <th>ID</th>
+                                <th>Mã khuyến mãi</th>
                                 <td>${promotion.promotionID}</td>
                             </tr>
                             <tr>
-                                <th>Name</th>
+                                <th>Tên khuyến mãi</th>
                                 <td>${promotion.promotionName}</td>
                             </tr>
                             <tr>
-                                <th>Description</th>
+                                <th>Mô tả</th>
                                 <td>${promotion.description}</td>
                             </tr>
                             <tr>
-                                <th>Discount</th>
+                                <th>Giảm giá</th>
                                 <td><fmt:formatNumber value="${promotion.discountPercent}" type="number"/>%</td>
                             </tr>
                             <tr>
-                                <th>Start Date</th>
+                                <th>Ngày bắt đầu</th>
                                 <td><fmt:formatDate value="${promotion.startDate}" pattern="yyyy-MM-dd"/></td>
                             </tr>
                             <tr>
-                                <th>End Date</th>
+                                <th>Ngày kết thúc</th>
                                 <td><fmt:formatDate value="${promotion.endDate}" pattern="yyyy-MM-dd"/></td>
                             </tr>
                             <tr>
-                                <th>Status</th>
+                                <th>Trạng thái</th>
                                 <td>
                                     <span class="status-badge ${promotion.active ? 'status-active' : 'status-inactive'}">
-                                        ${promotion.active ? 'Active' : 'Inactive'}
+                                        ${promotion.active ? 'Đang hoạt động' : 'Không hoạt động'}
                                     </span>
                                 </td>
                             </tr>

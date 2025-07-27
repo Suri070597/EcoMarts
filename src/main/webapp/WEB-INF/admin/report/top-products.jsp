@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
               type="image/x-icon">
-        <title>Top 10 Product</title>
+        <title>Top 10 sản phẩm</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet"
@@ -27,7 +27,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions">
-                            <h1 class="card-title">Top 10 Product</h1>
+                            <h1 class="card-title">Top 10 sản phẩm</h1>
                             <div class="d-flex gap-3">
                                 <form action="${pageContext.request.contextPath}/admin/report/top-products" method="get">
                                 </form>
@@ -40,10 +40,10 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Total Quantity Sold</th>
-                                    <th>Total Revenue</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Tổng số lượng bán</th>
+                                    <th>Tổng doanh thu</th>
                                 </tr>
                             </thead>
                             <tbody>
