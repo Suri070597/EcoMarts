@@ -44,6 +44,9 @@ C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controll
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\UpdateProfileServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\VerifyPasswordServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\ViewAllProductServlet.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\viewstaff\Changepasswordstaff.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\viewstaff\ManageStaffServlet.java
+C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\viewstaff\verifypasswordServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\controller\YearlyRevenueServlet.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\AccountDAO.java
 C:\Users\LNQB\Downloads\Project_List-123456-main\EcoMarts\src\main\java\dao\AccountDAO1.java

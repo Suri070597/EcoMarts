@@ -15,6 +15,7 @@ controller\google\LoginServlets.class
 db\Dotenv.class
 controller\dangky\RegistrationServlet.class
 model\Product.class
+controller\viewstaff\Changepasswordstaff.class
 dao\AccountDAO1.class
 model\ProductPromotion.class
 model\Voucher.class
@@ -29,6 +30,7 @@ controller\VerifyPasswordServlet.class
 dao\CartItemDAO.class
 dao\OrderDetailDAO.class
 controller\ReorderServlet.class
+controller\viewstaff\verifypasswordServlet.class
 controller\StaffFeedBack.class
 controller\AdminDashboardServlet.class
 dao\StaffDAO.class
@@ -49,6 +51,7 @@ model\InventoryTransaction.class
 controller\AdminStaffServlet.class
 dao\AccountDAO.class
 dao\PromotionDAO.class
+controller\viewstaff\ManageStaffServlet.class
 model\Staff.class
 controller\AdminPromotionServlet.class
 db\EmailUtil.class

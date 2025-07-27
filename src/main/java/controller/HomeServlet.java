@@ -25,7 +25,7 @@ public class HomeServlet extends HttpServlet {
 
         // Get products
         ProductDAO dao = new ProductDAO();
-        List<Product> list = dao.getAll();
+        List<Product> list = dao.getAllAvailable();
         request.setAttribute("products", list);
 
         // Lấy 7 danh sách sản phẩm theo từng ParentID

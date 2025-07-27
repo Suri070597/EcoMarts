@@ -54,7 +54,7 @@ public class ProductDAO extends DBContext {
                 p.setCreatedAt(rs.getTimestamp("createdAt"));
                 p.setCategory(cat);
                 p.setSupplier(sup);
-
+                p.setStatus(rs.getString("Status"));
                 list.add(p);
             }
         } catch (Exception e) {
@@ -92,7 +92,10 @@ public class ProductDAO extends DBContext {
             ps.setString(13, boxUnitName);
             ps.setString(14, itemUnitName);
 
-            return ps.executeUpdate();
+            int result = ps.executeUpdate();
+            // Tự động đồng bộ lại Status cho tất cả sản phẩm
+            syncAllProductStatusByStockAndExpiry();
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -285,6 +288,8 @@ public class ProductDAO extends DBContext {
             ps.setInt(15, product.getProductID());
 
             int affectedRows = ps.executeUpdate();
+            // Tự động đồng bộ lại Status cho tất cả sản phẩm
+            syncAllProductStatusByStockAndExpiry();
             return affectedRows > 0;
 
         } catch (Exception e) {
@@ -416,6 +421,8 @@ public class ProductDAO extends DBContext {
                         SELECT CategoryID FROM Category
                         WHERE ParentID = ? OR CategoryID = ?
                     )
+                      AND p.StockQuantity > 0
+                      AND p.[Status] = N'Còn hàng'
                 """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -479,23 +486,23 @@ public class ProductDAO extends DBContext {
         return categoryName;
     }
 
-public double getStockQuantityById(int productId) {
-    double stockQuantity = 0;
-    String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
+    public double getStockQuantityById(int productId) {
+        double stockQuantity = 0;
+        String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
 
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        ResultSet rs = ps.executeQuery();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            stockQuantity = rs.getDouble("StockQuantity");
+            if (rs.next()) {
+                stockQuantity = rs.getDouble("StockQuantity");
+            }
+        } catch (Exception e) {
+            System.out.println("Error getting stock quantity: " + e.getMessage());
         }
-    } catch (Exception e) {
-        System.out.println("Error getting stock quantity: " + e.getMessage());
-    }
 
-    return stockQuantity;
-}
+        return stockQuantity;
+    }
 
     public static void main(String[] args) throws ParseException {
         ProductDAO dao = new ProductDAO();
@@ -520,7 +527,8 @@ public double getStockQuantityById(int productId) {
     }
 
     public void updateQuantity(int productId, int addQuantity) {
-        String sql = "UPDATE Product SET Quantity = Quantity + ? WHERE ProductID = ?";
+        // Cập nhật số lượng
+        String sql = "UPDATE Product SET StockQuantity = StockQuantity + ? WHERE ProductID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, addQuantity);
             ps.setInt(2, productId);
@@ -528,6 +536,109 @@ public double getStockQuantityById(int productId) {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        // Tự động đồng bộ lại Status cho tất cả sản phẩm
+        syncAllProductStatusByStockAndExpiry();
     }
 
+    // Lấy sản phẩm còn hàng và còn hạn
+    public List<Product> getAllAvailable() {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p "
+                + "JOIN Category c ON p.categoryID = c.categoryID "
+                + "JOIN Supplier s ON p.supplierID = s.supplierID "
+                + "WHERE p.StockQuantity > 0 "
+                + "AND (p.ExpirationDate IS NULL OR p.ExpirationDate >= GETDATE()) "
+                + "AND p.[Status] = N'Còn hàng'";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Category cat = new Category();
+                cat.setCategoryID(rs.getInt("categoryID"));
+                cat.setCategoryName(rs.getString("categoryName"));
+                cat.setParentID(rs.getInt("parentID"));
+
+                Supplier sup = new Supplier();
+                sup.setSupplierID(rs.getInt("supplierID"));
+                sup.setCompanyName(rs.getString("CompanyName"));
+
+                Product p = new Product();
+                p.setProductID(rs.getInt("productID"));
+                p.setProductName(rs.getString("productName"));
+                p.setPrice(rs.getDouble("price"));
+                p.setDescription(rs.getString("description"));
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                p.setImageURL(rs.getString("ImageURL"));
+                p.setUnit(rs.getString("unit"));
+                p.setCreatedAt(rs.getTimestamp("createdAt"));
+                p.setCategory(cat);
+                p.setSupplier(sup);
+                p.setStatus(rs.getString("Status"));
+                list.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Tìm kiếm sản phẩm còn hàng và còn hạn
+    public List<Product> searchAvailableProductsByName(String keyword) {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName "
+                + "FROM Product p "
+                + "JOIN Category c ON p.CategoryID = c.CategoryID "
+                + "JOIN Supplier s ON p.SupplierID = s.SupplierID "
+                + "WHERE p.ProductName LIKE ? "
+                + "AND p.StockQuantity > 0 "
+                + "AND (p.ExpirationDate IS NULL OR p.ExpirationDate >= GETDATE()) "
+                + "AND p.[Status] = N'Còn hàng'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                p.setPrice(rs.getDouble("Price"));
+                p.setDescription(rs.getString("Description"));
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                p.setImageURL(rs.getString("ImageURL"));
+                p.setUnit(rs.getString("Unit"));
+                p.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                p.setStatus(rs.getString("Status"));
+                // Set Category
+                Category c = new Category();
+                c.setCategoryID(rs.getInt("CategoryID"));
+                c.setCategoryName(rs.getString("CategoryName"));
+                c.setParentID(rs.getInt("ParentID"));
+                p.setCategory(c);
+                // Set Supplier
+                Supplier s = new Supplier();
+                s.setSupplierID(rs.getInt("SupplierID"));
+                s.setCompanyName(rs.getString("CompanyName"));
+                p.setSupplier(s);
+                list.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Hàm cập nhật lại Status cho tất cả sản phẩm dựa vào StockQuantity và
+    // ExpirationDate
+    public void syncAllProductStatusByStockAndExpiry() {
+        String sql = "UPDATE Product SET [Status] = " +
+                "CASE " +
+                "  WHEN ExpirationDate IS NOT NULL AND ExpirationDate < GETDATE() THEN N'Hết hạn' " +
+                "  WHEN StockQuantity <= 0 THEN N'Hết hàng' " +
+                "  ELSE N'Còn hàng' " +
+                "END";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

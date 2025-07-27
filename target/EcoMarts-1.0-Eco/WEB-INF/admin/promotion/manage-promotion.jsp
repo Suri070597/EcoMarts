@@ -55,6 +55,7 @@
                                     <th>Discount</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
+                                    <th>Time left</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -68,6 +69,34 @@
                                         <td><fmt:formatNumber value="${p.discountPercent}" type="number"/>%</td>
                                         <td><fmt:formatDate value="${p.startDate}" pattern="yyyy-MM-dd"/></td>
                                         <td><fmt:formatDate value="${p.endDate}" pattern="yyyy-MM-dd"/></td>
+                                        <td>
+                                            <p id="timer-${p.promotionID}">Calculating...</p>
+                                            <script>
+                                                (function () {
+                                                    const countDownDate = new Date("${p.endDate}").getTime();
+                                                    const timerId = "timer-${p.promotionID}";
+
+                                                    const x = setInterval(function () {
+                                                        const now = new Date().getTime();
+                                                        const distance = countDownDate - now;
+
+                                                        if (distance < 0) {
+                                                            clearInterval(x);
+                                                            document.getElementById(timerId).innerHTML = "EXPIRED";
+                                                            return;
+                                                        }
+
+                                                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                                                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                                                        document.getElementById(timerId).innerHTML =
+                                                                days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+                                                    }, 1000);
+                                                })();
+                                            </script>
+                                        </td>
                                         <td>
                                             <span class="status-badge ${p.active ? 'status-active' : 'status-inactive'}">
                                                 ${p.active ? 'Active' : 'Inactive'}
@@ -92,6 +121,11 @@
                                                    class='btn btn-sm btn-danger'
                                                    onclick="return confirmDelete(event, '${p.promotionID}')">
                                                     <i class="fas fa-trash"></i>
+                                                </a>
+                                                <a href='${pageContext.request.contextPath}/admin/promotion?view=assign-products&id=${p.promotionID}'
+                                                   class='btn btn-sm btn-secondary'
+                                                   title="Gán sản phẩm">
+                                                    <i class="fas fa-box-open"></i>
                                                 </a>
                                             </div>
                                         </td>
@@ -156,6 +190,5 @@
                                                            return false;
                                                        }
         </script>
-
     </body>
 </html>

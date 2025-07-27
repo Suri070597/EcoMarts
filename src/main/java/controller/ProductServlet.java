@@ -39,10 +39,9 @@ public class ProductServlet extends HttpServlet {
         List<Category> listCategory = dao.getCategory();
         switch (action) {
             case "list":
-                List<Product> list = dao.getAll();
+                List<Product> list = dao.getAll(); // Để admin vẫn xem được tất cả sản phẩm
                 request.setAttribute("dataCate", listCategory);
                 request.setAttribute("data", list);
-
                 request.getRequestDispatcher("/WEB-INF/admin/product/product.jsp").forward(request, response);
                 break;
             case "create":
@@ -81,7 +80,8 @@ public class ProductServlet extends HttpServlet {
                 break;
             case "search":
                 String keyword = request.getParameter("keyword");
-                List<Product> searchResults = dao.searchProductsByName(keyword);
+                List<Product> searchResults = dao.searchProductsByName(keyword); // Để admin vẫn tìm được tất cả sản
+                                                                                 // phẩm
                 request.setAttribute("dataCate", listCategory);
                 request.setAttribute("data", searchResults);
                 request.setAttribute("keyword", keyword);

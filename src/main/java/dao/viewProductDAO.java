@@ -22,9 +22,12 @@ public class ViewProductDAO extends DBContext {
         List<Product> list = new ArrayList<>();
         String sql = """
                     SELECT p.productID, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity
-                                FROM Product p
-                                JOIN Category c ON p.CategoryID = c.CategoryID
-                                WHERE c.ParentID = ?
+                    FROM Product p
+                    JOIN Category c ON p.CategoryID = c.CategoryID
+                    WHERE c.ParentID = ?
+                      AND p.StockQuantity > 0
+                      AND (p.ExpirationDate IS NULL OR p.ExpirationDate >= GETDATE())
+                      AND p.[Status] = N'Còn hàng'
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, parentCategoryId);
@@ -99,19 +102,21 @@ public class ViewProductDAO extends DBContext {
         printProductList(dao.getFeaturedProducts());
     }
 
-    public List<Product> getFeaturedProductsByPage(int parentCategoryId, int offset, int limit) {
+    public List<Product> getFeaturedProductsByPage(int parentId, int offset, int limit) {
         List<Product> list = new ArrayList<>();
         String sql = """
-                    SELECT p.productID, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity
-                    FROM Product p
-                    JOIN Category c ON p.CategoryID = c.CategoryID
-                    WHERE c.ParentID = ?
-                    ORDER BY p.ProductID
-                    OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                SELECT p.productID, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity
+                FROM Product p
+                JOIN Category c ON p.CategoryID = c.CategoryID
+                WHERE c.ParentID = ?
+                  AND p.StockQuantity > 0
+                  AND (p.ExpirationDate IS NULL OR p.ExpirationDate >= GETDATE())
+                  AND p.[Status] = N'Còn hàng'
+                ORDER BY p.productID DESC
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """;
-
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, parentCategoryId);
+            ps.setInt(1, parentId);
             ps.setInt(2, offset);
             ps.setInt(3, limit);
             ResultSet rs = ps.executeQuery();
