@@ -25,7 +25,7 @@
                 box-shadow: 0 4px 20px rgba(0,0,0,0.1);
                 padding: 30px;
                 background: #ffffff;
-                margin-bottom: 30px;
+                margin-left: 50px;
             }
             .dashboard-header {
                 display: flex;
