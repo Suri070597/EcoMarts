@@ -116,7 +116,7 @@ public class AdminVoucherServlet extends HttpServlet {
                 if (res) {
                     response.sendRedirect(request.getContextPath() + "/admin/voucher");
                 } else {
-                    request.setAttribute("errorMessage", "Failed to create voucher. Please try again.");
+                    request.setAttribute("errorMessage", "Tạo mã giảm giá thất bại. Vui lòng thử lại.");
                     request.setAttribute("voucher", voucher);
                     request.getRequestDispatcher("/WEB-INF/admin/voucher/create-voucher.jsp").forward(request, response);
                 }
@@ -134,7 +134,7 @@ public class AdminVoucherServlet extends HttpServlet {
                 if (res) {
                     response.sendRedirect(request.getContextPath() + "/admin/voucher");
                 } else {
-                    request.setAttribute("errorMessage", "Failed to update voucher. Please try again.");
+                    request.setAttribute("errorMessage", "Cập nhật mã giảm giá thất bại. Vui lòng thử lại.");
                     request.setAttribute("voucher", voucher);
                     request.getRequestDispatcher("/WEB-INF/admin/voucher/edit-voucher.jsp").forward(request, response);
                 }

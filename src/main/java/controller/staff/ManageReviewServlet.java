@@ -17,6 +17,7 @@ import java.util.List;
 
 @WebServlet("/staff/manage-review")
 public class ManageReviewServlet extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -48,7 +49,8 @@ public class ManageReviewServlet extends HttpServlet {
                 reviewList = fbDao.getAllReviewsWithAccountAndProduct();
             }
             System.out.println(
-                    "DEBUG: Review list size in servlet: " + (reviewList != null ? reviewList.size() : "null"));
+                    "GỠ LỖI: Kích thước danh sách đánh giá trong servlet: " + (reviewList != null ? reviewList.size() : "null"));
+
             request.setAttribute("reviewList", reviewList);
             request.getRequestDispatcher("/WEB-INF/staff/review/manage-review.jsp").forward(request, response);
         } catch (Exception e) {

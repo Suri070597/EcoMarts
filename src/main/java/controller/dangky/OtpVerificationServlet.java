@@ -63,10 +63,10 @@ public class OtpVerificationServlet extends HttpServlet {
         String otp = request.getParameter("otp");
         Integer accountId = (Integer) request.getSession().getAttribute("accountId");
 
-        System.out.println("OTP verification attempt: accountId=" + accountId + ", otp=" + otp);
+        System.out.println("Thử xác minh OTP: accountId=" + accountId + ", otp=" + otp);
 
         if (otp == null || otp.trim().isEmpty() || accountId == null) {
-            System.out.println("Missing OTP or accountId");
+            System.out.println("Thiếu OTP hoặc accountId");
             request.setAttribute("error", "Vui lòng nhập mã OTP!");
             request.getRequestDispatcher("WEB-INF/customer/dangky/otp.jsp").forward(request, response);
             return;
@@ -79,16 +79,16 @@ public class OtpVerificationServlet extends HttpServlet {
                 tokenDAO.updateTokenStatus(token.getTokenId(), "used");
                 AccountDAO1 accountDAO = new AccountDAO1();
                 accountDAO.updateAccountStatus(accountId, "Active");
-                System.out.println("OTP verified successfully for accountId=" + accountId);
+                System.out.println("Xác minh OTP thành công cho accountId=" + accountId);
                 request.getSession().removeAttribute("accountId");
                 response.sendRedirect(request.getContextPath() + "/login");
             } else {
-                System.out.println("Invalid or expired OTP for accountId=" + accountId);
+                System.out.println("OTP không hợp lệ hoặc đã hết hạn cho accountId=" + accountId);
                 request.setAttribute("error", "Mã OTP không hợp lệ hoặc đã hết hạn!");
                 request.getRequestDispatcher("WEB-INF/customer/dangky/otp.jsp").forward(request, response);
             }
         } catch (SQLException e) {
-            System.out.println("Database error during OTP verification: " + e.getMessage());
+            System.out.println("Lỗi cơ sở dữ liệu trong quá trình xác minh OTP: " + e.getMessage());
             request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
             request.getRequestDispatcher("WEB-INF/customer/dangky/otp.jsp").forward(request, response);
         }

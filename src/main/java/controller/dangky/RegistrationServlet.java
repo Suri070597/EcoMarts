@@ -75,7 +75,7 @@ public class RegistrationServlet extends HttpServlet {
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
 
-        System.out.println("Registration attempt: username=" + username + ", email=" + email + ", phone=" + phone + ", address=" + address + ", gender=" + gender);
+        System.out.println("Thử đăng ký: tên người dùng=" + username + ", email=" + email + ", số điện thoại=" + phone + ", địa chỉ=" + address + ", giới tính=" + gender);
 
         // Kiểm tra các trường bắt buộc
         if (username == null || username.trim().isEmpty()
@@ -84,7 +84,7 @@ public class RegistrationServlet extends HttpServlet {
                 || phone == null || phone.trim().isEmpty()
                 || password == null || password.trim().isEmpty()
                 || confirmPassword == null || confirmPassword.trim().isEmpty()) {
-            System.out.println("Missing required fields");
+            System.out.println("Thiếu các trường bắt buộc");
             request.setAttribute("error", "Vui lòng điền đầy đủ thông tin!");
             request.getRequestDispatcher("WEB-INF/customer/dangky/register.jsp").forward(request, response);
             return;
@@ -92,7 +92,7 @@ public class RegistrationServlet extends HttpServlet {
 
         // Kiểm tra mật khẩu khớp
         if (!password.equals(confirmPassword)) {
-            System.out.println("Password and confirmPassword do not match");
+            System.out.println("Mật khẩu và xác nhận mật khẩu không khớp");
             request.setAttribute("error", "Mật khẩu xác nhận không khớp!");
             request.getRequestDispatcher("WEB-INF/customer/dangky/register.jsp").forward(request, response);
             return;
@@ -101,7 +101,7 @@ public class RegistrationServlet extends HttpServlet {
         // Kiểm tra định dạng mật khẩu
         String passwordRegex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{6,}$";
         if (!password.matches(passwordRegex)) {
-            System.out.println("Invalid password format for email=" + email);
+            System.out.println("Định dạng mật khẩu không hợp lệ cho email=" + email);
             request.setAttribute("error", "Mật khẩu phải có ít nhất 6 ký tự, chứa chữ, số, và ký tự đặc biệt!");
             request.getRequestDispatcher("WEB-INF/customer/dangky/register.jsp").forward(request, response);
             return;
@@ -110,7 +110,7 @@ public class RegistrationServlet extends HttpServlet {
         // Kiểm tra định dạng số điện thoại
         String phoneRegex = "^\\d{10}$";
         if (!phone.matches(phoneRegex)) {
-            System.out.println("Invalid phone number format: " + phone);
+            System.out.println("Định dạng số điện thoại không hợp lệ: " + phone);
             request.setAttribute("error", "Số điện thoại phải có đúng 10 chữ số!");
             request.getRequestDispatcher("WEB-INF/customer/dangky/register.jsp").forward(request, response);
             return;
@@ -120,13 +120,13 @@ public class RegistrationServlet extends HttpServlet {
         try {
             // Kiểm tra email hoặc username đã tồn tại
             if (accountDAO1.checkEmailExists(email)) {
-                System.out.println("Email already exists: " + email);
+                System.out.println("Email đã tồn tại: " + email);
                 request.setAttribute("error", "Email đã được sử dụng!");
                 request.getRequestDispatcher("WEB-INF/customer/dangky/register.jsp").forward(request, response);
                 return;
             }
             if (accountDAO1.checkUsernameExists(username)) {
-                System.out.println("Username already exists: " + username);
+                System.out.println("Tên người dùng đã tồn tại: " + username);
                 request.setAttribute("error", "Tên người dùng đã được sử dụng!");
                 request.getRequestDispatcher("WEB-INF/customer/dangky/register.jsp").forward(request, response);
                 return;
@@ -145,15 +145,15 @@ public class RegistrationServlet extends HttpServlet {
             account.setStatus("Pending");
 
             int accountId = accountDAO1.insertAccount(account);
-            System.out.println("Account registered with ID: " + accountId);
+            System.out.println("Tài khoản đã được đăng ký với ID: " + accountId);
 
             // Tạo và gửi OTP
             String otp = EmailUtil.generateOtp();
             try {
                 EmailUtil.sendOtpEmail(email, otp);
-                System.out.println("OTP sent to " + email + ": " + otp);
+                System.out.println("OTP đã được gửi đến " + email + ": " + otp);
             } catch (MessagingException e) {
-                System.out.println("Failed to send OTP email to " + email + ": " + e.getMessage());
+                System.out.println("Gửi email chứa OTP đến " + email + " thất bại: " + e.getMessage());
                 request.setAttribute("error", "Lỗi gửi email OTP. Vui lòng kiểm tra email và thử lại.");
                 request.getRequestDispatcher("WEB-INF/customer/dangky/register.jsp").forward(request, response);
                 return;
@@ -167,17 +167,17 @@ public class RegistrationServlet extends HttpServlet {
             Timestamp timeAdd = Timestamp.valueOf(LocalDateTime.now());
             token.setTimeAdd(timeAdd);
             token.setTimeExp(Timestamp.valueOf(LocalDateTime.now().plusMinutes(10)));
-            System.out.println("Adding token: AccountID=" + accountId + ", Token=" + otp + ", Time_Add=" + timeAdd + ", Time_Exp=" + token.getTimeExp());
+            System.out.println("Thêm token: AccountID=" + accountId + ", Token=" + otp + ", Time_Add=" + timeAdd + ", Time_Exp=" + token.getTimeExp());
 
             TokenDAO tokenDAO = new TokenDAO();
             tokenDAO.insertToken(token);
-            System.out.println("Token saved for AccountID=" + accountId + ", Token=" + otp);
+            System.out.println("Đã lưu token cho AccountID=" + accountId + ", Token=" + otp);
 
             // Lưu session
             request.getSession().setAttribute("accountId", accountId);
             response.sendRedirect(request.getContextPath() + "/otp");
         } catch (SQLException e) {
-            System.out.println("Database error during registration for email=" + email + ": " + e.getMessage());
+            System.out.println("Lỗi cơ sở dữ liệu trong quá trình đăng ký với email=" + email + ": " + e.getMessage());
             request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
             request.getRequestDispatcher("WEB-INF/customer/dangky/register.jsp").forward(request, response);
         }

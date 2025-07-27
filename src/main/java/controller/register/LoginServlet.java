@@ -67,20 +67,20 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        System.out.println("Login attempt: email=" + email + ", password=****");
+        System.out.println("Đang thử đăng nhập: email=" + email + ", mật khẩu=****");
 
         if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            System.out.println("Missing email or password");
+            System.out.println("Thiếu email hoặc mật khẩu");
             request.getSession().setAttribute("error", "Vui lòng nhập email và mật khẩu!");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        System.out.println("================ LOGIN DEBUG ================");
-        System.out.println("EMAIL FIELD VALUE: [" + email + "]");
-        System.out.println("PASSWORD FIELD VALUE: [" + password + "]");
-        System.out.println("PASSWORD LENGTH: " + (password == null ? "null" : password.length()));
+        System.out.println("================ GỠ LỖI ĐĂNG NHẬP ================");
+        System.out.println("GIÁ TRỊ TRƯỜNG EMAIL: [" + email + "]");
+        System.out.println("GIÁ TRỊ TRƯỜNG MẬT KHẨU: [" + password + "]");
+        System.out.println("ĐỘ DÀI MẬT KHẨU: " + (password == null ? "null" : password.length()));
         String hashedPassword = MD5Util.hash(password);
-        System.out.println("HASHED PASSWORD: [" + hashedPassword + "]");
+        System.out.println("MẬT KHẨU SAU KHI MÃ HÓA: [" + hashedPassword + "]");
 
         // *** Bổ sung hash password ***
         // String hashedPassword = MD5Util.hash(password);
@@ -89,7 +89,7 @@ public class LoginServlet extends HttpServlet {
             // Truyền hashedPassword vào checkLogin!
             Account account = accountDAO.checkLogin(email, hashedPassword);
             if (account != null) {
-                System.out.println("Login successful: email=" + email + ", role=" + account.getRole());
+                System.out.println("Đăng nhập thành công: email=" + email + ", vai trò=" + account.getRole());
                 request.getSession().setAttribute("account", account);
                 request.getSession().setAttribute("email", account.getEmail());
                 request.getSession().setAttribute("username", account.getUsername());
@@ -105,7 +105,7 @@ public class LoginServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/home");
                 }
             } else {
-                System.out.println("Login failed: invalid email or password for email=" + email);
+                System.out.println("Đăng nhập thất bại: email hoặc mật khẩu không hợp lệ cho email=" + email);
                 request.getSession().setAttribute("error", "Email hoặc mật khẩu không đúng!");
                 response.sendRedirect(request.getContextPath() + "/login");
             }

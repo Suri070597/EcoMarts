@@ -49,16 +49,16 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("Accessing admin page");
+        System.out.println("Đang truy cập trang quản trị");
         Integer role = (Integer) request.getSession().getAttribute("role");
         String email = (String) request.getSession().getAttribute("email");
         System.out.println("Admin access check: role=" + role + ", email=" + email);
 
         if (role != null && role == 1 && email != null) {
-            System.out.println("Admin access granted: email=" + email);
+            System.out.println("Quyền truy cập quản trị được cấp: email=" + email);
             request.getRequestDispatcher("/WEB-INF/admin/dashboard.jsp").forward(request, response);
         } else {
-            System.out.println("Unauthorized access to admin page: email=" + (email != null ? email : "null") + ", role=" + (role != null ? role : "null"));
+            System.out.println("Truy cập trái phép vào trang quản trị: email=" + (email != null ? email : "null") + ", vai trò=" + (role != null ? role : "null"));
             request.getSession().setAttribute("error", "Vui lòng đăng nhập với tài khoản admin!");
             response.sendRedirect(request.getContextPath() + "/login");
         }

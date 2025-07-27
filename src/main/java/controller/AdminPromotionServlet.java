@@ -131,7 +131,7 @@ public class AdminPromotionServlet extends HttpServlet {
                 if (promotionDAO.insertPromotion(promotion)) {
                     response.sendRedirect(request.getContextPath() + "/admin/promotion");
                 } else {
-                    request.setAttribute("errorMessage", "Failed to create promotion. Please try again.");
+                    request.setAttribute("errorMessage", "Tạo khuyến mãi thất bại. Vui lòng thử lại.");
                     request.setAttribute("promotion", promotion);
                     request.getRequestDispatcher("/WEB-INF/admin/promotion/create-promotion.jsp").forward(request, response);
                 }
@@ -147,7 +147,7 @@ public class AdminPromotionServlet extends HttpServlet {
                 if (promotionDAO.updatePromotion(promotion)) {
                     response.sendRedirect(request.getContextPath() + "/admin/promotion");
                 } else {
-                    request.setAttribute("errorMessage", "Failed to update promotion. Please try again.");
+                    request.setAttribute("errorMessage", "Cập nhật khuyến mãi thất bại. Vui lòng thử lại.");
                     request.setAttribute("promotion", promotion);
                     request.getRequestDispatcher("/WEB-INF/admin/promotion/edit-promotion.jsp").forward(request, response);
                 }
