@@ -40,6 +40,31 @@
                             <label class="form-label">Tên sản phẩm</label>
                             <input type="text" class="form-control" name="pName" required />
                         </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Thể loại</label>
+                            <select name="categoryID" class="form-select" required>
+                                <option value="">-- Chọn thể loại --</option>
+                                <% if (cate != null) {
+                                        for (Category c : cate) {
+                                            if (c.getParentID() != 0) {
+                                                String parentName = "";
+                                                for (Category p : cate) {
+                                                    if (c.getParentID() == p.getCategoryID()) {
+                                                        parentName = p.getCategoryName() + " > ";
+                                                        break;
+                                                    }
+                                                }
+                                                String display = parentName + c.getCategoryName();
+                                %>
+                                <option value="<%= c.getCategoryID()%>"><%= display%></option>
+                                <%
+                                            }
+                                        }
+                                    }
+                                %>
+                            </select>
+                        </div>
 
                         <div class="mb-3" id="fruit-price-group" style="display:none">
                             <label class="form-label">Giá (VNĐ/kg)</label>
@@ -107,42 +132,19 @@
                             <label class="form-label">Thời hạn sử dụng</label>
                             <select class="form-select" id="expirySelect" name="expirySelect" required>
                                 <option value="">-- Chọn thời hạn sử dụng --</option>
-                                <option value="3">3 months</option>
-                                <option value="6">6 months</option>
-                                <option value="12">1 year</option>
-                                <option value="24">2 years</option>
+                                <option value="3">3 tháng</option>
+                                <option value="6">6 tháng</option>
+                                <option value="12">1 năm</option>
+                                <option value="24">2 năm</option>
                             </select>
                         </div>
 
 
+                        
                         <div class="mb-3">
-                            <label class="form-label">Category</label>
-                            <select name="categoryID" class="form-select" required>
-                                <option value="">-- Select Category --</option>
-                                <% if (cate != null) {
-                                        for (Category c : cate) {
-                                            if (c.getParentID() != 0) {
-                                                String parentName = "";
-                                                for (Category p : cate) {
-                                                    if (c.getParentID() == p.getCategoryID()) {
-                                                        parentName = p.getCategoryName() + " > ";
-                                                        break;
-                                                    }
-                                                }
-                                                String display = parentName + c.getCategoryName();
-                                %>
-                                <option value="<%= c.getCategoryID()%>"><%= display%></option>
-                                <%
-                                            }
-                                        }
-                                    }
-                                %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Supplier</label>
+                            <label class="form-label">Nhà sản xuất</label>
                             <select name="supplierID" class="form-select" required>
-                                <option value="">-- Select Supplier --</option>
+                                <option value="">-- Chọn nhà sản xuất --</option>
                                 <% if (sup != null) {
 
                                         for (Supplier s : sup) {
@@ -154,8 +156,8 @@
                                 %>
                             </select>
                         </div>
-                        <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary" id="back"><i class="bi bi-arrow-return-left"></i> Back</a>
-                        <button type="submit" class="btn btn-primary" id="submit"><i class="bi bi-file-earmark-plus"></i> Create</button>
+                        <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary" id="back"><i class="bi bi-arrow-return-left"></i> Quay Lại</a>
+                        <button type="submit" class="btn btn-primary" id="submit"><i class="bi bi-file-earmark-plus"></i> Tạo sản phẩm</button>
                     </form>
                 </div>
             </div>
@@ -246,7 +248,7 @@
                                 '<option value="cái">cái</option>' +
                                 '<option value="hộp">hộp</option>';
                             var label = document.getElementById('importOrManufactureLabel');
-                            label.textContent = 'Manufacture Date';
+                            label.textContent = 'Ngày Sản Xuất';
                         }
                     }
                     cateSelect.addEventListener('change', updateForm);
