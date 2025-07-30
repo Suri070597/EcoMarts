@@ -66,7 +66,7 @@
                                     <div class="account-status">
                                         <span
                                             class="status-badge ${account.status eq 'Active' ? 'status-active' : 'status-inactive'}">
-                                            ${account.status eq 'Active' ? 'Hoạt động' : 'Ngưng hoạt động'}
+                                            ${account.status eq 'Active' ? 'Hoạt động' : 'Ngừng hoạt động'}
                                         </span>
                                     </div>
                                     <div class="account-role mt-2">
@@ -128,7 +128,7 @@
                                         </tr>
                                         <tr>
                                             <th>Trạng thái:</th>
-                                            <td>${account.status eq 'Active' ? 'Đang hoạt động' : 'Ngưng hoạt động'}</td>
+                                            <td>${account.status eq 'Active' ? 'Hoạt động' : 'Ngưng hoạt động'}</td>
                                         </tr>
                                     </table>
                                 </div>
