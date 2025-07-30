@@ -35,18 +35,21 @@
                     class="needs-validation" novalidate id="accountForm">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="id" value="${account.accountID}">
+                    
                     <div class="mb-3">
                         <label class="form-label" for="username">Tên đăng nhập</label>
                         <input type="text" class="form-control" id="username" name="username"
                             value="${account.username}" required>
                         <div class="invalid-feedback">Vui lòng nhập tên đăng nhập</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label" for="password">Mật khẩu</label>
                         <input type="password" class="form-control" id="password" name="password"
                             value="${account.password}" required>
                         <div class="invalid-feedback" id="passwordFeedback">Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label" for="email">Email</label>
                         <input type="email" class="form-control" id="email" name="email"
@@ -54,30 +57,37 @@
                             value="${account.email}" required>
                         <div class="invalid-feedback">Vui lòng nhập địa chỉ email hợp lệ (vd: abc12@gmail.com)</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label" for="fullName">Họ và tên</label>
                         <input type="text" class="form-control" id="fullName" name="fullName"
                             value="${account.fullName}" required>
                         <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label" for="phone">Số điện thoại</label>
                         <input type="tel" class="form-control" id="phone" name="phone"
                             pattern="[0-9]{10}" maxlength="10" value="${account.phone}" required>
                         <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ gồm 10 chữ số</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label" for="address">Địa chỉ</label>
                         <input type="text" class="form-control" id="address" name="address"
-                            value="${account.address}">
+                            value="${account.address}" required>
+                        <div class="invalid-feedback">Vui lòng nhập địa chỉ</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label" for="gender">Giới tính</label>
-                        <select class="form-control" name="gender" id="gender">
+                        <select class="form-control" name="gender" id="gender" required>
                             <option value="Nam" ${account.gender eq 'Nam' ? 'selected' : '' }>Nam</option>
                             <option value="Nữ" ${account.gender eq 'Nữ' ? 'selected' : '' }>Nữ</option>
                         </select>
+                        <div class="invalid-feedback">Vui lòng chọn giới tính</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label" for="role">Vai trò</label>
                         <select class="form-control" name="role" id="role" required>
@@ -86,6 +96,7 @@
                         </select>
                         <div class="invalid-feedback">Vui lòng chọn vai trò</div>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label" for="status">Trạng thái</label>
                         <select class="form-control" name="status" id="status" required>
@@ -94,6 +105,7 @@
                         </select>
                         <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
                     </div>
+                    
                     <div class="btn-group">
                         <a href="${pageContext.request.contextPath}/admin/account" class="btn btn-secondary">Quay lại</a>
                         <button type="submit" class="btn btn-primary">Cập nhật tài khoản</button>
@@ -139,8 +151,10 @@
             const passwordInput = document.getElementById('password');
             const password = passwordInput.value;
             const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+            
+            const oldPassword = '${account.password}';
 
-            if (!passwordRegex.test(password)) {
+            if (oldPassword !== password && !passwordRegex.test(password)) {
                 event.preventDefault();
                 passwordInput.setCustomValidity('Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt');
                 document.getElementById('passwordFeedback').textContent =

@@ -86,7 +86,7 @@
                     <div class="mb-3">
                         <label class="form-label" for="status">Trạng thái</label>
                         <select class="form-control" name="status" id="status" required>
-                            <option value="Active" ${param.status eq 'Active' ? 'selected' : '' }>Đang hoạt động</option>
+                            <option value="Active" ${param.status eq 'Active' ? 'selected' : '' }>Hoạt động</option>
                             <option value="Inactive" ${param.status eq 'Inactive' ? 'selected' : '' }>Ngừng hoạt động</option>
                         </select>
                         <div class="invalid-feedback">Vui lòng chọn trạng thái</div>

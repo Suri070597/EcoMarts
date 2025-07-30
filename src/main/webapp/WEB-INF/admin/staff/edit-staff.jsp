@@ -86,7 +86,6 @@
                     <div class="mb-3">
                         <label class="form-label" for="gender">Giới tính</label>
                         <select class="form-control" name="gender" id="gender" required>
-                            <option value="">-- Chọn giới tính --</option>
                             <option value="Nam" ${staff.gender eq 'Nam' ? 'selected' : '' }>Nam</option>
                             <option value="Nữ" ${staff.gender eq 'Nữ' ? 'selected' : '' }>Nữ</option>
                         </select>
@@ -146,8 +145,10 @@
             const passwordInput = document.getElementById('password');
             const password = passwordInput.value;
             const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+            
+            const oldPassword = '${staff.account.password}';
 
-            if (!passwordRegex.test(password)) {
+            if (oldPassword !== password && !passwordRegex.test(password)) {
                 event.preventDefault();
                 passwordInput.setCustomValidity('Mật khẩu phải có ít nhất 6 ký tự bao gồm chữ cái, số và ký tự đặc biệt');
                 document.getElementById('passwordFeedback').textContent =
