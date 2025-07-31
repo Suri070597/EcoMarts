@@ -130,7 +130,7 @@
                 const isActive = status == 1;
                 Swal.fire({
                     title: 'Xác nhận thay đổi trạng thái',
-                    text: isActive ? 'Bạn có muốn ngừng hợp tác với nhà cung cấp này không?' : 'Bạn có muốn bắt đầu hợp tác lại với nhà cung cấp này không?',
+                    text: isActive ? 'Bạn có muốn ngừng hợp tác với nhà sản xuất này không?' : 'Bạn có muốn bắt đầu hợp tác lại với nhà sản xuất này không?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
