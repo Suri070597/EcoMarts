@@ -31,7 +31,7 @@
                             <div class="d-flex gap-3">
                                 <form action="${pageContext.request.contextPath}/admin/supplier" method="get" class="search-box">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" name="search" placeholder="Tìm kiếm nhà cung cấp..." value="${keyword != null ? keyword : ''}">
+                                    <input type="text" name="search" placeholder="Tìm kiếm nhà sản xuất..." value="${keyword != null ? keyword : ''}">
                                 </form>
                                 <a href="${pageContext.request.contextPath}/admin/supplier?view=create" class="btn btn-success">
                                     <i class="fas fa-plus"></i> Thêm nhà sản xuất
@@ -156,8 +156,8 @@
             function confirmDelete(event, supplierId) {
                 event.preventDefault();
                 Swal.fire({
-                    title: 'Xác nhận xóa nhà cung cấp',
-                    text: 'Bạn có chắc chắn muốn xóa nhà cung cấp này không?',
+                    title: 'Xác nhận xóa nhà sản xuất',
+                    text: 'Bạn có chắc chắn muốn xóa nhà sản xuất này không?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
