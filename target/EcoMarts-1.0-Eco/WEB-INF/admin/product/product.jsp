@@ -61,7 +61,7 @@
                                     <th>Giá</th>
                                     <th>Số lượng</th>
                                     <th>Đơn vị</th>
-                                    <th>Mô tả</th>
+                                    <!--<th>Mô tả</th>-->
                                     <th>Hình ảnh</th>
                                     <!--<th>Supplier</th>-->
                                     <th>Ngày tạo</th>
@@ -116,7 +116,6 @@
                                         %>
                                     </td>
                                     <td><%= pro.getUnit()%></td>
-                                    <td><%= pro.getDescription().replaceAll("\n", "<br/>")%></td>
                                     <td>
                                         <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= pro.getImageURL()%>" alt="Product Image" style="width: 80px; height: auto;">
                                     </td>
