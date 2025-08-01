@@ -131,7 +131,7 @@
                         ${sessionScope.cartError}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                    <% session.removeAttribute("cartError"); %>
+                    <c:remove var="cartError" scope="session"/>
                 </c:if>
 
                 <c:if test="${not empty sessionScope.cartMessage}">
@@ -139,7 +139,7 @@
                         ${sessionScope.cartMessage}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                    <% session.removeAttribute("cartMessage"); %>
+                    <c:remove var="cartMessage" scope="session"/>
                 </c:if>
 
                 <div class="row">
@@ -220,17 +220,11 @@
                                                     <c:set var="price" value="${item.product.price}" />
                                                     <c:set var="quantity" value="${item.quantity}" />
                                                     <div class="col-md-2 mb-2 mb-md-0 text-md-end">
-                                                        <div class="fw-bold text-success item-total">
-                                                            <% double price = (Double) pageContext.getAttribute("price");
-                                                                int quantity = ((Number) pageContext.getAttribute("quantity")).intValue();
-                                                                long roundedTotal = Math.round((price * quantity) / 1000.0) * 1000;
-                                                                out.print(new java.text.DecimalFormat("#,###").format(roundedTotal));
-                                                            %> ₫
-                                                        </div>
-                                                        <div class="text-muted small">
-                                                            <% long roundedPrice = Math.round(price / 1000.0) * 1000;
-                                                                out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                                            %> ₫ / ${item.product.unit}
+                                                                                            <div class="fw-bold text-success item-total">
+                                        <fmt:formatNumber value="${Math.round(price * quantity / 1000) * 1000}" type="number"/> ₫
+                                    </div>
+                                    <div class="text-muted small">
+                                        <fmt:formatNumber value="${Math.round(price / 1000) * 1000}" type="number"/> ₫ / ${item.product.unit}
                                                         </div>
                                                     </div>
 
@@ -287,10 +281,7 @@
                                                     <!-- Saved for later price -->
                                                     <c:set var="savedPrice" value="${item.product.price}" />
                                                     <div class="fw-bold text-success">
-                                                        <% double savedPrice = (Double) pageContext.getAttribute("savedPrice");
-                                                            long roundedSavedPrice = Math.round(savedPrice / 1000.0) * 1000;
-                                                            out.print(new java.text.DecimalFormat("#,###").format(roundedSavedPrice));
-                                                        %> ₫
+                                                        <fmt:formatNumber value="${Math.round(savedPrice / 1000) * 1000}" type="number"/> ₫
                                                     </div>
                                                 </div>
 
@@ -327,12 +318,8 @@
                             <h4 class="mb-3 cart-title">Tóm tắt đơn hàng</h4>
                             <div class="d-flex justify-content-between mb-2" id="cart-subtotal-container">
                                 <span id="cart-item-count">Tạm tính (${activeItems.size()} sản phẩm)</span>
-                                <c:set var="cartTotalVal" value="${cartTotal}" />
                                 <span id="cart-subtotal-amount">
-                                    <% double cartTotalVal = (Double) pageContext.getAttribute("cartTotalVal");
-                                        long roundedSubtotal = Math.round(cartTotalVal / 1000.0) * 1000;
-                                        out.print(new java.text.DecimalFormat("#,###").format(roundedSubtotal));
-                                    %> ₫
+                                    <fmt:formatNumber value="${cartTotal}" type="number"/> ₫
                                 </span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
@@ -343,16 +330,17 @@
                             <div class="d-flex justify-content-between mb-4">
                                 <strong>Tổng cộng</strong>
                                 <strong class="text-success fs-5 cart-total">
-                                    <% long roundedTotal = Math.round(cartTotalVal / 1000.0) * 1000;
-                                        out.print(new java.text.DecimalFormat("#,###").format(roundedTotal));
-                                    %> ₫
+                                    <fmt:formatNumber value="${cartTotal}" type="number"/> ₫
                                 </strong>
                             </div>
 
                             <c:if test="${not empty activeItems}">
-                                <a href="checkout" class="btn btn-primary w-100 checkout-btn py-2 mb-2">
-                                    <i class="fas fa-cash-register me-2"></i>Thanh toán ngay
-                                </a>
+                                <form action="buy-now" method="post" id="checkout-form">
+                                    <input type="hidden" name="action" value="initiateCart">
+                                    <button type="submit" class="btn btn-primary w-100 checkout-btn py-2 mb-2">
+                                        <i class="fas fa-cash-register me-2"></i>Thanh toán ngay
+                                    </button>
+                                </form>
                             </c:if>
                             <a href="home" class="btn btn-outline-secondary w-100 shop-more-btn py-2">
                                 <i class="fas fa-shopping-basket me-2"></i>Tiếp tục mua sắm

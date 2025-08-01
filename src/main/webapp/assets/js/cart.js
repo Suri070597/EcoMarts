@@ -81,10 +81,9 @@
                 return '0 ' + currency;
             }
 
-            // Làm tròn về nghìn đồng và định dạng
+            // Không làm tròn, chỉ định dạng số
             try {
-                const rounded = Math.round(numericPrice / 1000) * 1000;
-                return rounded.toLocaleString('vi-VN') + ' ' + currency;
+                return numericPrice.toLocaleString('vi-VN') + ' ' + currency;
             } catch (error) {
                 console.error('Error formatting price:', error);
                 return numericPrice.toString() + ' ' + currency;

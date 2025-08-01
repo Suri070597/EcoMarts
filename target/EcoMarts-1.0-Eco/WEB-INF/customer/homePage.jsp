@@ -170,7 +170,12 @@
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
+                                <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
+                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                <input type="hidden" name="quantity" value="1"> 
+                                <input type="hidden" name="action" value="initiate"> 
+                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                            </form>
                             </div>
                         </div>
                     </div>
@@ -246,7 +251,12 @@
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
+                                <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
+                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                <input type="hidden" name="quantity" value="1"> 
+                                <input type="hidden" name="action" value="initiate"> 
+                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                            </form>
                             </div>
                         </div>
                     </div>
@@ -324,7 +334,12 @@
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
+                                <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
+                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                <input type="hidden" name="quantity" value="1"> 
+                                <input type="hidden" name="action" value="initiate"> 
+                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                            </form>
                             </div>
                         </div>
                     </div>
@@ -404,7 +419,12 @@
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
+                                <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
+                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                <input type="hidden" name="quantity" value="1"> 
+                                <input type="hidden" name="action" value="initiate"> 
+                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                            </form>
                             </div>
                         </div>
                     </div>
@@ -484,7 +504,12 @@
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
+                                <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
+                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                <input type="hidden" name="quantity" value="1"> 
+                                <input type="hidden" name="action" value="initiate"> 
+                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                            </form>
                             </div>
                         </div>
                     </div>
@@ -567,7 +592,12 @@
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
+                                <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
+                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                <input type="hidden" name="quantity" value="1"> 
+                                <input type="hidden" name="action" value="initiate"> 
+                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                            </form>
                             </div>
                         </div>
                     </div>
@@ -647,7 +677,12 @@
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
+                                <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
+                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                <input type="hidden" name="quantity" value="1"> 
+                                <input type="hidden" name="action" value="initiate"> 
+                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                            </form>
                             </div>
                         </div>
                     </div>

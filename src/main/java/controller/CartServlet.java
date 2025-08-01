@@ -447,18 +447,14 @@ public class CartServlet extends HttpServlet {
 
             double itemTotal = 0;
             itemTotal = cartItem.getProduct().getPrice() * quantity;
-            // Làm tròn itemTotal về nghìn đồng
-            long roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;
 
             if (success) {
                 // Calculate new cart total
                 double cartTotal = cartUtil.calculateCartTotal(account.getAccountID());
-                // Làm tròn cartTotal về nghìn đồng
-                long roundedCartTotal = Math.round(cartTotal / 1000.0) * 1000;
                 int totalItems = cartUtil.getCartItemCount(account.getAccountID());
 
                 System.out.println(
-                        "Cart update successful: Item total=" + roundedItemTotal + ", Cart total=" + roundedCartTotal
+                        "Cart update successful: Item total=" + itemTotal + ", Cart total=" + cartTotal
                         + ", Total items=" + totalItems);
 
                 // Ensure values are valid numbers and properly formatted for JSON
@@ -478,13 +474,13 @@ public class CartServlet extends HttpServlet {
                     String json = String.format(java.util.Locale.US,
                             "{\"success\":true,"
                             + "\"message\":\"Đã cập nhật số lượng\","
-                            + "\"cartTotal\":%d,"
-                            + "\"itemTotal\":%d,"
+                            + "\"cartTotal\":%.2f,"
+                            + "\"itemTotal\":%.2f,"
                             + "\"updatedQuantity\":%.2f,"
                             + "\"totalItems\":%d,"
                             + "\"itemCount\":%d}",
-                            roundedCartTotal,
-                            roundedItemTotal,
+                            cartTotal,
+                            itemTotal,
                             quantity,
                             totalItems,
                             activeItemsCount);

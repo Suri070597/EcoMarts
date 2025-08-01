@@ -19,7 +19,9 @@ controller\viewstaff\Changepasswordstaff.class
 dao\AccountDAO1.class
 model\ProductPromotion.class
 model\Voucher.class
+controller\VNPayServlet.class
 controller\staff\StaffServlet.class
+util\VNPayUtil.class
 controller\ReviewServlet.class
 controller\register\LoginServlet.class
 controller\ProductServlet.class
@@ -56,6 +58,7 @@ model\Staff.class
 controller\AdminPromotionServlet.class
 db\EmailUtil.class
 model\Review.class
+controller\BuyNowServlet.class
 dao\TokenDAO.class
 controller\AdminCategoryServlet.class
 controller\dangky\RegisterRedirectServlet.class

@@ -1,68 +1,138 @@
 package controller;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import dao.CartItemDAO;
+import dao.CategoryDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
-import model.Order;
-import model.OrderDetail;
-
+import dao.ProductDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
-import java.io.IOException;
-import java.util.List;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.Account;
 import model.CartItem;
+import model.Category;
+import model.Order;
+import model.OrderDetail;
+import model.Product;
 
 @WebServlet("/customer/orderDetail")
-
 public class OrderDetailServlet extends HttpServlet {
+
+    private final OrderDAO orderDAO = new OrderDAO();
+    private final OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
+    private final CartItemDAO cartItemDAO = new CartItemDAO();
+    private final ProductDAO productDAO = new ProductDAO();
+    private final CategoryDAO categoryDAO = new CategoryDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-//        try {
-        String orderIdStr = request.getParameter("orderID");
-        System.out.println("Received orderID: " + orderIdStr);
+        try {
+            HttpSession session = request.getSession();
+            Account account = (Account) session.getAttribute("account");
+            
+            if (account == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+            
+            // Get order ID from request
+            String orderIdStr = request.getParameter("orderID");
+            
+            if (orderIdStr == null || orderIdStr.isEmpty()) {
+                request.setAttribute("errorMessage", "Thiếu thông tin đơn hàng");
+                request.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(request, response);
+                return;
+            }
 
-        if (orderIdStr == null || orderIdStr.isEmpty()) {
-            throw new IllegalArgumentException("Thiếu orderID trên request.");
+            int orderId = Integer.parseInt(orderIdStr);
+
+            // Get order details
+            Order order = orderDAO.getOrderById(orderId);
+            if (order == null) {
+                request.setAttribute("errorMessage", "Không tìm thấy đơn hàng với ID: " + orderId);
+                request.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(request, response);
+                return;
+            }
+            
+            // Validate that order belongs to current user
+            if (order.getAccountID() != account.getAccountID()) {
+                request.setAttribute("errorMessage", "Bạn không có quyền xem đơn hàng này");
+                request.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(request, response);
+                return;
+            }
+
+            // Get order details and product information
+            List<OrderDetail> orderDetails = orderDetailDAO.getOrderDetailsByOrderId(orderId);
+            
+            // Calculate total
+            double total = 0;
+            for (OrderDetail od : orderDetails) {
+                // Load product information for display purposes only (image, description, etc)
+                Product product = productDAO.getProductById(od.getProductID());
+                if (product != null) {
+                    // Lưu thông tin sản phẩm nhưng KHÔNG cập nhật giá và số lượng
+                    // vì chúng ta muốn giữ giá trị gốc từ thời điểm đặt hàng
+                    od.setProduct(product);
+                }
+                
+                total += od.getSubTotal();
+            }
+            
+            // Get order history
+            List<Map<String, Object>> orderHistory = orderDAO.getOrderHistory(orderId);
+            
+            // Get categories for the navigation menu
+            List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
+
+            // Set attributes for JSP
+            request.setAttribute("order", order);
+            request.setAttribute("orderDetails", orderDetails);
+            request.setAttribute("total", total);
+            request.setAttribute("orderHistory", orderHistory);
+            request.setAttribute("categories", categories);
+            
+            // Check if this is a new order that needs history creation
+            String isNewOrder = request.getParameter("newOrder");
+            if ("true".equals(isNewOrder)) {
+                try {
+                    // Create order history now that the order is fully committed to the database
+                    orderDAO.createOrderHistory(account.getAccountID(), orderId, "Đơn hàng đã được tạo", "Đang xử lý");
+                } catch (Exception ex) {
+                    // Log error but continue processing
+                    System.err.println("Error creating order history: " + ex.getMessage());
+                }
+            }
+            
+            // Check for messages in session
+            String successMessage = (String) session.getAttribute("successMessage");
+            if (successMessage != null) {
+                request.setAttribute("successMessage", successMessage);
+                session.removeAttribute("successMessage");
+            }
+            
+            String errorMessage = (String) session.getAttribute("errorMessage");
+            if (errorMessage != null) {
+                request.setAttribute("errorMessage", errorMessage);
+                session.removeAttribute("errorMessage");
+            }
+
+            // Forward to JSP
+            request.getRequestDispatcher("/WEB-INF/customer/order-detail.jsp").forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Đã xảy ra lỗi khi xử lý chi tiết đơn hàng");
+            request.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(request, response);
         }
-
-        int orderId = Integer.parseInt(orderIdStr);
-
-        OrderDAO orderDAO = new OrderDAO();
-        OrderDetailDAO detailDAO = new OrderDetailDAO();
-
-        Order order = orderDAO.getOrderById(orderId);
-        if (order == null) {
-            throw new IllegalArgumentException("Không tìm thấy đơn hàng với ID: " + orderId);
-        }
-
-        List<OrderDetail> orderDetails = detailDAO.getOrderDetailsByOrderId(orderId);
-        if (orderDetails == null) {
-            throw new IllegalStateException("Không có chi tiết đơn hàng nào.");
-        }
-
-        double total = 0;
-        for (OrderDetail od : orderDetails) {
-            total += od.getSubTotal();
-        }
-
-        request.setAttribute("order", order);
-        request.setAttribute("orderDetails", orderDetails);
-        request.setAttribute("total", total);
-
-        request.getRequestDispatcher("/WEB-INF/customer/order-detail.jsp").forward(request, response);
     }
-//        } catch (Exception e) {
-//            e.printStackTrace(); // In stack trace để biết lỗi thật sự
-//            response.sendError(500, "Có lỗi xảy ra khi xử lý chi tiết đơn hàng.");
-//        }
-//    }
-    private final OrderDAO orderDAO = new OrderDAO();
-    private final OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-    private final CartItemDAO cartItemDAO = new CartItemDAO();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -70,35 +140,91 @@ public class OrderDetailServlet extends HttpServlet {
         String action = request.getParameter("action");
         String orderIdStr = request.getParameter("orderId");
         HttpSession session = request.getSession();
-        Account acc = (Account) session.getAttribute("account");
+        Account account = (Account) session.getAttribute("account");
 
-        if (orderIdStr == null || acc == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu orderId hoặc chưa đăng nhập");
+        if (orderIdStr == null || account == null) {
+            session.setAttribute("errorMessage", "Thiếu thông tin hoặc chưa đăng nhập");
+            response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
 
-        int orderId = Integer.parseInt(orderIdStr);
-
-        switch (action) {
-            case "cancel":
-                orderDAO.cancelOrder(orderId);
+        try {
+            int orderId = Integer.parseInt(orderIdStr);
+            
+            // Verify order belongs to the current user
+            Order order = orderDAO.getOrderById(orderId);
+            if (order == null || order.getAccountID() != account.getAccountID()) {
+                session.setAttribute("errorMessage", "Bạn không có quyền thực hiện thao tác với đơn hàng này");
                 response.sendRedirect(request.getContextPath() + "/customer/reorder");
-                break;
+                return;
+            }
 
-            case "reorder":
-                List<CartItem> items = orderDetailDAO.getCartItemsFromOrder(orderId);
-                for (CartItem item : items) {
-                    cartItemDAO.upsertCartItem(acc.getAccountID(), item.getProductID(), item.getQuantity());
-                }
-                response.sendRedirect(request.getContextPath() + "/cart");
-                break;
+            switch (action) {
+                case "cancel":
+                    // Check if order can be cancelled (only in Processing status)
+                    if (!"Đang xử lý".equals(order.getOrderStatus())) {
+                        session.setAttribute("errorMessage", "Chỉ có thể hủy đơn hàng trong trạng thái 'Đang xử lý'");
+                        response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId);
+                        return;
+                    }
+                    
+                    // Cancel the order and restore stock
+                    try {
+                        orderDAO.cancelOrder(orderId);
+                        
+                        // Record the cancellation in order history
+                        orderDAO.createOrderHistory(account.getAccountID(), orderId, "Đã hủy đơn hàng", "Đã hủy");
+                        session.setAttribute("successMessage", "Đơn hàng đã được hủy thành công");
+                    } catch (Exception ex) {
+                        session.setAttribute("errorMessage", "Không thể hủy đơn hàng. Vui lòng thử lại sau");
+                    }
+                    
+                    response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId);
+                    break;
 
-            case "back":
-                response.sendRedirect(request.getContextPath() + "/customer/reorder");
-                break;
+                case "reorder":
+                    // Add order items to cart
+                    List<CartItem> items = orderDAO.getCartItemsFromOrder(orderId);
+                    
+                    // Check stock availability before adding to cart
+                    Map<Integer, Double> insufficientStock = new HashMap<>();
+                    for (CartItem item : items) {
+                        double stockQuantity = productDAO.getStockQuantityById(item.getProductID());
+                        if (stockQuantity < item.getQuantity()) {
+                            // Save the product with insufficient stock for message
+                            Product product = productDAO.getProductById(item.getProductID());
+                            if (product != null) {
+                                insufficientStock.put(item.getProductID(), stockQuantity);
+                                // Adjust quantity to available stock
+                                if (stockQuantity > 0) {
+                                    item.setQuantity(stockQuantity);
+                                }
+                            }
+                        }
+                        
+                        // Only add to cart if stock is available
+                        if (stockQuantity > 0) {
+                            cartItemDAO.upsertCartItem(account.getAccountID(), item.getProductID(), 
+                                    Math.min(item.getQuantity(), stockQuantity));
+                        }
+                    }
+                    
+                    if (!insufficientStock.isEmpty()) {
+                        session.setAttribute("cartError", "Một số sản phẩm không đủ số lượng trong kho");
+                    } else {
+                        session.setAttribute("cartMessage", "Đã thêm tất cả sản phẩm vào giỏ hàng");
+                    }
+                    
+                    response.sendRedirect(request.getContextPath() + "/cart");
+                    break;
 
-            default:
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
+                default:
+                    response.sendRedirect(request.getContextPath() + "/customer/reorder");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.setAttribute("errorMessage", "Đã xảy ra lỗi: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/customer/reorder");
         }
     }
 }

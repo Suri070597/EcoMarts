@@ -529,5 +529,24 @@ public double getStockQuantityById(int productId) {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Update product stock quantity
+     * @param productId The product ID
+     * @param newStockQuantity The new stock quantity to set
+     * @return true if update was successful, false otherwise
+     */
+    public boolean updateProductStock(int productId, double newStockQuantity) {
+        String sql = "UPDATE Product SET StockQuantity = ? WHERE ProductID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, newStockQuantity);
+            ps.setInt(2, productId);
+            int result = ps.executeUpdate();
+            return result > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 }

@@ -219,7 +219,7 @@ CREATE TABLE [Order] (
     TotalAmount DECIMAL(10,2) NOT NULL,
     ShippingAddress NVARCHAR(255) NOT NULL,
     ShippingPhone VARCHAR(15) NOT NULL,
-    PaymentMethod NVARCHAR(50) NOT NULL, -- "Cash", "Momo", "VNPay", "Bank Transfer"
+    PaymentMethod NVARCHAR(50) NOT NULL, -- "Cash", "VNPay"
     PaymentStatus NVARCHAR(50) DEFAULT N'Chưa thanh toán', -- "Chưa thanh toán", "Đã thanh toán"
     OrderStatus NVARCHAR(50) DEFAULT N'Đang xử lý', -- "Đang xử lý", "Đang giao hàng", "Đã giao", "Đã hủy"
     Notes NVARCHAR(255),
@@ -230,7 +230,7 @@ CREATE TABLE OrderDetail (
     OrderDetailID INT PRIMARY KEY IDENTITY(1,1),
     OrderID INT NOT NULL,
     ProductID INT NOT NULL,
-    Quantity INT NOT NULL,
+    Quantity DECIMAL(10,2) NOT NULL,
     UnitPrice DECIMAL(10,2) NOT NULL,
     SubTotal AS (Quantity * UnitPrice) PERSISTED,
     FOREIGN KEY (OrderID) REFERENCES [Order](OrderID) ON DELETE CASCADE,
@@ -319,7 +319,7 @@ CREATE TABLE VoucherUsage (
 CREATE TABLE Inventory (
     InventoryID INT PRIMARY KEY IDENTITY(1,1),
     ProductID INT NOT NULL,
-    Quantity INT CHECK (Quantity >= 0),
+    Quantity DECIMAL(10,2) CHECK (Quantity >= 0),
     LastUpdated DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
 );

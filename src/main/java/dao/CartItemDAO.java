@@ -357,7 +357,7 @@ public class CartItemDAO extends DBContext {
     public void upsertCartItem(int accountID, int productID, double quantity) {
         String select = "SELECT Quantity FROM CartItem WHERE AccountID = ? AND ProductID = ? AND Status = N'Active'";
         String update = "UPDATE CartItem SET Quantity = Quantity + ? WHERE AccountID = ? AND ProductID = ? AND Status = N'Active'";
-        String insert = "INSERT INTO CartItem (AccountID, ProductID, Quantity) VALUES (?, ?, ?)";
+        String insert = "INSERT INTO CartItem (AccountID, ProductID, Quantity, AddedAt, Status) VALUES (?, ?, ?, GETDATE(), N'Active')";
 
         try {
             PreparedStatement ps = conn.prepareStatement(select);
@@ -376,7 +376,7 @@ public class CartItemDAO extends DBContext {
             } else {
                 // Nếu chưa có thì thêm mới
                 PreparedStatement ins = conn.prepareStatement(insert);
-                ins.setInt(1, accountID);  // <-- sửa: set từ tham số 1
+                ins.setInt(1, accountID);
                 ins.setInt(2, productID);
                 ins.setDouble(3, quantity);
                 ins.executeUpdate();
@@ -389,4 +389,38 @@ public class CartItemDAO extends DBContext {
         }
     }
     
+    /**
+     * Get all cart items for a specific user with active status
+     * 
+     * @param accountID The ID of the account
+     * @param isSavedForLater Whether to get saved for later items
+     * @return List of CartItem objects
+     */
+    public List<CartItem> getCartByAccountId(int accountID, boolean isSavedForLater) {
+        String status = isSavedForLater ? "SavedForLater" : "Active";
+        return getCartItems(accountID, status);
+    }
+    
+    /**
+     * Remove a cart item completely
+     * 
+     * @param cartItemID The ID of the cart item to remove
+     * @return true if successfully removed, false otherwise
+     */
+    public boolean removeCartItem(int cartItemID) {
+        String sql = "DELETE FROM CartItem WHERE CartItemID = ?";
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, cartItemID);
+            
+            int affectedRows = ps.executeUpdate();
+            ps.close();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("Error removing cart item: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
