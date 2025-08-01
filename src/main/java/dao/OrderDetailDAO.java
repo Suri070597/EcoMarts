@@ -22,6 +22,7 @@ public class OrderDetailDAO extends DBContext {
                 + "    od.OrderID,\n"
                 + "    od.ProductID,\n"
                 + "    p.ProductName,\n"
+                + "    p.Unit,\n"
                 + "    od.Quantity,\n"
                 + "    od.UnitPrice,\n"
                 + "    od.SubTotal,\n"
@@ -41,12 +42,13 @@ public class OrderDetailDAO extends DBContext {
                         rs.getInt("OrderDetailID"),
                         rs.getInt("OrderID"),
                         rs.getInt("ProductID"),
-                        rs.getInt("Quantity"),
+                        rs.getDouble("Quantity"),  // Lấy là double để hỗ trợ số lượng thập phân
                         rs.getDouble("UnitPrice")
                 );
 
                 // Set thêm thông tin phụ
                 orderDetail.setProductName(rs.getString("ProductName"));
+                orderDetail.setUnit(rs.getString("Unit"));  // Lưu đơn vị để hiển thị đúng
                 orderDetail.setOrderStatus(rs.getString("OrderStatus"));
                 orderDetail.setSubTotal(rs.getDouble("SubTotal")); // nếu không tính trong constructor
 
@@ -70,7 +72,7 @@ public class OrderDetailDAO extends DBContext {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, orderDetail.getOrderID());
             ps.setInt(2, orderDetail.getProductID());
-            ps.setInt(3, orderDetail.getQuantity());
+            ps.setDouble(3, orderDetail.getQuantity());
             ps.setDouble(4, orderDetail.getUnitPrice());
 
             int rowsAffected = ps.executeUpdate();
@@ -88,7 +90,7 @@ public class OrderDetailDAO extends DBContext {
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, orderDetail.getQuantity());
+            ps.setDouble(1, orderDetail.getQuantity());
             ps.setDouble(2, orderDetail.getUnitPrice());
             ps.setInt(3, orderDetail.getOrderDetailID());
 

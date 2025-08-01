@@ -193,7 +193,7 @@ return;
                                     <button type="submit" id="add-to-cart-btn" class="btn btn-outline-danger">
                                         <i class="fa-solid fa-cart-shopping"></i> Thêm Vào Giỏ Hàng
                                     </button>
-                                    <a href="cart" class="btn btn-danger">Mua Ngay</a>
+                                    <button type="button" id="buy-now-btn" class="btn btn-danger">Mua Ngay</button>
                                 </div>
 
                                 <script>
@@ -201,6 +201,7 @@ return;
                                         const quantityInput = document.getElementById('product-quantity');
                                         const quantityWarning = document.getElementById('quantity-warning');
                                         const addToCartBtn = document.getElementById('add-to-cart-btn');
+                                        const buyNowBtn = document.getElementById('buy-now-btn');
                                         const maxStock = <%= mo.getAvailableQuantity()%>;
 
                                         // Validate quantity when changed
@@ -210,13 +211,16 @@ return;
                                                 this.value = 1;
                                                 quantityWarning.style.display = 'none';
                                                 addToCartBtn.disabled = false;
+                                                buyNowBtn.disabled = false;
                                             } else if (quantity > maxStock) {
                                                 quantityWarning.style.display = 'block';
                                                 quantityWarning.textContent = 'Số lượng tối đa có thể mua: ' + maxStock;
                                                 addToCartBtn.disabled = true;
+                                                buyNowBtn.disabled = true;
                                             } else {
                                                 quantityWarning.style.display = 'none';
                                                 addToCartBtn.disabled = false;
+                                                buyNowBtn.disabled = false;
                                             }
                                         });
 
@@ -231,6 +235,50 @@ return;
                                                         ? 'Số lượng tối đa có thể mua: ' + maxStock
                                                         : 'Vui lòng nhập số lượng hợp lệ';
                                             }
+                                        });
+                                        
+                                        // Add Buy Now functionality
+                                        buyNowBtn.addEventListener('click', function() {
+                                            const quantity = parseInt(quantityInput.value);
+                                            
+                                            // Validate quantity
+                                            if (isNaN(quantity) || quantity <= 0 || quantity > maxStock) {
+                                                quantityWarning.style.display = 'block';
+                                                quantityWarning.textContent = quantity > maxStock
+                                                        ? 'Số lượng tối đa có thể mua: ' + maxStock
+                                                        : 'Vui lòng nhập số lượng hợp lệ';
+                                                return;
+                                            }
+                                            
+                                            // Use the built-in form instead of creating a new one
+                                            const buyNowForm = document.createElement('form');
+                                            buyNowForm.method = 'post';
+                                            buyNowForm.action = 'buy-now';
+                                            
+                                            // Add action parameter
+                                            const actionInput = document.createElement('input');
+                                            actionInput.type = 'hidden';
+                                            actionInput.name = 'action';
+                                            actionInput.value = 'initiate';
+                                            buyNowForm.appendChild(actionInput);
+                                            
+                                            // Add product ID parameter
+                                            const productIdInput = document.createElement('input');
+                                            productIdInput.type = 'hidden';
+                                            productIdInput.name = 'productID';
+                                            productIdInput.value = '<c:out value="${mo.productID}"/>';
+                                            buyNowForm.appendChild(productIdInput);
+                                            
+                                            // Add quantity parameter
+                                            const quantityInputHidden = document.createElement('input');
+                                            quantityInputHidden.type = 'hidden';
+                                            quantityInputHidden.name = 'quantity';
+                                            quantityInputHidden.value = quantity;
+                                            buyNowForm.appendChild(quantityInputHidden);
+                                            
+                                            // Append form to body and submit
+                                            document.body.appendChild(buyNowForm);
+                                            buyNowForm.submit();
                                         });
                                     });
                                 </script>

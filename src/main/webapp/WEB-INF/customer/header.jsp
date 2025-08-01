@@ -71,7 +71,7 @@
                     <div class="category-content">
                         <c:if test="${not empty category.children}">
                             <c:forEach items="${category.children}" var="child">
-                                <a href="ViewAllProductServlet?categoryId=${child.categoryID}">${child.categoryName}</a>
+                                <a href="${pageContext.request.contextPath}/ViewAllProductServlet?categoryId=${child.categoryID}">${child.categoryName}</a>
                             </c:forEach>
                         </c:if>
                     </div>
@@ -84,11 +84,11 @@
 <!-- Header -->
 <div class="header">
     <div class="logo">
-        <a href="home"><img src="assets/img/eco.png" alt="Logo"></a>
+        <a href="${pageContext.request.contextPath}/home"><img src="${pageContext.request.contextPath}/assets/img/eco.png" alt="Logo"></a>
         <span>EcoMart</span>
     </div>
 
-    <form action="SearchProduct" method="get" class="search-bar" autocomplete="off">
+    <form action="${pageContext.request.contextPath}/SearchProduct" method="get" class="search-bar" autocomplete="off">
         <i class="fas fa-search"></i>
         <input type="text" id="searchInput" name="keyword" placeholder="Tìm kiếm sản phẩm..." required>
         <div id="suggestions" class="suggestions-box"></div>
@@ -212,7 +212,7 @@
             return;
         }
 
-        fetch("Suggest?keyword=" + encodeURIComponent(keyword))
+        fetch("${pageContext.request.contextPath}/Suggest?keyword=" + encodeURIComponent(keyword))
                 .then(res => res.json())
                 .then(data => {
                     suggestionBox.innerHTML = "";

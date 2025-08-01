@@ -407,4 +407,13 @@ public class AccountDAO extends DBContext {
             return false;
         }
     }
+    
+    /**
+     * Get detailed account info by account ID
+     * @param accountId The account ID
+     * @return The Account object or null if not found
+     */
+    public Account getUserDetail(int accountId) {
+        return getFullAccountById(accountId);
+    }
 }

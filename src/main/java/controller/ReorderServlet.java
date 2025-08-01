@@ -4,20 +4,22 @@
  */
 package controller;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import dao.CategoryDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
-import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import model.Account;
+import model.Category;
 import model.Order;
 import model.OrderDetail;
 
@@ -30,6 +32,7 @@ public class ReorderServlet extends HttpServlet {
 
     OrderDAO orderDAO = new OrderDAO();
     OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
+    CategoryDAO categoryDAO = new CategoryDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -43,7 +46,10 @@ public class ReorderServlet extends HttpServlet {
         }
 
         List<Order> orders = orderDAO.getOrdersByCustomerName(acc.getFullName());
+        List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
+        
         req.setAttribute("orders", orders);
+        req.setAttribute("categories", categories);
         req.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(req, resp);
     }
 
@@ -62,15 +68,15 @@ public class ReorderServlet extends HttpServlet {
         List<OrderDetail> oldDetails = orderDetailDAO.getOrderDetailsByOrderId(orderId);
 
         // Tạo giỏ hàng tạm thời trong session (giả sử đang dùng Map<Integer, Integer> để lưu ProductID và Quantity)
-        Map<Integer, Integer> cart = (Map<Integer, Integer>) session.getAttribute("cart");
+        Map<Integer, Double> cart = (Map<Integer, Double>) session.getAttribute("cart");
         if (cart == null) {
             cart = new HashMap<>();
         }
 
         for (OrderDetail od : oldDetails) {
             int pid = od.getProductID();
-            int qty = od.getQuantity();
-            cart.put(pid, cart.getOrDefault(pid, 0) + qty);
+            double qty = od.getQuantity();
+            cart.put(pid, cart.getOrDefault(pid, 0.0) + qty);
         }
 
         session.setAttribute("cart", cart);

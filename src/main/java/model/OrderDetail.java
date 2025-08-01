@@ -5,17 +5,18 @@ public class OrderDetail {
     private int orderDetailID;
     private int orderID;
     private int productID;
-    private int quantity;
+    private double quantity;  // Đổi thành double để hỗ trợ số lượng thập phân
     private double unitPrice;
     private double subTotal;
     private String productName;
     private Product product;
     private String orderStatus;
+    private String unit;  // Thêm trường đơn vị
 
     public OrderDetail() {
     }
 
-    public OrderDetail(int orderDetailID, int orderID, int productID, int quantity, double unitPrice) {
+    public OrderDetail(int orderDetailID, int orderID, int productID, double quantity, double unitPrice) {
         this.orderDetailID = orderDetailID;
         this.orderID = orderID;
         this.productID = productID;
@@ -48,13 +49,21 @@ public class OrderDetail {
         this.productID = productID;
     }
 
-    public int getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(double quantity) {
         this.quantity = quantity;
         this.subTotal = this.quantity * this.unitPrice;
+    }
+    
+    public String getUnit() {
+        return unit;
+    }
+    
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     public double getUnitPrice() {
@@ -97,7 +106,7 @@ public class OrderDetail {
     public String getOrderStatus() {
         return orderStatus;
     }
-public OrderDetail(int productID, int quantity) {
+public OrderDetail(int productID, double quantity) {
     this.productID = productID;
     this.quantity = quantity;
 }

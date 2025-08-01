@@ -5,14 +5,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import db.DBContext;
-import java.util.LinkedHashMap;
+import model.Account;
 import model.CartItem;
 import model.Order;
 import model.OrderDetail;
+import model.Product;
 import model.RevenueStats;
 
 public class OrderDAO extends DBContext {
@@ -73,6 +75,13 @@ public class OrderDAO extends DBContext {
                 o.setOrderStatus(rs.getString("OrderStatus"));
                 o.setNotes(rs.getString("Notes"));
                 o.setAccountName(rs.getString("FullName"));
+                
+                // Create Account object and set it
+                Account account = new Account();
+                account.setAccountID(o.getAccountID());
+                account.setFullName(rs.getString("FullName"));
+                o.setAccount(account);
+                
                 return o;
             }
         } catch (SQLException e) {
@@ -85,7 +94,7 @@ public class OrderDAO extends DBContext {
     public List<OrderDetail> getOrderDetailsByOrderId(int orderId) {
         List<OrderDetail> list = new ArrayList<>();
         String sql = """
-            SELECT od.*, p.ProductName
+            SELECT od.*, p.ProductName, p.Unit
             FROM OrderDetail od
             JOIN Product p ON od.ProductID = p.ProductID
             WHERE od.OrderID = ?
@@ -98,10 +107,11 @@ public class OrderDAO extends DBContext {
                 od.setOrderDetailID(rs.getInt("OrderDetailID"));
                 od.setOrderID(rs.getInt("OrderID"));
                 od.setProductID(rs.getInt("ProductID"));
-                od.setQuantity(rs.getInt("Quantity"));
+                od.setQuantity(rs.getDouble("Quantity"));
                 od.setUnitPrice(rs.getDouble("UnitPrice"));
                 od.setSubTotal(rs.getDouble("SubTotal"));
                 od.setProductName(rs.getString("ProductName"));
+                od.setUnit(rs.getString("Unit"));
                 list.add(od);
             }
         } catch (SQLException e) {
@@ -116,7 +126,7 @@ public class OrderDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return (int)rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -129,7 +139,7 @@ public class OrderDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return (int)rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -378,7 +388,7 @@ public class OrderDAO extends DBContext {
             ps.setDate(1, date);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return (int)rs.getDouble(1);
             }
         } catch (SQLException e) {
             System.out.println("Error in countOrdersForDate: " + e.getMessage());
@@ -394,7 +404,7 @@ public class OrderDAO extends DBContext {
             ps.setString(1, status);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return (int)rs.getDouble(1);
             }
         } catch (SQLException e) {
             System.out.println("Error in countOrdersByStatus: " + e.getMessage());
@@ -405,6 +415,25 @@ public class OrderDAO extends DBContext {
 
     public boolean updateOrderStatus(int orderId, String status) {
         String sql = "UPDATE [Order] SET OrderStatus = ? WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, orderId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    /**
+     * Cập nhật trạng thái thanh toán của đơn hàng
+     * @param orderId ID của đơn hàng
+     * @param status Trạng thái thanh toán mới
+     * @return true nếu cập nhật thành công, false nếu thất bại
+     */
+    public boolean updatePaymentStatus(int orderId, String status) {
+        String sql = "UPDATE [Order] SET PaymentStatus = ? WHERE OrderID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, orderId);
@@ -521,7 +550,7 @@ public class OrderDAO extends DBContext {
             ps.setInt(2, year);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return (int)rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -540,7 +569,7 @@ public class OrderDAO extends DBContext {
             ps.setInt(2, year);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return (int)rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -572,7 +601,7 @@ public class OrderDAO extends DBContext {
             ps.setInt(1, year);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return (int)rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -592,7 +621,7 @@ public class OrderDAO extends DBContext {
             ps.setInt(1, year);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return (int)rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -669,7 +698,7 @@ public class OrderDAO extends DBContext {
                 ResultSet rs = detailStmt.executeQuery();
                 while (rs.next()) {
                     int productId = rs.getInt("ProductID");
-                    int quantity = rs.getInt("Quantity");
+                    double quantity = rs.getDouble("Quantity");
                     orderDetails.add(new OrderDetail(productId, quantity)); // ✅ sửa chỗ này
                 }
             }
@@ -677,7 +706,7 @@ public class OrderDAO extends DBContext {
             // 3. Cập nhật tồn kho
             try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSQL)) {
                 for (OrderDetail od : orderDetails) {
-                    stockStmt.setInt(1, od.getQuantity());
+                    stockStmt.setDouble(1, od.getQuantity());
                     stockStmt.setInt(2, od.getProductID());
                     stockStmt.addBatch();
                 }
@@ -712,7 +741,7 @@ public class OrderDAO extends DBContext {
             while (rs.next()) {
                 CartItem item = new CartItem();
                 item.setProductID(rs.getInt("ProductID"));
-                item.setQuantity(rs.getInt("Quantity"));
+                item.setQuantity(rs.getDouble("Quantity"));
                 items.add(item);
             }
 
@@ -786,6 +815,315 @@ public Map<Integer, Double> getLast5YearsRevenue() {
     }
 
     return revenueMap;
+}
+
+/**
+ * Create order history record
+ * @param accountId The account ID
+ * @param orderId The order ID
+ * @param action The action performed
+ * @param status The order status
+ * @return true if the history was created successfully, false otherwise
+ */
+public boolean createOrderHistory(int accountId, int orderId, String action, String status) {
+    // First, check if we need to create the OrderHistory table if it doesn't exist
+    try {
+        String checkTableSql = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'OrderHistory') " +
+                            "CREATE TABLE OrderHistory (" +
+                            "HistoryID INT PRIMARY KEY IDENTITY(1,1), " +
+                            "OrderID INT NOT NULL, " +
+                            "AccountID INT NOT NULL, " +
+                            "Action NVARCHAR(255) NOT NULL, " +
+                            "Status NVARCHAR(50) NOT NULL, " +
+                            "Timestamp DATETIME DEFAULT GETDATE(), " +
+                            "FOREIGN KEY (OrderID) REFERENCES [Order](OrderID) ON DELETE CASCADE, " +
+                            "FOREIGN KEY (AccountID) REFERENCES Account(AccountID) " +
+                            ")";
+        
+        try (PreparedStatement ps = conn.prepareStatement(checkTableSql)) {
+            ps.executeUpdate();
+        }
+        
+        // Insert the history record
+        String insertSql = "INSERT INTO OrderHistory (OrderID, AccountID, Action, Status) VALUES (?, ?, ?, ?)";
+        
+        try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+            ps.setInt(1, orderId);
+            ps.setInt(2, accountId);
+            ps.setString(3, action);
+            ps.setString(4, status);
+            
+            int result = ps.executeUpdate();
+            return result > 0;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+/**
+ * Get order history for a specific order
+ * @param orderId The order ID
+ * @return List of order history records as maps
+ */
+public List<Map<String, Object>> getOrderHistory(int orderId) {
+    List<Map<String, Object>> historyList = new ArrayList<>();
+    
+    try {
+        // Check if the table exists
+        String checkTableSql = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'OrderHistory') " +
+                            "CREATE TABLE OrderHistory (" +
+                            "HistoryID INT PRIMARY KEY IDENTITY(1,1), " +
+                            "OrderID INT NOT NULL, " +
+                            "AccountID INT NOT NULL, " +
+                            "Action NVARCHAR(255) NOT NULL, " +
+                            "Status NVARCHAR(50) NOT NULL, " +
+                            "Timestamp DATETIME DEFAULT GETDATE(), " +
+                            "FOREIGN KEY (OrderID) REFERENCES [Order](OrderID) ON DELETE CASCADE, " +
+                            "FOREIGN KEY (AccountID) REFERENCES Account(AccountID) " +
+                            ")";
+        
+        try (PreparedStatement ps = conn.prepareStatement(checkTableSql)) {
+            ps.executeUpdate();
+        }
+        
+        // Get history records
+        String sql = "SELECT h.*, a.Username FROM OrderHistory h " +
+                    "JOIN Account a ON h.AccountID = a.AccountID " +
+                    "WHERE h.OrderID = ? ORDER BY h.Timestamp DESC";
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Map<String, Object> record = new HashMap<>();
+                record.put("historyId", rs.getInt("HistoryID"));
+                record.put("orderId", rs.getInt("OrderID"));
+                record.put("accountId", rs.getInt("AccountID"));
+                record.put("username", rs.getString("Username"));
+                record.put("action", rs.getString("Action"));
+                record.put("status", rs.getString("Status"));
+                record.put("timestamp", rs.getTimestamp("Timestamp"));
+                
+                historyList.add(record);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    
+    return historyList;
+}
+
+
+
+/**
+ * Creates a new order from cart items
+ * @param order The order to create
+ * @param items The list of cart items to add to the order
+ * @return The ID of the created order, or -1 if creation failed
+ */
+public int createOrderFromCart(Order order, List<CartItem> items) {
+    int orderId = -1;
+    
+    try {
+        // Set autocommit to false for transaction
+        conn.setAutoCommit(false);
+        
+        // Insert order
+        String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
+                              "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
+                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        try (PreparedStatement ps = conn.prepareStatement(insertOrderSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, order.getAccountID());
+            ps.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
+            ps.setDouble(3, order.getTotalAmount());
+            ps.setString(4, order.getShippingAddress());
+            ps.setString(5, order.getShippingPhone());
+            ps.setString(6, order.getPaymentMethod());
+            ps.setString(7, order.getPaymentStatus());
+            ps.setString(8, order.getOrderStatus());
+            ps.setString(9, order.getNotes());
+            
+            int affectedRows = ps.executeUpdate();
+            
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    orderId = rs.getInt(1);
+                }
+                rs.close();
+            }
+        }
+        
+        // If order creation succeeded, insert order details
+        if (orderId > 0) {
+            // Insert order details
+            String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
+                                   "VALUES (?, ?, ?, ?)";
+            
+            try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
+                for (CartItem item : items) {
+                    if (item.getProduct() != null) {
+                        ps.setInt(1, orderId);
+                        ps.setInt(2, item.getProductID());
+                        ps.setDouble(3, item.getQuantity());
+                        ps.setDouble(4, item.getProduct().getPrice());
+                        ps.addBatch();
+                    }
+                }
+                ps.executeBatch();
+            }
+        } else {
+            // Order creation failed, rollback transaction
+            conn.rollback();
+            return orderId;
+        }
+        
+        // Commit transaction if all operations succeeded
+        conn.commit();
+    } catch (SQLException e) {
+        try {
+            // Rollback transaction on error
+            conn.rollback();
+        } catch (SQLException rollbackEx) {
+            rollbackEx.printStackTrace();
+        }
+        e.printStackTrace();
+    } finally {
+        try {
+            // Reset auto-commit
+            conn.setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    return orderId;
+}
+
+/**
+ * Creates a new order with a single item
+ * @param order The order to create
+ * @param item The cart item to add to the order
+ * @return The ID of the created order, or -1 if creation failed
+ */
+public int createOrder(Order order, CartItem item) {
+    int orderId = -1;
+    
+    try {
+        // Set autocommit to false for transaction
+        conn.setAutoCommit(false);
+        
+        // Insert order
+        String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
+                               "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
+                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        try (PreparedStatement ps = conn.prepareStatement(insertOrderSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, order.getAccountID());
+            ps.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
+            ps.setDouble(3, order.getTotalAmount());
+            ps.setString(4, order.getShippingAddress());
+            ps.setString(5, order.getShippingPhone());
+            ps.setString(6, order.getPaymentMethod());
+            ps.setString(7, order.getPaymentStatus());
+            ps.setString(8, order.getOrderStatus());
+            ps.setString(9, order.getNotes());
+            
+            int affectedRows = ps.executeUpdate();
+            
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    orderId = rs.getInt(1);
+                }
+                rs.close();
+            }
+        }
+        
+        // If order creation succeeded, insert order detail
+        if (orderId > 0) {
+            // Get product price
+            ProductDAO productDAO = new ProductDAO();
+            Product product = productDAO.getProductById(item.getProductID());
+            
+            if (product != null) {
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
+                                        "VALUES (?, ?, ?, ?)";
+                
+                try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
+                    ps.setInt(1, orderId);
+                    ps.setInt(2, item.getProductID());
+                    ps.setDouble(3, item.getQuantity());
+                    ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
+                    
+                    ps.executeUpdate();
+                }
+            } else {
+                // Product not found, rollback transaction
+                conn.rollback();
+                orderId = -1;
+                return orderId;
+            }
+        }
+        
+        // Commit transaction if all operations succeeded
+        conn.commit();
+    } catch (SQLException e) {
+        try {
+            // Rollback transaction on error
+            conn.rollback();
+        } catch (SQLException rollbackEx) {
+            rollbackEx.printStackTrace();
+        }
+        e.printStackTrace();
+    } finally {
+        try {
+            // Reset auto-commit
+            conn.setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    return orderId;
+}
+
+/**
+ * Record voucher usage for an order
+ * @param voucherId The voucher ID
+ * @param accountId The account ID
+ * @param orderId The order ID
+ * @param discountAmount The discount amount applied
+ */
+public void recordVoucherUsage(int voucherId, int accountId, int orderId, double discountAmount) {
+    String insertVoucherUsageSql = "INSERT INTO VoucherUsage (VoucherID, AccountID, OrderID, UsedDate, DiscountAmount) " +
+                                 "VALUES (?, ?, ?, GETDATE(), ?)";
+    
+    String updateVoucherSql = "UPDATE Voucher SET UsageCount = UsageCount + 1 WHERE VoucherID = ?";
+    
+    try {
+        // Insert voucher usage
+        try (PreparedStatement ps = conn.prepareStatement(insertVoucherUsageSql)) {
+            ps.setInt(1, voucherId);
+            ps.setInt(2, accountId);
+            ps.setInt(3, orderId);
+            ps.setDouble(4, discountAmount);
+            ps.executeUpdate();
+        }
+        
+        // Update voucher usage count
+        try (PreparedStatement ps = conn.prepareStatement(updateVoucherSql)) {
+            ps.setInt(1, voucherId);
+            ps.executeUpdate();
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
 }
 
 
