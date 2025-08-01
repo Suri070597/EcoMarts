@@ -6,7 +6,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Đăng Ký - Bách Hóa Xanh</title>
+    <title>Đăng Ký</title>
+    <link rel="shortcut icon" href="assets/img/eco.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap và FontAwesome -->

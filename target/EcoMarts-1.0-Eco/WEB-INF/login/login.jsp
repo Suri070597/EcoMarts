@@ -3,7 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng nhập</title>
+    <title>Đăng Nhập</title>
+    <link rel="shortcut icon" href="assets/img/eco.png" type="image/x-icon">
     <style>
         body {
             font-family: Arial, sans-serif;
