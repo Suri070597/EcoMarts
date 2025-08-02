@@ -283,7 +283,7 @@
                     </a>
 
                     <div>
-                        <c:if test="${order.orderStatus == 'Đang xử lý'}">
+                        <c:if test="${order.orderStatus == 'Đang xử lý' && order.paymentStatus != 'Đã thanh toán'}">
                             <button id="cancelOrderBtn" class="btn btn-outline-danger order-action-btn me-2">
                                 <i class="fas fa-times-circle me-2"></i>Hủy đơn hàng
                             </button>

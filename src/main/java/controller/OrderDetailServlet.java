@@ -145,9 +145,9 @@ public class OrderDetailServlet extends HttpServlet {
 
             switch (action) {
                 case "cancel":
-                    // Check if order can be cancelled (only in Processing status)
-                    if (!"Đang xử lý".equals(order.getOrderStatus())) {
-                        session.setAttribute("errorMessage", "Chỉ có thể hủy đơn hàng trong trạng thái 'Đang xử lý'");
+                    // Check if order can be cancelled (only in Processing status and not paid)
+                    if (!"Đang xử lý".equals(order.getOrderStatus()) || "Đã thanh toán".equals(order.getPaymentStatus())) {
+                        session.setAttribute("errorMessage", "Chỉ có thể hủy đơn hàng trong trạng thái 'Đang xử lý' và chưa thanh toán");
                         response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId);
                         return;
                     }
