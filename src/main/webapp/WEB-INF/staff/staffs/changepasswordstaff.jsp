@@ -1,6 +1,6 @@
 <%-- 
     Document   : changepasswordstaff
-    Created on : Jul 21, 2025, 4:33:00 PM
+    Created on : Jul 21, 2025, 4:33:00 PM
     Author     : ADMIN
 --%>
 
@@ -20,6 +20,7 @@
                 align-items: center;
                 height: 100vh;
                 margin: 0;
+                color: #000; /* chữ đen */
             }
             .form-container {
                 background-color: #fff;
@@ -30,42 +31,39 @@
                 width: 100%;
                 margin: 0 18px;
                 box-sizing: border-box;
+                color: #000;
             }
             h2 {
                 text-align: center;
-                color: #4CAF50;
+                color: #000; /* tiêu đề đen */
                 margin-bottom: 26px;
                 letter-spacing: 0.5px;
             }
             label {
                 display: block;
                 margin-bottom: 7px;
-                color: #333;
+                color: #000;
                 font-weight: 500;
-                margin-left: 0;
-                padding-left: 0;
             }
             input[type="password"] {
                 width: 100%;
                 padding: 11px 12px;
-                border: 1.5px solid #ddd;
+                border: 1.5px solid #dbc09a; /* viền nâu nhạt */
                 border-radius: 12px;
                 margin-bottom: 17px;
-                margin-left: 0;
-                margin-right: 0;
                 font-size: 16px;
                 background: #fff;
+                color: #000;
                 transition: border-color 0.3s;
                 box-sizing: border-box;
             }
             input[type="password"]:focus {
-                border-color: #4CAF50;
+                border-color: #b3936b; /* nâu đậm hơn khi focus */
                 outline: none;
             }
             .btn-group {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
                 gap: 18px;
                 margin-top: 8px;
             }
@@ -79,25 +77,16 @@
                 cursor: pointer;
                 transition: background 0.3s, color 0.3s;
                 text-align: center;
+                background-color: #dbc09a; /* nền nâu nhạt */
+                color: #000; /* chữ đen */
             }
-            button {
-                background-color: #4CAF50;
-                color: #fff;
-            }
-            button:hover {
-                background-color: #388E3C;
+            button:hover, .back-btn:hover {
+                background-color: #b3936b; /* hover nâu đậm */
+                color: #000;
             }
             .back-btn {
-                background-color: #f5f5f5;
-                color: #4CAF50;
-                border: 1px solid #4CAF50;
                 text-decoration: none;
                 display: inline-block;
-            }
-            .back-btn:hover {
-                background-color: #e8f5e9;
-                color: #388E3C;
-                border-color: #388E3C;
             }
             .message {
                 color: red;

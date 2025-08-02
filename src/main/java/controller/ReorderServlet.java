@@ -4,20 +4,20 @@
  */
 package controller;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import dao.CategoryDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
+import java.io.IOException;
+import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import model.Account;
 import model.Category;
 import model.Order;
@@ -25,9 +25,9 @@ import model.OrderDetail;
 
 /**
  *
- * @author nguye
+ * @author ADMIN
  */
-@WebServlet("/customer/reorder")
+@WebServlet(name = "ReorderServlet", urlPatterns = {"/reorder"})
 public class ReorderServlet extends HttpServlet {
 
     OrderDAO orderDAO = new OrderDAO();
@@ -47,7 +47,7 @@ public class ReorderServlet extends HttpServlet {
 
         List<Order> orders = orderDAO.getOrdersByCustomerName(acc.getFullName());
         List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
-        
+
         req.setAttribute("orders", orders);
         req.setAttribute("categories", categories);
         req.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(req, resp);

@@ -27,7 +27,7 @@
             }
             h2 {
                 text-align: center;
-                color: #4CAF50;
+                color: #000;
                 margin-bottom: 26px;
                 letter-spacing: 0.5px;
             }

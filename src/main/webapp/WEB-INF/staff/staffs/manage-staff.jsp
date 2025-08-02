@@ -23,7 +23,7 @@
             }
             h2 {
                 text-align: center;
-                color: #4CAF50;
+                color: #111111;
                 margin-bottom: 26px;
                 letter-spacing: 0.5px;
             }
@@ -67,23 +67,15 @@
                 cursor: pointer;
                 transition: background 0.3s, color 0.3s;
                 text-align: center;
+                color: #111; /* chữ màu đen */
+                background-color: #dbc09a; /* nền nút màu vàng */
             }
-            button {
-                background-color: #4CAF50;
-                color: #fff;
-            }
-            button:hover {
-                background-color: #388E3C;
+            button:hover, a.button-link:hover {
+                background-color: #bfa270; /* nền nút đậm hơn khi hover */
+                color: #111; /* chữ vẫn màu đen */
             }
             a.button-link {
-                background-color: #f5f5f5;
-                color: #4CAF50;
-                border: 1px solid #4CAF50;
-            }
-            a.button-link:hover {
-                background-color: #e8f5e9;
-                color: #388E3C;
-                border-color: #388E3C;
+                border: 1px solid #dbc09a; /* viền cũng vàng */
             }
             .message {
                 text-align: center;
@@ -93,6 +85,7 @@
                 font-size: 17px;
             }
         </style>
+
     </head>
     <body>
         <div class="container">

@@ -1,123 +1,103 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Xác nhận mật khẩu</title>
+        <title>Voucher của tôi</title>
         <style>
             body {
-                font-family: 'Segoe UI', sans-serif;
-                background: linear-gradient(to right, #fff6ec, #fff);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
+                color: #000;
+                background: #fff6ec;
+                font-family: 'Segoe UI', Arial, sans-serif;
                 margin: 0;
+                padding: 0;
             }
-            .form-container {
-                background-color: #fff;
-                padding: 32px 24px;      /* đều 2 bên */
-                border-radius: 15px;
-                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
-                max-width: 400px;
-                width: 100%;
-                margin: 0 18px;
-                box-sizing: border-box;
+            table {
+                width: 90%;
+                margin: auto;
+                border-collapse: collapse;
+                color: #000; /* chữ đen */
             }
-
+            th, td {
+                padding: 12px;
+                border: 1px solid #dbc09a; /* border nâu nhạt */
+                text-align: left;
+                color: #000; /* chữ đen */
+            }
+            th {
+                background-color: #dbc09a;  /* nâu nhạt */
+                color: #000;                /* chữ đen */
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
             h2 {
                 text-align: center;
-                color: #4CAF50;
-                margin-bottom: 26px;
-                letter-spacing: 0.5px;
-            }
-            label {
-                font-weight: 500;
-                display: block;
-                margin-bottom: 8px;
-                margin-left: 0;      /* Đảm bảo sát lề trái */
-                padding-left: 0;
-                color: #333;
-            }
-            input[type="password"] {
-                width: 100%;
-                padding: 11px 12px;
-                border: 1.5px solid #4CAF50; /* để border xanh lá rõ nét */
-                border-radius: 12px;
-                margin-bottom: 17px;
-                margin-left: 0;
-                margin-right: 0;
-                font-size: 16px;
-                background: #fff;
-                transition: border-color 0.3s;
-                box-sizing: border-box;
-            }
-            input[type="password"]:focus {
-                border-color: #4CAF50;
-                outline: none;
-            }
-            .btn-container {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 18px;
-                margin-top: 10px;
-            }
-            button, .back-btn {
-                flex: 1;
-                padding: 10px 0;
-                border: none;
-                border-radius: 8px;
-                text-decoration: none;
-                font-size: 16px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: background 0.3s, color 0.3s;
-                text-align: center;
-            }
-            button {
-                background-color: #4CAF50;
-                color: #fff;
-            }
-            button:hover {
-                background-color: #388E3C;
+                margin-top: 30px;
+                color: #000; /* tiêu đề đen */
             }
             .back-btn {
-                background-color: #f5f5f5;
-                color: #4CAF50;
-                border: 1px solid #4CAF50;
-                display: inline-block;
+                display: block;
+                width: 220px;
+                margin: 30px auto;
+                padding: 10px 0;
+                text-align: center;
+                background-color: #dbc09a;
+                color: #000; /* chữ đen */
+                text-decoration: none;
+                border-radius: 8px;
+                font-size: 17px;
+                font-weight: bold;
+                border: none;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+                transition: background 0.25s, color 0.25s;
             }
             .back-btn:hover {
-                background-color: #e8f5e9;
-                color: #388E3C;
-                border-color: #388E3C;
+                background-color: #c3a476;
+                color: #000;
             }
-            .message {
-                margin-top: 15px;
+            .no-voucher {
                 text-align: center;
                 color: red;
-                font-weight: bold;
+                margin-top: 30px;
+                font-size: 17px;
             }
         </style>
     </head>
     <body>
-        <div class="form-container">
-            <h2>Xác nhận mật khẩu</h2>
-            <form action="VerifyPasswordServlet" method="post">
-                <label>Nhập mật khẩu hiện tại:</label>
-                <input type="password" name="currentPassword" required />
 
-                <div class="btn-container">
-                    <button type="submit">Xác nhận</button>
-                    <a href="home" class="back-btn">Quay lại</a>
-                </div>
+        <h2>Danh sách Voucher của bạn</h2>
 
-                <c:if test="${not empty message}">
-                    <p class="message">${message}</p>
-                </c:if>
-            </form>
-        </div>
+        <c:if test="${empty vouchers}">
+            <p class="no-voucher">Bạn chưa có voucher nào.</p>
+        </c:if>
+
+        <c:if test="${not empty vouchers}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã Voucher</th>
+                        <th>Giảm giá (%)</th>
+                        <th>Hạn sử dụng</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach items="${vouchers}" var="v">
+                        <tr>
+                            <td>${v.voucherCode}</td>
+                            <td>${v.discountAmount}%</td>
+                            <td>${v.endDate}</td>
+                            <td>${v.description}</td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </c:if>
+
+        <!-- Nút quay lại -->
+        <a href="${pageContext.request.contextPath}/home" class="back-btn">← Quay lại trang chủ</a>
+
     </body>
 </html>
