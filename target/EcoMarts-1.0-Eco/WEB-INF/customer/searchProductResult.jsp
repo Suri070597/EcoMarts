@@ -29,6 +29,7 @@
         <!-- Home CSS -->
         <link rel="stylesheet" href="./assets/css/home.css?version=<%= System.currentTimeMillis()%>">
         <script defer src="./assets/js/homeJs.js"></script>
+        <script defer src="./assets/js/cart.js"></script>
         <!-- Animate on scroll -->
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     </head>
@@ -43,11 +44,11 @@
                 <c:choose>
                     <c:when test="${not empty searchResult}">
                         <c:forEach var="p" items="${searchResult}">
-                            <div class="product-card">
+                            <div class="product-card" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}">
                                 <div class="product-image-container">
                                     <img src="ImageServlet?name=${p.imageURL}" alt="${p.productName}" class="product-image">
                                     <div class="product-actions">
-                                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                                        <button class="action-btn add-to-cart-action" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}"><i class="fas fa-cart-plus"></i></button>
                                         <a href="ProductDetail?id=${p.productID}" class="action-btn"><i class="fas fa-eye"></i></a>
                                     </div>
                                 </div>

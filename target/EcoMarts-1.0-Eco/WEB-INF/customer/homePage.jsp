@@ -130,10 +130,11 @@
                         if (featuredProducts != null && !featuredProducts.isEmpty()) {
                             for (Product p : featuredProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -186,8 +187,10 @@
                         }
                     %>
                 </div>
+                <% if (featuredProducts != null && featuredProducts.size() >= 6) { %>
                 <button id="load-more-featured" class="see-more-btn"
                         data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+                <% } %>
             </section>
 
             <!--mở đầu-->
@@ -208,11 +211,12 @@
                         if (drinkProducts != null && !drinkProducts.isEmpty()) {
                             for (Product p : drinkProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -265,8 +269,10 @@
                         }
                     %>
                 </div>
+                <% if (drinkProducts != null && drinkProducts.size() >= 6) { %>
                 <button id="load-more-drink" class="see-more-btn"
                         data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+                <% } %>
             </section>
 
             <!--kết thúc-->
@@ -289,11 +295,12 @@
                         if (MilkProducts != null && !MilkProducts.isEmpty()) {
                             for (Product p : MilkProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -346,10 +353,12 @@
                         }
                     %>
                 </div>
+                <% if (MilkProducts != null && MilkProducts.size() >= 6) { %>
                 <button id="load-more-milk" class="see-more-btn"
                         data-parent="2" data-target="milk-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
+                </button>
+                <% } %>            
             </section>
 
             <!--kết thúc--> 
@@ -372,11 +381,12 @@
                         if (FruitProducts != null && !FruitProducts.isEmpty()) {
                             for (Product p : FruitProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -429,10 +439,12 @@
                         }
                     %>
                 </div>
+                <% if (FruitProducts != null && FruitProducts.size() >= 6) { %>
                 <button id="load-more-fruit" class="see-more-btn"
                         data-parent="3" data-target="fruit-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
                 </button>
+                <% } %>
             </section>
 
             <!--kết thúc--> 
@@ -455,11 +467,12 @@
                         if (CandyProducts != null && !CandyProducts.isEmpty()) {
                             for (Product p : CandyProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -512,10 +525,12 @@
                         }
                     %>
                 </div>
+                <% if (CandyProducts != null && CandyProducts.size() >= 6) { %>
                 <button id="load-more-snack" class="see-more-btn"
                         data-parent="4" data-target="snack-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
                 </button>
+                <% } %>
             </section>
 
             <!--kết thúc--> 
@@ -541,11 +556,12 @@
                         if (MotherBabyProducts != null && !MotherBabyProducts.isEmpty()) {
                             for (Product p : MotherBabyProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -598,10 +614,12 @@
                         }
                     %>
                 </div>
+                <% if (MotherBabyProducts != null && MotherBabyProducts.size() >= 6) { %>
                 <button id="load-more-baby" class="see-more-btn"
                         data-parent="5" data-target="baby-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
+                </button>
+                <% } %>            
             </section>
 
             <!--kết thúc--> 
@@ -624,11 +642,12 @@
                         if (CosmeticProducts != null && !CosmeticProducts.isEmpty()) {
                             for (Product p : CosmeticProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -681,10 +700,12 @@
                         }
                     %>
                 </div>
+                <% if (CosmeticProducts != null && CosmeticProducts.size() >= 6) { %>
                 <button id="load-more-cosmetic" class="see-more-btn"
                         data-parent="6" data-target="cosmetic-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
+                </button>
+                <% } %>            
             </section>
 
             <!--kết thúc--> 
@@ -818,7 +839,10 @@
                             dots[slideIndex - 1].className += " active";
                         }
         </script>
-        <script src="${pageContext.request.contextPath}/assets/js/loadMore.js"></script>
+
+        
+        <!-- Load More JavaScript -->
+        <script src="${pageContext.request.contextPath}/assets/js/loadMore.js?version=<%= System.currentTimeMillis()%>"></script>
     </body>
 
 </html>

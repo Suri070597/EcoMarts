@@ -3,6 +3,7 @@ package controller;
 import dao.CategoryDAO;
 import dao.ProductDAO;
 import dao.ViewProductDAO;
+import dao.FeedBackDAO;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.*;
@@ -40,7 +41,7 @@ public class HomeServlet extends HttpServlet {
 
         // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
         try {
-            dao.FeedBackDAO fbDao = new dao.FeedBackDAO();
+            FeedBackDAO fbDao = new FeedBackDAO();
             java.util.Map<Integer, Double> avgRatingMap = new java.util.HashMap<>();
             java.util.Map<Integer, Integer> reviewCountMap = new java.util.HashMap<>();
             List<List<Product>> allProductLists = java.util.Arrays.asList(

@@ -180,7 +180,16 @@
                                     }
                                 %>
                             </p>
-                            <p><strong>Số Lượng Tồn Kho:</strong> <%= mo.getStockQuantity() %></p>
+                            <p><strong>Số Lượng Tồn Kho:</strong> 
+                                <%
+                                    double stockQty = mo.getStockQuantity();
+                                    if (stockQty % 1 == 0) {
+                                        out.print((int) stockQty);
+                                    } else {
+                                        out.print(stockQty);
+                                    }
+                                %>
+                            </p>
                             <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p>
                             <p><strong>Nhà Sản Xuất:</strong> <%=mo.getSupplier().getCompanyName()%></p>
 

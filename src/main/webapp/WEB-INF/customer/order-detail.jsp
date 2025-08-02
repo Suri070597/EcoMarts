@@ -227,7 +227,14 @@
                                             <td class="text-center">
                                                 <c:choose>
                                                     <c:when test="${od.unit eq 'kg'}">
-                                                        <fmt:formatNumber value="${od.quantity}" pattern="#.##"/>
+                                                        <c:choose>
+                                                            <c:when test="${od.quantity % 1 == 0}">
+                                                                <fmt:formatNumber value="${od.quantity}" pattern="#"/>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <fmt:formatNumber value="${od.quantity}" pattern="#.##"/>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <fmt:formatNumber value="${od.quantity}" pattern="#" />

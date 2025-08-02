@@ -92,5 +92,6 @@ filter\AuthenticationFilter.class
 model\Order.class
 controller\google\UpdateGoogleServlet.class
 dao\SearchProductsDAO.class
+controller\SimpleTestServlet.class
 controller\NotificationFilter.class
 db\DBContext.class

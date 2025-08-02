@@ -1,23 +1,41 @@
 /* Variables */
 :root {
-    --primary-color: #d4b78f;         /* Primary beige color */
-    --primary-dark: #b89c70;          /* Darker beige for hover effects */
-    --primary-light: #e8d7bc;         /* Light beige for backgrounds */
-    --accent-color: #8b6c42;          /* Brown accent color */
-    --accent-dark: #6a5232;           /* Dark brown */
-    --accent-secondary: #c35f5f;      /* Accent for buy button */
-    --accent-secondary-dark: #a74848; /* Dark accent for buy button hover */
-    --text-dark: #3a3a3a;             /* Dark text */
-    --text-light: #f9f9f9;            /* Light text */
-    --text-muted: #767676;            /* Muted text */
-    --bg-color: #f5f2ea;              /* Light beige background */
-    --white: #ffffff;                 /* White */
-    --gray-100: #f8f8f8;              /* Light gray */
-    --gray-200: #e9e9e9;              /* Medium light gray */
-    --gray-300: #d9d9d9;              /* Medium gray */
-    --border-radius-sm: 4px;          /* Small border radius */
-    --border-radius: 8px;             /* Standard border radius */
-    --border-radius-lg: 12px;         /* Large border radius */
+    --primary-color: #d4b78f;
+    /* Primary beige color */
+    --primary-dark: #b89c70;
+    /* Darker beige for hover effects */
+    --primary-light: #e8d7bc;
+    /* Light beige for backgrounds */
+    --accent-color: #8b6c42;
+    /* Brown accent color */
+    --accent-dark: #6a5232;
+    /* Dark brown */
+    --accent-secondary: #c35f5f;
+    /* Accent for buy button */
+    --accent-secondary-dark: #a74848;
+    /* Dark accent for buy button hover */
+    --text-dark: #3a3a3a;
+    /* Dark text */
+    --text-light: #f9f9f9;
+    /* Light text */
+    --text-muted: #767676;
+    /* Muted text */
+    --bg-color: #f5f2ea;
+    /* Light beige background */
+    --white: #ffffff;
+    /* White */
+    --gray-100: #f8f8f8;
+    /* Light gray */
+    --gray-200: #e9e9e9;
+    /* Medium light gray */
+    --gray-300: #d9d9d9;
+    /* Medium gray */
+    --border-radius-sm: 4px;
+    /* Small border radius */
+    --border-radius: 8px;
+    /* Standard border radius */
+    --border-radius-lg: 12px;
+    /* Large border radius */
     --box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
 }
@@ -75,7 +93,8 @@ section {
     font-size: 12px;
 }
 
-.prev, .next {
+.prev,
+.next {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -97,7 +116,8 @@ section {
     right: 15px;
 }
 
-.prev:hover, .next:hover {
+.prev:hover,
+.next:hover {
     background-color: rgba(0, 0, 0, 0.6);
 }
 
@@ -117,7 +137,8 @@ section {
     transition: var(--transition);
 }
 
-.dot.active, .dot:hover {
+.dot.active,
+.dot:hover {
     background-color: var(--primary-color);
 }
 
@@ -270,7 +291,7 @@ section {
 }
 
 .product-image-container {
-     position: relative;
+    position: relative;
     width: 100%;
     height: 280px;
     overflow: hidden;
@@ -552,6 +573,7 @@ section {
     from {
         opacity: .4
     }
+
     to {
         opacity: 1
     }
@@ -609,8 +631,10 @@ section {
     padding: 20px;
     margin: 30px auto;
     max-width: 600px;
-    background-color: #fef3c7; /* vàng nhạt */
-    color: #92400e; /* màu chữ nâu đậm */
+    background-color: #fef3c7;
+    /* vàng nhạt */
+    color: #92400e;
+    /* màu chữ nâu đậm */
     font-size: 18px;
     text-align: center;
     border: 1px solid #fde68a;
@@ -618,4 +642,3 @@ section {
     font-weight: 500;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-
