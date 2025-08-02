@@ -14,6 +14,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *
+ * @author HuuDuc
+ */
+
+/**
  * Loads environment variables from a .env file in resources.
  */
 public class Dotenv {

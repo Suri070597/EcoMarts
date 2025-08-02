@@ -8,6 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ *
+ * @author HuuDuc
+ */
+
 @WebServlet(name = "LogoutServlet", urlPatterns = { "/logout" })
 public class LogoutServlet extends HttpServlet {
        /**

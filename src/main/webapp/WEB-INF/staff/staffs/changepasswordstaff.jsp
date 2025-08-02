@@ -11,6 +11,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Đổi mật khẩu</title>
+         <link rel="shortcut icon" href="assets/img/eco.png" type="image/x-icon">
         <style>
             body {
                 font-family: 'Segoe UI', sans-serif;

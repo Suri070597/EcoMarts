@@ -5,6 +5,8 @@
 package db;
 
 
+
+
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -14,12 +16,14 @@ import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+
+/**
+ *
+ * @author HuuDuc
+ */
 
 public class EmailUtil {
-    private static final Logger LOGGER = Logger.getLogger(EmailUtil.class.getName());
     private static final Dotenv dotenv = Dotenv.configure().load();
     private static final String SMTP_HOST = dotenv.get("SMTP_HOST");
     private static final String SMTP_PORT = dotenv.get("SMTP_PORT");
@@ -35,15 +39,14 @@ public class EmailUtil {
     public static void sendOtpEmail(String recipient, String otp) throws MessagingException {
         send(
             recipient,
-            "Mã OTP xác thực tài khoản - Bách Hóa Xanh",
-            "Mã OTP của bạn là: " + otp + "\nVui lòng nhập mã này để hoàn tất đăng ký.\nMã có hiệu lực trong 5 phút."
+            "Mã OTP xác thực tài khoản - EcoMart",
+            "Mã OTP của bạn là: " + otp + "\nVui lòng nhập mã này để hoàn tất đăng ký.\nMã có hiệu lực trong 1 phút."
         );
     }
 
     // Gửi mail tự do (ví dụ: xác nhận quên mật khẩu)
     public static void send(String recipient, String subject, String body) throws MessagingException {
         if (SMTP_HOST == null || SMTP_PORT == null || SMTP_USER == null || SMTP_PASSWORD == null) {
-            LOGGER.log(Level.SEVERE, "SMTP configuration missing: HOST={0}, PORT={1}, USER={2}", new Object[]{SMTP_HOST, SMTP_PORT, SMTP_USER});
             throw new IllegalStateException("SMTP configuration is missing");
         }
 
@@ -61,17 +64,12 @@ public class EmailUtil {
             }
         });
 
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SMTP_USER));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
-            message.setSubject(subject);
-            message.setText(body);
-            Transport.send(message);
-            LOGGER.log(Level.INFO, "Email sent successfully to {0}", recipient);
-        } catch (MessagingException e) {
-            LOGGER.log(Level.SEVERE, "Failed to send email to " + recipient + ": " + e.getMessage(), e);
-            throw e;
-        }
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(SMTP_USER));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
+        message.setSubject(subject);
+        message.setText(body);
+        Transport.send(message);
+        System.out.println("Email sent successfully to " + recipient);
     }
 }

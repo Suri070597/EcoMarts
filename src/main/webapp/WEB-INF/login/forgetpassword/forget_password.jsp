@@ -1,6 +1,6 @@
 <%-- 
     Document   : forget_password
-    Created on : Jun 30, 2025, 8:50:49 PM
+    Created on : Jun 30, 2025, 8:50:49 PM
     Author     : ADMIN
 --%>
 
@@ -9,7 +9,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Forget Password</title>
+        <title>Quên mật khẩu</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -19,6 +19,7 @@
                 align-items: center;
                 height: 100vh;
                 margin: 0;
+                color: #000; /* chữ đen */
             }
             .login-box {
                 background: #fff;
@@ -28,31 +29,35 @@
                 text-align: center;
                 width: 370px;
                 min-width: 320px;
+                color: #000;
             }
             h2 {
                 margin-bottom: 22px;
                 font-weight: bold;
                 font-size: 2rem;
+                color: #000; /* tiêu đề đen */
             }
             .form-control {
                 width: 100%;
                 padding: 13px 14px;
                 margin: 12px 0 0 0;
-                border: 1px solid #ddd;
+                border: 1.5px solid #dbc09a; /* viền nâu nhạt */
                 border-radius: 9px;
                 font-size: 16px;
                 box-sizing: border-box;
                 outline: none;
                 transition: border .2s;
+                color: #000;
+                background: #fff;
             }
             .form-control:focus {
-                border-color: #28a745;
+                border-color: #b3936b; /* nâu đậm hơn khi focus */
             }
             .btn {
                 width: 100%;
                 padding: 13px;
-                background-color: #28a745;
-                color: white;
+                background-color: #dbc09a; /* nền nâu nhạt */
+                color: #000;               /* chữ đen */
                 border: none;
                 border-radius: 9px;
                 font-size: 18px;
@@ -63,14 +68,14 @@
                 transition: background .2s;
             }
             .btn:hover {
-                background-color: #00b07e;
+                background-color: #b3936b; /* hover nâu đậm */
             }
             .links {
                 margin-top: 16px;
                 font-size: 16px;
             }
             .links a {
-                color: #0066cc;
+                color: #0066cc; /* giữ link xanh dương */
                 text-decoration: none;
                 margin: 0 5px;
             }
@@ -79,17 +84,17 @@
                 padding: 11px 19px;
                 font-size: 16px;
                 border-radius: 7px;
+                color: #000;
             }
             .alert-success {
-                background: #e9ffe5;
-                color: #20892b;
+                background: #fff3e0;   /* nâu nhạt nền success */
+                border: 1px solid #dbc09a;
             }
             .alert-danger {
-                background: #ffe9e9;
-                color: #b10e1e;
+                background: #ffe9e9;   /* giữ đỏ cho error */
+                border: 1px solid #b10e1e;
             }
         </style>
-
     </head>
     <body>
         <div class="login-box">
@@ -107,9 +112,8 @@
             <div class="alert alert-danger"><%= error%></div>
             <% }%>
             <div class="links">
-                <a href="<%=request.getContextPath()%>/login">Quay lại đăng nhập</a>
+                <a href="<%=request.getContextPath()%>/login">← Quay lại đăng nhập</a>
             </div>
         </div>
     </body>
 </html>
-

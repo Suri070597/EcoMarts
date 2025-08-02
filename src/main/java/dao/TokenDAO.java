@@ -11,6 +11,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ *
+ * @author HuuDuc
+ */
+
 public class TokenDAO {
 
     private final DBContext1 dbContext = new DBContext1();

@@ -13,7 +13,7 @@ import Iconstant.Iconstant;
 import com.google.gson.JsonObject;
 /**
  *
- * @author ADMIN
+ * @author HuuDuc
  */
 public class GoogleLogin {
     

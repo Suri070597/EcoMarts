@@ -8,6 +8,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+
+/**
+ *
+ * @author HuuDuc
+ */
+
 public class AccountDAO1 {
 
     private final DBContext1 dbContext = new DBContext1();

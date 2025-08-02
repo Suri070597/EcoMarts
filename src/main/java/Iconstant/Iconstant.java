@@ -6,7 +6,7 @@ package Iconstant;
 
 /**
  *
- * @author HP
+ * @author HuuDuc
  */
 public class Iconstant {
     public static final String GOOGLE_CLIENT_ID = "504688061004-84d80lmablul2i4qvakbjvvmnu5b6d9l.apps.googleusercontent.com";

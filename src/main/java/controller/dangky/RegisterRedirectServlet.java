@@ -12,6 +12,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ *
+ * @author HuuDuc
+ */
+
 @WebServlet(name = "RegisterRedirectServlet", urlPatterns = {"/register"})
 public class RegisterRedirectServlet extends HttpServlet {
 

@@ -16,7 +16,7 @@ import model.Account;
 
 /**
  *
- * @author ADMIN
+ * @author HuuDuc
  */
 @WebServlet(name = "verifypasswordServlet", urlPatterns = {"/verifypasswordServlet"})
 public class verifypasswordServlet extends HttpServlet {

@@ -18,7 +18,7 @@ import model.Staff;
 
 /**
  *
- * @author ADMIN
+ * @author HuuDuc
  */
 @WebServlet(name = "ManageStaffServlet", urlPatterns = {"/ManageStaffServlet"})
 public class ManageStaffServlet extends HttpServlet {
