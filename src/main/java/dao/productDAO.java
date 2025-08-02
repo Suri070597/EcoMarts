@@ -29,6 +29,45 @@ public class ProductDAO extends DBContext {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p \n"
                 + "                                JOIN Category c ON p.categoryID = c.categoryID \n"
+                + "                               JOIN Supplier s ON p.supplierID = s.supplierID \n"
+                + "                               WHERE p.StockQuantity > 0";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Category cat = new Category();
+                cat.setCategoryID(rs.getInt("categoryID"));
+                cat.setCategoryName(rs.getString("categoryName"));
+                cat.setParentID(rs.getInt("parentID"));
+
+                Supplier sup = new Supplier();
+                sup.setSupplierID(rs.getInt("supplierID"));
+                sup.setCompanyName(rs.getString("CompanyName"));
+
+                Product p = new Product();
+                p.setProductID(rs.getInt("productID"));
+                p.setProductName(rs.getString("productName"));
+                p.setPrice(rs.getDouble("price"));
+                p.setDescription(rs.getString("description"));
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                p.setImageURL(rs.getString("ImageURL"));
+                p.setUnit(rs.getString("unit"));
+                p.setCreatedAt(rs.getTimestamp("createdAt"));
+                p.setCategory(cat);
+                p.setSupplier(sup);
+
+                list.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Product> getAllIncludingOutOfStock() {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p \n"
+                + "                                JOIN Category c ON p.categoryID = c.categoryID \n"
                 + "                               JOIN Supplier s ON p.supplierID = s.supplierID";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -341,7 +380,7 @@ public class ProductDAO extends DBContext {
                     FROM Product p
                     JOIN Category c ON p.CategoryID = c.CategoryID
                     JOIN Supplier s ON p.SupplierID = s.SupplierID
-                    WHERE p.ProductName LIKE ?
+                    WHERE p.ProductName LIKE ? AND p.StockQuantity > 0
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
@@ -383,7 +422,7 @@ public class ProductDAO extends DBContext {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.* FROM Product p "
                 + "JOIN Category c ON p.CategoryID = c.CategoryID "
-                + "WHERE c.ParentID = ? AND p.ProductID != ?";
+                + "WHERE c.ParentID = ? AND p.ProductID != ? AND p.StockQuantity > 0";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, parentId);
             ps.setInt(2, excludeProductId);
@@ -393,7 +432,7 @@ public class ProductDAO extends DBContext {
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 double rawPrice = rs.getDouble("Price");
-//                long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
+                // long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
                 p.setPrice(rawPrice);
                 p.setImageURL(rs.getString("ImageURL"));
                 list.add(p);
@@ -415,7 +454,7 @@ public class ProductDAO extends DBContext {
                     WHERE p.CategoryID IN (
                         SELECT CategoryID FROM Category
                         WHERE ParentID = ? OR CategoryID = ?
-                    )
+                    ) AND p.StockQuantity > 0
                 """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -428,7 +467,7 @@ public class ProductDAO extends DBContext {
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 double rawPrice = rs.getDouble("Price");
-//                long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
+                // long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
                 p.setPrice(rawPrice);
                 p.setDescription(rs.getString("Description"));
                 p.setStockQuantity(rs.getDouble("StockQuantity"));
@@ -479,23 +518,23 @@ public class ProductDAO extends DBContext {
         return categoryName;
     }
 
-public double getStockQuantityById(int productId) {
-    double stockQuantity = 0;
-    String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
+    public double getStockQuantityById(int productId) {
+        double stockQuantity = 0;
+        String sql = "SELECT StockQuantity FROM Product WHERE ProductID = ?";
 
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        ResultSet rs = ps.executeQuery();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            stockQuantity = rs.getDouble("StockQuantity");
+            if (rs.next()) {
+                stockQuantity = rs.getDouble("StockQuantity");
+            }
+        } catch (Exception e) {
+            System.out.println("Error getting stock quantity: " + e.getMessage());
         }
-    } catch (Exception e) {
-        System.out.println("Error getting stock quantity: " + e.getMessage());
-    }
 
-    return stockQuantity;
-}
+        return stockQuantity;
+    }
 
     public static void main(String[] args) throws ParseException {
         ProductDAO dao = new ProductDAO();
@@ -529,10 +568,11 @@ public double getStockQuantityById(int productId) {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Update product stock quantity
-     * @param productId The product ID
+     * 
+     * @param productId        The product ID
      * @param newStockQuantity The new stock quantity to set
      * @return true if update was successful, false otherwise
      */

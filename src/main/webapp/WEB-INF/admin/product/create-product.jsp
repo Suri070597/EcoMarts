@@ -76,7 +76,7 @@
                         </div>
                         <div class="mb-3 box-related">
                             <label class="form-label">Giá 1 thùng/hộp/kiện</label>
-                            <input type="number" min="0" step="any" class="form-control" name="boxPrice" id="boxPrice" />
+                            <input type="number" min="0" step="1" class="form-control" name="boxPrice" id="boxPrice" />
                         </div>
                         <div class="mb-3 box-related">
                             <label class="form-label">Số lượng 1 thùng/hộp/kiện</label>

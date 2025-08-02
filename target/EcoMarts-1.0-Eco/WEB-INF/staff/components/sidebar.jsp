@@ -13,7 +13,7 @@
         <li><a href="${pageContext.request.contextPath}/staff/product"><i class="fas fa-box"></i> Quản lý sản phẩm</a></li>
         <li><a href="${pageContext.request.contextPath}/staff/manage-review"><i class="fas fa-receipt"></i> Quản lý phản hồi</a>
         </li>
-         </li>
+        </li>
         <li><a href="${pageContext.request.contextPath}/ManageStaffServlet"><i class="fas fa-receipt"></i>Xem hồ sơ nhân viên</a>
         </li>
         </li>

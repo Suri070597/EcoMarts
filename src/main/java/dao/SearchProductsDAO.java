@@ -32,7 +32,7 @@ public class SearchProductsDAO extends DBContext {
                     JOIN Category c ON p.CategoryID = c.CategoryID
                     LEFT JOIN Category pc ON c.ParentID = pc.CategoryID
                     JOIN Supplier s ON p.SupplierID = s.SupplierID
-                    WHERE
+                    WHERE p.StockQuantity > 0 AND
                 """);
 
         // Tạo điều kiện cho mỗi từ khóa với OR logic

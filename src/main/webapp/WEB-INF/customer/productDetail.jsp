@@ -620,11 +620,27 @@
                     margin-bottom: 0.5rem;
                 }
                 .toggle-reply-box button {
-                    transition: background 0.2s, color 0.2s;
+                    transition: all 0.3s ease;
+                    background: linear-gradient(135deg, #f5f2ea 0%, #e8d7bc 100%);
+                    border: 1px solid #d4b78f;
+                    color: #8b6c42;
+                    font-weight: 500;
+                    box-shadow: 0 1px 3px rgba(139, 108, 66, 0.1);
                 }
                 .toggle-reply-box button:hover {
-                    background: #e3f2fd;
-                    color: #1976d2;
+                    background: linear-gradient(135deg, #e8d7bc 0%, #d4b78f 100%);
+                    color: #6a5232;
+                    border-color: #b89c70;
+                    transform: translateY(-1px);
+                    box-shadow: 0 3px 8px rgba(139, 108, 66, 0.2);
+                }
+                .toggle-reply-box button:active {
+                    transform: translateY(0);
+                    box-shadow: 0 1px 4px rgba(139, 108, 66, 0.15);
+                }
+                .toggle-reply-box button:focus {
+                    outline: 2px solid #8b6c42;
+                    outline-offset: 2px;
                 }
                 .action-buttons {
                     display: flex;
@@ -632,17 +648,35 @@
                     flex-wrap: wrap;
                 }
                 .action-buttons .btn-link {
-                    padding: 2px 8px;
+                    padding: 6px 12px;
                     font-size: 0.875rem;
-                    color: #007bff;
+                    color: #8b6c42;
                     text-decoration: none;
-                    border-radius: 4px;
-                    transition: all 0.2s;
+                    border-radius: 6px;
+                    transition: all 0.3s ease;
+                    background: linear-gradient(135deg, #f5f2ea 0%, #e8d7bc 100%);
+                    border: 1px solid #d4b78f;
+                    font-weight: 500;
+                    box-shadow: 0 1px 3px rgba(139, 108, 66, 0.1);
+                    display: inline-block;
+                    min-width: 80px;
+                    text-align: center;
                 }
                 .action-buttons .btn-link:hover {
-                    background-color: #f8f9fa;
-                    color: #0056b3;
+                    background: linear-gradient(135deg, #e8d7bc 0%, #d4b78f 100%);
+                    color: #6a5232;
                     text-decoration: none;
+                    border-color: #b89c70;
+                    transform: translateY(-1px);
+                    box-shadow: 0 3px 8px rgba(139, 108, 66, 0.2);
+                }
+                .action-buttons .btn-link:active {
+                    transform: translateY(0);
+                    box-shadow: 0 1px 4px rgba(139, 108, 66, 0.15);
+                }
+                .action-buttons .btn-link:focus {
+                    outline: 2px solid #8b6c42;
+                    outline-offset: 2px;
                 }
                 .review-comment, .review-reply {
                     border-left: 3px solid #e9ecef;

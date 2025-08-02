@@ -19,6 +19,50 @@
         .table-container {
             overflow-x: auto;
         }
+        
+        /* CSS cho link tên sản phẩm - đồng bộ với theme beige */
+        .product-link {
+            color: #8b6c42;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #f5f2ea 0%, #e8d7bc 100%);
+            border: 1px solid #d4b78f;
+            display: inline-block;
+            min-width: 120px;
+            box-shadow: 0 1px 3px rgba(139, 108, 66, 0.1);
+        }
+        
+        .product-link:hover {
+            color: #6a5232;
+            text-decoration: none;
+            background: linear-gradient(135deg, #e8d7bc 0%, #d4b78f 100%);
+            border-color: #b89c70;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 108, 66, 0.2);
+        }
+        
+        .product-link:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(139, 108, 66, 0.15);
+        }
+        
+        /* Hiệu ứng focus cho accessibility */
+        .product-link:focus {
+            outline: 2px solid #8b6c42;
+            outline-offset: 2px;
+        }
+        
+        /* Responsive cho mobile */
+        @media (max-width: 768px) {
+            .product-link {
+                font-size: 0.9em;
+                padding: 3px 6px;
+                min-width: 100px;
+            }
+        }
     </style>
     <body>
         <div class="container-fluid">
@@ -70,7 +114,7 @@
                                         <% } %>
                                     </td>
                                     <td>
-                                        <a href="<%= request.getContextPath() %>/ProductDetail?id=<%= r.getProductID() %>" target="_blank">
+                                        <a href="<%= request.getContextPath() %>/ProductDetail?id=<%= r.getProductID() %>" target="_blank" class="product-link">
                                             <%= r.getProductName() %>
                                         </a>
                                     </td>

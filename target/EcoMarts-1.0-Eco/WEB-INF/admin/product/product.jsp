@@ -61,6 +61,7 @@
                                     <th>Giá</th>
                                     <th>Số lượng</th>
                                     <th>Đơn vị</th>
+                                    <th>Trạng thái</th>
                                     <!--<th>Mô tả</th>-->
                                     <th>Hình ảnh</th>
                                     <!--<th>Supplier</th>-->
@@ -117,6 +118,15 @@
                                     </td>
                                     <td><%= pro.getUnit()%></td>
                                     <td>
+                                        <% if (pro.getStockQuantity() <= 0) { %>
+                                            <span class="badge bg-danger">Hết hàng</span>
+                                        <% } else if (pro.getStockQuantity() <= 10) { %>
+                                            <span class="badge bg-warning">Sắp hết</span>
+                                        <% } else { %>
+                                            <span class="badge bg-success">Còn hàng</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
                                         <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= pro.getImageURL()%>" alt="Product Image" style="width: 80px; height: auto;">
                                     </td>
                                     <td><%= pro.getCreatedAt()%></td>
@@ -141,7 +151,7 @@
                         </table>
                         <% } else { %>
                         <div class="text-center">
-                            <h1 class="text-danger my-4">Không có dữ liệu!</h1>
+                            <h1 class="text-danger my-4">Không có sản phẩm nào!</h1>
                         </div>
                         <% }%>
                     </div>
