@@ -8,12 +8,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
 /**
  *
  * @author HuuDuc
  */
-
 public class DBContext1 {
 
     // Đọc biến môi trường từ .env

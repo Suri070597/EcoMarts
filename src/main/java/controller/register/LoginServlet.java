@@ -20,7 +20,6 @@ import java.sql.SQLException;
  *
  * @author HuuDuc
  */
-
 @WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
 public class LoginServlet extends HttpServlet {
 

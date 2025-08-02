@@ -380,6 +380,7 @@ public class AccountDAO extends DBContext {
         }
     }
 // HuuDuc đã thêm 2 public này 
+
     public boolean isUsernameExists(String username) {
         String sql = "SELECT 1 FROM Account WHERE Username = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -407,9 +408,10 @@ public class AccountDAO extends DBContext {
             return false;
         }
     }
-    
+
     /**
      * Get detailed account info by account ID
+     *
      * @param accountId The account ID
      * @return The Account object or null if not found
      */
