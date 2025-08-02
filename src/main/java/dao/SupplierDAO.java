@@ -97,37 +97,38 @@ public class SupplierDAO extends DBContext {
         }
     }
 
-public boolean update(Supplier supplier) {
-    String sql = "UPDATE Supplier SET BrandName = ?, CompanyName = ?, [Address] = ?, Email = ?, Phone = ?, [Status] = ? WHERE SupplierID = ?";
-    try (Connection conn = getConnection(); // Hàm lấy kết nối database
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setString(1, supplier.getBrandName());
-        stmt.setString(2, supplier.getCompanyName());
-        stmt.setString(3, supplier.getAddress());
-        stmt.setString(4, supplier.getEmail());
-        stmt.setString(5, supplier.getPhone());
-        stmt.setInt(6, supplier.getStatus());
-        stmt.setInt(7, supplier.getSupplierID());
-        int rowsAffected = stmt.executeUpdate();
-        return rowsAffected > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
+    public boolean update(Supplier supplier) {
+        String sql = "UPDATE Supplier SET BrandName = ?, CompanyName = ?, [Address] = ?, Email = ?, Phone = ?, [Status] = ? WHERE SupplierID = ?";
+        try (Connection conn = getConnection(); // Hàm lấy kết nối database
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, supplier.getBrandName());
+            stmt.setString(2, supplier.getCompanyName());
+            stmt.setString(3, supplier.getAddress());
+            stmt.setString(4, supplier.getEmail());
+            stmt.setString(5, supplier.getPhone());
+            stmt.setInt(6, supplier.getStatus());
+            stmt.setInt(7, supplier.getSupplierID());
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-}
-public boolean updateSupplierStatus(int supplierId, int status) {
-    String sql = "UPDATE Supplier SET Status = ? WHERE SupplierID = ?";
-    try (Connection conn = getConnection(); // Hàm getConnection() của bạn
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setInt(1, status);
-        stmt.setInt(2, supplierId);
-        int rowsAffected = stmt.executeUpdate();
-        return rowsAffected > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
+
+    public boolean updateSupplierStatus(int supplierId, int status) {
+        String sql = "UPDATE Supplier SET Status = ? WHERE SupplierID = ?";
+        try (Connection conn = getConnection(); // Hàm getConnection() của bạn
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, status);
+            stmt.setInt(2, supplierId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-}
 
     public boolean deleteSupplier(int supplierId) {
         String sql = "DELETE FROM Supplier WHERE SupplierID = ?";

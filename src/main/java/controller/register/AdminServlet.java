@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author HuuDuc
  */
-
 @WebServlet(name = "AdminServlet", urlPatterns = {"/admin"})
 public class AdminServlet extends HttpServlet {
 

@@ -14,7 +14,6 @@ import model.Supplier;
  *
  * @author HuuDuc
  */
-
 @WebServlet(urlPatterns = {"/admin/supplier"})
 public class SupplierServlet extends HttpServlet {
 

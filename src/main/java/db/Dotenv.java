@@ -17,11 +17,11 @@ import java.util.logging.Logger;
  *
  * @author HuuDuc
  */
-
 /**
  * Loads environment variables from a .env file in resources.
  */
 public class Dotenv {
+
     private static final Logger LOGGER = Logger.getLogger(Dotenv.class.getName());
     private final Map<String, String> env;
 
@@ -41,7 +41,8 @@ public class Dotenv {
     /**
      * Loads .env file from resources (WEB-INF/classes/.env).
      *
-     * @throws IllegalStateException if .env file is not found or cannot be read.
+     * @throws IllegalStateException if .env file is not found or cannot be
+     * read.
      */
     public Dotenv load() {
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(".env")) {

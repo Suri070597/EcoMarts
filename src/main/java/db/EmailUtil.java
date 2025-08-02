@@ -4,9 +4,6 @@
  */
 package db;
 
-
-
-
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -17,13 +14,12 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
 
-
 /**
  *
  * @author HuuDuc
  */
-
 public class EmailUtil {
+
     private static final Dotenv dotenv = Dotenv.configure().load();
     private static final String SMTP_HOST = dotenv.get("SMTP_HOST");
     private static final String SMTP_PORT = dotenv.get("SMTP_PORT");
@@ -38,9 +34,9 @@ public class EmailUtil {
     // Gửi mail OTP xác thực tài khoản
     public static void sendOtpEmail(String recipient, String otp) throws MessagingException {
         send(
-            recipient,
-            "Mã OTP xác thực tài khoản - EcoMart",
-            "Mã OTP của bạn là: " + otp + "\nVui lòng nhập mã này để hoàn tất đăng ký.\nMã có hiệu lực trong 1 phút."
+                recipient,
+                "Mã OTP xác thực tài khoản - EcoMart",
+                "Mã OTP của bạn là: " + otp + "\nVui lòng nhập mã này để hoàn tất đăng ký.\nMã có hiệu lực trong 1 phút."
         );
     }
 

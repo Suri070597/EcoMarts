@@ -1,6 +1,5 @@
 package controller.dangky;
 
-
 import dao.AccountDAO1;
 import dao.TokenDAO;
 import jakarta.servlet.ServletException;
@@ -17,7 +16,6 @@ import java.sql.SQLException;
  *
  * @author HuuDuc
  */
-
 @WebServlet(name = "OtpVerificationServlet", urlPatterns = {"/otp"})
 public class OtpVerificationServlet extends HttpServlet {
 

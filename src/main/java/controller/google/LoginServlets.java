@@ -13,8 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import model.Account;
 
 /**
@@ -59,53 +58,52 @@ public class LoginServlets extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-  @Override
-protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    String code = request.getParameter("code");
-    String error = request.getParameter("error");
+        String code = request.getParameter("code");
+        String error = request.getParameter("error");
 
-    if (error != null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
-
-    if (code != null) {
-        // Lấy access token và thông tin từ Google
-        GoogleLogin gg = new GoogleLogin();
-        String accessToken = gg.getToken(code);
-        Account accGoogle = gg.getUserInfo(accessToken);
-
-        // Xử lý username nếu Google không trả về
-        if (accGoogle.getUsername() == null || accGoogle.getUsername().isEmpty()) {
-            String email = accGoogle.getEmail();
-            String username = email != null && email.contains("@") ? email.substring(0, email.indexOf("@")) : "";
-            accGoogle.setUsername(username);
+        if (error != null) {
+            response.sendRedirect("login.jsp");
+            return;
         }
 
-        AccountDAO1 dao = AccountDAO1.getInstance();
+        if (code != null) {
+            // Lấy access token và thông tin từ Google
+            GoogleLogin gg = new GoogleLogin();
+            String accessToken = gg.getToken(code);
+            Account accGoogle = gg.getUserInfo(accessToken);
 
-        try {
-            if (dao.checkEmailExists(accGoogle.getEmail())) {
-                // Đã có tài khoản => Đăng nhập luôn
-                Account accDB = dao.getAccountByEmail(accGoogle.getEmail());
-                request.getSession().setAttribute("account", accDB); // <--- đồng nhất key!
-                response.sendRedirect(request.getContextPath() + "/home");
-            } else {
-                // Chưa có tài khoản => Bổ sung thông tin
-                request.getSession().setAttribute("account", accGoogle); // <--- đồng nhất key!
-                response.sendRedirect(request.getContextPath() + "/updategoogle");
+            // Xử lý username nếu Google không trả về
+            if (accGoogle.getUsername() == null || accGoogle.getUsername().isEmpty()) {
+                String email = accGoogle.getEmail();
+                String username = email != null && email.contains("@") ? email.substring(0, email.indexOf("@")) : "";
+                accGoogle.setUsername(username);
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+
+            AccountDAO1 dao = AccountDAO1.getInstance();
+
+            try {
+                if (dao.checkEmailExists(accGoogle.getEmail())) {
+                    // Đã có tài khoản => Đăng nhập luôn
+                    Account accDB = dao.getAccountByEmail(accGoogle.getEmail());
+                    request.getSession().setAttribute("account", accDB); // <--- đồng nhất key!
+                    response.sendRedirect(request.getContextPath() + "/home");
+                } else {
+                    // Chưa có tài khoản => Bổ sung thông tin
+                    request.getSession().setAttribute("account", accGoogle); // <--- đồng nhất key!
+                    response.sendRedirect(request.getContextPath() + "/updategoogle");
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                response.sendRedirect("login.jsp");
+            }
+        } else {
             response.sendRedirect("login.jsp");
         }
-    } else {
-        response.sendRedirect("login.jsp");
     }
-}
-
 
     /**
      * Handles the HTTP <code>POST</code> method.

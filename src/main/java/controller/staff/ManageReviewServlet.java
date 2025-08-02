@@ -1,11 +1,8 @@
 package controller.staff;
 
 import dao.FeedBackDAO;
-import dao.ProductDAO;
-import dao.AccountDAO;
+
 import model.Review;
-import model.Product;
-import model.Account;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

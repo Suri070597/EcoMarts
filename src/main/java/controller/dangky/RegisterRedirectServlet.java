@@ -16,7 +16,6 @@ import java.io.PrintWriter;
  *
  * @author HuuDuc
  */
-
 @WebServlet(name = "RegisterRedirectServlet", urlPatterns = {"/register"})
 public class RegisterRedirectServlet extends HttpServlet {
 
