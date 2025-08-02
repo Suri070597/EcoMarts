@@ -40,14 +40,14 @@
         input[type="submit"] {
             width: 100%;
             padding: 10px;
-            background-color: #4CAF50;
+            background-color: #dbc09a;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
         input[type="submit"]:hover {
-            background-color: #45a049;
+            background-color: #dbc09a;
         }
     </style>
 </head>

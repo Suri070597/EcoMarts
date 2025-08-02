@@ -40,7 +40,7 @@
         .btn {
             width: 95%;
             padding: 12px;
-            background-color: #28a745;
+            background-color: #dbc09a;
             color: white;
             border: none;
             border-radius: 8px;
@@ -49,7 +49,7 @@
             margin-top: 10px;
         }
         .btn:hover {
-            background-color: #00b07e;
+            background-color: #dbc09a;
         }
         .links {
             margin-top: 15px;
@@ -61,7 +61,7 @@
             margin: 0 5px;
         }
         .google-btn {
-            background-color: #28a745;
+            background-color: #dbc09a;
             color: white;
             text-decoration: none;
             display: inline-block;

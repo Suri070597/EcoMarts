@@ -75,11 +75,11 @@
                 text-align: center;
             }
             button {
-                background-color: #4CAF50;
+                background-color: #dbc09a;
                 color: #fff;
             }
             button:hover {
-                background-color: #388E3C;
+                background-color: #dbc09a;
             }
             .back-btn {
                 background-color: #f5f5f5;
