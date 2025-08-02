@@ -67,7 +67,7 @@
                         </div>
 
                         <div class="mb-3" id="fruit-price-group" style="display:none">
-                            <label class="form-label">Giá (VNĐ/kg)</label>
+                            <label class="form-label">Giá (đ/kg)</label>
                             <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" id="fruitPrice" placeholder="Nhập giá theo kg" />
                         </div>
                         <div class="mb-3" id="fruit-qty-group" style="display:none">

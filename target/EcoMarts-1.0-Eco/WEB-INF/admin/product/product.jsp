@@ -90,7 +90,7 @@
                                     <td>
                                         <% double price = pro.getPrice();
                                            out.print(new java.text.DecimalFormat("#,###").format(price));
-                                        %> VNĐ
+                                        %> đ
                                     </td>
                                     <td>
                                         <% double qty = pro.getStockQuantity();

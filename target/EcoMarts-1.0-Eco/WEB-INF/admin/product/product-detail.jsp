@@ -48,7 +48,7 @@
                                     }
                                 %>
                                 <% if (isFruit) { %>
-                                    <tr><th>Giá bán:</th><td><%= new java.text.DecimalFormat("#,###").format(product.getPrice()) %> VNĐ / kg</td></tr>
+                                    <tr><th>Giá bán:</th><td><%= new java.text.DecimalFormat("#,###").format(product.getPrice()) %> đ / kg</td></tr>
                                     <tr><th>Số lượng tồn kho:</th>
                                         <td>
                                             <% double kg = product.getStockQuantity();
@@ -65,8 +65,8 @@
                                         </td>
                                     </tr>
                                 <% } else { %>
-                                    <tr><th>Giá lẻ:</th><td><%= new java.text.DecimalFormat("#,###").format(product.getPrice()) %> VNĐ / <%= product.getUnit() %></td></tr>
-                                    <tr><th>Giá thùng:</th><td><%= product.getUnitPerBox() > 0 ? new java.text.DecimalFormat("#,###").format(product.getPrice() * product.getUnitPerBox()) : "-" %> VNĐ / <%= product.getBoxUnitName() %></td></tr>
+                                    <tr><th>Giá lẻ:</th><td><%= new java.text.DecimalFormat("#,###").format(product.getPrice()) %> đ / <%= product.getUnit() %></td></tr>
+                        <tr><th>Giá thùng:</th><td><%= product.getUnitPerBox() > 0 ? new java.text.DecimalFormat("#,###").format(product.getPrice() * product.getUnitPerBox()) : "-" %> đ / <%= product.getBoxUnitName() %></td></tr>
                                     <tr><th>Số lượng tồn kho:</th><td>
     <% double qty = product.getStockQuantity();
        int unitPerBox = product.getUnitPerBox();
@@ -95,7 +95,7 @@
                                     <tr><th>Đơn vị nhỏ nhất:</th><td><%= product.getItemUnitName() %></td></tr>
                                 <% } %>
                                 <tr><th>Danh mục:</th><td><%= product.getCategory() != null ? product.getCategory().getCategoryName() : "" %></td></tr>
-                                <tr><th>Nhà cung cấp:</th><td><%= product.getSupplier() != null ? product.getSupplier().getCompanyName() : "" %></td></tr>
+                                <tr><th>Nhà sản xuất:</th><td><%= product.getSupplier() != null ? product.getSupplier().getCompanyName() : "" %></td></tr>
                                 <tr>
                                     <% if (isFruit) { %>
                                         <th>Ngày nhập kho:</th>

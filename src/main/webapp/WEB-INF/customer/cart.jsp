@@ -127,7 +127,7 @@
 
                 <!-- Show error/success messages -->
                 <c:if test="${not empty sessionScope.cartError}">
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 45px; margin-bottom: 20px;">
                         ${sessionScope.cartError}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -135,7 +135,7 @@
                 </c:if>
 
                 <c:if test="${not empty sessionScope.cartMessage}">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 45px; margin-bottom: 20px;">
                         ${sessionScope.cartMessage}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -220,12 +220,12 @@
                                                     <c:set var="price" value="${item.product.price}" />
                                                     <c:set var="quantity" value="${item.quantity}" />
                                                     <div class="col-md-2 mb-2 mb-md-0 text-md-end">
-                                                                                            <div class="fw-bold text-success item-total">
-                                        <fmt:formatNumber value="${Math.round(price * quantity / 1000) * 1000}" type="number"/> ₫
+                                                                                                                                <div class="fw-bold text-success item-total">
+                                        <fmt:formatNumber value="${price * quantity}" type="number" pattern="#,###"/> ₫
                                     </div>
                                     <div class="text-muted small">
-                                        <fmt:formatNumber value="${Math.round(price / 1000) * 1000}" type="number"/> ₫ / ${item.product.unit}
-                                                        </div>
+                                        <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.unit}
+                                        </div>
                                                     </div>
 
                                                     <!-- Actions -->
@@ -281,7 +281,7 @@
                                                     <!-- Saved for later price -->
                                                     <c:set var="savedPrice" value="${item.product.price}" />
                                                     <div class="fw-bold text-success">
-                                                        <fmt:formatNumber value="${Math.round(savedPrice / 1000) * 1000}" type="number"/> ₫
+                                                        <fmt:formatNumber value="${savedPrice}" type="number" pattern="#,###"/> ₫
                                                     </div>
                                                 </div>
 

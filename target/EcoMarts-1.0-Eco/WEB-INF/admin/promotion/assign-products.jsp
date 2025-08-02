@@ -64,9 +64,9 @@
                                                 </td>
                                                 <td>${product.productID}</td>
                                                 <td>${product.productName}</td>
-                                                <td><fmt:formatNumber value="${product.price}" type="number"/> VND</td>
+                                                <td><fmt:formatNumber value="${product.price}" type="number" pattern="#,###"/> đ</td>
                                                 <td><fmt:formatNumber value="${promotion.discountPercent}" type="number"/>%</td>
-                                                <td><fmt:formatNumber value="${product.price * (1 - promotion.discountPercent / 100)}" type="number"/> VND</td>
+                                                <td><fmt:formatNumber value="${product.price * (1 - promotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ</td>
                                             </tr>
                                         </c:forEach>
                                     </tbody>

@@ -1,6 +1,7 @@
 package controller;
 
 import dao.ViewProductDAO;
+import dao.FeedBackDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,6 +12,8 @@ import model.Product;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @WebServlet(name = "LoadMoreFeaturedServlet", urlPatterns = {"/loadMoreFeatured"})
 public class LoadMoreFeaturedServlet extends HttpServlet {
@@ -40,6 +43,27 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
 
         List<Product> products = dao.getFeaturedProductsByPage(parentId, offset, limit);
         request.setAttribute("products", products);
+        
+        // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
+        try {
+            FeedBackDAO fbDao = new FeedBackDAO();
+            Map<Integer, Double> avgRatingMap = new HashMap<>();
+            Map<Integer, Integer> reviewCountMap = new HashMap<>();
+            
+            for (Product p : products) {
+                int pid = p.getProductID();
+                double avg = fbDao.getAverageRatingByProductId(pid);
+                int count = fbDao.countReviewsByProductId(pid);
+                avgRatingMap.put(pid, avg);
+                reviewCountMap.put(pid, count);
+            }
+            
+            request.setAttribute("avgRatingMap", avgRatingMap);
+            request.setAttribute("reviewCountMap", reviewCountMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         request.getRequestDispatcher("/WEB-INF/customer/loadMoreFeatured.jsp").forward(request, response);
     }
 

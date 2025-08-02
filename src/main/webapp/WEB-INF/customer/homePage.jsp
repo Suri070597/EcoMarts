@@ -164,9 +164,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -245,9 +243,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -328,9 +324,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -413,9 +407,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -498,9 +490,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -586,9 +576,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -671,9 +659,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>

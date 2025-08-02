@@ -223,7 +223,7 @@
                                                     ${od.productName}
                                                 </a>
                                             </td>
-                                            <td class="text-center"><fmt:formatNumber value="${od.unitPrice}" type="number"/> đ</td>
+                                            <td class="text-center"><fmt:formatNumber value="${od.unitPrice}" type="number" pattern="#,###"/> đ</td>
                                             <td class="text-center">
                                                 <c:choose>
                                                     <c:when test="${od.unit eq 'kg'}">

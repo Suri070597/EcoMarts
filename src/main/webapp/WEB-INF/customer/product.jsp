@@ -63,7 +63,7 @@
                     <tr>
                         <td><%= pro.getProductID()%></td>
                         <td><%= pro.getProductName()%></td>
-                        <td><%= pro.getPrice()%></td>
+                        <td><%= new java.text.DecimalFormat("#,###").format(pro.getPrice()) %> đ</td>
                         <td><%= pro.getStockQuantity()%></td>
                         <td><%= pro.getUnit()%></td>
                         <td><%= pro.getDescription()%></td>

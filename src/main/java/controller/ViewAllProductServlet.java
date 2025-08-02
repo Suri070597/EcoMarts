@@ -6,6 +6,7 @@ package controller;
 
 import dao.CategoryDAO;
 import dao.ProductDAO;
+import dao.FeedBackDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -14,6 +15,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import model.Category;
 import model.Product;
 
@@ -78,6 +81,27 @@ public class ViewAllProductServlet extends HttpServlet {
 
             request.setAttribute("productList", productList);
             request.setAttribute("categoryId", categoryId);
+            
+            // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
+            try {
+                FeedBackDAO fbDao = new FeedBackDAO();
+                Map<Integer, Double> avgRatingMap = new HashMap<>();
+                Map<Integer, Integer> reviewCountMap = new HashMap<>();
+                
+                for (Product p : productList) {
+                    int pid = p.getProductID();
+                    double avg = fbDao.getAverageRatingByProductId(pid);
+                    int count = fbDao.countReviewsByProductId(pid);
+                    avgRatingMap.put(pid, avg);
+                    reviewCountMap.put(pid, count);
+                }
+                
+                request.setAttribute("avgRatingMap", avgRatingMap);
+                request.setAttribute("reviewCountMap", reviewCountMap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             request.getRequestDispatcher("/WEB-INF/customer/view-all.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {

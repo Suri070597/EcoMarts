@@ -81,7 +81,7 @@
                                     <td><%= pro.getProductID()%></td>
                                     <td><%= parentName%></td>
                                     <td><%= pro.getProductName()%></td>
-                                    <td><fmt:formatNumber value="<%= pro.getPrice()%>" type="number" pattern=",###" /> VNĐ</td>
+                                    <td><fmt:formatNumber value="<%= pro.getPrice()%>" type="number" pattern="#,###" /> đ</td>
                                     <td>
                                     <% double qty = pro.getStockQuantity();
                                        if (qty == Math.floor(qty)) {

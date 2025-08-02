@@ -18,7 +18,7 @@ import model.Account;
 import model.Promotion;
 import model.Review;
 
-@WebServlet(name = "ProductDetailServlet", urlPatterns = {"/ProductDetail" })
+@WebServlet(name = "ProductDetailServlet", urlPatterns = { "/ProductDetail" })
 public class ProductDetailServlet extends HttpServlet {
 
     @Override
@@ -40,19 +40,18 @@ public class ProductDetailServlet extends HttpServlet {
             int id = Integer.parseInt(idRaw);
             Product mo = dao.getProductById(id);
 
-PromotionDAO promotionDAO = new PromotionDAO();
-Promotion appliedPromotion = promotionDAO.getValidPromotionForProduct(mo.getProductID());
-
-
-if (appliedPromotion != null) {
-    request.setAttribute("appliedPromotion", appliedPromotion);
-}
-
-            
             if (mo == null) {
                 request.setAttribute("errorMessage", "Sản phẩm với ID " + id + " không tồn tại");
                 request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
                 return;
+            }
+
+            // Chỉ thực hiện các thao tác này khi mo không null
+            PromotionDAO promotionDAO = new PromotionDAO();
+            Promotion appliedPromotion = promotionDAO.getValidPromotionForProduct(mo.getProductID());
+
+            if (appliedPromotion != null) {
+                request.setAttribute("appliedPromotion", appliedPromotion);
             }
 
             if (mo.getCategory() != null) {

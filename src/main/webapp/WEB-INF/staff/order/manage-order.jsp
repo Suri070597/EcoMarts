@@ -94,7 +94,7 @@
                                                 ${o.orderStatus}
                                             </span>
                                         </td>
-                                        <td><fmt:formatNumber value="${o.totalAmount}" type="number" groupingUsed="true" /> VND</td>
+                                        <td><fmt:formatNumber value="${o.totalAmount}" type="number" groupingUsed="true" /> đ</td>
                                         <td>
                                             <a href="${pageContext.request.contextPath}/staff/order/detail?id=${o.orderID}"
                                                class="btn btn-sm btn-info" title="View Details">

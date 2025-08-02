@@ -109,7 +109,7 @@
                 data: {
                     labels: yearLabels,
                     datasets: [{
-                            label: 'Revenue (VND)',
+                            label: 'Revenue (đ)',
                             data: yearData,
                             backgroundColor: 'rgba(75, 192, 192, 0.7)',
                             borderColor: 'rgba(75, 192, 192, 1)',
@@ -125,7 +125,7 @@
                                 callback: function (value) {
                                     return new Intl.NumberFormat('vi-VN', {
                                         style: 'currency',
-                                        currency: 'VND'
+                                        currency: 'đ'
                                     }).format(value);
                                 }
                             }

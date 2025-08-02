@@ -26,10 +26,6 @@
         hsd = sdf.format(mo.getExpirationDate());
     }
 %>
-<% if (mo == null) { %>
-<div style="color:red;">Không tìm thấy thông tin sản phẩm.</div>
-return;
-<% }%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -61,19 +57,32 @@ return;
         <jsp:include page="header.jsp" />
 
         <!-- Main content -->
-        <div class="main-content2">
+        <div class="main-content1">
             <%
                 String errorMessage = (String) request.getAttribute("errorMessage");
                 if (errorMessage != null && !errorMessage.isEmpty()) {
             %>
-            <div class="alert alert-danger text-center" role="alert">
-                <%= errorMessage%>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="alert alert-danger text-center" role="alert">
+                            <h4 class="alert-heading">Lỗi!</h4>
+                            <p><%= errorMessage%></p>
+                            <hr>
+                            <p class="mb-0">
+                                <a href="${pageContext.request.contextPath}/home" class="btn btn-primary">
+                                    <i class="fas fa-home"></i> Quay về trang chủ
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <%
-            } else {
+            } else if (mo != null) {
             %>
             <% if (session.getAttribute("cartMessage") != null) { %>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 45px; margin-bottom: 20px;">
                 ${sessionScope.cartMessage}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -81,14 +90,13 @@ return;
             <% } %>
 
             <% if (session.getAttribute("cartError") != null) { %>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 45px; margin-bottom: 20px;">
                 ${sessionScope.cartError}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <% session.removeAttribute("cartError"); %>
             <% } %>
-
-            <% if (mo != null) {%>
+            
             <div class="container mt-5">
                 <div class="row">
                     <div class="col-md-6">
@@ -98,7 +106,6 @@ return;
                     <div class="col-md-6">
                         <h2 class="product-name"><%= mo.getProductName()%></h2>
                         <div class="promotion-section">
-
                             <c:choose>
                                 <c:when test="${not empty appliedPromotion}">
                                     <div class="flash-sale-banner mt-3">
@@ -112,13 +119,12 @@ return;
                                                 <span class="countdown-box" id="timer-ss">--</span>
                                             </div>
                                         </div>
-
                                         <div class="mt-3">
                                             <span class="flash-sale-price">
-                                                <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number"/> đ
+                                                <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ
                                             </span>
                                             <span class="original-price">
-                                                <fmt:formatNumber value="${mo.price}" type="number"/> đ
+                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
                                             </span>
                                             <span class="discount-percent">
                                                 -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
@@ -126,19 +132,17 @@ return;
                                         </div>
                                     </div>
                                 </c:when>
-
                                 <c:otherwise>
                                     <div class="flash-sale-banner mt-3">
                                         <div class="flash-sale-header">
-                                        <span class="flash-sale-price">
-                                            <fmt:formatNumber value="${mo.price}" type="number"/> đ
-                                        </span>
+                                            <span class="flash-sale-price">
+                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
+                                            </span>
                                         </div>
                                     </div>
                                 </c:otherwise>
                             </c:choose>
                         </div>
-
 
                         <div class="product-detail">
                             <p><span class="sao">
@@ -147,22 +151,23 @@ return;
                                 <span class="text-warning">
                                     <c:forEach begin="1" end="${fullStars}"><i class="fas fa-star"></i></c:forEach><c:if test="${halfStar}"><i class="fas fa-star-half-alt"></i></c:if><c:forEach begin="1" end="${emptyStars}"><i class="far fa-star"></i></c:forEach>
                                 </span> | <span class="sao">${reviewCount}</span> Đánh Giá</p>
-                                <%
-                                    Category child = mo.getCategory();
-                                    String parentName = "N/A";
-                                    String childName = (child != null) ? child.getCategoryName() : "Unknown";
-                                    int parentId = -1;
+                            
+                            <%
+                                Category child = mo.getCategory();
+                                String parentName = "N/A";
+                                String childName = (child != null) ? child.getCategoryName() : "Unknown";
+                                int parentId = -1;
 
-                                    if (child != null) {
-                                        parentId = child.getParentID();
-                                        for (Category c : dataCate) {
-                                            if (c.getCategoryID() == parentId) {
-                                                parentName = c.getCategoryName();
-                                                break;
-                                            }
+                                if (child != null) {
+                                    parentId = child.getParentID();
+                                    for (Category c : dataCate) {
+                                        if (c.getCategoryID() == parentId) {
+                                            parentName = c.getCategoryName();
+                                            break;
                                         }
                                     }
-                                %>
+                                }
+                            %>
 
                             <p><strong>Thể Loại:</strong>
                                 <%
@@ -175,9 +180,9 @@ return;
                                     }
                                 %>
                             </p>
-                            <p><strong>Số Lượng Tồn Kho:</strong> <%=mo.getStockQuantity()%></p>
+                            <p><strong>Số Lượng Tồn Kho:</strong> <%= mo.getStockQuantity() %></p>
                             <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p>
-                            <p><strong>Nhà Cung Cấp:</strong> <%=mo.getSupplier().getCompanyName()%></p>
+                            <p><strong>Nhà Sản Xuất:</strong> <%=mo.getSupplier().getCompanyName()%></p>
 
                             <form action="cart" method="post">
                                 <input type="hidden" name="action" value="add">
@@ -283,6 +288,7 @@ return;
                                     });
                                 </script>
                             </form>
+                            
                             <div>
                                 <a href="#" class="me-2"><i class="fab fa-facebook"></i></a>
                                 <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
@@ -301,7 +307,6 @@ return;
                             </div>
                         </div>
                     </div>
-                    <%}%>
 
                     <div class="row mt-5">
                         <div class="col-12">
@@ -321,7 +326,7 @@ return;
                                                             <c:if test="${review.accountRole != 2}">
                                                                 <span class="text-warning">
                                                                     <c:forEach begin="1" end="${review.rating}" var="i">★</c:forEach><c:forEach begin="1" end="${5 - review.rating}" var="i">☆</c:forEach>
-                                                                    </span>
+                                                                </span>
                                                             </c:if>
                                                             <span class="text-muted small ms-2">
                                                                 <fmt:formatDate value="${review.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
@@ -363,7 +368,7 @@ return;
                                                                         <span class="text-warning">
                                                                             <c:forEach begin="1" end="${reply.rating}" var="i">★</c:forEach>
                                                                             <c:forEach begin="1" end="${5 - reply.rating}" var="i">☆</c:forEach>
-                                                                            </span>
+                                                                        </span>
                                                                     </c:if>
                                                                     <span class="text-muted small ms-2">
                                                                         <fmt:formatDate value="${reply.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
@@ -492,7 +497,6 @@ return;
                         <div class="carousel-inner">
                             <%
                                 List<Product> related = (List<Product>) request.getAttribute("relatedProducts");
-                                int count = 0;
                                 if (related != null && !related.isEmpty()) {
                                     for (int i = 0; i < related.size(); i += 4) {
                             %>
@@ -517,8 +521,8 @@ return;
                                     <% } %>
                                 </div>
                             </div>
-                            <% }
-                            } else { %>
+                            <% } %>
+                            <% } else { %>
                             <p class="text-muted1">Không có sản phẩm liên quan.</p>
                             <% }%>
                         </div>
@@ -537,52 +541,55 @@ return;
             </div>
             <jsp:include page="footer.jsp" />
             <%
-                }
+            }
             %>
+            
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
             <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
+            
             <script>
-                                                                            function setReply(parentId, orderId, productId) {
-                                                                                document.getElementById('parentReviewId').value = parentId;
-                                                                                document.getElementsByName('orderId')[0].value = orderId;
-                                                                                document.getElementsByName('productId')[0].value = productId;
-                                                                                document.getElementById('action').value = 'add';
-                                                                                document.getElementById('reviewId').value = '';
-                                                                                document.getElementById('comment').focus();
-                                                                                document.getElementById('comment').value = '';
+                function setReply(parentId, orderId, productId) {
+                    document.getElementById('parentReviewId').value = parentId;
+                    document.getElementsByName('orderId')[0].value = orderId;
+                    document.getElementsByName('productId')[0].value = productId;
+                    document.getElementById('action').value = 'add';
+                    document.getElementById('reviewId').value = '';
+                    document.getElementById('comment').focus();
+                    document.getElementById('comment').value = '';
 
-                                                                                // Reset rating
-                                                                                var stars = document.getElementsByName('rating');
-                                                                                for (var i = 0; i < stars.length; i++) {
-                                                                                    stars[i].checked = false;
-                                                                                }
+                    // Reset rating
+                    var stars = document.getElementsByName('rating');
+                    for (var i = 0; i < stars.length; i++) {
+                        stars[i].checked = false;
+                    }
 
-                                                                                // Ẩn/hiện rating
-                                                                                var ratingSection = document.getElementById('ratingSection');
-                                                                                if (ratingSection) {
-                                                                                    if (parentId) {
-                                                                                        ratingSection.style.display = 'none';
-                                                                                        // Bỏ required cho rating khi reply
-                                                                                        for (var i = 0; i < stars.length; i++) {
-                                                                                            stars[i].required = false;
-                                                                                        }
-                                                                                    } else {
-                                                                                        ratingSection.style.display = 'block';
-                                                                                        // Bắt buộc required khi review gốc
-                                                                                        for (var i = 0; i < stars.length; i++) {
-                                                                                            stars[i].required = true;
-                                                                                        }
-                                                                                    }
-                                                                                }
+                    // Ẩn/hiện rating
+                    var ratingSection = document.getElementById('ratingSection');
+                    if (ratingSection) {
+                        if (parentId) {
+                            ratingSection.style.display = 'none';
+                            // Bỏ required cho rating khi reply
+                            for (var i = 0; i < stars.length; i++) {
+                                stars[i].required = false;
+                            }
+                        } else {
+                            ratingSection.style.display = 'block';
+                            // Bắt buộc required khi review gốc
+                            for (var i = 0; i < stars.length; i++) {
+                                stars[i].required = true;
+                            }
+                        }
+                    }
 
-                                                                                // Reset file input
-                                                                                document.getElementById('image').value = '';
+                    // Reset file input
+                    document.getElementById('image').value = '';
 
-                                                                                // Đổi text button
-                                                                                document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
-                                                                            }
+                    // Đổi text button
+                    document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
+                }
             </script>
+            
             <script>
                 function toggleReply(reviewId) {
                     var section = document.getElementById('replySection' + reviewId);
@@ -596,6 +603,7 @@ return;
                     }
                 }
             </script>
+            
             <style>
                 .toggle-reply-box {
                     display: flex;
@@ -703,8 +711,8 @@ return;
                     font-weight: bold;
                     margin-left: 10px;
                 }
-
             </style>
+            
             <script>
                 (function () {
                     const endTime = new Date("${appliedPromotion.endDate}").getTime();
@@ -736,7 +744,6 @@ return;
                     }, 1000);
                 })();
             </script>
-
 
     </body>
 </html>
