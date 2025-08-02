@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
-         version="5.0">
+<web-app version="5.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd">
     <display-name>EcoMart</display-name>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
-    
     <!-- Session Configuration -->
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
-
+    <!-- Authentication Filter for Admin and Staff URLs -->
+    <filter>
+        <filter-name>AuthenticationFilter</filter-name>
+        <filter-class>filter.AuthenticationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthenticationFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+        <url-pattern>/admin</url-pattern>
+        <url-pattern>/staff/*</url-pattern>
+        <url-pattern>/staff</url-pattern>
+    </filter-mapping>
     <servlet>
         <servlet-name>ImageServlet_2</servlet-name>
         <servlet-class>controller.ImageServlet_2</servlet-class>
@@ -21,4 +28,4 @@
         <servlet-name>ImageServlet_2</servlet-name>
         <url-pattern>/ImageServlet_2</url-pattern>
     </servlet-mapping>
-</web-app> 
+</web-app>

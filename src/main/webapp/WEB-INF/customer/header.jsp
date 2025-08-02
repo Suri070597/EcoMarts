@@ -38,8 +38,35 @@
         color: #007bff;
     }
     
-
-
+    .btn-admin {
+        background-color: gainsboro; 
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin: 0 10px;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-admin:hover {
+        background-color: #f1f1f1;
+        color: white;
+    }
+    
+    .btn-staff {
+        background-color: gainsboro;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin: 0 10px;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-staff:hover {
+        background-color: #f1f1f1;
+        color: white;
+    }
 </style>
 
 <!-- Sidebar -->
@@ -148,6 +175,30 @@
         <!-- Logout -->
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
 
+        <% } else if (account != null && account.getRole() == 1) { %>
+        <!-- Admin user -->
+        <span>Chào, <%= account.getFullName()%> (Admin)</span>
+        
+        <!-- Return to Admin -->
+        <a href="<%= request.getContextPath()%>/admin" class="btn-admin">
+            <i class="fas fa-user-shield"></i> Quay lại trang Admin
+        </a>
+        
+        <!-- Logout -->
+        <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+        
+        <% } else if (account != null && account.getRole() == 2) { %>
+        <!-- Staff user -->
+        <span>Chào, <%= account.getFullName()%> (Nhân viên)</span>
+        
+        <!-- Return to Staff -->
+        <a href="<%= request.getContextPath()%>/staff" class="btn-staff">
+            <i class="fas fa-user-tie"></i> Quay lại trang Nhân viên
+        </a>
+        
+        <!-- Logout -->
+        <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+        
         <% } else if (account == null) {%>
         <!-- Chưa đăng nhập -->
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
