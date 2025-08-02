@@ -278,7 +278,7 @@
 
                 <!-- Order Actions -->
                 <div class="d-flex justify-content-between">
-                    <a href="${pageContext.request.contextPath}/customer/reorder" class="btn btn-outline-secondary order-action-btn">
+                    <a href="${pageContext.request.contextPath}/reorder" class="btn btn-outline-secondary order-action-btn">
                         <i class="fas fa-arrow-left me-2"></i>Quay lại
                     </a>
 

@@ -93,7 +93,7 @@
                 <div class="category-wrapper">
                     <!-- Mục tĩnh "Mua lại đơn cũ" -->
                     <div class="category-item">
-                        <a href="${pageContext.request.contextPath}/customer/reorder">
+                        <a href="${pageContext.request.contextPath}/reorder">
                             <div class="category-icon">
                                 <img src="https://cdn.tgdd.vn/bachhoaxanh/www/Content/images/icon-history.v202301091407.png"
                                      alt="Mua lại đơn cũ">
