@@ -141,7 +141,7 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <% 
+                                <%
                                     double avg = 0.0;
                                     int count = 0;
                                     if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
@@ -154,27 +154,27 @@
                                     boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
                                     int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                                     for (int i = 0; i < fullStars; i++) { %>
-                                        <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                                 <% } %>
                                 <% if (halfStar) { %>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star-half-alt"></i>
                                 <% } %>
                                 <% for (int i = 0; i < emptyStars; i++) { %>
-                                    <i class="far fa-star"></i>
-                                <% } %>
-                                <span>(<%= count %>)</span>
+                                <i class="far fa-star"></i>
+                                <% }%>
+                                <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
-                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
-                                <input type="hidden" name="quantity" value="1"> 
-                                <input type="hidden" name="action" value="initiate"> 
-                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
-                            </form>
+                                    <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                    <input type="hidden" name="quantity" value="1"> 
+                                    <input type="hidden" name="action" value="initiate"> 
+                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -190,7 +190,7 @@
                 <% if (featuredProducts != null && featuredProducts.size() >= 6) { %>
                 <button id="load-more-featured" class="see-more-btn"
                         data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
-                <% } %>
+                    <% } %>
             </section>
 
             <!--mở đầu-->
@@ -223,7 +223,7 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <% 
+                                <%
                                     double avg = 0.0;
                                     int count = 0;
                                     if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
@@ -236,27 +236,27 @@
                                     boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
                                     int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                                     for (int i = 0; i < fullStars; i++) { %>
-                                        <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                                 <% } %>
                                 <% if (halfStar) { %>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star-half-alt"></i>
                                 <% } %>
                                 <% for (int i = 0; i < emptyStars; i++) { %>
-                                    <i class="far fa-star"></i>
-                                <% } %>
-                                <span>(<%= count %>)</span>
+                                <i class="far fa-star"></i>
+                                <% }%>
+                                <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
-                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
-                                <input type="hidden" name="quantity" value="1"> 
-                                <input type="hidden" name="action" value="initiate"> 
-                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
-                            </form>
+                                    <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                    <input type="hidden" name="quantity" value="1"> 
+                                    <input type="hidden" name="action" value="initiate"> 
+                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -272,7 +272,7 @@
                 <% if (drinkProducts != null && drinkProducts.size() >= 6) { %>
                 <button id="load-more-drink" class="see-more-btn"
                         data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
-                <% } %>
+                    <% } %>
             </section>
 
             <!--kết thúc-->
@@ -307,7 +307,7 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <% 
+                                <%
                                     double avg = 0.0;
                                     int count = 0;
                                     if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
@@ -320,27 +320,27 @@
                                     boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
                                     int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                                     for (int i = 0; i < fullStars; i++) { %>
-                                        <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                                 <% } %>
                                 <% if (halfStar) { %>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star-half-alt"></i>
                                 <% } %>
                                 <% for (int i = 0; i < emptyStars; i++) { %>
-                                    <i class="far fa-star"></i>
-                                <% } %>
-                                <span>(<%= count %>)</span>
+                                <i class="far fa-star"></i>
+                                <% }%>
+                                <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
-                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
-                                <input type="hidden" name="quantity" value="1"> 
-                                <input type="hidden" name="action" value="initiate"> 
-                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
-                            </form>
+                                    <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                    <input type="hidden" name="quantity" value="1"> 
+                                    <input type="hidden" name="action" value="initiate"> 
+                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -393,7 +393,7 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <% 
+                                <%
                                     double avg = 0.0;
                                     int count = 0;
                                     if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
@@ -406,27 +406,27 @@
                                     boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
                                     int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                                     for (int i = 0; i < fullStars; i++) { %>
-                                        <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                                 <% } %>
                                 <% if (halfStar) { %>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star-half-alt"></i>
                                 <% } %>
                                 <% for (int i = 0; i < emptyStars; i++) { %>
-                                    <i class="far fa-star"></i>
-                                <% } %>
-                                <span>(<%= count %>)</span>
+                                <i class="far fa-star"></i>
+                                <% }%>
+                                <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
-                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
-                                <input type="hidden" name="quantity" value="1"> 
-                                <input type="hidden" name="action" value="initiate"> 
-                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
-                            </form>
+                                    <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                    <input type="hidden" name="quantity" value="1"> 
+                                    <input type="hidden" name="action" value="initiate"> 
+                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -479,7 +479,7 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <% 
+                                <%
                                     double avg = 0.0;
                                     int count = 0;
                                     if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
@@ -492,27 +492,27 @@
                                     boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
                                     int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                                     for (int i = 0; i < fullStars; i++) { %>
-                                        <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                                 <% } %>
                                 <% if (halfStar) { %>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star-half-alt"></i>
                                 <% } %>
                                 <% for (int i = 0; i < emptyStars; i++) { %>
-                                    <i class="far fa-star"></i>
-                                <% } %>
-                                <span>(<%= count %>)</span>
+                                <i class="far fa-star"></i>
+                                <% }%>
+                                <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
-                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
-                                <input type="hidden" name="quantity" value="1"> 
-                                <input type="hidden" name="action" value="initiate"> 
-                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
-                            </form>
+                                    <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                    <input type="hidden" name="quantity" value="1"> 
+                                    <input type="hidden" name="action" value="initiate"> 
+                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -568,7 +568,7 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <% 
+                                <%
                                     double avg = 0.0;
                                     int count = 0;
                                     if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
@@ -581,27 +581,27 @@
                                     boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
                                     int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                                     for (int i = 0; i < fullStars; i++) { %>
-                                        <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                                 <% } %>
                                 <% if (halfStar) { %>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star-half-alt"></i>
                                 <% } %>
                                 <% for (int i = 0; i < emptyStars; i++) { %>
-                                    <i class="far fa-star"></i>
-                                <% } %>
-                                <span>(<%= count %>)</span>
+                                <i class="far fa-star"></i>
+                                <% }%>
+                                <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
-                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
-                                <input type="hidden" name="quantity" value="1"> 
-                                <input type="hidden" name="action" value="initiate"> 
-                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
-                            </form>
+                                    <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                    <input type="hidden" name="quantity" value="1"> 
+                                    <input type="hidden" name="action" value="initiate"> 
+                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -654,7 +654,7 @@
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <% 
+                                <%
                                     double avg = 0.0;
                                     int count = 0;
                                     if (request.getAttribute("avgRatingMap") != null && request.getAttribute("reviewCountMap") != null) {
@@ -667,27 +667,27 @@
                                     boolean halfStar = (avg - fullStars) >= 0.25 && (avg - fullStars) < 0.75;
                                     int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                                     for (int i = 0; i < fullStars; i++) { %>
-                                        <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                                 <% } %>
                                 <% if (halfStar) { %>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star-half-alt"></i>
                                 <% } %>
                                 <% for (int i = 0; i < emptyStars; i++) { %>
-                                    <i class="far fa-star"></i>
-                                <% } %>
-                                <span>(<%= count %>)</span>
+                                <i class="far fa-star"></i>
+                                <% }%>
+                                <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
-                                <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
-                                <input type="hidden" name="quantity" value="1"> 
-                                <input type="hidden" name="action" value="initiate"> 
-                                <button type="submit" class="buy-now-btn">Mua ngay</button> 
-                            </form>
+                                    <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                    <input type="hidden" name="quantity" value="1"> 
+                                    <input type="hidden" name="action" value="initiate"> 
+                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -705,7 +705,7 @@
                         data-parent="6" data-target="cosmetic-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
                 </button>
-                <% } %>            
+                <% }%>            
             </section>
 
             <!--kết thúc--> 
@@ -840,7 +840,7 @@
                         }
         </script>
 
-        
+
         <!-- Load More JavaScript -->
         <script src="${pageContext.request.contextPath}/assets/js/loadMore.js?version=<%= System.currentTimeMillis()%>"></script>
     </body>
