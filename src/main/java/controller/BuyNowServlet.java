@@ -74,6 +74,11 @@ public class BuyNowServlet extends HttpServlet {
             return;
         }
         
+        // Get categories from database
+        CategoryDAO categoryDAO = new CategoryDAO();
+        List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
+        request.setAttribute("categories", categories);
+        
         // Check if buying from cart
         boolean isFromCart = session.getAttribute("checkoutFromCart") != null;
         
@@ -153,11 +158,6 @@ public class BuyNowServlet extends HttpServlet {
         
         // Calculate rounded totals for consistent display
         double roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;
-        
-        // Get categories from database
-        CategoryDAO categoryDAO = new CategoryDAO();
-        List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
-        request.setAttribute("categories", categories);
         
         // Set attributes for the checkout page
         request.setAttribute("buyNowItem", buyNowItem);
