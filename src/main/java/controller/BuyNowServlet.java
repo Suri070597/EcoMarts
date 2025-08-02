@@ -613,20 +613,7 @@ public class BuyNowServlet extends HttpServlet {
         String pattern = "^(0|\\+84)[3|5|7|8|9][0-9]{8}$";
         return phone.matches(pattern);
     }
-    
-    /**
-     * Save order history to database
-     */
-    private void saveOrderHistory(int accountId, int orderId, String action, String status) {
-        try {
-            OrderDAO orderDAO = new OrderDAO();
-            orderDAO.createOrderHistory(accountId, orderId, action, status);
-        } catch (Exception e) {
-            // Log error but continue processing
-            System.err.println("Error saving order history: " + e.getMessage());
-        }
-    }
-    
+
     /**
      * Xử lý callback từ VNPay sau khi thanh toán
      */
@@ -687,8 +674,6 @@ public class BuyNowServlet extends HttpServlet {
             boolean updated = orderDAO.updatePaymentStatus(pendingOrderId, "Đã thanh toán");
             
             if (updated) {
-                // Lưu lịch sử đơn hàng
-                orderDAO.createOrderHistory(account.getAccountID(), pendingOrderId, "Thanh toán thành công qua VNPay", "Đang xử lý");
                 
                 // Thông báo thành công
                 session.setAttribute("successMessage", "Thanh toán thành công! Cảm ơn quý khách đã mua sắm.");
@@ -711,7 +696,6 @@ public class BuyNowServlet extends HttpServlet {
             // Thanh toán thất bại
             // Cập nhật trạng thái đơn hàng thành "Đã hủy"
             orderDAO.cancelOrder(pendingOrderId);
-            orderDAO.createOrderHistory(account.getAccountID(), pendingOrderId, "Thanh toán thất bại qua VNPay", "Đã hủy");
             
             // Thông báo lỗi
             session.setAttribute("errorMessage", "Thanh toán không thành công. Mã lỗi: " + vnpResponseCode);
