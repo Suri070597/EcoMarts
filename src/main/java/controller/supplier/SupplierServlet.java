@@ -10,6 +10,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import model.Supplier;
 
+/**
+ *
+ * @author HuuDuc
+ */
+
 @WebServlet(urlPatterns = {"/admin/supplier"})
 public class SupplierServlet extends HttpServlet {
 

@@ -17,7 +17,7 @@ import model.Account;
 
 /**
  *
- * @author ADMIN
+ * @author HuuDuc
  */
 @WebServlet(urlPatterns = {"/updategoogle"})
 public class UpdateGoogleServlet extends HttpServlet {

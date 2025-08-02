@@ -19,7 +19,7 @@ import model.Account;
 
 /**
  *
- * @author ADMIN
+ * @author HuuDuc
  */
 @WebServlet(name = "LoginServlets", urlPatterns = {"/logins"})
 public class LoginServlets extends HttpServlet {

@@ -15,7 +15,7 @@ import java.sql.Connection;
 
 /**
  *
- * @author MSI Gaming
+ * @author HuuDuc
  */
 public class SupplierDAO extends DBContext {
 

@@ -3,6 +3,7 @@
 <html>
     <head>
         <title>Thông tin cá nhân</title>
+         <link rel="shortcut icon" href="assets/img/eco.png" type="image/x-icon">
         <style>
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
