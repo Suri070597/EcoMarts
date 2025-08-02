@@ -91,7 +91,7 @@
                         <% } else { %>
                             <div class="mb-3">
                                 <label class="form-label">Giá 1 thùng/hộp/kiện</label>
-                                <input type="number" min="0" step="1" class="form-control" name="boxPrice" required value="<%= mo.getUnitPerBox() > 0 ? (mo.getPrice() * mo.getUnitPerBox()) : "" %>" />
+                                <input type="number" min="0" step="1" class="form-control" name="boxPrice" required value="<%= mo.getUnitPerBox() > 0 ? Math.round(mo.getPrice() * mo.getUnitPerBox()) : "" %>" />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Số lượng thùng/hộp/kiện</label>

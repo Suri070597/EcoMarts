@@ -39,7 +39,7 @@ public class ProductServlet extends HttpServlet {
         List<Category> listCategory = dao.getCategory();
         switch (action) {
             case "list":
-                List<Product> list = dao.getAll();
+                List<Product> list = dao.getAllIncludingOutOfStock();
                 request.setAttribute("dataCate", listCategory);
                 request.setAttribute("data", list);
 
