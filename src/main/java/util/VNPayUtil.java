@@ -41,10 +41,6 @@ public class VNPayUtil {
     //Ngày phát hành	07/15
     //Mật khẩu OTP	123456
     
-    public static String getPaymentUrl(HttpServletRequest request, HttpServletResponse response, double price) throws UnsupportedEncodingException {
-        return getPaymentUrl(request, response, price, null);
-    }
-    
     public static String getPaymentUrl(HttpServletRequest request, HttpServletResponse response, double price, Integer orderId) throws UnsupportedEncodingException {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
@@ -85,7 +81,7 @@ public class VNPayUtil {
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
 
-        cld.add(Calendar.MINUTE, 15);
+        cld.add(Calendar.MINUTE, 10);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
