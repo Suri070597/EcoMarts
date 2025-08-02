@@ -295,30 +295,7 @@
                     </div>
                 </div>
 
-                <!-- Order History -->
-                <c:if test="${not empty orderHistory}">
-                    <div class="card order-card mt-4">
-                        <div class="card-header order-card-header">
-                            <h5 class="mb-0 order-title">Lịch sử đơn hàng</h5>
-                        </div>
-                        <div class="card-body">
-                            <c:forEach items="${orderHistory}" var="history">
-                                <div class="history-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <span class="history-user">${history.username}</span> 
-                                            <span class="history-action">${history.action}</span>
-                                        </div>
-                                        <span class="history-timestamp">
-                                            <fmt:formatDate value="${history.timestamp}" pattern="dd/MM/yyyy HH:mm"/>
-                                        </span>
-                                    </div>
-                                    <div class="mt-1">Trạng thái: ${history.status}</div>
-                                </div>
-                            </c:forEach>
-                        </div>
-                    </div>
-                </c:if>
+
             </div>
         </div>
 

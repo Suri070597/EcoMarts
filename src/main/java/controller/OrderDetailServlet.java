@@ -87,9 +87,6 @@ public class OrderDetailServlet extends HttpServlet {
                 total += od.getSubTotal();
             }
             
-            // Get order history
-            List<Map<String, Object>> orderHistory = orderDAO.getOrderHistory(orderId);
-            
             // Get categories for the navigation menu
             List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
 
@@ -97,20 +94,7 @@ public class OrderDetailServlet extends HttpServlet {
             request.setAttribute("order", order);
             request.setAttribute("orderDetails", orderDetails);
             request.setAttribute("total", total);
-            request.setAttribute("orderHistory", orderHistory);
             request.setAttribute("categories", categories);
-            
-            // Check if this is a new order that needs history creation
-            String isNewOrder = request.getParameter("newOrder");
-            if ("true".equals(isNewOrder)) {
-                try {
-                    // Create order history now that the order is fully committed to the database
-                    orderDAO.createOrderHistory(account.getAccountID(), orderId, "Đơn hàng đã được tạo", "Đang xử lý");
-                } catch (Exception ex) {
-                    // Log error but continue processing
-                    System.err.println("Error creating order history: " + ex.getMessage());
-                }
-            }
             
             // Check for messages in session
             String successMessage = (String) session.getAttribute("successMessage");
@@ -172,8 +156,6 @@ public class OrderDetailServlet extends HttpServlet {
                     try {
                         orderDAO.cancelOrder(orderId);
                         
-                        // Record the cancellation in order history
-                        orderDAO.createOrderHistory(account.getAccountID(), orderId, "Đã hủy đơn hàng", "Đã hủy");
                         session.setAttribute("successMessage", "Đơn hàng đã được hủy thành công");
                     } catch (Exception ex) {
                         session.setAttribute("errorMessage", "Không thể hủy đơn hàng. Vui lòng thử lại sau");
