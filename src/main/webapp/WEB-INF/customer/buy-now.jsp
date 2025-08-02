@@ -228,7 +228,7 @@
                                                         </div>
                                                     </div>
                                                     <p class="text-muted small mb-0">
-                                                        <fmt:formatNumber value="${item.product.price}" type="number"/> đ / ${item.product.unit}
+                                                        <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
                                                     </p>
                                                 </div>
                                             </div>
@@ -266,7 +266,7 @@
                                                     <small class="text-muted">Còn lại: ${buyNowItem.product.stockQuantity} ${buyNowItem.product.unit}</small>
                                                 </div>
                                                 <p class="text-success fw-bold mb-0">
-                                                    <fmt:formatNumber value="${buyNowItem.product.price}" type="number"/> đ / ${buyNowItem.product.unit}
+                                                    <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ / ${buyNowItem.product.unit}
                                                 </p>
                                             </div>
                                         </div>

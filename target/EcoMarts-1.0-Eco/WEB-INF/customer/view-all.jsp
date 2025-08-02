@@ -18,6 +18,8 @@
     List<Product> products = (List<Product>) request.getAttribute("productList");
     ViewProductDAO dao = new ViewProductDAO();
     int categoryId = (int) request.getAttribute("categoryId");
+    Map<Integer, Double> avgRatingMap = (Map<Integer, Double>) request.getAttribute("avgRatingMap");
+    Map<Integer, Integer> reviewCountMap = (Map<Integer, Integer>) request.getAttribute("reviewCountMap");
 
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
     List<Product> product = (List<Product>) request.getAttribute("data");
@@ -140,25 +142,40 @@
                         if (products != null && !products.isEmpty()) {
                             for (Product p : products) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
                         <div class="product-info">
                             <h3 class="product-name"><%= p.getProductName()%></h3>
                             <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(29)</span>
+                                <%
+                                    int productId = p.getProductID();
+                                    Double avgRating = avgRatingMap != null ? avgRatingMap.get(productId) : 0.0;
+                                    Integer reviewCount = reviewCountMap != null ? reviewCountMap.get(productId) : 0;
+                                    
+                                    if (avgRating == null) avgRating = 0.0;
+                                    if (reviewCount == null) reviewCount = 0;
+                                    
+                                    int fullStars = avgRating.intValue();
+                                    boolean hasHalfStar = (avgRating - fullStars) >= 0.5;
+                                %>
+                                <% for (int i = 0; i < fullStars; i++) { %>
+                                    <i class="fas fa-star"></i>
+                                <% } %>
+                                <% if (hasHalfStar) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } %>
+                                <% for (int i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                                <span>(<%= reviewCount %>)</span>
                             </div>
-                            <div class="product-price"><%= new java.text.DecimalFormat("#,###").format(p.getPrice()) %> VNĐ / <%= p.getUnit() %></div>
+                            <div class="product-price"><fmt:formatNumber value="<%= p.getPrice() %>" type="number" pattern="#,###"/> đ / <%= p.getUnit() %></div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="buy-now-btn">Mua ngay</a>
@@ -299,6 +316,7 @@
                         }
         </script>
         <script src="${pageContext.request.contextPath}/assets/js/loadMore.js"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
     </body>
 
 </html>

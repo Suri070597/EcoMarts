@@ -393,8 +393,8 @@ public class ProductDAO extends DBContext {
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 double rawPrice = rs.getDouble("Price");
-                long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
-                p.setPrice(roundedPrice);
+//                long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
+                p.setPrice(rawPrice);
                 p.setImageURL(rs.getString("ImageURL"));
                 list.add(p);
             }
@@ -428,8 +428,8 @@ public class ProductDAO extends DBContext {
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 double rawPrice = rs.getDouble("Price");
-                long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
-                p.setPrice(roundedPrice);
+//                long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
+                p.setPrice(rawPrice);
                 p.setDescription(rs.getString("Description"));
                 p.setStockQuantity(rs.getDouble("StockQuantity"));
                 p.setImageURL(rs.getString("ImageURL"));

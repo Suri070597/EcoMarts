@@ -81,17 +81,17 @@
                         </div>
                         <% if (isFruit) { %>
                             <div class="mb-3">
-                                <label class="form-label">Giá (VNĐ/kg)</label>
-                                <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" value="<%= (int)Math.round(mo.getPrice()) %>" required />
+                                <label class="form-label">Giá (đ/kg)</label>
+                                <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" value="<%= mo.getPrice() %>" required />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Số lượng tồn kho (kg)</label>
-                                <input type="number" min="1" step="1" class="form-control" name="fruitQuantity" value="<%= (int)Math.round(mo.getStockQuantity()) %>" required />
+                                <input type="number" min="1" step="1" class="form-control" name="fruitQuantity" value="<%= mo.getStockQuantity() %>" required />
                             </div>
                         <% } else { %>
                             <div class="mb-3">
                                 <label class="form-label">Giá 1 thùng/hộp/kiện</label>
-                                <input type="number" min="0" step="1" class="form-control" name="boxPrice" required value="<%= mo.getUnitPerBox() > 0 ? (int)Math.round(mo.getPrice() * mo.getUnitPerBox()) : "" %>" />
+                                <input type="number" min="0" step="1" class="form-control" name="boxPrice" required value="<%= mo.getUnitPerBox() > 0 ? (mo.getPrice() * mo.getUnitPerBox()) : "" %>" />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Số lượng thùng/hộp/kiện</label>

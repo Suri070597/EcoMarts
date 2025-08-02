@@ -175,7 +175,7 @@
                     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                     datasets: [{
-                            label: 'Revenue (VND)',
+                            label: 'Revenue (đ)',
                             data: revenueData,
                             backgroundColor: 'rgba(54, 162, 235, 0.7)',
                             borderColor: 'rgba(54, 162, 235, 1)',
@@ -191,7 +191,7 @@
                                 callback: function (value) {
                                     return new Intl.NumberFormat('vi-VN', {
                                         style: 'currency',
-                                        currency: 'VND'
+                                        currency: 'đ'
                                     }).format(value);
                                 }
                             }

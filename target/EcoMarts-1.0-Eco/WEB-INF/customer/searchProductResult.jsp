@@ -11,6 +11,8 @@
 <%
     List<Product> products = (List<Product>) request.getAttribute("searchResult");
     String keyword = (String) request.getAttribute("searchKeyword");
+    Map<Integer, Double> avgRatingMap = (Map<Integer, Double>) request.getAttribute("avgRatingMap");
+    Map<Integer, Integer> reviewCountMap = (Map<Integer, Integer>) request.getAttribute("reviewCountMap");
 %>
 <!DOCTYPE html>
 <html>
@@ -27,6 +29,7 @@
         <!-- Home CSS -->
         <link rel="stylesheet" href="./assets/css/home.css?version=<%= System.currentTimeMillis()%>">
         <script defer src="./assets/js/homeJs.js"></script>
+        <script defer src="./assets/js/cart.js"></script>
         <!-- Animate on scroll -->
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     </head>
@@ -41,26 +44,57 @@
                 <c:choose>
                     <c:when test="${not empty searchResult}">
                         <c:forEach var="p" items="${searchResult}">
-                            <div class="product-card">
+                            <div class="product-card" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}">
                                 <div class="product-image-container">
                                     <img src="ImageServlet?name=${p.imageURL}" alt="${p.productName}" class="product-image">
                                     <div class="product-actions">
-                                        <button class="action-btn"><i class="fas fa-cart-plus"></i></button>
+                                        <button class="action-btn add-to-cart-action" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}"><i class="fas fa-cart-plus"></i></button>
                                         <a href="ProductDetail?id=${p.productID}" class="action-btn"><i class="fas fa-eye"></i></a>
                                     </div>
                                 </div>
                                 <div class="product-info">
                                     <h3 class="product-name">${p.productName}</h3>
                                     <div class="product-rating">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
-                                        <span>(29)</span>
+                                        <c:set var="productId" value="${p.productID}" />
+                                        <c:set var="avgRating" value="${avgRatingMap[productId]}" />
+                                        <c:set var="reviewCount" value="${reviewCountMap[productId]}" />
+                                        
+                                        <c:choose>
+                                            <c:when test="${empty avgRating}">
+                                                <c:set var="avgRating" value="0.0" />
+                                            </c:when>
+                                        </c:choose>
+                                        <c:choose>
+                                            <c:when test="${empty reviewCount}">
+                                                <c:set var="reviewCount" value="0" />
+                                            </c:when>
+                                        </c:choose>
+                                        
+                                        <%
+                                            Object avgRatingObj = pageContext.getAttribute("avgRating");
+                                            double avgRatingValue = 0.0;
+                                            if (avgRatingObj != null) {
+                                                avgRatingValue = Double.parseDouble(avgRatingObj.toString());
+                                            }
+                                            int fullStars = (int) Math.floor(avgRatingValue);
+                                            boolean hasHalfStar = (avgRatingValue - fullStars) >= 0.5;
+                                            pageContext.setAttribute("fullStars", fullStars);
+                                            pageContext.setAttribute("hasHalfStar", hasHalfStar);
+                                        %>
+                                        
+                                        <c:forEach begin="1" end="${fullStars}" var="i">
+                                            <i class="fas fa-star"></i>
+                                        </c:forEach>
+                                        <c:if test="${hasHalfStar}">
+                                            <i class="fas fa-star-half-alt"></i>
+                                        </c:if>
+                                        <c:forEach begin="1" end="${5 - fullStars - (hasHalfStar ? 1 : 0)}" var="i">
+                                            <i class="far fa-star"></i>
+                                        </c:forEach>
+                                        <span>(${reviewCount})</span>
                                     </div>
                                     <div class="product-price">
-                                        <fmt:formatNumber value="${p.price}" type="number" pattern=",###" /> VNĐ / ${p.unit}
+                                        <fmt:formatNumber value="${p.price}" type="number" pattern="#,###" /> đ / ${p.unit}
                                     </div>
                                     <div class="button-group">
                                         <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>

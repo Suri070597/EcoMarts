@@ -130,10 +130,11 @@
                         if (featuredProducts != null && !featuredProducts.isEmpty()) {
                             for (Product p : featuredProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -164,9 +165,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -188,8 +187,10 @@
                         }
                     %>
                 </div>
+                <% if (featuredProducts != null && featuredProducts.size() >= 6) { %>
                 <button id="load-more-featured" class="see-more-btn"
                         data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+                <% } %>
             </section>
 
             <!--mở đầu-->
@@ -210,11 +211,12 @@
                         if (drinkProducts != null && !drinkProducts.isEmpty()) {
                             for (Product p : drinkProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -245,9 +247,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -269,8 +269,10 @@
                         }
                     %>
                 </div>
+                <% if (drinkProducts != null && drinkProducts.size() >= 6) { %>
                 <button id="load-more-drink" class="see-more-btn"
                         data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+                <% } %>
             </section>
 
             <!--kết thúc-->
@@ -293,11 +295,12 @@
                         if (MilkProducts != null && !MilkProducts.isEmpty()) {
                             for (Product p : MilkProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -328,9 +331,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -352,10 +353,12 @@
                         }
                     %>
                 </div>
+                <% if (MilkProducts != null && MilkProducts.size() >= 6) { %>
                 <button id="load-more-milk" class="see-more-btn"
                         data-parent="2" data-target="milk-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
+                </button>
+                <% } %>            
             </section>
 
             <!--kết thúc--> 
@@ -378,11 +381,12 @@
                         if (FruitProducts != null && !FruitProducts.isEmpty()) {
                             for (Product p : FruitProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -413,9 +417,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -437,10 +439,12 @@
                         }
                     %>
                 </div>
+                <% if (FruitProducts != null && FruitProducts.size() >= 6) { %>
                 <button id="load-more-fruit" class="see-more-btn"
                         data-parent="3" data-target="fruit-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
                 </button>
+                <% } %>
             </section>
 
             <!--kết thúc--> 
@@ -463,11 +467,12 @@
                         if (CandyProducts != null && !CandyProducts.isEmpty()) {
                             for (Product p : CandyProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -498,9 +503,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -522,10 +525,12 @@
                         }
                     %>
                 </div>
+                <% if (CandyProducts != null && CandyProducts.size() >= 6) { %>
                 <button id="load-more-snack" class="see-more-btn"
                         data-parent="4" data-target="snack-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
                 </button>
+                <% } %>
             </section>
 
             <!--kết thúc--> 
@@ -551,11 +556,12 @@
                         if (MotherBabyProducts != null && !MotherBabyProducts.isEmpty()) {
                             for (Product p : MotherBabyProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -586,9 +592,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -610,10 +614,12 @@
                         }
                     %>
                 </div>
+                <% if (MotherBabyProducts != null && MotherBabyProducts.size() >= 6) { %>
                 <button id="load-more-baby" class="see-more-btn"
                         data-parent="5" data-target="baby-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
+                </button>
+                <% } %>            
             </section>
 
             <!--kết thúc--> 
@@ -636,11 +642,12 @@
                         if (CosmeticProducts != null && !CosmeticProducts.isEmpty()) {
                             for (Product p : CosmeticProducts) {
                     %>
-                    <div class="product-card">
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <!--<div class="product-badge">Hot</div>-->
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -671,9 +678,7 @@
                                 <span>(<%= count %>)</span>
                             </div>
                             <div class="product-price">
-                                <% long roundedPrice = Math.round(p.getPrice() / 1000.0) * 1000;
-                                   out.print(new java.text.DecimalFormat("#,###").format(roundedPrice));
-                                %> VNĐ / <%= p.getUnit() %>
+                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice())); %> đ / <%= p.getUnit() %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -695,10 +700,12 @@
                         }
                     %>
                 </div>
+                <% if (CosmeticProducts != null && CosmeticProducts.size() >= 6) { %>
                 <button id="load-more-cosmetic" class="see-more-btn"
                         data-parent="6" data-target="cosmetic-products">
                     Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
-                </button>            
+                </button>
+                <% } %>            
             </section>
 
             <!--kết thúc--> 
@@ -832,7 +839,10 @@
                             dots[slideIndex - 1].className += " active";
                         }
         </script>
-        <script src="${pageContext.request.contextPath}/assets/js/loadMore.js"></script>
+
+        
+        <!-- Load More JavaScript -->
+        <script src="${pageContext.request.contextPath}/assets/js/loadMore.js?version=<%= System.currentTimeMillis()%>"></script>
     </body>
 
 </html>

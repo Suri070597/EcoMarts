@@ -49,7 +49,7 @@
 
                 // Cập nhật số lượng sản phẩm trong giỏ hàng khi trang tải xong
                 this.updateCartCount();
-                
+
                 console.log('EcoMarts Cart initialized successfully');
             } catch (error) {
                 console.error('Error initializing EcoMarts Cart:', error);
@@ -249,10 +249,11 @@
                 }
             });
 
-            // Theo dõi toàn bộ document
+            // Theo dõi toàn bộ document (chỉ thay đổi node, không theo dõi thuộc tính)
             observer.observe(document.body, {
                 childList: true,
-                subtree: true
+                subtree: true,
+                attributes: false
             });
 
             console.log('Đã thiết lập MutationObserver');
@@ -277,14 +278,13 @@
 
             // Xử lý từng nút
             actionBtns.forEach(btn => {
-                // Xóa event listeners cũ (nếu có)
-                const newBtn = btn.cloneNode(true);
-                if (btn.parentNode) {
-                    btn.parentNode.replaceChild(newBtn, btn);
+                // Kiểm tra xem nút đã có event listener chưa
+                if (btn.hasAttribute('data-cart-initialized')) {
+                    return; // Đã được khởi tạo rồi
                 }
 
                 // Thêm event listener mới
-                newBtn.addEventListener('click', (e) => {
+                btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -317,6 +317,9 @@
                     console.log(`Thêm sản phẩm ID=${productId} vào giỏ hàng (từ action-btn), tồn kho=${stockQuantity}`);
                     this.addToCart(productId, 1);
                 });
+
+                // Đánh dấu nút đã được khởi tạo
+                btn.setAttribute('data-cart-initialized', 'true');
             });
         }
 
@@ -330,23 +333,22 @@
 
             // Xử lý từng nút
             addToCartBtns.forEach(btn => {
-                // Xóa event listeners cũ (nếu có)
-                const newBtn = btn.cloneNode(true);
-                if (btn.parentNode) {
-                    btn.parentNode.replaceChild(newBtn, btn);
+                // Kiểm tra xem nút đã có event listener chưa
+                if (btn.hasAttribute('data-cart-initialized')) {
+                    return; // Đã được khởi tạo rồi
                 }
 
                 // Thêm event listener mới
-                newBtn.addEventListener('click', (e) => {
+                btn.addEventListener('click', (e) => {
                     e.preventDefault();
 
                     // Lấy ID sản phẩm từ thuộc tính data-product-id
-                    let productId = newBtn.getAttribute('data-product-id');
-                    let stockQuantity = parseInt(newBtn.getAttribute('data-stock-quantity') || 0);
+                    let productId = btn.getAttribute('data-product-id');
+                    let stockQuantity = parseInt(btn.getAttribute('data-stock-quantity') || 0);
 
                     if (!productId) {
                         // Thử tìm từ product-card cha
-                        const productCard = newBtn.closest('.product-card');
+                        const productCard = btn.closest('.product-card');
                         if (productCard && productCard.getAttribute('data-product-id')) {
                             productId = productCard.getAttribute('data-product-id');
                             stockQuantity = parseInt(productCard.getAttribute('data-stock-quantity') || 0);
@@ -367,6 +369,9 @@
                     console.log(`Thêm sản phẩm ID=${productId} vào giỏ hàng, tồn kho=${stockQuantity}`);
                     this.addToCart(productId, 1);
                 });
+
+                // Đánh dấu nút đã được khởi tạo
+                btn.setAttribute('data-cart-initialized', 'true');
             });
         }
 
@@ -561,11 +566,13 @@
             // Xác định URL API dựa vào đường dẫn hiện tại
             let cartUrl = `cart?action=add&productID=${productId}&quantity=${quantity}`;
 
-            // Điều chỉnh URL nếu đang ở trong thư mục con
+            // Điều chỉnh URL nếu đang ở trong thư mục con hoặc servlet
             if (window.location.pathname.includes('/customer/') ||
-                window.location.pathname.includes('/ViewAllProductServlet') ||
                 window.location.pathname.includes('/ProductDetail')) {
                 cartUrl = `../cart?action=add&productID=${productId}&quantity=${quantity}`;
+            } else if (window.location.pathname.includes('/ViewAllProductServlet')) {
+                // Khi truy cập từ ViewAllProductServlet, sử dụng URL tương đối
+                cartUrl = `cart?action=add&productID=${productId}&quantity=${quantity}`;
             }
 
             console.log(`Gửi request đến: ${cartUrl}`);
@@ -677,11 +684,13 @@
             // Xác định URL API dựa vào đường dẫn hiện tại
             let cartCountUrl = 'cart?action=count';
 
-            // Điều chỉnh URL nếu đang ở trong thư mục con
+            // Điều chỉnh URL nếu đang ở trong thư mục con hoặc servlet
             if (window.location.pathname.includes('/customer/') ||
-                window.location.pathname.includes('/ViewAllProductServlet') ||
                 window.location.pathname.includes('/ProductDetail')) {
                 cartCountUrl = '../cart?action=count';
+            } else if (window.location.pathname.includes('/ViewAllProductServlet')) {
+                // Khi truy cập từ ViewAllProductServlet, sử dụng URL tương đối
+                cartCountUrl = `cart?action=count`;
             }
 
             console.log(`Lấy số lượng giỏ hàng từ: ${cartCountUrl}`);
@@ -951,7 +960,7 @@
                     this.showNotification('Có lỗi xảy ra khi xóa sản phẩm khỏi giỏ hàng: ' + error.message, 'error');
                 });
         }
-        
+
         /**
          * Hiển thị thông báo
          * @param {string} message - Nội dung thông báo

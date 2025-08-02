@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <link rel="stylesheet"
       href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
 <link rel="stylesheet"
@@ -62,9 +63,18 @@
                         <c:forEach var="d" items="${details}">
                             <tr>
                                 <td>${d.productName}</td>
-                                <td>${d.unitPrice} VND</td>
-                                <td>${d.quantity}</td>
-                                <td>${d.subTotal} VND</td>
+                                <td><fmt:formatNumber value="${d.unitPrice}" type="number" pattern="#,###"/> đ</td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${d.quantity % 1 == 0}">
+                                            <fmt:formatNumber value="${d.quantity}" pattern="#"/>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <fmt:formatNumber value="${d.quantity}" pattern="#.##"/>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td><fmt:formatNumber value="${d.subTotal}" type="number" pattern="#,###"/> đ</td>
 
                             </tr>
                         </c:forEach>
@@ -73,7 +83,7 @@
 
                 <!-- Tổng tiền -->
                 <div class="order-total">
-                    <p><strong>Tổng tiền:</strong> ${order.totalAmount} VND</p>
+                                            <p><strong>Tổng tiền:</strong> <fmt:formatNumber value="${order.totalAmount}" type="number" pattern="#,###"/> đ</p>
                 </div>
             </div>
         </div>

@@ -63,8 +63,17 @@
                     <tr>
                         <td><%= pro.getProductID()%></td>
                         <td><%= pro.getProductName()%></td>
-                        <td><%= pro.getPrice()%></td>
-                        <td><%= pro.getStockQuantity()%></td>
+                        <td><%= new java.text.DecimalFormat("#,###").format(pro.getPrice()) %> đ</td>
+                        <td>
+                            <%
+                                double stockQty = pro.getStockQuantity();
+                                if (stockQty % 1 == 0) {
+                                    out.print((int) stockQty);
+                                } else {
+                                    out.print(stockQty);
+                                }
+                            %>
+                        </td>
                         <td><%= pro.getUnit()%></td>
                         <td><%= pro.getDescription()%></td>
                         <td>
