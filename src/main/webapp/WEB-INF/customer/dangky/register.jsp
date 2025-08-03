@@ -104,7 +104,7 @@
                 <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required title="Số điện thoại phải có 10 chữ số">
 
                 <label for="address">Địa chỉ:</label>
-                <input type="text" id="address" name="address" required placeholder="Nhập đầy đủ địa chỉ (số nhà, đường, phường, thành phố,...)">
+                <input type="text" id="address" name="address" required title="Thành Phố">
 
                 <label for="gender">Giới tính:</label>
                 <select name="gender" id="gender" required>

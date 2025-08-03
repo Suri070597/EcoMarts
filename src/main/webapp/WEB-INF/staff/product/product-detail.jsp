@@ -50,7 +50,7 @@
                                         <tr><th>Số lượng tồn kho:</th>
                                             <td>
                                                 <% double kg = product.getStockQuantity();
-                                                    String display = new java.text.DecimalFormat("#,##0").format(kg) + "kg";
+                                                    String display = new java.text.DecimalFormat("#,##0.0").format(kg) + "kg";
                                                     if (kg >= 1000) {
                                                         double ton = kg / 1000.0;
                                                         display += " (" + new java.text.DecimalFormat("#.#").format(ton) + " tấn)";
