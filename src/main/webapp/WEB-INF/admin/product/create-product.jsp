@@ -101,10 +101,28 @@
                             <label class="form-label">Đơn vị nhỏ nhất</label>
                             <select class="form-select" name="itemUnitName" id="itemUnitName" required>
                                 <option value="">-- Chọn đơn vị nhỏ nhất --</option>
-                                <option value="chai">chai</option>
-                                <option value="lon">lon</option>
+                                <!-- Đơn vị đóng gói -->
+                                <option value="gói">gói</option>
+                                <option value="túi">túi</option>
+                                <option value="lốc">lốc</option>
                                 <option value="cái">cái</option>
+                                <!-- Đơn vị nước -->
+                                <option value="lon">lon</option>
+                                <option value="chai">chai</option>
                                 <option value="hộp">hộp</option>
+                                <!-- Đơn vị bánh kẹo -->
+                                <option value="thanh">thanh</option>
+                                <option value="viên">viên</option>
+                                <option value="miếng">miếng</option>
+                                <!-- Đơn vị mẹ và bé -->
+                                <option value="tấm">tấm</option>
+                                <option value="bộ">bộ</option>
+                                <option value="cặp">cặp</option>
+                                <!-- Đơn vị mỹ phẩm -->
+                                <option value="tuýp">tuýp</option>
+                                <option value="lọ">lọ</option>
+                                <option value="bình">bình</option>
+                                <option value="thỏi">thỏi</option>
                             </select>
                         </div>
 
@@ -243,10 +261,28 @@
                             expirySelect.disabled = false;
                             // Khôi phục các đơn vị nhỏ nhất khác
                             itemUnitSelect.innerHTML = '<option value="">-- Chọn đơn vị nhỏ nhất --</option>' +
-                                '<option value="chai">chai</option>' +
-                                '<option value="lon">lon</option>' +
+                                '<!-- Đơn vị đóng gói -->' +
+                                '<option value="gói">gói</option>' +
+                                '<option value="túi">túi</option>' +
+                                '<option value="lốc">lốc</option>' +
                                 '<option value="cái">cái</option>' +
-                                '<option value="hộp">hộp</option>';
+                                '<!-- Đơn vị nước -->' +
+                                '<option value="lon">lon</option>' +
+                                '<option value="chai">chai</option>' +
+                                '<option value="hộp">hộp</option>' +
+                                '<!-- Đơn vị bánh kẹo -->' +
+                                '<option value="thanh">thanh</option>' +
+                                '<option value="viên">viên</option>' +
+                                '<option value="miếng">miếng</option>' +
+                                '<!-- Đơn vị mẹ và bé -->' +
+                                '<option value="tấm">tấm</option>' +
+                                '<option value="bộ">bộ</option>' +
+                                '<option value="cặp">cặp</option>' +
+                                '<!-- Đơn vị mỹ phẩm -->' +
+                                '<option value="tuýp">tuýp</option>' +
+                                '<option value="lọ">lọ</option>' +
+                                '<option value="bình">bình</option>' +
+                                '<option value="thỏi">thỏi</option>';
                             var label = document.getElementById('importOrManufactureLabel');
                             label.textContent = 'Ngày Sản Xuất';
                         }

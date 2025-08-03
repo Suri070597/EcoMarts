@@ -120,10 +120,27 @@
                                                            <% } else { %>
                                   <select class="form-select" name="itemUnitName" required>
                                       <option value="">-- Chọn đơn vị nhỏ nhất --</option>
-                                      <option value="chai" <%= "chai".equals(mo.getItemUnitName()) ? "selected" : ""%>>chai</option>
-                                      <option value="lon" <%= "lon".equals(mo.getItemUnitName()) ? "selected" : ""%>>lon</option>
+                                      <!-- Đơn vị đóng gói -->
+                                      <option value="gói" <%= "gói".equals(mo.getItemUnitName()) ? "selected" : ""%>>gói</option>
+                                      <option value="túi" <%= "túi".equals(mo.getItemUnitName()) ? "selected" : ""%>>túi</option>
+                                      <option value="lốc" <%= "lốc".equals(mo.getItemUnitName()) ? "selected" : ""%>>lốc</option>
                                       <option value="cái" <%= "cái".equals(mo.getItemUnitName()) ? "selected" : ""%>>cái</option>
+                                      <!-- Đơn vị nước -->
+                                      <option value="lon" <%= "lon".equals(mo.getItemUnitName()) ? "selected" : ""%>>lon</option>
+                                      <option value="chai" <%= "chai".equals(mo.getItemUnitName()) ? "selected" : ""%>>chai</option>
                                       <option value="hộp" <%= "hộp".equals(mo.getItemUnitName()) ? "selected" : ""%>>hộp</option>
+                                      <!-- Đơn vị bánh kẹo -->
+                                      <option value="thanh" <%= "thanh".equals(mo.getItemUnitName()) ? "selected" : ""%>>thanh</option>
+                                      <option value="viên" <%= "viên".equals(mo.getItemUnitName()) ? "selected" : ""%>>viên</option>
+                                      <option value="miếng" <%= "miếng".equals(mo.getItemUnitName()) ? "selected" : ""%>>miếng</option>
+                                      <!-- Đơn vị mẹ và bé -->
+                                      <option value="tấm" <%= "tấm".equals(mo.getItemUnitName()) ? "selected" : ""%>>tấm</option>
+                                      <option value="bộ" <%= "bộ".equals(mo.getItemUnitName()) ? "selected" : ""%>>bộ</option>
+                                      <option value="cặp" <%= "cặp".equals(mo.getItemUnitName()) ? "selected" : ""%>>cặp</option>
+                                      <!-- Đơn vị mỹ phẩm -->
+                                      <option value="tuýp" <%= "tuýp".equals(mo.getItemUnitName()) ? "selected" : ""%>>tuýp</option>
+                                      <option value="lọ" <%= "lọ".equals(mo.getItemUnitName()) ? "selected" : ""%>>lọ</option>
+                                      <option value="bình" <%= "bình".equals(mo.getItemUnitName()) ? "selected" : ""%>>bình</option>
                                       <option value="thỏi" <%= "thỏi".equals(mo.getItemUnitName()) ? "selected" : ""%>>thỏi</option>
                                   </select>
                               <% } %>
