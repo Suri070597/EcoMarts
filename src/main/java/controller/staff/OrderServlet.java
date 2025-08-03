@@ -115,7 +115,12 @@ public class OrderServlet extends HttpServlet {
             boolean success = dao.updateOrderStatus(orderId, newStatus);
 
             if (success) {
+                // Nếu đơn hàng đã giao → cập nhật thanh toán
+                if ("Đã giao".equals(newStatus)) {
+                    dao.updatePaymentStatus(orderId, "Đã thanh toán");
+                }
                 request.setAttribute("message", "Cập nhật trạng thái đơn hàng thành công!");
+
             } else {
                 request.setAttribute("message", "Cập nhật thất bại. Vui lòng thử lại.");
             }
@@ -134,19 +139,18 @@ public class OrderServlet extends HttpServlet {
         }
     }
 
-private void calculateOrderSummary(Order order) {
-    double totalAfterDiscount = order.getTotalAmount(); // Đã trừ giảm giá
-    double discount = dao.getDiscountAmountByOrderID(order.getOrderID()).doubleValue(); // Lấy số giảm
+    private void calculateOrderSummary(Order order) {
+        double totalAfterDiscount = order.getTotalAmount(); // Đã trừ giảm giá
+        double discount = dao.getDiscountAmountByOrderID(order.getOrderID()).doubleValue(); // Lấy số giảm
 
-    double subtotal = totalAfterDiscount + discount; // Giá gốc
-    double vat = subtotal * 0.08;
-    double grandTotal = totalAfterDiscount + vat;
+        double subtotal = totalAfterDiscount + discount; // Giá gốc
+        double vat = subtotal * 0.08;
+        double grandTotal = totalAfterDiscount + vat;
 
-    order.setDiscountAmount(discount);
-    order.setSubtotal(subtotal);
-    order.setVat(vat);
-    order.setGrandTotal(grandTotal);
-}
-
+        order.setDiscountAmount(discount);
+        order.setSubtotal(subtotal);
+        order.setVat(vat);
+        order.setGrandTotal(grandTotal);
+    }
 
 }

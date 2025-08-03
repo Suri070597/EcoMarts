@@ -87,10 +87,7 @@
                     <label class="form-check-label" for="isActive">Hoạt động</label>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="categoryID">ID danh mục (tùy chọn)</label>
-                    <input type="number" class="form-control" id="categoryID" min='1' name="categoryID" value="${param.categoryID}">
-                </div>
+               
 
                 <div class="btn-group">
                     <a href="${pageContext.request.contextPath}/admin/voucher" class="btn btn-secondary">Quay lại</a>

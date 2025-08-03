@@ -99,10 +99,7 @@
                                     <th>Ngày kết thúc:</th>
                                     <td><fmt:formatDate value="${voucher.endDate}" pattern="yyyy-MM-dd"/></td>
                                 </tr>
-                                <tr>
-                                    <th>ID Danh mục:</th>
-                                    <td>${voucher.categoryID != null ? voucher.categoryID : 'Tất cả danh mục'}</td>
-                                </tr>
+                             
                                 <tr>
                                     <th>Trạng thái:</th>
                                     <td>${voucher.active ? 'Đang hoạt động' : 'Không hoạt động'}</td>

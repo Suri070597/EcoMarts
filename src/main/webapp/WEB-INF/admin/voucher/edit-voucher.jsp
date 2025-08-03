@@ -87,10 +87,7 @@
                     <label class="form-check-label" for="isActive">Kích hoạt</label>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="categoryID">ID Danh mục (không bắt buộc)</label>
-                    <input type="number" class="form-control" id="categoryID" name="categoryID" value="${voucher.categoryID}">
-                </div>
+            
 
                 <div class="btn-group">
                     <a href="${pageContext.request.contextPath}/admin/voucher" class="btn btn-secondary">Quay lại</a>
