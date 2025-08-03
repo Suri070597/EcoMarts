@@ -222,14 +222,14 @@
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
-                                                    <form action="${pageContext.request.contextPath}/customer/orderDetail" method="get">
+                                                    <form action="${pageContext.request.contextPath}/orderDetail" method="get">
                                                         <input type="hidden" name="orderID" value="${order.orderID}" />
                                                         <button type="submit" class="btn btn-view">
                                                             <i class="fas fa-eye me-1"></i> Chi tiết
                                                         </button>
                                                     </form>
 
-                                                    <form method="post" action="${pageContext.request.contextPath}/customer/orderDetail">
+                                                    <form method="post" action="${pageContext.request.contextPath}/orderDetail">
                                                         <input type="hidden" name="orderId" value="${order.orderID}">
                                                         <button type="submit" name="action" value="reorder" class="btn btn-reorder">
                                                             <i class="fas fa-shopping-cart me-1"></i> Mua lại

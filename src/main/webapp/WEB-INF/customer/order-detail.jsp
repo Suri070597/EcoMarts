@@ -334,7 +334,7 @@
                                 // Submit form for order cancellation
                                 const form = document.createElement('form');
                                 form.method = 'post';
-                                form.action = '${pageContext.request.contextPath}/customer/orderDetail';
+                                form.action = '${pageContext.request.contextPath}/orderDetail';
 
                                 const orderId = document.createElement('input');
                                 orderId.type = 'hidden';
@@ -362,7 +362,7 @@
                         // Submit form for reordering
                         const form = document.createElement('form');
                         form.method = 'post';
-                        form.action = '${pageContext.request.contextPath}/customer/orderDetail';
+                        form.action = '${pageContext.request.contextPath}/orderDetail';
 
                         const orderId = document.createElement('input');
                         orderId.type = 'hidden';
