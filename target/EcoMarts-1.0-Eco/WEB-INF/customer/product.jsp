@@ -94,7 +94,7 @@
             <% } else {
             %>
             <div class="container">
-                <h1 style="color: red; text-align: center; margin: 30px">Không có dữ liệu!</h1>
+                <h1 style="color: red; text-align: center; margin: 30px">Không có sản phẩm nào hoặc tất cả sản phẩm đã hết hàng!</h1>
             </div>
             <%
                 }

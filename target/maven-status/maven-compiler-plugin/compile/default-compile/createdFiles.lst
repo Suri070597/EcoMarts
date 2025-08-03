@@ -14,7 +14,6 @@ controller\ProductDetailServlet.class
 controller\dangky\RegistrationServlet.class
 controller\viewstaff\Changepasswordstaff.class
 model\ProductPromotion.class
-controller\VNPayServlet.class
 util\VNPayUtil.class
 controller\ReviewServlet.class
 controller\SearchProductServlet.class
