@@ -144,6 +144,26 @@ public class AccountDAO extends DBContext {
         }
         return null;
     }
+    
+    public Account getAccountByPhone(String phone) {
+        String sql = "SELECT * FROM Account WHERE phone = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, phone);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Account account = mapResultSetToAccount(rs);
+                rs.close();
+                ps.close();
+                return account;
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
 
     public boolean insert(String username, String password, String email, String fullName, String phone,
             String address, String gender, int role, String status) {

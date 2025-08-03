@@ -388,9 +388,11 @@ public class AdminStaffServlet extends HttpServlet {
                     return;
                 }
                 
-                if (accDAO.isPhoneExists(phone)) {
-                    request.setAttribute("errorMessage", "Phone đã tồn tại.");
-                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                Account checkPhone = accDAO.getAccountByPhone(phone);
+                if (checkPhone != null && checkPhone.getAccountID() != accountID) {
+                    request.setAttribute("errorMessage", "Email đã tồn tại.");
+                    request.setAttribute("staff", staffDAO.getStaffById(staffID));
+                    request.getRequestDispatcher("/WEB-INF/admin/staff/edit-staff.jsp").forward(request, response);
                     return;
                 }
 
