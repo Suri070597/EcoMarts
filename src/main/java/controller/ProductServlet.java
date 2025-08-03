@@ -22,7 +22,7 @@ import model.Category;
 import model.Product;
 import model.Supplier;
 
-@WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
+@WebServlet(name = "ProductServlet", urlPatterns = {"/admin/product"})
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
@@ -408,7 +408,7 @@ public class ProductServlet extends HttpServlet {
                     }
 
                     double price = 0;
-                    int stockQuantity = 0;
+                    double stockQuantity = 0;
                     int unitPerBox = 1;
                     String image;
                     Date expirationDate = null;
@@ -446,7 +446,7 @@ public class ProductServlet extends HttpServlet {
                             return;
                         }
                         price = Double.parseDouble(fruitPriceStr);
-                        stockQuantity = Integer.parseInt(fruitQtyStr);
+                        stockQuantity = Double.parseDouble(fruitQtyStr);
                         int fruitExpiryDays = Integer.parseInt(fruitExpiryDaysStr);
                         // Tính ngày hết hạn
                         Calendar calFruit = Calendar.getInstance();
@@ -543,6 +543,15 @@ public class ProductServlet extends HttpServlet {
                 } catch (Exception e) {
                     e.printStackTrace();
                     request.setAttribute("error", "❌ Đã xảy ra lỗi khi cập nhật sản phẩm.");
+                    try {
+                        int id1 = Integer.parseInt(request.getParameter("id"));
+                        Product existing = dao.getProductById(id1);
+                        request.setAttribute("mo", existing);
+                        request.setAttribute("dataCate", dao.getCategory());
+                        request.setAttribute("dataSup", dao.getAllSuppliers());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                     request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
                 }
                 break;

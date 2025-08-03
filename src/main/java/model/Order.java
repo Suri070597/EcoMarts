@@ -17,6 +17,11 @@ public class Order {
     private String notes;
     private String accountName;
     private Account account;
+    // === Thêm vào trên hoặc dưới các trường đã có ===
+    private Double discountAmount;
+    private Double subtotal;
+    private Double vat;
+    private Double grandTotal;
 
     public Order() {
     }
@@ -135,5 +140,37 @@ public class Order {
     public void setAccount(Account account) {
         this.account = account;
     }
-    
+
+    public Double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(Double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public Double getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(Double subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public Double getVat() {
+        return vat;
+    }
+
+    public void setVat(Double vat) {
+        this.vat = vat;
+    }
+
+    public Double getGrandTotal() {
+        return grandTotal;
+    }
+
+    public void setGrandTotal(Double grandTotal) {
+        this.grandTotal = grandTotal;
+    }
+
 }

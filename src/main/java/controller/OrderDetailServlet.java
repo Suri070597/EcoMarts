@@ -1,29 +1,39 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
 package controller;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import dao.CartItemDAO;
 import dao.CategoryDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
 import dao.ProductDAO;
+import dao.VoucherUsageDAO;
+import java.io.IOException;
+import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import model.Account;
 import model.CartItem;
 import model.Category;
 import model.Order;
 import model.OrderDetail;
 import model.Product;
+import model.VoucherUsage;
 
-@WebServlet("/customer/orderDetail")
+/**
+ *
+ * @author ADMIN
+ */
+@WebServlet(name = "OrderDetailServlet", urlPatterns = {"/orderDetail"})
 public class OrderDetailServlet extends HttpServlet {
 
     private final OrderDAO orderDAO = new OrderDAO();
@@ -31,6 +41,7 @@ public class OrderDetailServlet extends HttpServlet {
     private final CartItemDAO cartItemDAO = new CartItemDAO();
     private final ProductDAO productDAO = new ProductDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
+    private final VoucherUsageDAO voucherUsageDAO = new VoucherUsageDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -38,15 +49,15 @@ public class OrderDetailServlet extends HttpServlet {
         try {
             HttpSession session = request.getSession();
             Account account = (Account) session.getAttribute("account");
-            
+
             if (account == null) {
                 response.sendRedirect(request.getContextPath() + "/login");
                 return;
             }
-            
+
             // Get order ID from request
             String orderIdStr = request.getParameter("orderID");
-            
+
             if (orderIdStr == null || orderIdStr.isEmpty()) {
                 request.setAttribute("errorMessage", "Thiếu thông tin đơn hàng");
                 request.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(request, response);
@@ -62,7 +73,7 @@ public class OrderDetailServlet extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(request, response);
                 return;
             }
-            
+
             // Validate that order belongs to current user
             if (order.getAccountID() != account.getAccountID()) {
                 request.setAttribute("errorMessage", "Bạn không có quyền xem đơn hàng này");
@@ -72,7 +83,7 @@ public class OrderDetailServlet extends HttpServlet {
 
             // Get order details and product information
             List<OrderDetail> orderDetails = orderDetailDAO.getOrderDetailsByOrderId(orderId);
-            
+
             // Calculate total
             double total = 0;
             for (OrderDetail od : orderDetails) {
@@ -83,10 +94,21 @@ public class OrderDetailServlet extends HttpServlet {
                     // vì chúng ta muốn giữ giá trị gốc từ thời điểm đặt hàng
                     od.setProduct(product);
                 }
-                
+
                 total += od.getSubTotal();
             }
-            
+// VAT = 8% của tổng phụ
+            double vat = total * 0.08;
+
+// Lấy thông tin voucher đã sử dụng (nếu có)
+            VoucherUsage voucherUsage = voucherUsageDAO.getByOrderId(orderId);
+
+// Nếu có voucher thì lấy số tiền giảm
+            double discount = (voucherUsage != null) ? voucherUsage.getDiscountAmount() : 0.0;
+
+// Tổng thanh toán cuối cùng = tổng phụ - giảm giá + VAT
+            double finalTotal = total - discount + vat;
+
             // Get categories for the navigation menu
             List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
 
@@ -95,14 +117,18 @@ public class OrderDetailServlet extends HttpServlet {
             request.setAttribute("orderDetails", orderDetails);
             request.setAttribute("total", total);
             request.setAttribute("categories", categories);
-            
+            request.setAttribute("voucherUsage", voucherUsage);
+            request.setAttribute("discount", discount);
+            request.setAttribute("vat", vat);
+            request.setAttribute("finalTotal", finalTotal);
+
             // Check for messages in session
             String successMessage = (String) session.getAttribute("successMessage");
             if (successMessage != null) {
                 request.setAttribute("successMessage", successMessage);
                 session.removeAttribute("successMessage");
             }
-            
+
             String errorMessage = (String) session.getAttribute("errorMessage");
             if (errorMessage != null) {
                 request.setAttribute("errorMessage", errorMessage);
@@ -134,7 +160,7 @@ public class OrderDetailServlet extends HttpServlet {
 
         try {
             int orderId = Integer.parseInt(orderIdStr);
-            
+
             // Verify order belongs to the current user
             Order order = orderDAO.getOrderById(orderId);
             if (order == null || order.getAccountID() != account.getAccountID()) {
@@ -151,23 +177,23 @@ public class OrderDetailServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId);
                         return;
                     }
-                    
+
                     // Cancel the order and restore stock
                     try {
                         orderDAO.cancelOrder(orderId);
-                        
+
                         session.setAttribute("successMessage", "Đơn hàng đã được hủy thành công");
                     } catch (Exception ex) {
                         session.setAttribute("errorMessage", "Không thể hủy đơn hàng. Vui lòng thử lại sau");
                     }
-                    
+
                     response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId);
                     break;
 
                 case "reorder":
                     // Add order items to cart
                     List<CartItem> items = orderDAO.getCartItemsFromOrder(orderId);
-                    
+
                     // Check stock availability before adding to cart
                     Map<Integer, Double> insufficientStock = new HashMap<>();
                     for (CartItem item : items) {
@@ -183,20 +209,20 @@ public class OrderDetailServlet extends HttpServlet {
                                 }
                             }
                         }
-                        
+
                         // Only add to cart if stock is available
                         if (stockQuantity > 0) {
-                            cartItemDAO.upsertCartItem(account.getAccountID(), item.getProductID(), 
+                            cartItemDAO.upsertCartItem(account.getAccountID(), item.getProductID(),
                                     Math.min(item.getQuantity(), stockQuantity));
                         }
                     }
-                    
+
                     if (!insufficientStock.isEmpty()) {
                         session.setAttribute("cartError", "Một số sản phẩm không đủ số lượng trong kho");
                     } else {
                         session.setAttribute("cartMessage", "Đã thêm tất cả sản phẩm vào giỏ hàng");
                     }
-                    
+
                     response.sendRedirect(request.getContextPath() + "/cart");
                     break;
 

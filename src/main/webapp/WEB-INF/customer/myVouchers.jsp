@@ -78,7 +78,7 @@
                 <thead>
                     <tr>
                         <th>Mã Voucher</th>
-                        <th>Giảm giá (%)</th>
+                        <th>Giảm giá</th>
                         <th>Hạn sử dụng</th>
                         <th>Mô tả</th>
                     </tr>
@@ -87,7 +87,7 @@
                     <c:forEach items="${vouchers}" var="v">
                         <tr>
                             <td>${v.voucherCode}</td>
-                            <td>${v.discountAmount}%</td>
+                            <td>${v.discountAmount}đ</td>
                             <td>${v.endDate}</td>
                             <td>${v.description}</td>
                         </tr>

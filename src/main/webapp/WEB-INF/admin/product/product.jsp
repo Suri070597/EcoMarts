@@ -89,35 +89,28 @@
                                     <td><%= parentName%></td>
                                     <td><%= pro.getProductName()%></td>
                                     <td>
-                                        <%
-                                            double price = pro.getPrice();
-                                            java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                            symbols.setGroupingSeparator('.');
-                                            java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                            out.print(formatter.format(price));
+                                        <% double price = pro.getPrice();
+                                            out.print(new java.text.DecimalFormat("#,###").format(price));
                                         %> đ
                                     </td>
-
                                     <td>
-                                        <% double qty = pro.getStockQuantity();
-                                            int unitPerBox = pro.getUnitPerBox();
-                                            String boxUnit = pro.getBoxUnitName();
-                                            String itemUnit = pro.getItemUnitName();
-                                            if (qty == Math.floor(qty)) {
-                                                out.print((long) qty);
-                                            } else {
-                                                out.print(new java.text.DecimalFormat("#").format(qty));
+                                        <%
+                                            double qty = pro.getStockQuantity();
+                                            int categoryId = 0;
+                                            if (pro.getCategory() != null) {
+                                                categoryId = pro.getCategory().getCategoryID();
                                             }
-                                            out.print(" " + (itemUnit != null ? itemUnit : ""));
-                                            if (unitPerBox > 1 && boxUnit != null && !boxUnit.isEmpty()) {
-                                                double boxQty = qty / unitPerBox;
-                                                out.print(" (");
-                                                if (boxQty == Math.floor(boxQty)) {
-                                                    out.print((long) boxQty);
+
+                                            // Nếu là trái cây (categoryID = 3) thì giữ nguyên số thập phân
+                                            if (categoryId == 3) {
+                                                out.print(qty);
+                                            } else {
+                                                // Các loại khác thì loại bỏ .0
+                                                if (qty == Math.floor(qty)) {
+                                                    out.print((long) qty);
                                                 } else {
-                                                    out.print(new java.text.DecimalFormat("#").format(boxQty));
+                                                    out.print(qty);
                                                 }
-                                                out.print(" " + boxUnit + ")");
                                             }
                                         %>
                                     </td>

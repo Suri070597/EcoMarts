@@ -508,7 +508,7 @@ public class BuyNowServlet extends HttpServlet {
                     session.removeAttribute("checkoutFromCart");
 
                     // Redirect to order detail page with flag to create history
-                    response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId + "&newOrder=true");
+                    response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + orderId + "&newOrder=true");
                 }
             } else {
                 // Failed to create order
@@ -683,11 +683,11 @@ public class BuyNowServlet extends HttpServlet {
                 session.removeAttribute("checkoutFromCart");
 
                 // Chuyển hướng đến trang chi tiết đơn hàng
-                response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + pendingOrderId + "&newOrder=true");
+                response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + pendingOrderId + "&newOrder=true");
             } else {
                 // Lỗi cập nhật trạng thái
                 session.setAttribute("errorMessage", "Đã xảy ra lỗi khi cập nhật trạng thái thanh toán");
-                response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + pendingOrderId);
+                response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + pendingOrderId);
             }
         } else {
             // Thanh toán thất bại
@@ -696,7 +696,7 @@ public class BuyNowServlet extends HttpServlet {
 
             // Thông báo lỗi
             session.setAttribute("errorMessage", "Thanh toán không thành công. Mã lỗi: " + vnpResponseCode);
-            response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + pendingOrderId);
+            response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + pendingOrderId);
         }
     }
 
@@ -890,7 +890,7 @@ public class BuyNowServlet extends HttpServlet {
                     session.removeAttribute("checkoutFromCart");
 
                     // Redirect to order detail page with flag to create history
-                    response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId + "&newOrder=true");
+                    response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + orderId + "&newOrder=true");
                 }
             } else {
                 // Failed to create order

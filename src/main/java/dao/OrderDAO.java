@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import db.DBContext;
+import java.math.BigDecimal;
+import java.sql.Connection;
 import model.Account;
 import model.CartItem;
 import model.Order;
@@ -1030,5 +1032,25 @@ public void recordVoucherUsage(int voucherId, int accountId, int orderId, double
     }
 }
 
+public BigDecimal getDiscountAmountByOrderID(int orderId) {
+    BigDecimal discount = BigDecimal.ZERO;
+    String sql = "SELECT DiscountAmount FROM VoucherUsage WHERE OrderID = ?";
+    try {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, orderId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            discount = rs.getBigDecimal("DiscountAmount");
+        }
+        rs.close();
+        ps.close();
+        conn.close(); // đóng kết nối nếu không dùng shared connection
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return discount;
+}
 
 }

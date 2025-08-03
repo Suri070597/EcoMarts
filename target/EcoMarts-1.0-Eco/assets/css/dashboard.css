@@ -223,6 +223,8 @@ html {
     color: #f44336;
 }
 
+
+
 .chart-container {
     flex: 1;
     display: flex;
@@ -393,7 +395,7 @@ html {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .shift-time {
         width: 100%;
     }
