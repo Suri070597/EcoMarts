@@ -18,6 +18,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import model.Account;
 import model.Category;
 import model.Order;
@@ -35,23 +37,38 @@ public class ReorderServlet extends HttpServlet {
     CategoryDAO categoryDAO = new CategoryDAO();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        Account acc = (Account) session.getAttribute("account");
+protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+    HttpSession session = req.getSession();
+    Account acc = (Account) session.getAttribute("account");
 
-        if (acc == null) {
-            req.getRequestDispatcher("/WEB-INF/login/login.jsp").forward(req, resp);
-            return;
-        }
-
-        List<Order> orders = orderDAO.getOrdersByCustomerName(acc.getFullName());
-        List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
-
-        req.setAttribute("orders", orders);
-        req.setAttribute("categories", categories);
-        req.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(req, resp);
+    if (acc == null) {
+        req.getRequestDispatcher("/WEB-INF/login/login.jsp").forward(req, resp);
+        return;
     }
+
+    List<Order> orders = orderDAO.getOrdersByCustomerName(acc.getFullName());
+    List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
+
+for (Order order : orders) {
+    double totalAfterDiscount = order.getTotalAmount(); // Đã trừ giảm giá
+    double discount = orderDAO.getDiscountAmountByOrderID(order.getOrderID()).doubleValue(); // Lấy số giảm
+
+    double subtotal = totalAfterDiscount + discount; // Giá gốc
+    double vat = subtotal * 0.08;
+    double grandTotal = totalAfterDiscount + vat;
+
+    order.setDiscountAmount(discount);
+    order.setSubtotal(subtotal);
+    order.setVat(vat);
+    order.setGrandTotal(grandTotal);
+}
+
+
+    req.setAttribute("orders", orders);
+    req.setAttribute("categories", categories);
+    req.getRequestDispatcher("/WEB-INF/customer/reorder.jsp").forward(req, resp);
+}
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)

@@ -82,9 +82,25 @@
                 </table>
 
                 <!-- Tổng tiền -->
-                <div class="order-total">
-                                            <p><strong>Tổng tiền:</strong> <fmt:formatNumber value="${order.totalAmount}" type="number" pattern="#,###"/> đ</p>
+                <div class="order-summary-horizontal">
+                    <div class="summary-row">
+                        <div class="label">Giá gốc:</div>
+                        <div class="value"><fmt:formatNumber value="${order.subtotal}" type="number" pattern="#,###"/> đ</div>
+                    </div>
+                    <div class="summary-row">
+                        <div class="label">Giảm giá:</div>
+                        <div class="value"><fmt:formatNumber value="${order.discountAmount}" type="number" pattern="#,###"/> đ</div>
+                    </div>
+                    <div class="summary-row">
+                        <div class="label">VAT (8%):</div>
+                        <div class="value"><fmt:formatNumber value="${order.vat}" type="number" pattern="#,###"/> đ</div>
+                    </div>
+                    <div class="summary-row total">
+                        <div class="label">Tổng thanh toán:</div>
+                        <div class="value"><fmt:formatNumber value="${order.grandTotal}" type="number" pattern="#,###"/> đ</div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -136,6 +152,40 @@
 
         .btn-back:hover {
             background-color: #0056b3;
+        }
+        .order-summary-horizontal {
+            width: 100%;
+            max-width: 770px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #fafafa;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row.total {
+            font-weight: bold;
+            color: #d9534f;
+        }
+
+        .summary-row .label {
+            flex: 1;
+        }
+
+        .summary-row .value {
+            flex: 1;
+            text-align: right;
         }
 
     </style>
