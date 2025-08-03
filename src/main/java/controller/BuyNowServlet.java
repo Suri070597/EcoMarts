@@ -909,9 +909,36 @@ public class BuyNowServlet extends HttpServlet {
     private void initiateFromCart(HttpServletRequest request, HttpServletResponse response,
             HttpSession session, Account account) throws IOException {
         try {
+            // Check if we have selected items
+            String selectedItemsStr = request.getParameter("selectedItems");
+            List<Integer> selectedItemIds = new ArrayList<>();
+            
+            if (selectedItemsStr != null && !selectedItemsStr.trim().isEmpty()) {
+                String[] itemIds = selectedItemsStr.split(",");
+                for (String itemId : itemIds) {
+                    try {
+                        selectedItemIds.add(Integer.parseInt(itemId.trim()));
+                    } catch (NumberFormatException e) {
+                        // Skip invalid IDs
+                    }
+                }
+            }
+            
             // Get cart items for this user
             CartItemDAO cartItemDAO = new CartItemDAO();
-            List<CartItem> cartItems = cartItemDAO.getCartByAccountId(account.getAccountID(), false);
+            List<CartItem> allCartItems = cartItemDAO.getCartByAccountId(account.getAccountID(), false);
+            List<CartItem> cartItems = new ArrayList<>();
+            
+            // Filter cart items based on selected IDs if any, otherwise use all items
+            if (!selectedItemIds.isEmpty()) {
+                for (CartItem item : allCartItems) {
+                    if (selectedItemIds.contains(item.getCartItemID())) {
+                        cartItems.add(item);
+                    }
+                }
+            } else {
+                cartItems = allCartItems;
+            }
 
             // Check if cart is empty
             if (cartItems == null || cartItems.isEmpty()) {
