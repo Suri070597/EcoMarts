@@ -92,8 +92,8 @@
                     <div class="row text-center mb-4">
                         <div class="col-md-4">
                             <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5><i class="fas fa-dollar-sign text-success"></i> Tổng doanh thu</h5>
-                                <p class="fw-bold text-success fs-5"><fmt:formatNumber value="${revenue}" type="currency"/></p>
+                                <h5><i class="fas fa-money-bill-wave text-success"></i> Tổng doanh thu</h5>
+                                <p class="fw-bold text-success"><fmt:formatNumber value="${revenue}" type="currency"/></p>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -122,7 +122,7 @@
                             <tr>
                                 <th><i class="fas fa-box"></i> Sản phẩm</th>
                                 <th><i class="fas fa-sort-amount-up-alt"></i> Số lượng đã bán</th>
-                                <th><i class="fas fa-sack-dollar"></i> Doanh thu</th>
+                                <th><i class="fas fa-money-bill-wave text-success"></i> Doanh thu</th>
                             </tr>
 
                         </thead>
@@ -189,10 +189,15 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function (value) {
-                                    return new Intl.NumberFormat('vi-VN', {
+                                    let price = new Intl.NumberFormat('vi-VN', {
                                         style: 'currency',
-                                        currency: 'đ'
+                                        currency: 'VND'
                                     }).format(value);
+
+// Đổi ₫ thành đ
+                                    price = price.replace('₫', 'đ');
+                                    return price;
+
                                 }
                             }
                         }
