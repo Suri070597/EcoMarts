@@ -165,7 +165,15 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
+                                <div class="product-price">
+    <%
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+        out.print(formatter.format(p.getPrice()));
+    %> đ / <%= p.getUnit() %>
+</div>
+
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -247,7 +255,15 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
+                                <div class="product-price">
+    <%
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+        out.print(formatter.format(p.getPrice()));
+    %> đ / <%= p.getUnit() %>
+</div>
+
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -331,8 +347,14 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
+                                <%
+                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                                    symbols.setGroupingSeparator('.');
+                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                                    out.print(formatter.format(p.getPrice()));
+                                %> đ / <%= p.getUnit()%>
                             </div>
+
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
@@ -417,7 +439,12 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
+                                <%
+                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                                    symbols.setGroupingSeparator('.');
+                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                                    out.print(formatter.format(p.getPrice()));
+                                %> đ / <%= p.getUnit()%>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -503,7 +530,15 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
+                                <div class="product-price">
+    <%
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+        out.print(formatter.format(p.getPrice()));
+    %> đ / <%= p.getUnit() %>
+</div>
+
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -592,7 +627,15 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
+                               <div class="product-price">
+    <%
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+        out.print(formatter.format(p.getPrice()));
+    %> đ / <%= p.getUnit() %>
+</div>
+
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -678,7 +721,15 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <% out.print(new java.text.DecimalFormat("#,###").format(p.getPrice()));%> đ / <%= p.getUnit()%>
+                                <div class="product-price">
+    <%
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+        out.print(formatter.format(p.getPrice()));
+    %> đ / <%= p.getUnit() %>
+</div>
+
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
