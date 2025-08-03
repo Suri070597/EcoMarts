@@ -159,9 +159,8 @@ public class AdminPromotionServlet extends HttpServlet {
             int promotionID = Integer.parseInt(request.getParameter("promotionID"));
             String[] productIDs = request.getParameterValues("productIDs");
 
-            // Nếu người dùng bỏ chọn hết thì vẫn cần clear toàn bộ sản phẩm cũ
             if (productIDs == null) {
-                promotionDAO.clearProductAssignments(promotionID); // thêm hàm này vào DAO
+                promotionDAO.clearProductAssignments(promotionID);
             } else {
                 promotionDAO.updateProductAssignments(promotionID, productIDs);
             }
