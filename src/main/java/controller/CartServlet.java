@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import model.Account;
 import model.CartItem;
 import model.Category;
+import model.Product;
 import util.CartUtil;
 
 /**
@@ -210,6 +211,10 @@ public class CartServlet extends HttpServlet {
 
             case "remove":
                 removeCartItem(request, response, cartUtil);
+                break;
+                
+            case "removeSelected":
+                removeSelectedItems(request, response, account, cartUtil);
                 break;
 
             case "saveForLater":
@@ -763,6 +768,76 @@ public class CartServlet extends HttpServlet {
         response.sendRedirect("cart");
     }
 
+    /**
+     * Remove selected items from cart
+     */
+    private void removeSelectedItems(HttpServletRequest request, HttpServletResponse response, Account account, CartUtil cartUtil)
+            throws IOException {
+        try {
+            // Get the selected item IDs
+            String selectedItems = request.getParameter("selectedItems");
+            if (selectedItems == null || selectedItems.trim().isEmpty()) {
+                request.getSession().setAttribute("cartError", "Không có sản phẩm nào được chọn để xóa");
+                response.sendRedirect("cart");
+                return;
+            }
+            
+            // Split the comma-separated list of IDs
+            String[] itemIds = selectedItems.split(",");
+            int removedCount = 0;
+            ProductDAO productDAO = new ProductDAO();
+            
+            // Remove each selected item
+            for (String itemIdStr : itemIds) {
+                try {
+                    int itemId = Integer.parseInt(itemIdStr.trim());
+                    
+                    // Get the cart item to check product details before removal
+                    CartItem item = cartUtil.getCartItemById(itemId);
+                    if (item == null) {
+                        continue;
+                    }
+                    
+                    // Verify the item belongs to this user
+                    if (item.getAccountID() != account.getAccountID()) {
+                        continue;
+                    }
+                    
+                    // Get product to restore stock
+                    Product product = item.getProduct();
+                    if (product == null) {
+                        // If product info not in cart item, try to get it from database
+                        product = productDAO.getProductById(item.getProductID());
+                    }
+                    
+                    // Remove the item
+                    boolean removed = cartUtil.removeCartItem(itemId);
+                    if (removed && product != null) {
+                        // Increment removed counter
+                        removedCount++;
+                    }
+                } catch (NumberFormatException e) {
+                    // Skip invalid IDs
+                    continue;
+                }
+            }
+            
+            // Set appropriate message
+            if (removedCount > 0) {
+                request.getSession().setAttribute("cartMessage", "Đã xóa " + removedCount + " sản phẩm khỏi giỏ hàng");
+            } else {
+                request.getSession().setAttribute("cartError", "Không thể xóa sản phẩm khỏi giỏ hàng");
+            }
+            
+            // Redirect back to cart
+            response.sendRedirect("cart");
+            
+        } catch (Exception e) {
+            request.getSession().setAttribute("cartError", "Lỗi khi xóa sản phẩm: " + e.getMessage());
+            response.sendRedirect("cart");
+        }
+    }
+    
     /**
      * Helper method to handle AJAX errors
      */

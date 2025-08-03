@@ -23,6 +23,24 @@
                 padding: 15px 0;
                 transition: all 0.3s ease;
             }
+            
+            /* Styling for checkbox */
+            .form-check-input.item-select {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+                border-color: #4CAF50;
+            }
+            
+            .form-check-input.item-select:checked {
+                background-color: #4CAF50;
+                border-color: #4CAF50;
+            }
+            
+            .form-check-input:focus {
+                border-color: #4CAF50;
+                box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+            }
             .cart-item:hover {
                 background-color: #fdf7ea;
             }
@@ -147,16 +165,27 @@
                     <div class="col-lg-8">
                         <!-- Active cart items -->
                         <div class="card cart-card mb-4">
-                            <div class="card-header cart-card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0 cart-title">Sản phẩm trong giỏ hàng</h5>
-                                <c:if test="${not empty activeItems}">
-                                    <form action="cart" method="post">
-                                        <input type="hidden" name="action" value="clear">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger cart-action-btn">
-                                            <i class="fas fa-trash-alt me-1"></i> Xóa tất cả
-                                        </button>
-                                    </form>
-                                </c:if>
+                            <div class="card-header cart-card-header">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0 cart-title">Sản phẩm trong giỏ hàng</h5>
+                                    <c:if test="${not empty activeItems}">
+                                        <div class="d-flex">
+                                            <div class="form-check me-3">
+                                                <input class="form-check-input" type="checkbox" id="select-all-items" checked>
+                                                <label class="form-check-label" for="select-all-items">Chọn tất cả</label>
+                                            </div>
+                                            <button type="button" id="delete-selected" class="btn btn-sm btn-outline-danger cart-action-btn me-2">
+                                                <i class="fas fa-trash-alt me-1"></i> Xóa đã chọn
+                                            </button>
+                                            <form action="cart" method="post">
+                                                <input type="hidden" name="action" value="clear">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger cart-action-btn">
+                                                    <i class="fas fa-trash-alt me-1"></i> Xóa tất cả
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </c:if>
+                                </div>
                             </div>
                             <div class="card-body cart-container">
                                 <c:choose>
@@ -172,6 +201,10 @@
                                         <c:forEach items="${activeItems}" var="item">
                                             <div class="cart-item">
                                                 <div class="row align-items-center">
+                                                    <!-- Product Selection Checkbox -->
+                                                    <div class="col-md-1 mb-2 mb-md-0 text-center">
+                                                        <input type="checkbox" class="form-check-input item-select" data-cartitemid="${item.cartItemID}" checked>
+                                                    </div>
                                                     <!-- Product Image -->
                                                     <div class="col-md-2 mb-2 mb-md-0">
                                                         <a href="ProductDetail?id=${item.productID}">
@@ -180,7 +213,7 @@
                                                     </div>
 
                                                     <!-- Product Info -->
-                                                    <div class="col-md-4 mb-2 mb-md-0">
+                                                    <div class="col-md-3 mb-2 mb-md-0">
                                                         <a href="ProductDetail?id=${item.productID}" class="text-decoration-none">
                                                             <h5 class="product-name">${item.product.productName}</h5>
                                                         </a>
@@ -231,13 +264,6 @@
                                                     <!-- Actions -->
                                                     <div class="col-md-1 text-end">
                                                         <div class="btn-group-vertical">
-                                                            <form action="cart" method="post" class="mb-1">
-                                                                <input type="hidden" name="action" value="saveForLater">
-                                                                <input type="hidden" name="cartItemID" value="${item.cartItemID}">
-                                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Để dành sau">
-                                                                    <i class="far fa-bookmark"></i>
-                                                                </button>
-                                                            </form>
                                                             <form action="cart" method="post">
                                                                 <input type="hidden" name="action" value="remove">
                                                                 <input type="hidden" name="cartItemID" value="${item.cartItemID}">
@@ -337,6 +363,7 @@
                             <c:if test="${not empty activeItems}">
                                 <form action="buy-now" method="post" id="checkout-form">
                                     <input type="hidden" name="action" value="initiateCart">
+                                    <input type="hidden" name="selectedItems" id="selected-items-input" value="">
                                     <button type="submit" class="btn btn-primary w-100 checkout-btn py-2 mb-2">
                                         <i class="fas fa-cash-register me-2"></i>Thanh toán ngay
                                     </button>
@@ -381,6 +408,164 @@
                     console.log('Cart manager initialized on cart page');
                 } else {
                     console.error('EcomartsCart class not found');
+                }
+                
+                // Handle item selection
+                const selectAllCheckbox = document.getElementById('select-all-items');
+                const itemCheckboxes = document.querySelectorAll('.item-select');
+                const checkoutForm = document.getElementById('checkout-form');
+                const selectedItemsInput = document.getElementById('selected-items-input');
+                
+                // Function to update the hidden input with selected item IDs
+                function updateSelectedItems() {
+                    const selectedIds = Array.from(itemCheckboxes)
+                        .filter(checkbox => checkbox.checked)
+                        .map(checkbox => checkbox.getAttribute('data-cartitemid'));
+                        
+                    selectedItemsInput.value = selectedIds.join(',');
+                    
+                    // Update the cart total based on selected items
+                    updateCartTotal();
+                }
+                
+                // Function to update cart total based on selected items
+                function updateCartTotal() {
+                    const selectedCheckboxes = Array.from(itemCheckboxes).filter(checkbox => checkbox.checked);
+                    let total = 0;
+                    
+                    selectedCheckboxes.forEach(checkbox => {
+                        const cartItemId = checkbox.getAttribute('data-cartitemid');
+                        const cartItem = checkbox.closest('.cart-item');
+                        const itemTotal = cartItem.querySelector('.item-total');
+                        
+                        if (itemTotal) {
+                            // Extract the numeric value from the formatted price
+                            const priceText = itemTotal.textContent.trim();
+                            const price = parseFloat(priceText.replace(/[^0-9]/g, ''));
+                            if (!isNaN(price)) {
+                                total += price;
+                            }
+                        }
+                    });
+                    
+                    // Update the cart total and subtotal displays
+                    const formattedTotal = new Intl.NumberFormat('vi-VN').format(total);
+                    
+                    const cartTotal = document.querySelector('.cart-total');
+                    if (cartTotal) {
+                        cartTotal.textContent = formattedTotal + ' ₫';
+                    }
+                    
+                    const subtotalAmount = document.getElementById('cart-subtotal-amount');
+                    if (subtotalAmount) {
+                        subtotalAmount.textContent = formattedTotal + ' ₫';
+                    }
+                    
+                    // Update item count
+                    const itemCount = document.getElementById('cart-item-count');
+                    if (itemCount) {
+                        itemCount.textContent = `Tạm tính (${selectedCheckboxes.length} sản phẩm)`;
+                    }
+                }
+                
+                // Set up event listeners for checkboxes
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.addEventListener('change', function() {
+                        const isChecked = this.checked;
+                        
+                        // Update all item checkboxes
+                        itemCheckboxes.forEach(checkbox => {
+                            checkbox.checked = isChecked;
+                        });
+                        
+                        // Update hidden input
+                        updateSelectedItems();
+                    });
+                }
+                
+                // Set up event listeners for individual checkboxes
+                itemCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        // Check if all items are selected
+                        const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
+                        if (selectAllCheckbox) {
+                            selectAllCheckbox.checked = allChecked;
+                        }
+                        
+                        // Update hidden input
+                        updateSelectedItems();
+                    });
+                });
+                
+                // Initialize selected items on page load
+                updateSelectedItems();
+                
+                // Handle form submission
+                if (checkoutForm) {
+                    checkoutForm.addEventListener('submit', function(e) {
+                        const selectedCount = selectedItemsInput.value.split(',').filter(id => id).length;
+                        
+                        if (selectedCount === 0) {
+                            e.preventDefault();
+                            alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
+                        }
+                    });
+                }
+                
+                // Handle delete selected items
+                const deleteSelectedBtn = document.getElementById('delete-selected');
+                if (deleteSelectedBtn) {
+                    deleteSelectedBtn.addEventListener('click', function() {
+                        const selectedCheckboxes = Array.from(document.querySelectorAll('.item-select:checked'));
+                        const selectedCount = selectedCheckboxes.length;
+                        
+                        if (selectedCount === 0) {
+                            alert('Vui lòng chọn ít nhất một sản phẩm để xóa');
+                            return;
+                        }
+                        
+                        // Confirm deletion with number of items
+                        const confirmMessage = `Bạn có chắc chắn muốn xóa ${selectedCount} sản phẩm đã chọn khỏi giỏ hàng?`;
+                        
+                        // Use the same confirmation dialog as single item deletion
+                        if (window.ecomartsCart && typeof window.ecomartsCart.showConfirm === 'function') {
+                            // Use the cart's confirmation dialog
+                            window.ecomartsCart.showConfirm(confirmMessage, () => {
+                                submitRemoveSelectedItems();
+                            });
+                        } else {
+                            // Fallback to browser's confirm
+                            if (confirm(confirmMessage)) {
+                                submitRemoveSelectedItems();
+                            }
+                        }
+                        
+                        // Helper function to submit form
+                        function submitRemoveSelectedItems() {
+                            const selectedIds = selectedCheckboxes.map(checkbox => checkbox.getAttribute('data-cartitemid')).join(',');
+                            
+                            // Create and submit form
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = 'cart';
+                            form.style.display = 'none';
+                            
+                            const actionInput = document.createElement('input');
+                            actionInput.type = 'hidden';
+                            actionInput.name = 'action';
+                            actionInput.value = 'removeSelected';
+                            
+                            const selectedItemsInput = document.createElement('input');
+                            selectedItemsInput.type = 'hidden';
+                            selectedItemsInput.name = 'selectedItems';
+                            selectedItemsInput.value = selectedIds;
+                            
+                            form.appendChild(actionInput);
+                            form.appendChild(selectedItemsInput);
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
                 }
             });
         </script>

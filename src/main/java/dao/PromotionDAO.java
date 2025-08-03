@@ -97,7 +97,9 @@ public class PromotionDAO extends DBContext {
     public int countPromotions() {
         try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM Promotion")) {
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt(1);
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -116,7 +118,6 @@ public class PromotionDAO extends DBContext {
     }
 
     // --- Product-Promotion Assignments ---
-
     public List<Integer> updateProductAssignments(int promotionID, String[] productIDs) {
         List<Integer> failed = new ArrayList<>();
         String deleteOldSQL = "DELETE FROM Product_Promotion WHERE ProductID = ?";
@@ -124,8 +125,7 @@ public class PromotionDAO extends DBContext {
 
         try {
             conn.setAutoCommit(false);
-            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteOldSQL);
-                 PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteOldSQL); PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
 
                 for (String pidStr : productIDs) {
                     int productID = Integer.parseInt(pidStr);
@@ -142,9 +142,17 @@ public class PromotionDAO extends DBContext {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         } finally {
-            try { conn.setAutoCommit(true); } catch (SQLException e) { e.printStackTrace(); }
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return failed;
     }
@@ -154,7 +162,9 @@ public class PromotionDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement("SELECT ProductID FROM Product_Promotion WHERE PromotionID = ?")) {
             ps.setInt(1, promotionID);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) list.add(rs.getInt("ProductID"));
+            while (rs.next()) {
+                list.add(rs.getInt("ProductID"));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -192,6 +202,16 @@ public class PromotionDAO extends DBContext {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public void clearProductAssignments(int promotionID) {
+        String sql = "DELETE FROM Product_Promotion WHERE PromotionID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, promotionID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

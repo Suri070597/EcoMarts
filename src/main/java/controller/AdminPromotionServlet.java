@@ -159,10 +159,15 @@ public class AdminPromotionServlet extends HttpServlet {
             int promotionID = Integer.parseInt(request.getParameter("promotionID"));
             String[] productIDs = request.getParameterValues("productIDs");
 
-            promotionDAO.updateProductAssignments(promotionID, productIDs);
+            if (productIDs == null) {
+                promotionDAO.clearProductAssignments(promotionID);
+            } else {
+                promotionDAO.updateProductAssignments(promotionID, productIDs);
+            }
 
             response.sendRedirect(request.getContextPath() + "/admin/promotion");
         }
+
     }
 
     private Promotion extractPromotionFromRequest(HttpServletRequest request) {

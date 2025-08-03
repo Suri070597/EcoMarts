@@ -110,7 +110,7 @@
                                 <c:when test="${not empty appliedPromotion}">
                                     <div class="flash-sale-banner mt-3">
                                         <div class="flash-sale-header">
-                                            <div class="flash-sale-label">FLASH SALE</div>
+                                            <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
                                             <div class="countdown-text">
                                                 <i class="bi bi-clock"></i> KẾT THÚC TRONG 
                                                 <span class="countdown-box" id="timer-dd">--</span> :
@@ -747,6 +747,7 @@
                     display: flex;
                     align-items: center;
                     gap: 6px;
+                    font-size: 0.75rem;
                 }
 
                 .countdown-text i {
