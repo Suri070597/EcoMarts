@@ -122,6 +122,9 @@ public class PromotionDAO extends DBContext {
         List<Integer> failed = new ArrayList<>();
         String deleteOldSQL = "DELETE FROM Product_Promotion WHERE ProductID = ?";
         String insertSQL = "INSERT INTO Product_Promotion (ProductID, PromotionID) VALUES (?, ?)";
+        if (productIDs == null || productIDs.length == 0) {
+            return failed;
+        }
 
         try {
             conn.setAutoCommit(false);
