@@ -51,6 +51,10 @@ public class OrderServlet extends HttpServlet {
             }
         } else {
             orders = dao.getAllOrders();
+            for (Order o : orders) {
+                calculateOrderSummary(o);
+            }
+
         }
 
         int total = dao.countAllOrders();
@@ -76,6 +80,8 @@ public class OrderServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(idRaw);
             Order order = dao.getOrderById(id);
+            calculateOrderSummary(order);
+
             List<OrderDetail> details = dao.getOrderDetailsByOrderId(id);
 
             if (order == null) {
@@ -116,6 +122,7 @@ public class OrderServlet extends HttpServlet {
 
             // Lấy lại order & detail để hiển thị
             Order order = dao.getOrderById(orderId);
+            calculateOrderSummary(order);
             List<OrderDetail> details = dao.getOrderDetailsByOrderId(orderId);
             request.setAttribute("order", order);
             request.setAttribute("details", details);
@@ -126,5 +133,20 @@ public class OrderServlet extends HttpServlet {
             response.sendRedirect("order");
         }
     }
+
+private void calculateOrderSummary(Order order) {
+    double totalAfterDiscount = order.getTotalAmount(); // Đã trừ giảm giá
+    double discount = dao.getDiscountAmountByOrderID(order.getOrderID()).doubleValue(); // Lấy số giảm
+
+    double subtotal = totalAfterDiscount + discount; // Giá gốc
+    double vat = subtotal * 0.08;
+    double grandTotal = totalAfterDiscount + vat;
+
+    order.setDiscountAmount(discount);
+    order.setSubtotal(subtotal);
+    order.setVat(vat);
+    order.setGrandTotal(grandTotal);
+}
+
 
 }
