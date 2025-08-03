@@ -71,7 +71,7 @@ html {
 .stat-card {
     background-color: var(--white);
     border-radius: var(--border-radius-lg);
-    padding: 10px;
+    padding: 20px;
     box-shadow: var(--box-shadow);
     transition: var(--transition);
     position: relative;

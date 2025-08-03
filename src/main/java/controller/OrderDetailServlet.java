@@ -11,7 +11,6 @@ import dao.OrderDetailDAO;
 import dao.ProductDAO;
 import dao.VoucherUsageDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -165,7 +164,7 @@ public class OrderDetailServlet extends HttpServlet {
             Order order = orderDAO.getOrderById(orderId);
             if (order == null || order.getAccountID() != account.getAccountID()) {
                 session.setAttribute("errorMessage", "Bạn không có quyền thực hiện thao tác với đơn hàng này");
-                response.sendRedirect(request.getContextPath() + "/customer/reorder");
+                response.sendRedirect(request.getContextPath() + "/reorder");
                 return;
             }
 
@@ -174,7 +173,7 @@ public class OrderDetailServlet extends HttpServlet {
                     // Check if order can be cancelled (only in Processing status and not paid)
                     if (!"Đang xử lý".equals(order.getOrderStatus()) || "Đã thanh toán".equals(order.getPaymentStatus())) {
                         session.setAttribute("errorMessage", "Chỉ có thể hủy đơn hàng trong trạng thái 'Đang xử lý' và chưa thanh toán");
-                        response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId);
+                        response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + orderId);
                         return;
                     }
 
@@ -187,7 +186,7 @@ public class OrderDetailServlet extends HttpServlet {
                         session.setAttribute("errorMessage", "Không thể hủy đơn hàng. Vui lòng thử lại sau");
                     }
 
-                    response.sendRedirect(request.getContextPath() + "/customer/orderDetail?orderID=" + orderId);
+                    response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + orderId);
                     break;
 
                 case "reorder":
@@ -227,12 +226,12 @@ public class OrderDetailServlet extends HttpServlet {
                     break;
 
                 default:
-                    response.sendRedirect(request.getContextPath() + "/customer/reorder");
+                    response.sendRedirect(request.getContextPath() + "/reorder");
             }
         } catch (Exception e) {
             e.printStackTrace();
             session.setAttribute("errorMessage", "Đã xảy ra lỗi: " + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/customer/reorder");
+            response.sendRedirect(request.getContextPath() + "/reorder");
         }
     }
 }
