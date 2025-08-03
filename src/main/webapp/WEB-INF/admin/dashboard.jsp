@@ -115,9 +115,9 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
-                                <a href="${pageContext.request.contextPath}/admin/order" class="view-all">
+<!--                                <a href="${pageContext.request.contextPath}/admin/order" class="view-all">
                                     Xem tất cả đơn hàng <i class="fas fa-arrow-right"></i>
-                                </a>
+                                </a>-->
                             </c:when>
                             <c:otherwise>
                                 <div class="empty-state">
