@@ -197,9 +197,30 @@
                                 <input type="hidden" name="action" value="add">
                                 <input type="hidden" name="productID" value="<%= mo.getProductID()%>">
 
+                                <%
+                                    boolean isFruit = false;
+                                    int categoryId = 0;
+                                    String categoryName = "Unknown";
+                                    int fruitParentId = 0;
+                                    
+                                    if (mo.getCategory() != null) {
+                                        categoryId = mo.getCategory().getCategoryID();
+                                        categoryName = mo.getCategory().getCategoryName();
+                                        fruitParentId = mo.getCategory().getParentID() != null ? mo.getCategory().getParentID() : 0;
+                                    } else {
+                                        categoryId = mo.getCategoryID();
+                                    }
+                                    
+                                    // Kiểm tra cả category cha (3) và category con (có ParentID = 3)
+                                    isFruit = (categoryId == 3) || (fruitParentId == 3);
+                                    String step = isFruit ? "0.1" : "1";
+                                    String min = isFruit ? "0.1" : "1";
+                                    String value = isFruit ? "0.1" : "1";
+                                %>
+
                                 <div class="d-flex gap-2 mb-3">
                                     <strong>Số Lượng: </strong>
-                                    <input type="number" id="product-quantity" name="quantity" class="form-control w-25" value="1" min="1" max="<%= mo.getAvailableQuantity()%>">
+                                    <input type="number" id="product-quantity" name="quantity" class="form-control w-25" value="<%= value %>" min="<%= min %>" max="<%= mo.getAvailableQuantity()%>" step="<%= step %>">
                                     <div class="form-text text-danger" id="quantity-warning" style="display: none;">Số lượng vượt quá tồn kho!</div>
                                 </div>
 
@@ -220,9 +241,12 @@
 
                                         // Validate quantity when changed
                                         quantityInput.addEventListener('input', function () {
-                                            const quantity = parseInt(this.value);
-                                            if (isNaN(quantity) || quantity <= 0) {
-                                                this.value = 1;
+                                            const isFruit = <%= isFruit %>;
+                                            const quantity = isFruit ? parseFloat(this.value) : parseInt(this.value);
+                                            const minValue = isFruit ? 0.1 : 1;
+                                            
+                                            if (isNaN(quantity) || quantity < minValue) {
+                                                this.value = minValue;
                                                 quantityWarning.style.display = 'none';
                                                 addToCartBtn.disabled = false;
                                                 buyNowBtn.disabled = false;
@@ -241,26 +265,31 @@
                                         // Prevent form submission if quantity is invalid
                                         const form = quantityInput.closest('form');
                                         form.addEventListener('submit', function (event) {
-                                            const quantity = parseInt(quantityInput.value);
-                                            if (isNaN(quantity) || quantity <= 0 || quantity > maxStock) {
+                                            const isFruit = <%= isFruit %>;
+                                            const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
+                                            const minValue = isFruit ? 0.1 : 1;
+                                            
+                                            if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
                                                 event.preventDefault();
                                                 quantityWarning.style.display = 'block';
                                                 quantityWarning.textContent = quantity > maxStock
                                                         ? 'Số lượng tối đa có thể mua: ' + maxStock
-                                                        : 'Vui lòng nhập số lượng hợp lệ';
+                                                        : 'Vui lòng nhập số lượng hợp lệ (tối thiểu: ' + minValue + ')';
                                             }
                                         });
                                         
                                         // Add Buy Now functionality
                                         buyNowBtn.addEventListener('click', function() {
-                                            const quantity = parseInt(quantityInput.value);
+                                            const isFruit = <%= isFruit %>;
+                                            const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
+                                            const minValue = isFruit ? 0.1 : 1;
                                             
                                             // Validate quantity
-                                            if (isNaN(quantity) || quantity <= 0 || quantity > maxStock) {
+                                            if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
                                                 quantityWarning.style.display = 'block';
                                                 quantityWarning.textContent = quantity > maxStock
                                                         ? 'Số lượng tối đa có thể mua: ' + maxStock
-                                                        : 'Vui lòng nhập số lượng hợp lệ';
+                                                        : 'Vui lòng nhập số lượng hợp lệ (tối thiểu: ' + minValue + ')';
                                                 return;
                                             }
                                             
