@@ -408,6 +408,20 @@ public class AccountDAO extends DBContext {
             return false;
         }
     }
+    
+    public boolean isPhoneExists(String phone) {
+        String sql = "SELECT 1 FROM Account WHERE Phone = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, phone);
+            ResultSet rs = ps.executeQuery();
+            boolean exists = rs.next();
+            rs.close();
+            return exists;
+        } catch (SQLException e) {
+            System.out.println("Check phone exists failed: " + e.getMessage());
+            return false;
+        }
+    }
 
     /**
      * Get detailed account info by account ID

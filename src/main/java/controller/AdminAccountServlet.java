@@ -136,6 +136,12 @@ public class AdminAccountServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
                     return;
                 }
+                
+                if (accDAO.isPhoneExists(phone)) {
+                    request.setAttribute("errorMessage", "Phone đã tồn tại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
 
                 if (username == null || username.isEmpty()) {
                     request.setAttribute("errorMessage", "Vui lòng nhập tên đăng nhập.");
@@ -241,7 +247,13 @@ public class AdminAccountServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     return;
                 }
-
+                
+                if (accDAO.isPhoneExists(phone)) {
+                    request.setAttribute("errorMessage", "Phone đã tồn tại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+                
                 Account account = new Account();
                 account.setAccountID(id);
                 account.setUsername(username);
