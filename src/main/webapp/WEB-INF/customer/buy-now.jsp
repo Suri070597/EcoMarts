@@ -505,40 +505,47 @@
                                                     const discount = parseFloat(selectedOption.getAttribute('data-discount'));
                                                     const minOrder = parseFloat(selectedOption.getAttribute('data-min-order'));
 
-                                                    // Validate minimum order value
-                                                    if (newSubtotal < minOrder) {
-                                                        voucherSelect.value = "";
-                                                        discountRow.style.display = 'none';
-                                                        showAlert('Mã giảm giá không áp dụng được',
-                                                                'Giá trị đơn hàng phải từ ' + new Intl.NumberFormat('vi-VN').format(minOrder) + ' đ để sử dụng mã này',
-                                                                'warning');
-                                                        totalAmount.textContent = formattedSubtotal + ' đ';
-                                                    } else {
+                                                    if (newSubtotal >= minOrder) {
                                                         // Apply discount
                                                         const formattedDiscount = new Intl.NumberFormat('vi-VN').format(discount);
                                                         discountAmount.textContent = '-' + formattedDiscount + ' đ';
 
-                                                        // Calculate new total
-                                                        let vat = currentTotal * 0.08;
-                                                        let newTotal = currentTotal - discount + vat;
+                                                        // Recalculate total
+                                                        let vat = newSubtotal * 0.08;
+                                                        let newTotal = newSubtotal - discount + vat;
                                                         if (newTotal < 0)
                                                             newTotal = 0;
 
                                                         vatAmount.textContent = new Intl.NumberFormat('vi-VN').format(vat) + ' đ';
                                                         totalAmount.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + ' đ';
 
-
-                                                        // Show discount row
                                                         discountRow.style.display = 'flex';
+                                                    } else {
+                                                        // Không đủ điều kiện, xóa voucher
+                                                        voucherSelect.value = "";
+                                                        discountAmount.textContent = '-0 đ';
+                                                        discountRow.style.display = 'none';
+
+                                                        let vat = newSubtotal * 0.08;
+                                                        vatAmount.textContent = new Intl.NumberFormat('vi-VN').format(vat) + ' đ';
+                                                        let newTotal = newSubtotal + vat;
+                                                        totalAmount.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + ' đ';
+
+                                                        showAlert('Mã giảm giá không áp dụng được',
+                                                                'Giá trị đơn hàng phải từ ' + new Intl.NumberFormat('vi-VN').format(minOrder) + ' đ để sử dụng mã này',
+                                                                'warning');
                                                     }
                                                 } else {
-                                                    // No voucher selected
+                                                    // Không có voucher
+                                                    discountAmount.textContent = '-0 đ';
+                                                    discountRow.style.display = 'none';
+
                                                     let vat = newSubtotal * 0.08;
                                                     vatAmount.textContent = new Intl.NumberFormat('vi-VN').format(vat) + ' đ';
                                                     let newTotal = newSubtotal + vat;
                                                     totalAmount.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + ' đ';
-
                                                 }
+
                                             }
 
                                             // For single product checkout only
@@ -623,40 +630,43 @@
                                                         const discount = parseFloat(selectedOption.getAttribute('data-discount'));
                                                         const minOrder = parseFloat(selectedOption.getAttribute('data-min-order'));
 
-                                                        // Validate minimum order value
-                                                        if (newSubtotal < minOrder) {
-                                                            voucherSelect.value = "";
-                                                            discountRow.style.display = 'none';
-                                                            showAlert('Mã giảm giá không áp dụng được',
-                                                                    'Giá trị đơn hàng phải từ ' + new Intl.NumberFormat('vi-VN').format(minOrder) + ' đ để sử dụng mã này',
-                                                                    'warning');
-                                                            totalAmount.textContent = formattedSubtotal + ' đ';
-                                                        } else {
-                                                            // Apply discount
+                                                        if (newSubtotal >= minOrder) {
                                                             const formattedDiscount = new Intl.NumberFormat('vi-VN').format(discount);
                                                             discountAmount.textContent = '-' + formattedDiscount + ' đ';
 
-                                                            // Calculate new total
-                                                            let vat = currentTotal * 0.08;
-                                                            let newTotal = currentTotal - discount + vat;
+                                                            let vat = newSubtotal * 0.08;
+                                                            let newTotal = newSubtotal - discount + vat;
                                                             if (newTotal < 0)
                                                                 newTotal = 0;
 
                                                             vatAmount.textContent = new Intl.NumberFormat('vi-VN').format(vat) + ' đ';
                                                             totalAmount.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + ' đ';
 
-
-                                                            // Show discount row
                                                             discountRow.style.display = 'flex';
+                                                        } else {
+                                                            voucherSelect.value = "";
+                                                            discountAmount.textContent = '-0 đ';
+                                                            discountRow.style.display = 'none';
+
+                                                            let vat = newSubtotal * 0.08;
+                                                            vatAmount.textContent = new Intl.NumberFormat('vi-VN').format(vat) + ' đ';
+                                                            let newTotal = newSubtotal + vat;
+                                                            totalAmount.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + ' đ';
+
+                                                            showAlert('Mã giảm giá không áp dụng được',
+                                                                    'Giá trị đơn hàng phải từ ' + new Intl.NumberFormat('vi-VN').format(minOrder) + ' đ để sử dụng mã này',
+                                                                    'warning');
                                                         }
                                                     } else {
-                                                        // No voucher selected
+                                                        discountAmount.textContent = '-0 đ';
+                                                        discountRow.style.display = 'none';
+
                                                         let vat = newSubtotal * 0.08;
                                                         vatAmount.textContent = new Intl.NumberFormat('vi-VN').format(vat) + ' đ';
                                                         let newTotal = newSubtotal + vat;
                                                         totalAmount.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + ' đ';
-
                                                     }
+
                                                 }
 
                                                 // Initialize cart prices on page load
@@ -770,13 +780,14 @@
                                                     }
                                                 } else {
                                                     // No voucher selected, reset to original total
+                                                    discountAmount.textContent = '-0 đ'; // <-- THÊM DÒNG NÀY
                                                     discountRow.style.display = 'none';
                                                     let vat = currentTotal * 0.08;
                                                     vatAmount.textContent = new Intl.NumberFormat('vi-VN').format(vat) + ' đ';
                                                     let total = currentTotal + vat;
                                                     totalAmount.textContent = new Intl.NumberFormat('vi-VN').format(total) + ' đ';
-
                                                 }
+
                                             });
 
                                             // Initialize prices on page load
