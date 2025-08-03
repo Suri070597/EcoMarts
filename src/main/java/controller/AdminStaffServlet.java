@@ -262,6 +262,12 @@ public class AdminStaffServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
                     return;
                 }
+                
+                if (accDAO.isPhoneExists(phone)) {
+                    request.setAttribute("errorMessage", "Phone đã tồn tại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
 
                 Account account = new Account();
                 account.setUsername(username);
@@ -379,6 +385,12 @@ public class AdminStaffServlet extends HttpServlet {
                     request.setAttribute("errorMessage", "Email đã tồn tại.");
                     request.setAttribute("staff", staffDAO.getStaffById(staffID));
                     request.getRequestDispatcher("/WEB-INF/admin/staff/edit-staff.jsp").forward(request, response);
+                    return;
+                }
+                
+                if (accDAO.isPhoneExists(phone)) {
+                    request.setAttribute("errorMessage", "Phone đã tồn tại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
                     return;
                 }
 

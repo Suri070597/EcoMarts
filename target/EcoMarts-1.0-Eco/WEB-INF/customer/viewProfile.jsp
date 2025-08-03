@@ -96,8 +96,8 @@
                 <label>Họ tên:</label>
                 <input type="text" name="fullName" value="${sessionScope.account.fullName}" required />
 
-                <label>SĐT:</label>
-                <input type="text" name="phone" value="${sessionScope.account.phone}" />
+               <label>SĐT:</label>
+                <input type="text" name="phone" pattern="[0-9]{10}" required title="Số điện thoại phải có 10 chữ số" value="${sessionScope.account.phone}" />
 
                 <label>Địa chỉ:</label>
                 <input type="text" name="address" value="${sessionScope.account.address}" />
