@@ -95,8 +95,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <% session.removeAttribute("cartError"); %>
-            <% } %>
-            
+            <% }%>
+
             <div class="container mt-5">
                 <div class="row">
                     <div class="col-md-6">
@@ -151,7 +151,7 @@
                                 <span class="text-warning">
                                     <c:forEach begin="1" end="${fullStars}"><i class="fas fa-star"></i></c:forEach><c:if test="${halfStar}"><i class="fas fa-star-half-alt"></i></c:if><c:forEach begin="1" end="${emptyStars}"><i class="far fa-star"></i></c:forEach>
                                 </span> | <span class="sao">${reviewCount}</span> Đánh Giá</p>
-                            
+
                             <%
                                 Category child = mo.getCategory();
                                 String parentName = "N/A";
@@ -202,7 +202,7 @@
                                     int categoryId = 0;
                                     String categoryName = "Unknown";
                                     int fruitParentId = 0;
-                                    
+
                                     if (mo.getCategory() != null) {
                                         categoryId = mo.getCategory().getCategoryID();
                                         categoryName = mo.getCategory().getCategoryName();
@@ -210,7 +210,7 @@
                                     } else {
                                         categoryId = mo.getCategoryID();
                                     }
-                                    
+
                                     // Kiểm tra cả category cha (3) và category con (có ParentID = 3)
                                     isFruit = (categoryId == 3) || (fruitParentId == 3);
                                     String step = isFruit ? "0.1" : "1";
@@ -220,7 +220,7 @@
 
                                 <div class="d-flex gap-2 mb-3">
                                     <strong>Số Lượng: </strong>
-                                    <input type="number" id="product-quantity" name="quantity" class="form-control w-25" value="<%= value %>" min="<%= min %>" max="<%= mo.getAvailableQuantity()%>" step="<%= step %>">
+                                    <input type="number" id="product-quantity" name="quantity" class="form-control w-25" value="<%= value%>" min="<%= min%>" max="<%= mo.getAvailableQuantity()%>" step="<%= step%>">
                                     <div class="form-text text-danger" id="quantity-warning" style="display: none;">Số lượng vượt quá tồn kho!</div>
                                 </div>
 
@@ -241,10 +241,10 @@
 
                                         // Validate quantity when changed
                                         quantityInput.addEventListener('input', function () {
-                                            const isFruit = <%= isFruit %>;
+                                            const isFruit = <%= isFruit%>;
                                             const quantity = isFruit ? parseFloat(this.value) : parseInt(this.value);
                                             const minValue = isFruit ? 0.1 : 1;
-                                            
+
                                             if (isNaN(quantity) || quantity < minValue) {
                                                 this.value = minValue;
                                                 quantityWarning.style.display = 'none';
@@ -265,10 +265,10 @@
                                         // Prevent form submission if quantity is invalid
                                         const form = quantityInput.closest('form');
                                         form.addEventListener('submit', function (event) {
-                                            const isFruit = <%= isFruit %>;
+                                            const isFruit = <%= isFruit%>;
                                             const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
                                             const minValue = isFruit ? 0.1 : 1;
-                                            
+
                                             if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
                                                 event.preventDefault();
                                                 quantityWarning.style.display = 'block';
@@ -277,13 +277,13 @@
                                                         : 'Vui lòng nhập số lượng hợp lệ (tối thiểu: ' + minValue + ')';
                                             }
                                         });
-                                        
+
                                         // Add Buy Now functionality
-                                        buyNowBtn.addEventListener('click', function() {
-                                            const isFruit = <%= isFruit %>;
+                                        buyNowBtn.addEventListener('click', function () {
+                                            const isFruit = <%= isFruit%>;
                                             const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
                                             const minValue = isFruit ? 0.1 : 1;
-                                            
+
                                             // Validate quantity
                                             if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
                                                 quantityWarning.style.display = 'block';
@@ -292,33 +292,33 @@
                                                         : 'Vui lòng nhập số lượng hợp lệ (tối thiểu: ' + minValue + ')';
                                                 return;
                                             }
-                                            
+
                                             // Use the built-in form instead of creating a new one
                                             const buyNowForm = document.createElement('form');
                                             buyNowForm.method = 'post';
                                             buyNowForm.action = 'buy-now';
-                                            
+
                                             // Add action parameter
                                             const actionInput = document.createElement('input');
                                             actionInput.type = 'hidden';
                                             actionInput.name = 'action';
                                             actionInput.value = 'initiate';
                                             buyNowForm.appendChild(actionInput);
-                                            
+
                                             // Add product ID parameter
                                             const productIdInput = document.createElement('input');
                                             productIdInput.type = 'hidden';
                                             productIdInput.name = 'productID';
                                             productIdInput.value = '<c:out value="${mo.productID}"/>';
                                             buyNowForm.appendChild(productIdInput);
-                                            
+
                                             // Add quantity parameter
                                             const quantityInputHidden = document.createElement('input');
                                             quantityInputHidden.type = 'hidden';
                                             quantityInputHidden.name = 'quantity';
                                             quantityInputHidden.value = quantity;
                                             buyNowForm.appendChild(quantityInputHidden);
-                                            
+
                                             // Append form to body and submit
                                             document.body.appendChild(buyNowForm);
                                             buyNowForm.submit();
@@ -326,12 +326,8 @@
                                     });
                                 </script>
                             </form>
-                            
-                            <div>
-                                <a href="#" class="me-2"><i class="fab fa-facebook"></i></a>
-                                <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
-                                <a href="#"><i class="fab fa-instagram"></i></a>
-                            </div>
+
+                          
                         </div>
                     </div>
 
@@ -364,7 +360,7 @@
                                                             <c:if test="${review.accountRole != 2}">
                                                                 <span class="text-warning">
                                                                     <c:forEach begin="1" end="${review.rating}" var="i">★</c:forEach><c:forEach begin="1" end="${5 - review.rating}" var="i">☆</c:forEach>
-                                                                </span>
+                                                                    </span>
                                                             </c:if>
                                                             <span class="text-muted small ms-2">
                                                                 <fmt:formatDate value="${review.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
@@ -406,7 +402,7 @@
                                                                         <span class="text-warning">
                                                                             <c:forEach begin="1" end="${reply.rating}" var="i">★</c:forEach>
                                                                             <c:forEach begin="1" end="${5 - reply.rating}" var="i">☆</c:forEach>
-                                                                        </span>
+                                                                            </span>
                                                                     </c:if>
                                                                     <span class="text-muted small ms-2">
                                                                         <fmt:formatDate value="${reply.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
@@ -545,7 +541,7 @@
                                             Product p = related.get(j);
                                     %>
                                     <div class="col-md-3">
-                                        <div class="card h-100 text-center san-pham-lq" style="margin-top: 10px">
+                                        <div class="card h-100 text-center san-pham-lq">
                                             <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>">
                                                 <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= p.getImageURL()%>"
                                                      class="card-img-top img-fluid product-image1" style="height: 350px; object-fit: cover;" alt="<%= p.getProductName()%>">
@@ -577,246 +573,248 @@
                     </div>
                 </div>
             </div>
-            <jsp:include page="footer.jsp" />
             <%
-            }
+                }
             %>
-            
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-            <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
-            
-            <script>
-                function setReply(parentId, orderId, productId) {
-                    document.getElementById('parentReviewId').value = parentId;
-                    document.getElementsByName('orderId')[0].value = orderId;
-                    document.getElementsByName('productId')[0].value = productId;
-                    document.getElementById('action').value = 'add';
-                    document.getElementById('reviewId').value = '';
-                    document.getElementById('comment').focus();
-                    document.getElementById('comment').value = '';
+        </div>
 
-                    // Reset rating
-                    var stars = document.getElementsByName('rating');
-                    for (var i = 0; i < stars.length; i++) {
-                        stars[i].checked = false;
+        <jsp:include page="footer.jsp" />
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
+
+        <script>
+                                                                        function setReply(parentId, orderId, productId) {
+                                                                            document.getElementById('parentReviewId').value = parentId;
+                                                                            document.getElementsByName('orderId')[0].value = orderId;
+                                                                            document.getElementsByName('productId')[0].value = productId;
+                                                                            document.getElementById('action').value = 'add';
+                                                                            document.getElementById('reviewId').value = '';
+                                                                            document.getElementById('comment').focus();
+                                                                            document.getElementById('comment').value = '';
+
+                                                                            // Reset rating
+                                                                            var stars = document.getElementsByName('rating');
+                                                                            for (var i = 0; i < stars.length; i++) {
+                                                                                stars[i].checked = false;
+                                                                            }
+
+                                                                            // Ẩn/hiện rating
+                                                                            var ratingSection = document.getElementById('ratingSection');
+                                                                            if (ratingSection) {
+                                                                                if (parentId) {
+                                                                                    ratingSection.style.display = 'none';
+                                                                                    // Bỏ required cho rating khi reply
+                                                                                    for (var i = 0; i < stars.length; i++) {
+                                                                                        stars[i].required = false;
+                                                                                    }
+                                                                                } else {
+                                                                                    ratingSection.style.display = 'block';
+                                                                                    // Bắt buộc required khi review gốc
+                                                                                    for (var i = 0; i < stars.length; i++) {
+                                                                                        stars[i].required = true;
+                                                                                    }
+                                                                                }
+                                                                            }
+
+                                                                            // Reset file input
+                                                                            document.getElementById('image').value = '';
+
+                                                                            // Đổi text button
+                                                                            document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
+                                                                        }
+        </script>
+
+        <script>
+            function toggleReply(reviewId) {
+                var section = document.getElementById('replySection' + reviewId);
+                var arrow = document.getElementById('arrow' + reviewId);
+                if (section.style.display === 'none') {
+                    section.style.display = 'block';
+                    arrow.innerHTML = '&#9660;'; // ▼
+                } else {
+                    section.style.display = 'none';
+                    arrow.innerHTML = '&#9654;'; // ▶
+                }
+            }
+        </script>
+
+        <style>
+            .toggle-reply-box {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.5rem;
+            }
+            .toggle-reply-box button {
+                transition: all 0.3s ease;
+                background: linear-gradient(135deg, #f5f2ea 0%, #e8d7bc 100%);
+                border: 1px solid #d4b78f;
+                color: #8b6c42;
+                font-weight: 500;
+                box-shadow: 0 1px 3px rgba(139, 108, 66, 0.1);
+            }
+            .toggle-reply-box button:hover {
+                background: linear-gradient(135deg, #e8d7bc 0%, #d4b78f 100%);
+                color: #6a5232;
+                border-color: #b89c70;
+                transform: translateY(-1px);
+                box-shadow: 0 3px 8px rgba(139, 108, 66, 0.2);
+            }
+            .toggle-reply-box button:active {
+                transform: translateY(0);
+                box-shadow: 0 1px 4px rgba(139, 108, 66, 0.15);
+            }
+            .toggle-reply-box button:focus {
+                outline: 2px solid #8b6c42;
+                outline-offset: 2px;
+            }
+            .action-buttons {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .action-buttons .btn-link {
+                padding: 6px 12px;
+                font-size: 0.875rem;
+                color: #8b6c42;
+                text-decoration: none;
+                border-radius: 6px;
+                transition: all 0.3s ease;
+                background: linear-gradient(135deg, #f5f2ea 0%, #e8d7bc 100%);
+                border: 1px solid #d4b78f;
+                font-weight: 500;
+                box-shadow: 0 1px 3px rgba(139, 108, 66, 0.1);
+                display: inline-block;
+                min-width: 80px;
+                text-align: center;
+            }
+            .action-buttons .btn-link:hover {
+                background: linear-gradient(135deg, #e8d7bc 0%, #d4b78f 100%);
+                color: #6a5232;
+                text-decoration: none;
+                border-color: #b89c70;
+                transform: translateY(-1px);
+                box-shadow: 0 3px 8px rgba(139, 108, 66, 0.2);
+            }
+            .action-buttons .btn-link:active {
+                transform: translateY(0);
+                box-shadow: 0 1px 4px rgba(139, 108, 66, 0.15);
+            }
+            .action-buttons .btn-link:focus {
+                outline: 2px solid #8b6c42;
+                outline-offset: 2px;
+            }
+            .review-comment, .review-reply {
+                border-left: 3px solid #e9ecef;
+                padding-left: 15px;
+                margin-bottom: 15px;
+            }
+            .review-reply {
+                border-left-color: #dee2e6;
+            }
+            .flash-sale-banner {
+                background: linear-gradient(to right, #ff512f, #dd2476);
+                border-radius: 8px;
+                padding: 15px;
+                color: #fff;
+                font-family: 'Arial', sans-serif;
+            }
+
+            .flash-sale-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 1rem;
+                font-weight: bold;
+            }
+
+            .flash-sale-label {
+                font-size: 1.2rem;
+                display: flex;
+                align-items: center;
+            }
+
+            .flash-sale-label::before {
+                content: "⚡";
+                margin-right: 5px;
+                font-size: 1.4rem;
+            }
+
+            .countdown-text {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.75rem;
+            }
+
+            .countdown-text i {
+                margin-right: 4px;
+            }
+
+            .countdown-box {
+                display: inline-block;
+                background-color: #000;
+                color: #fff;
+                font-weight: bold;
+                padding: 2px 8px;
+                border-radius: 4px;
+                font-family: 'Courier New', monospace;
+                min-width: 30px;
+                text-align: center;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+
+            .flash-sale-price {
+                font-size: 2rem;
+                color: #fefefe;
+                font-weight: bold;
+            }
+
+            .original-price {
+                color: #ccc;
+                text-decoration: line-through;
+                margin-left: 10px;
+            }
+
+            .discount-percent {
+                color: #ffcccb;
+                font-weight: bold;
+                margin-left: 10px;
+            }
+        </style>
+
+        <script>
+            (function () {
+                const endTime = new Date("${appliedPromotion.endDate}").getTime();
+
+                const dd = document.getElementById("timer-dd");
+                const hh = document.getElementById("timer-hh");
+                const mm = document.getElementById("timer-mm");
+                const ss = document.getElementById("timer-ss");
+
+                const timer = setInterval(function () {
+                    const now = new Date().getTime();
+                    const distance = endTime - now;
+
+                    if (distance < 0) {
+                        clearInterval(timer);
+                        dd.innerHTML = hh.innerHTML = mm.innerHTML = ss.innerHTML = "00";
+                        return;
                     }
 
-                    // Ẩn/hiện rating
-                    var ratingSection = document.getElementById('ratingSection');
-                    if (ratingSection) {
-                        if (parentId) {
-                            ratingSection.style.display = 'none';
-                            // Bỏ required cho rating khi reply
-                            for (var i = 0; i < stars.length; i++) {
-                                stars[i].required = false;
-                            }
-                        } else {
-                            ratingSection.style.display = 'block';
-                            // Bắt buộc required khi review gốc
-                            for (var i = 0; i < stars.length; i++) {
-                                stars[i].required = true;
-                            }
-                        }
-                    }
+                    const days = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, "0");
+                    const hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, "0");
+                    const minutes = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, "0");
+                    const seconds = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, "0");
 
-                    // Reset file input
-                    document.getElementById('image').value = '';
-
-                    // Đổi text button
-                    document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
-                }
-            </script>
-            
-            <script>
-                function toggleReply(reviewId) {
-                    var section = document.getElementById('replySection' + reviewId);
-                    var arrow = document.getElementById('arrow' + reviewId);
-                    if (section.style.display === 'none') {
-                        section.style.display = 'block';
-                        arrow.innerHTML = '&#9660;'; // ▼
-                    } else {
-                        section.style.display = 'none';
-                        arrow.innerHTML = '&#9654;'; // ▶
-                    }
-                }
-            </script>
-            
-            <style>
-                .toggle-reply-box {
-                    display: flex;
-                    align-items: center;
-                    margin-bottom: 0.5rem;
-                }
-                .toggle-reply-box button {
-                    transition: all 0.3s ease;
-                    background: linear-gradient(135deg, #f5f2ea 0%, #e8d7bc 100%);
-                    border: 1px solid #d4b78f;
-                    color: #8b6c42;
-                    font-weight: 500;
-                    box-shadow: 0 1px 3px rgba(139, 108, 66, 0.1);
-                }
-                .toggle-reply-box button:hover {
-                    background: linear-gradient(135deg, #e8d7bc 0%, #d4b78f 100%);
-                    color: #6a5232;
-                    border-color: #b89c70;
-                    transform: translateY(-1px);
-                    box-shadow: 0 3px 8px rgba(139, 108, 66, 0.2);
-                }
-                .toggle-reply-box button:active {
-                    transform: translateY(0);
-                    box-shadow: 0 1px 4px rgba(139, 108, 66, 0.15);
-                }
-                .toggle-reply-box button:focus {
-                    outline: 2px solid #8b6c42;
-                    outline-offset: 2px;
-                }
-                .action-buttons {
-                    display: flex;
-                    gap: 8px;
-                    flex-wrap: wrap;
-                }
-                .action-buttons .btn-link {
-                    padding: 6px 12px;
-                    font-size: 0.875rem;
-                    color: #8b6c42;
-                    text-decoration: none;
-                    border-radius: 6px;
-                    transition: all 0.3s ease;
-                    background: linear-gradient(135deg, #f5f2ea 0%, #e8d7bc 100%);
-                    border: 1px solid #d4b78f;
-                    font-weight: 500;
-                    box-shadow: 0 1px 3px rgba(139, 108, 66, 0.1);
-                    display: inline-block;
-                    min-width: 80px;
-                    text-align: center;
-                }
-                .action-buttons .btn-link:hover {
-                    background: linear-gradient(135deg, #e8d7bc 0%, #d4b78f 100%);
-                    color: #6a5232;
-                    text-decoration: none;
-                    border-color: #b89c70;
-                    transform: translateY(-1px);
-                    box-shadow: 0 3px 8px rgba(139, 108, 66, 0.2);
-                }
-                .action-buttons .btn-link:active {
-                    transform: translateY(0);
-                    box-shadow: 0 1px 4px rgba(139, 108, 66, 0.15);
-                }
-                .action-buttons .btn-link:focus {
-                    outline: 2px solid #8b6c42;
-                    outline-offset: 2px;
-                }
-                .review-comment, .review-reply {
-                    border-left: 3px solid #e9ecef;
-                    padding-left: 15px;
-                    margin-bottom: 15px;
-                }
-                .review-reply {
-                    border-left-color: #dee2e6;
-                }
-                .flash-sale-banner {
-                    background: linear-gradient(to right, #ff512f, #dd2476);
-                    border-radius: 8px;
-                    padding: 15px;
-                    color: #fff;
-                    font-family: 'Arial', sans-serif;
-                }
-
-                .flash-sale-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    font-size: 1rem;
-                    font-weight: bold;
-                }
-
-                .flash-sale-label {
-                    font-size: 1.2rem;
-                    display: flex;
-                    align-items: center;
-                }
-
-                .flash-sale-label::before {
-                    content: "⚡";
-                    margin-right: 5px;
-                    font-size: 1.4rem;
-                }
-
-                .countdown-text {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    font-size: 0.75rem;
-                }
-
-                .countdown-text i {
-                    margin-right: 4px;
-                }
-
-                .countdown-box {
-                    display: inline-block;
-                    background-color: #000;
-                    color: #fff;
-                    font-weight: bold;
-                    padding: 2px 8px;
-                    border-radius: 4px;
-                    font-family: 'Courier New', monospace;
-                    min-width: 30px;
-                    text-align: center;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                }
-
-                .flash-sale-price {
-                    font-size: 2rem;
-                    color: #fefefe;
-                    font-weight: bold;
-                }
-
-                .original-price {
-                    color: #ccc;
-                    text-decoration: line-through;
-                    margin-left: 10px;
-                }
-
-                .discount-percent {
-                    color: #ffcccb;
-                    font-weight: bold;
-                    margin-left: 10px;
-                }
-            </style>
-            
-            <script>
-                (function () {
-                    const endTime = new Date("${appliedPromotion.endDate}").getTime();
-
-                    const dd = document.getElementById("timer-dd");
-                    const hh = document.getElementById("timer-hh");
-                    const mm = document.getElementById("timer-mm");
-                    const ss = document.getElementById("timer-ss");
-
-                    const timer = setInterval(function () {
-                        const now = new Date().getTime();
-                        const distance = endTime - now;
-
-                        if (distance < 0) {
-                            clearInterval(timer);
-                            dd.innerHTML = hh.innerHTML = mm.innerHTML = ss.innerHTML = "00";
-                            return;
-                        }
-
-                        const days = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, "0");
-                        const hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, "0");
-                        const minutes = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, "0");
-                        const seconds = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, "0");
-
-                        dd.innerHTML = days;
-                        hh.innerHTML = hours;
-                        mm.innerHTML = minutes;
-                        ss.innerHTML = seconds;
-                    }, 1000);
-                })();
-            </script>
+                    dd.innerHTML = days;
+                    hh.innerHTML = hours;
+                    mm.innerHTML = minutes;
+                    ss.innerHTML = seconds;
+                }, 1000);
+            })();
+        </script>
 
     </body>
 </html>
