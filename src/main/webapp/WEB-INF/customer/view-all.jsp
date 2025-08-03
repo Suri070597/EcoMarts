@@ -107,7 +107,7 @@
                 <div class="category-wrapper">
                     <!-- Mục tĩnh "Mua lại đơn cũ" -->
                     <div class="category-item">
-                        <a href="${pageContext.request.contextPath}/customer/reorder">
+                        <a href="${pageContext.request.contextPath}/reorder">
                             <div class="category-icon">
                                 <img src="https://cdn.tgdd.vn/bachhoaxanh/www/Content/images/icon-history.v202301091407.png"
                                      alt="Mua lại đơn cũ">
@@ -175,7 +175,15 @@
                                 <% } %>
                                 <span>(<%= reviewCount %>)</span>
                             </div>
-                            <div class="product-price"><fmt:formatNumber value="<%= p.getPrice() %>" type="number" pattern="#,###"/> đ / <%= p.getUnit() %></div>
+                            <div class="product-price"><div class="product-price">
+    <%
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+        out.print(formatter.format(p.getPrice()));
+    %> đ / <%= p.getUnit() %>
+</div>
+</div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 

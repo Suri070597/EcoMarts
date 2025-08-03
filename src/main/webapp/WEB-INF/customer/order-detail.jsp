@@ -129,7 +129,7 @@
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
-                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/customer/reorder">Đơn hàng của tôi</a></li>
+                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/reorder">Đơn hàng của tôi</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Chi tiết đơn hàng #${order.orderID}</li>
                             </ol>
                         </nav>
