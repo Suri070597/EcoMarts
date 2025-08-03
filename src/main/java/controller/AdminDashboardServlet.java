@@ -26,8 +26,9 @@ public class AdminDashboardServlet extends HttpServlet {
         ProductDAO productDAO = new ProductDAO();
         AccountDAO accountDAO = new AccountDAO();
 
-        // 1. Revenue summary (total, monthly, daily)
-        Map<String, Double> revenueSummary = orderDAO.getRevenueSummary();
+        // 1. Revenue summary with detailed breakdown (total, monthly, daily, tax,
+        // voucher)
+        Map<String, Object> revenueSummary = orderDAO.getRevenueSummaryWithDetails();
         request.setAttribute("revenueSummary", revenueSummary);
 
         // 2. Revenue by month for chart
@@ -38,8 +39,23 @@ public class AdminDashboardServlet extends HttpServlet {
         Map<String, Integer> orderStatusCounts = orderDAO.getOrderCountsByStatus();
         request.setAttribute("orderStatusCounts", orderStatusCounts);
 
-        // 4. Recent orders (last 5)
+        // 4. Recent orders (last 5) with calculated grandTotal
         List<Map<String, Object>> recentOrders = orderDAO.getRecentOrders(5);
+        // Calculate grandTotal for each recent order (same logic as staff)
+        for (Map<String, Object> order : recentOrders) {
+            int orderId = (Integer) order.get("orderId");
+            double totalAfterDiscount = (Double) order.get("totalAmount"); // Đã trừ giảm giá
+            double discount = orderDAO.getDiscountAmountByOrderID(orderId).doubleValue(); // Lấy số giảm
+
+            double subtotal = totalAfterDiscount + discount; // Giá gốc
+            double vat = subtotal * 0.08; // Thuế tính trên giá gốc
+            double grandTotal = totalAfterDiscount + vat; // Tổng cuối = giá sau voucher + thuế
+
+            order.put("grandTotal", grandTotal);
+            order.put("discountAmount", discount);
+            order.put("subtotal", subtotal);
+            order.put("vat", vat);
+        }
         request.setAttribute("recentOrders", recentOrders);
 
         // 5. Top selling products (top 10)
@@ -49,26 +65,26 @@ public class AdminDashboardServlet extends HttpServlet {
             request.setAttribute("topProducts", topProducts);
             request.getRequestDispatcher("/WEB-INF/admin/report/top-products.jsp").forward(request, response);
             return;
+        }
 
-            // 6. Top customers (top 5)
-        } else if ("top-customers".equals(view)) {
-            List<Map<String, Object>> topCustomers = orderDAO.getTopCustomers(5);
+        // 6. Top customers (top 10)
+        if ("top-customers".equals(view)) {
+            List<Map<String, Object>> topCustomers = orderDAO.getTopCustomers(10);
             request.setAttribute("topCustomers", topCustomers);
             request.getRequestDispatcher("/WEB-INF/admin/report/top-customers.jsp").forward(request, response);
             return;
         }
 
-        // 7. Total products count
+        // 7. Additional statistics
+        int totalOrders = orderDAO.countTotalOrders();
         List<Product> products = productDAO.getAll();
-        request.setAttribute("totalProducts", products.size());
+        int totalProducts = products.size();
+        int totalAccounts = accountDAO.countAccountsByRole(0);
 
-        // 8. Total accounts (customers) count
-        request.setAttribute("totalAccounts", accountDAO.countAccountsByRole(0));
+        request.setAttribute("totalOrders", totalOrders);
+        request.setAttribute("totalProducts", totalProducts);
+        request.setAttribute("totalAccounts", totalAccounts);
 
-        // 9. Total orders count
-        request.setAttribute("totalOrders", orderDAO.countTotalOrders());
-
-        // Forward to the dashboard JSP
         request.getRequestDispatcher("/WEB-INF/admin/dashboard.jsp").forward(request, response);
     }
 
