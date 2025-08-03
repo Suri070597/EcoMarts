@@ -23,7 +23,7 @@
                 padding: 15px 0;
                 transition: all 0.3s ease;
             }
-            
+
             /* Styling for checkbox */
             .form-check-input.item-select {
                 width: 20px;
@@ -31,12 +31,12 @@
                 cursor: pointer;
                 border-color: #4CAF50;
             }
-            
+
             .form-check-input.item-select:checked {
                 background-color: #4CAF50;
                 border-color: #4CAF50;
             }
-            
+
             .form-check-input:focus {
                 border-color: #4CAF50;
                 box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
@@ -253,12 +253,12 @@
                                                     <c:set var="price" value="${item.product.price}" />
                                                     <c:set var="quantity" value="${item.quantity}" />
                                                     <div class="col-md-2 mb-2 mb-md-0 text-md-end">
-                                                                                                                                <div class="fw-bold text-success item-total">
-                                        <fmt:formatNumber value="${price * quantity}" type="number" pattern="#,###"/> ₫
-                                    </div>
-                                    <div class="text-muted small">
-                                        <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.unit}
-                                        </div>
+                                                        <div class="fw-bold text-success item-total">
+                                                            <fmt:formatNumber value="${price * quantity}" type="number" pattern="#,###"/> ₫
+                                                        </div>
+                                                        <div class="text-muted small">
+                                                            <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.unit}
+                                                        </div>
                                                     </div>
 
                                                     <!-- Actions -->
@@ -409,35 +409,35 @@
                 } else {
                     console.error('EcomartsCart class not found');
                 }
-                
+
                 // Handle item selection
                 const selectAllCheckbox = document.getElementById('select-all-items');
                 const itemCheckboxes = document.querySelectorAll('.item-select');
                 const checkoutForm = document.getElementById('checkout-form');
                 const selectedItemsInput = document.getElementById('selected-items-input');
-                
+
                 // Function to update the hidden input with selected item IDs
                 function updateSelectedItems() {
                     const selectedIds = Array.from(itemCheckboxes)
-                        .filter(checkbox => checkbox.checked)
-                        .map(checkbox => checkbox.getAttribute('data-cartitemid'));
-                        
+                            .filter(checkbox => checkbox.checked)
+                            .map(checkbox => checkbox.getAttribute('data-cartitemid'));
+
                     selectedItemsInput.value = selectedIds.join(',');
-                    
+
                     // Update the cart total based on selected items
                     updateCartTotal();
                 }
-                
+
                 // Function to update cart total based on selected items
                 function updateCartTotal() {
                     const selectedCheckboxes = Array.from(itemCheckboxes).filter(checkbox => checkbox.checked);
                     let total = 0;
-                    
+
                     selectedCheckboxes.forEach(checkbox => {
                         const cartItemId = checkbox.getAttribute('data-cartitemid');
                         const cartItem = checkbox.closest('.cart-item');
                         const itemTotal = cartItem.querySelector('.item-total');
-                        
+
                         if (itemTotal) {
                             // Extract the numeric value from the formatted price
                             const priceText = itemTotal.textContent.trim();
@@ -447,86 +447,86 @@
                             }
                         }
                     });
-                    
+
                     // Update the cart total and subtotal displays
                     const formattedTotal = new Intl.NumberFormat('vi-VN').format(total);
-                    
+
                     const cartTotal = document.querySelector('.cart-total');
                     if (cartTotal) {
                         cartTotal.textContent = formattedTotal + ' ₫';
                     }
-                    
+
                     const subtotalAmount = document.getElementById('cart-subtotal-amount');
                     if (subtotalAmount) {
                         subtotalAmount.textContent = formattedTotal + ' ₫';
                     }
-                    
+
                     // Update item count
                     const itemCount = document.getElementById('cart-item-count');
                     if (itemCount) {
                         itemCount.textContent = `Tạm tính (${selectedCheckboxes.length} sản phẩm)`;
                     }
                 }
-                
+
                 // Set up event listeners for checkboxes
                 if (selectAllCheckbox) {
-                    selectAllCheckbox.addEventListener('change', function() {
+                    selectAllCheckbox.addEventListener('change', function () {
                         const isChecked = this.checked;
-                        
+
                         // Update all item checkboxes
                         itemCheckboxes.forEach(checkbox => {
                             checkbox.checked = isChecked;
                         });
-                        
+
                         // Update hidden input
                         updateSelectedItems();
                     });
                 }
-                
+
                 // Set up event listeners for individual checkboxes
                 itemCheckboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
+                    checkbox.addEventListener('change', function () {
                         // Check if all items are selected
                         const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
                         if (selectAllCheckbox) {
                             selectAllCheckbox.checked = allChecked;
                         }
-                        
+
                         // Update hidden input
                         updateSelectedItems();
                     });
                 });
-                
+
                 // Initialize selected items on page load
                 updateSelectedItems();
-                
+
                 // Handle form submission
                 if (checkoutForm) {
-                    checkoutForm.addEventListener('submit', function(e) {
+                    checkoutForm.addEventListener('submit', function (e) {
                         const selectedCount = selectedItemsInput.value.split(',').filter(id => id).length;
-                        
+
                         if (selectedCount === 0) {
                             e.preventDefault();
                             alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
                         }
                     });
                 }
-                
+
                 // Handle delete selected items
                 const deleteSelectedBtn = document.getElementById('delete-selected');
                 if (deleteSelectedBtn) {
-                    deleteSelectedBtn.addEventListener('click', function() {
+                    deleteSelectedBtn.addEventListener('click', function () {
                         const selectedCheckboxes = Array.from(document.querySelectorAll('.item-select:checked'));
                         const selectedCount = selectedCheckboxes.length;
-                        
+
                         if (selectedCount === 0) {
                             alert('Vui lòng chọn ít nhất một sản phẩm để xóa');
                             return;
                         }
-                        
+
                         // Confirm deletion with number of items
                         const confirmMessage = `Bạn có chắc chắn muốn xóa ${selectedCount} sản phẩm đã chọn khỏi giỏ hàng?`;
-                        
+
                         // Use the same confirmation dialog as single item deletion
                         if (window.ecomartsCart && typeof window.ecomartsCart.showConfirm === 'function') {
                             // Use the cart's confirmation dialog
@@ -539,27 +539,27 @@
                                 submitRemoveSelectedItems();
                             }
                         }
-                        
+
                         // Helper function to submit form
                         function submitRemoveSelectedItems() {
                             const selectedIds = selectedCheckboxes.map(checkbox => checkbox.getAttribute('data-cartitemid')).join(',');
-                            
+
                             // Create and submit form
                             const form = document.createElement('form');
                             form.method = 'POST';
                             form.action = 'cart';
                             form.style.display = 'none';
-                            
+
                             const actionInput = document.createElement('input');
                             actionInput.type = 'hidden';
                             actionInput.name = 'action';
                             actionInput.value = 'removeSelected';
-                            
+
                             const selectedItemsInput = document.createElement('input');
                             selectedItemsInput.type = 'hidden';
                             selectedItemsInput.name = 'selectedItems';
                             selectedItemsInput.value = selectedIds;
-                            
+
                             form.appendChild(actionInput);
                             form.appendChild(selectedItemsInput);
                             document.body.appendChild(form);
