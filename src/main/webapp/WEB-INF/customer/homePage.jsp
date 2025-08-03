@@ -779,7 +779,7 @@
                     </div>
 
                     <div class="tips-list">
-                        <a href="meo-vat.html#lam-sach-rau-cu" class="tip-item">
+                        <a href="https://eva.vn/tu-van-nha-cua/cach-de-thit-ca-tuan-khong-hoi-khong-hong-nhieu-nguoi-dung-tu-lanh-hon-20-nam-khong-biet-c172a455815.html" class="tip-item">
                             <div class="tip-image">
                                 <img src="https://th.bing.com/th/id/OIP.z6N7VnK2aWx6YlRmR-gpCwHaEK?w=200&h=112&rs=1&qlt=80&o=6&dpr=1.3&pid=3.1"
                                      alt="Làm sạch rau củ">
@@ -791,7 +791,7 @@
                             </div>
                         </a>
 
-                        <a href="meo-vat.html#bao-quan-thit-ca" class="tip-item">
+                        <a href="https://eva.vn/tu-van-nha-cua/cach-de-thit-ca-tuan-khong-hoi-khong-hong-nhieu-nguoi-dung-tu-lanh-hon-20-nam-khong-biet-c172a455815.html" class="tip-item">
                             <div class="tip-image">
                                 <img src="https://th.bing.com/th/id/OIP.quVOFTDt4CAdc7VhwyocagHaEo?w=295&h=184&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
                                      alt="Bảo quản thịt cá">
@@ -803,7 +803,7 @@
                             </div>
                         </a>
 
-                        <a href="meo-vat.html#chong-lang-phi-thuc-pham" class="tip-item">
+                        <a href="https://afamily.vn/nhung-cach-thong-minh-de-giam-lang-phi-thuc-pham-20230411120935868.chn" class="tip-item">
                             <div class="tip-image">
                                 <img src="https://th.bing.com/th/id/OIP.-2dh96wDCZIaPp8k1q3b7gHaE8?w=269&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
                                      alt="Chống lãng phí">
@@ -815,7 +815,7 @@
                             </div>
                         </a>
 
-                        <a href="meo-vat.html#lam-nuoc-uong-tai-nha" class="tip-item">
+                        <a href="https://drinkocany.com/nuoc-uong-giai-nhiet-mua-he/" class="tip-item">
                             <div class="tip-image">
                                 <img src="https://th.bing.com/th/id/OIP.qtsxKJLVM8WZX27VbcEp3AHaE8?w=242&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
                                      alt="Nước uống tại nhà">
