@@ -25,11 +25,11 @@ public class OrderDAO extends DBContext {
     public List<Order> getAllOrders() {
         List<Order> list = new ArrayList<>();
         String sql = """
-            SELECT o.*, a.FullName
-            FROM [Order] o
-            JOIN Account a ON o.AccountID = a.AccountID
-            ORDER BY o.OrderDate DESC
-        """;
+                    SELECT o.*, a.FullName
+                    FROM [Order] o
+                    JOIN Account a ON o.AccountID = a.AccountID
+                    ORDER BY o.OrderDate DESC
+                """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -56,11 +56,11 @@ public class OrderDAO extends DBContext {
     // Tìm đơn hàng theo ID
     public Order getOrderById(int id) {
         String sql = """
-            SELECT o.*, a.FullName
-            FROM [Order] o
-            JOIN Account a ON o.AccountID = a.AccountID
-            WHERE o.OrderID = ?
-        """;
+                    SELECT o.*, a.FullName
+                    FROM [Order] o
+                    JOIN Account a ON o.AccountID = a.AccountID
+                    WHERE o.OrderID = ?
+                """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
@@ -77,13 +77,13 @@ public class OrderDAO extends DBContext {
                 o.setOrderStatus(rs.getString("OrderStatus"));
                 o.setNotes(rs.getString("Notes"));
                 o.setAccountName(rs.getString("FullName"));
-                
+
                 // Create Account object and set it
                 Account account = new Account();
                 account.setAccountID(o.getAccountID());
                 account.setFullName(rs.getString("FullName"));
                 o.setAccount(account);
-                
+
                 return o;
             }
         } catch (SQLException e) {
@@ -96,11 +96,11 @@ public class OrderDAO extends DBContext {
     public List<OrderDetail> getOrderDetailsByOrderId(int orderId) {
         List<OrderDetail> list = new ArrayList<>();
         String sql = """
-            SELECT od.*, p.ProductName, p.Unit
-            FROM OrderDetail od
-            JOIN Product p ON od.ProductID = p.ProductID
-            WHERE od.OrderID = ?
-        """;
+                    SELECT od.*, p.ProductName, p.Unit
+                    FROM OrderDetail od
+                    JOIN Product p ON od.ProductID = p.ProductID
+                    WHERE od.OrderID = ?
+                """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, orderId);
             ResultSet rs = ps.executeQuery();
@@ -128,7 +128,7 @@ public class OrderDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return (int)rs.getDouble(1);
+                return (int) rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -141,7 +141,7 @@ public class OrderDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return (int)rs.getDouble(1);
+                return (int) rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -280,6 +280,106 @@ public class OrderDAO extends DBContext {
         return summary;
     }
 
+    // Get revenue summary with detailed breakdown for admin dashboard
+    public Map<String, Object> getRevenueSummaryWithDetails() {
+        Map<String, Object> summary = new HashMap<>();
+
+        // Total revenue for all time (including tax and after voucher)
+        String totalSql = "SELECT SUM(TotalAmount) FROM [Order] WHERE OrderStatus = N'Đã giao'";
+
+        // This month's revenue
+        String monthlySql = "SELECT SUM(TotalAmount) FROM [Order] WHERE "
+                + "YEAR(OrderDate) = YEAR(GETDATE()) AND MONTH(OrderDate) = MONTH(GETDATE()) "
+                + "AND OrderStatus = N'Đã giao'";
+
+        // Today's revenue
+        String dailySql = "SELECT SUM(TotalAmount) FROM [Order] WHERE "
+                + "CAST(OrderDate AS DATE) = CAST(GETDATE() AS DATE) "
+                + "AND OrderStatus = N'Đã giao'";
+
+        // Get total voucher discounts
+        String totalDiscountSql = "SELECT SUM(vu.DiscountAmount) FROM VoucherUsage vu "
+                + "JOIN [Order] o ON vu.OrderID = o.OrderID "
+                + "WHERE o.OrderStatus = N'Đã giao'";
+
+        // Get total tax amount (estimated as 8% of subtotal)
+        String totalTaxSql = "SELECT SUM((o.TotalAmount + ISNULL(vu.DiscountAmount, 0)) * 0.08) FROM [Order] o "
+                + "LEFT JOIN VoucherUsage vu ON o.OrderID = vu.OrderID "
+                + "WHERE o.OrderStatus = N'Đã giao'";
+
+        try {
+            // Get total revenue
+            PreparedStatement ps1 = conn.prepareStatement(totalSql);
+            ResultSet rs1 = ps1.executeQuery();
+            double totalRevenue = 0.0;
+            if (rs1.next()) {
+                totalRevenue = rs1.getDouble(1);
+            }
+            summary.put("total", totalRevenue);
+            rs1.close();
+            ps1.close();
+
+            // Get monthly revenue
+            PreparedStatement ps2 = conn.prepareStatement(monthlySql);
+            ResultSet rs2 = ps2.executeQuery();
+            double monthlyRevenue = 0.0;
+            if (rs2.next()) {
+                monthlyRevenue = rs2.getDouble(1);
+            }
+            summary.put("monthly", monthlyRevenue);
+            rs2.close();
+            ps2.close();
+
+            // Get daily revenue
+            PreparedStatement ps3 = conn.prepareStatement(dailySql);
+            ResultSet rs3 = ps3.executeQuery();
+            double dailyRevenue = 0.0;
+            if (rs3.next()) {
+                dailyRevenue = rs3.getDouble(1);
+            }
+            summary.put("daily", dailyRevenue);
+            rs3.close();
+            ps3.close();
+
+            // Get total voucher discounts
+            PreparedStatement ps4 = conn.prepareStatement(totalDiscountSql);
+            ResultSet rs4 = ps4.executeQuery();
+            double totalDiscount = 0.0;
+            if (rs4.next()) {
+                totalDiscount = rs4.getDouble(1);
+            }
+            summary.put("totalDiscount", totalDiscount);
+            rs4.close();
+            ps4.close();
+
+            // Get total tax amount
+            PreparedStatement ps5 = conn.prepareStatement(totalTaxSql);
+            ResultSet rs5 = ps5.executeQuery();
+            double totalTax = 0.0;
+            if (rs5.next()) {
+                totalTax = rs5.getDouble(1);
+            }
+            summary.put("totalTax", totalTax);
+            rs5.close();
+            ps5.close();
+
+            // Calculate subtotal (revenue before tax and after voucher)
+            double subtotal = totalRevenue + totalDiscount; // Giá gốc = giá sau voucher + số tiền giảm
+            summary.put("subtotal", subtotal);
+
+        } catch (SQLException e) {
+            System.out.println("Error in getRevenueSummaryWithDetails: " + e.getMessage());
+            summary.put("total", 0.0);
+            summary.put("monthly", 0.0);
+            summary.put("daily", 0.0);
+            summary.put("totalDiscount", 0.0);
+            summary.put("totalTax", 0.0);
+            summary.put("subtotal", 0.0);
+        }
+
+        return summary;
+    }
+
     public int countCancelledOrders() {
         int count = 0;
         String sql = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Đã hủy'";
@@ -390,7 +490,7 @@ public class OrderDAO extends DBContext {
             ps.setDate(1, date);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return (int)rs.getDouble(1);
+                return (int) rs.getDouble(1);
             }
         } catch (SQLException e) {
             System.out.println("Error in countOrdersForDate: " + e.getMessage());
@@ -406,7 +506,7 @@ public class OrderDAO extends DBContext {
             ps.setString(1, status);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return (int)rs.getDouble(1);
+                return (int) rs.getDouble(1);
             }
         } catch (SQLException e) {
             System.out.println("Error in countOrdersByStatus: " + e.getMessage());
@@ -427,11 +527,12 @@ public class OrderDAO extends DBContext {
         }
         return false;
     }
-    
+
     /**
      * Cập nhật trạng thái thanh toán của đơn hàng
+     * 
      * @param orderId ID của đơn hàng
-     * @param status Trạng thái thanh toán mới
+     * @param status  Trạng thái thanh toán mới
      * @return true nếu cập nhật thành công, false nếu thất bại
      */
     public boolean updatePaymentStatus(int orderId, String status) {
@@ -506,14 +607,14 @@ public class OrderDAO extends DBContext {
     public List<RevenueStats> getMonthlyRevenueDetails(int month, int year) {
         List<RevenueStats> list = new ArrayList<>();
         String sql = """
-        SELECT p.ProductName, SUM(od.Quantity) AS TotalQuantity, SUM(od.SubTotal) AS TotalRevenue
-        FROM OrderDetail od
-        JOIN Product p ON od.ProductID = p.ProductID
-        JOIN [Order] o ON od.OrderID = o.OrderID
-        WHERE MONTH(o.OrderDate) = ? AND YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
-        GROUP BY p.ProductName
-        ORDER BY TotalQuantity DESC
-    """;
+                    SELECT p.ProductName, SUM(od.Quantity) AS TotalQuantity, SUM(od.SubTotal) AS TotalRevenue
+                    FROM OrderDetail od
+                    JOIN Product p ON od.ProductID = p.ProductID
+                    JOIN [Order] o ON od.OrderID = o.OrderID
+                    WHERE MONTH(o.OrderDate) = ? AND YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
+                    GROUP BY p.ProductName
+                    ORDER BY TotalQuantity DESC
+                """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, month);
             ps.setInt(2, year);
@@ -552,7 +653,7 @@ public class OrderDAO extends DBContext {
             ps.setInt(2, year);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return (int)rs.getDouble(1);
+                return (int) rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -562,23 +663,23 @@ public class OrderDAO extends DBContext {
 
     public int getTotalProductSoldInMonth(int month, int year) {
         String sql = """
-        SELECT SUM(od.Quantity) FROM [Order] o
-        JOIN OrderDetail od ON o.OrderID = od.OrderID
-        WHERE MONTH(o.OrderDate) = ? AND YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
-    """;
+                    SELECT SUM(od.Quantity) FROM [Order] o
+                    JOIN OrderDetail od ON o.OrderID = od.OrderID
+                    WHERE MONTH(o.OrderDate) = ? AND YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
+                """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, month);
             ps.setInt(2, year);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return (int)rs.getDouble(1);
+                return (int) rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return 0;
     }
-// Tổng doanh thu trong năm
+    // Tổng doanh thu trong năm
 
     public double getYearlyRevenue(int year) {
         String sql = "SELECT SUM(TotalAmount) FROM [Order] "
@@ -595,7 +696,7 @@ public class OrderDAO extends DBContext {
         return 0;
     }
 
-// Tổng số đơn đã giao trong năm
+    // Tổng số đơn đã giao trong năm
     public int countDeliveredOrdersByYear(int year) {
         String sql = "SELECT COUNT(*) FROM [Order] "
                 + "WHERE YEAR(OrderDate) = ? AND OrderStatus = N'Đã giao'";
@@ -603,7 +704,7 @@ public class OrderDAO extends DBContext {
             ps.setInt(1, year);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return (int)rs.getDouble(1);
+                return (int) rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -611,19 +712,19 @@ public class OrderDAO extends DBContext {
         return 0;
     }
 
-// Tổng số lượng sản phẩm đã bán trong năm
+    // Tổng số lượng sản phẩm đã bán trong năm
     public int countProductsSoldByYear(int year) {
         String sql = """
-        SELECT SUM(od.Quantity) 
-        FROM OrderDetail od
-        JOIN [Order] o ON od.OrderID = o.OrderID
-        WHERE YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
-    """;
+                    SELECT SUM(od.Quantity)
+                    FROM OrderDetail od
+                    JOIN [Order] o ON od.OrderID = o.OrderID
+                    WHERE YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
+                """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, year);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return (int)rs.getDouble(1);
+                return (int) rs.getDouble(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -631,18 +732,18 @@ public class OrderDAO extends DBContext {
         return 0;
     }
 
-// Danh sách sản phẩm bán được trong năm
+    // Danh sách sản phẩm bán được trong năm
     public List<Map<String, Object>> getProductSalesByYear(int year) {
         List<Map<String, Object>> list = new ArrayList<>();
         String sql = """
-        SELECT p.ProductName, SUM(od.Quantity) AS totalQuantity, SUM(od.SubTotal) AS totalRevenue
-        FROM OrderDetail od
-        JOIN Product p ON od.ProductID = p.ProductID
-        JOIN [Order] o ON od.OrderID = o.OrderID
-        WHERE YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
-        GROUP BY p.ProductName
-        ORDER BY totalRevenue DESC
-    """;
+                    SELECT p.ProductName, SUM(od.Quantity) AS totalQuantity, SUM(od.SubTotal) AS totalRevenue
+                    FROM OrderDetail od
+                    JOIN Product p ON od.ProductID = p.ProductID
+                    JOIN [Order] o ON od.OrderID = o.OrderID
+                    WHERE YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
+                    GROUP BY p.ProductName
+                    ORDER BY totalRevenue DESC
+                """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, year);
             ResultSet rs = ps.executeQuery();
@@ -754,303 +855,304 @@ public class OrderDAO extends DBContext {
         return items;
     }
 
-public List<RevenueStats> getMonthlyRevenueInYear(int year) {
-    List<RevenueStats> list = new ArrayList<>();
+    public List<RevenueStats> getMonthlyRevenueInYear(int year) {
+        List<RevenueStats> list = new ArrayList<>();
 
-    // Khởi tạo map mặc định 12 tháng doanh thu = 0
-    Map<Integer, Double> revenueMap = new HashMap<>();
-    for (int i = 1; i <= 12; i++) {
-        revenueMap.put(i, 0.0);
-    }
-
-    String sql = "SELECT MONTH(OrderDate) AS Month, SUM(TotalAmount) AS Revenue "
-               + "FROM [Order] WHERE YEAR(OrderDate) = ? AND OrderStatus = N'Đã giao' "
-               + "GROUP BY MONTH(OrderDate)";
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, year);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            int month = rs.getInt("Month");
-            double revenue = rs.getDouble("Revenue");
-            revenueMap.put(month, revenue); // Ghi đè doanh thu thực tế
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-
-    // Chuyển map thành danh sách RevenueStats
-    for (int i = 1; i <= 12; i++) {
-        RevenueStats stat = new RevenueStats();
-        stat.setMonth(i);
-        stat.setTotalRevenue(revenueMap.get(i));
-        list.add(stat);
-    }
-
-    return list;
-}
-public Map<Integer, Double> getLast5YearsRevenue() {
-    Map<Integer, Double> revenueMap = new LinkedHashMap<>();
-    String sql = "SELECT YEAR(OrderDate) AS Year, SUM(TotalAmount) AS Revenue " +
-                 "FROM [Order] " +
-                 "WHERE OrderStatus = N'Đã giao' AND YEAR(OrderDate) BETWEEN ? AND ? " +
-                 "GROUP BY YEAR(OrderDate) ORDER BY YEAR(OrderDate)";
-
-    int currentYear = java.time.Year.now().getValue();
-    int startYear = currentYear - 4;
-
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, startYear);
-        ps.setInt(2, currentYear);
-        ResultSet rs = ps.executeQuery();
-
-        for (int year = startYear; year <= currentYear; year++) {
-            revenueMap.put(year, 0.0); // mặc định = 0
+        // Khởi tạo map mặc định 12 tháng doanh thu = 0
+        Map<Integer, Double> revenueMap = new HashMap<>();
+        for (int i = 1; i <= 12; i++) {
+            revenueMap.put(i, 0.0);
         }
 
-        while (rs.next()) {
-            int year = rs.getInt("Year");
-            double revenue = rs.getDouble("Revenue");
-            revenueMap.put(year, revenue);
+        String sql = "SELECT MONTH(OrderDate) AS Month, SUM(TotalAmount) AS Revenue "
+                + "FROM [Order] WHERE YEAR(OrderDate) = ? AND OrderStatus = N'Đã giao' "
+                + "GROUP BY MONTH(OrderDate)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int month = rs.getInt("Month");
+                double revenue = rs.getDouble("Revenue");
+                revenueMap.put(month, revenue); // Ghi đè doanh thu thực tế
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+        // Chuyển map thành danh sách RevenueStats
+        for (int i = 1; i <= 12; i++) {
+            RevenueStats stat = new RevenueStats();
+            stat.setMonth(i);
+            stat.setTotalRevenue(revenueMap.get(i));
+            list.add(stat);
+        }
+
+        return list;
     }
 
-    return revenueMap;
-}
+    public Map<Integer, Double> getLast5YearsRevenue() {
+        Map<Integer, Double> revenueMap = new LinkedHashMap<>();
+        String sql = "SELECT YEAR(OrderDate) AS Year, SUM(TotalAmount) AS Revenue " +
+                "FROM [Order] " +
+                "WHERE OrderStatus = N'Đã giao' AND YEAR(OrderDate) BETWEEN ? AND ? " +
+                "GROUP BY YEAR(OrderDate) ORDER BY YEAR(OrderDate)";
 
+        int currentYear = java.time.Year.now().getValue();
+        int startYear = currentYear - 4;
 
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, startYear);
+            ps.setInt(2, currentYear);
+            ResultSet rs = ps.executeQuery();
 
+            for (int year = startYear; year <= currentYear; year++) {
+                revenueMap.put(year, 0.0); // mặc định = 0
+            }
 
+            while (rs.next()) {
+                int year = rs.getInt("Year");
+                double revenue = rs.getDouble("Revenue");
+                revenueMap.put(year, revenue);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
+        return revenueMap;
+    }
 
+    /**
+     * Creates a new order from cart items
+     * 
+     * @param order The order to create
+     * @param items The list of cart items to add to the order
+     * @return The ID of the created order, or -1 if creation failed
+     */
+    public int createOrderFromCart(Order order, List<CartItem> items) {
+        int orderId = -1;
 
-/**
- * Creates a new order from cart items
- * @param order The order to create
- * @param items The list of cart items to add to the order
- * @return The ID of the created order, or -1 if creation failed
- */
-public int createOrderFromCart(Order order, List<CartItem> items) {
-    int orderId = -1;
-    
-    try {
-        // Set autocommit to false for transaction
-        conn.setAutoCommit(false);
-        
-        // Insert order
-        String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
-                              "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
-                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        try (PreparedStatement ps = conn.prepareStatement(insertOrderSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, order.getAccountID());
-            ps.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
-            ps.setDouble(3, order.getTotalAmount());
-            ps.setString(4, order.getShippingAddress());
-            ps.setString(5, order.getShippingPhone());
-            ps.setString(6, order.getPaymentMethod());
-            ps.setString(7, order.getPaymentStatus());
-            ps.setString(8, order.getOrderStatus());
-            ps.setString(9, order.getNotes());
-            
-            int affectedRows = ps.executeUpdate();
-            
-            if (affectedRows > 0) {
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    orderId = rs.getInt(1);
+        try {
+            // Set autocommit to false for transaction
+            conn.setAutoCommit(false);
+
+            // Insert order
+            String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
+                    "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (PreparedStatement ps = conn.prepareStatement(insertOrderSql,
+                    PreparedStatement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, order.getAccountID());
+                ps.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
+                ps.setDouble(3, order.getTotalAmount());
+                ps.setString(4, order.getShippingAddress());
+                ps.setString(5, order.getShippingPhone());
+                ps.setString(6, order.getPaymentMethod());
+                ps.setString(7, order.getPaymentStatus());
+                ps.setString(8, order.getOrderStatus());
+                ps.setString(9, order.getNotes());
+
+                int affectedRows = ps.executeUpdate();
+
+                if (affectedRows > 0) {
+                    ResultSet rs = ps.getGeneratedKeys();
+                    if (rs.next()) {
+                        orderId = rs.getInt(1);
+                    }
+                    rs.close();
                 }
-                rs.close();
+            }
+
+            // If order creation succeeded, insert order details
+            if (orderId > 0) {
+                // Insert order details
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
+                        "VALUES (?, ?, ?, ?)";
+
+                try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
+                    for (CartItem item : items) {
+                        if (item.getProduct() != null) {
+                            ps.setInt(1, orderId);
+                            ps.setInt(2, item.getProductID());
+                            ps.setDouble(3, item.getQuantity());
+                            ps.setDouble(4, item.getProduct().getPrice());
+                            ps.addBatch();
+                        }
+                    }
+                    ps.executeBatch();
+                }
+            } else {
+                // Order creation failed, rollback transaction
+                conn.rollback();
+                return orderId;
+            }
+
+            // Commit transaction if all operations succeeded
+            conn.commit();
+        } catch (SQLException e) {
+            try {
+                // Rollback transaction on error
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            e.printStackTrace();
+        } finally {
+            try {
+                // Reset auto-commit
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
-        
-        // If order creation succeeded, insert order details
-        if (orderId > 0) {
-            // Insert order details
-            String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
-                                   "VALUES (?, ?, ?, ?)";
-            
-            try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
-                for (CartItem item : items) {
-                    if (item.getProduct() != null) {
+
+        return orderId;
+    }
+
+    /**
+     * Creates a new order with a single item
+     * 
+     * @param order The order to create
+     * @param item  The cart item to add to the order
+     * @return The ID of the created order, or -1 if creation failed
+     */
+    public int createOrder(Order order, CartItem item) {
+        int orderId = -1;
+
+        try {
+            // Set autocommit to false for transaction
+            conn.setAutoCommit(false);
+
+            // Insert order
+            String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
+                    "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (PreparedStatement ps = conn.prepareStatement(insertOrderSql,
+                    PreparedStatement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, order.getAccountID());
+                ps.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
+                ps.setDouble(3, order.getTotalAmount());
+                ps.setString(4, order.getShippingAddress());
+                ps.setString(5, order.getShippingPhone());
+                ps.setString(6, order.getPaymentMethod());
+                ps.setString(7, order.getPaymentStatus());
+                ps.setString(8, order.getOrderStatus());
+                ps.setString(9, order.getNotes());
+
+                int affectedRows = ps.executeUpdate();
+
+                if (affectedRows > 0) {
+                    ResultSet rs = ps.getGeneratedKeys();
+                    if (rs.next()) {
+                        orderId = rs.getInt(1);
+                    }
+                    rs.close();
+                }
+            }
+
+            // If order creation succeeded, insert order detail
+            if (orderId > 0) {
+                // Get product price
+                ProductDAO productDAO = new ProductDAO();
+                Product product = productDAO.getProductById(item.getProductID());
+
+                if (product != null) {
+                    String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
+                            "VALUES (?, ?, ?, ?)";
+
+                    try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                         ps.setInt(1, orderId);
                         ps.setInt(2, item.getProductID());
                         ps.setDouble(3, item.getQuantity());
-                        ps.setDouble(4, item.getProduct().getPrice());
-                        ps.addBatch();
+                        ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
+
+                        ps.executeUpdate();
                     }
+                } else {
+                    // Product not found, rollback transaction
+                    conn.rollback();
+                    orderId = -1;
+                    return orderId;
                 }
-                ps.executeBatch();
             }
-        } else {
-            // Order creation failed, rollback transaction
-            conn.rollback();
-            return orderId;
-        }
-        
-        // Commit transaction if all operations succeeded
-        conn.commit();
-    } catch (SQLException e) {
-        try {
-            // Rollback transaction on error
-            conn.rollback();
-        } catch (SQLException rollbackEx) {
-            rollbackEx.printStackTrace();
-        }
-        e.printStackTrace();
-    } finally {
-        try {
-            // Reset auto-commit
-            conn.setAutoCommit(true);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    return orderId;
-}
 
-/**
- * Creates a new order with a single item
- * @param order The order to create
- * @param item The cart item to add to the order
- * @return The ID of the created order, or -1 if creation failed
- */
-public int createOrder(Order order, CartItem item) {
-    int orderId = -1;
-    
-    try {
-        // Set autocommit to false for transaction
-        conn.setAutoCommit(false);
-        
-        // Insert order
-        String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
-                               "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
-                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        try (PreparedStatement ps = conn.prepareStatement(insertOrderSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, order.getAccountID());
-            ps.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
-            ps.setDouble(3, order.getTotalAmount());
-            ps.setString(4, order.getShippingAddress());
-            ps.setString(5, order.getShippingPhone());
-            ps.setString(6, order.getPaymentMethod());
-            ps.setString(7, order.getPaymentStatus());
-            ps.setString(8, order.getOrderStatus());
-            ps.setString(9, order.getNotes());
-            
-            int affectedRows = ps.executeUpdate();
-            
-            if (affectedRows > 0) {
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    orderId = rs.getInt(1);
-                }
-                rs.close();
-            }
-        }
-        
-        // If order creation succeeded, insert order detail
-        if (orderId > 0) {
-            // Get product price
-            ProductDAO productDAO = new ProductDAO();
-            Product product = productDAO.getProductById(item.getProductID());
-            
-            if (product != null) {
-                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
-                                        "VALUES (?, ?, ?, ?)";
-                
-                try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
-                    ps.setInt(1, orderId);
-                    ps.setInt(2, item.getProductID());
-                    ps.setDouble(3, item.getQuantity());
-                    ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
-                    
-                    ps.executeUpdate();
-                }
-            } else {
-                // Product not found, rollback transaction
+            // Commit transaction if all operations succeeded
+            conn.commit();
+        } catch (SQLException e) {
+            try {
+                // Rollback transaction on error
                 conn.rollback();
-                orderId = -1;
-                return orderId;
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            e.printStackTrace();
+        } finally {
+            try {
+                // Reset auto-commit
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
-        
-        // Commit transaction if all operations succeeded
-        conn.commit();
-    } catch (SQLException e) {
+
+        return orderId;
+    }
+
+    /**
+     * Record voucher usage for an order
+     * 
+     * @param voucherId      The voucher ID
+     * @param accountId      The account ID
+     * @param orderId        The order ID
+     * @param discountAmount The discount amount applied
+     */
+    public void recordVoucherUsage(int voucherId, int accountId, int orderId, double discountAmount) {
+        String insertVoucherUsageSql = "INSERT INTO VoucherUsage (VoucherID, AccountID, OrderID, UsedDate, DiscountAmount) "
+                +
+                "VALUES (?, ?, ?, GETDATE(), ?)";
+
+        String updateVoucherSql = "UPDATE Voucher SET UsageCount = UsageCount + 1 WHERE VoucherID = ?";
+
         try {
-            // Rollback transaction on error
-            conn.rollback();
-        } catch (SQLException rollbackEx) {
-            rollbackEx.printStackTrace();
-        }
-        e.printStackTrace();
-    } finally {
-        try {
-            // Reset auto-commit
-            conn.setAutoCommit(true);
+            // Insert voucher usage
+            try (PreparedStatement ps = conn.prepareStatement(insertVoucherUsageSql)) {
+                ps.setInt(1, voucherId);
+                ps.setInt(2, accountId);
+                ps.setInt(3, orderId);
+                ps.setDouble(4, discountAmount);
+                ps.executeUpdate();
+            }
+
+            // Update voucher usage count
+            try (PreparedStatement ps = conn.prepareStatement(updateVoucherSql)) {
+                ps.setInt(1, voucherId);
+                ps.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    
-    return orderId;
-}
 
-/**
- * Record voucher usage for an order
- * @param voucherId The voucher ID
- * @param accountId The account ID
- * @param orderId The order ID
- * @param discountAmount The discount amount applied
- */
-public void recordVoucherUsage(int voucherId, int accountId, int orderId, double discountAmount) {
-    String insertVoucherUsageSql = "INSERT INTO VoucherUsage (VoucherID, AccountID, OrderID, UsedDate, DiscountAmount) " +
-                                 "VALUES (?, ?, ?, GETDATE(), ?)";
-    
-    String updateVoucherSql = "UPDATE Voucher SET UsageCount = UsageCount + 1 WHERE VoucherID = ?";
-    
-    try {
-        // Insert voucher usage
-        try (PreparedStatement ps = conn.prepareStatement(insertVoucherUsageSql)) {
-            ps.setInt(1, voucherId);
-            ps.setInt(2, accountId);
-            ps.setInt(3, orderId);
-            ps.setDouble(4, discountAmount);
-            ps.executeUpdate();
+    public BigDecimal getDiscountAmountByOrderID(int orderId) {
+        BigDecimal discount = BigDecimal.ZERO;
+        String sql = "SELECT DiscountAmount FROM VoucherUsage WHERE OrderID = ?";
+        try {
+            DBContext db = new DBContext();
+            Connection conn = db.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                discount = rs.getBigDecimal("DiscountAmount");
+            }
+            rs.close();
+            ps.close();
+            conn.close(); // đóng kết nối nếu không dùng shared connection
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
-        // Update voucher usage count
-        try (PreparedStatement ps = conn.prepareStatement(updateVoucherSql)) {
-            ps.setInt(1, voucherId);
-            ps.executeUpdate();
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return discount;
     }
-}
-
-public BigDecimal getDiscountAmountByOrderID(int orderId) {
-    BigDecimal discount = BigDecimal.ZERO;
-    String sql = "SELECT DiscountAmount FROM VoucherUsage WHERE OrderID = ?";
-    try {
-        DBContext db = new DBContext();
-        Connection conn = db.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setInt(1, orderId);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            discount = rs.getBigDecimal("DiscountAmount");
-        }
-        rs.close();
-        ps.close();
-        conn.close(); // đóng kết nối nếu không dùng shared connection
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return discount;
-}
 
 }
