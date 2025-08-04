@@ -265,7 +265,7 @@ public class AdminStaffServlet extends HttpServlet {
                 
                 if (accDAO.isPhoneExists(phone)) {
                     request.setAttribute("errorMessage", "Phone đã tồn tại.");
-                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-staff.jsp").forward(request, response);
                     return;
                 }
 
