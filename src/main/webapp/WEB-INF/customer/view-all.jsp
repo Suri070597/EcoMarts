@@ -143,10 +143,13 @@
                             for (Product p : products) {
                     %>
                     <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
+                        <% if (p.getStockQuantity() <= 0) { %>
+                            <div class="product-badge out-of-stock">Hết hàng</div>
+                        <% } %>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-cart-plus"></i></button>
                                 <a href="ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -185,12 +188,12 @@
 </div>
 </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>

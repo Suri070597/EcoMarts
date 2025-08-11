@@ -24,7 +24,7 @@ public class ViewProductDAO extends DBContext {
                     SELECT p.productID, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.CategoryID
                                 FROM Product p
                                 JOIN Category c ON p.CategoryID = c.CategoryID
-                                WHERE c.ParentID = ? AND p.StockQuantity > 0
+                                WHERE c.ParentID = ?
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, parentCategoryId);
@@ -106,7 +106,7 @@ public class ViewProductDAO extends DBContext {
                     SELECT p.productID, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.CategoryID
                     FROM Product p
                     JOIN Category c ON p.CategoryID = c.CategoryID
-                    WHERE c.ParentID = ? AND p.StockQuantity > 0
+                    WHERE c.ParentID = ?
                     ORDER BY p.ProductID
                     OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """;

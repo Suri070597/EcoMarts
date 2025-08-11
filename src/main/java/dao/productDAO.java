@@ -29,8 +29,7 @@ public class ProductDAO extends DBContext {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p \n"
                 + "                                JOIN Category c ON p.categoryID = c.categoryID \n"
-                + "                               JOIN Supplier s ON p.supplierID = s.supplierID \n"
-                + "                               WHERE p.StockQuantity > 0";
+                + "                               JOIN Supplier s ON p.supplierID = s.supplierID";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -454,7 +453,7 @@ public class ProductDAO extends DBContext {
                     WHERE p.CategoryID IN (
                         SELECT CategoryID FROM Category
                         WHERE ParentID = ? OR CategoryID = ?
-                    ) AND p.StockQuantity > 0
+                    )
                 """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

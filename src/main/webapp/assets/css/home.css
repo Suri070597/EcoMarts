@@ -290,6 +290,18 @@ section {
     color: var(--text-dark);
 }
 
+.product-badge.out-of-stock {
+    background-color: #bdbdbd;
+    color: #fff;
+    font-weight: bold;
+    border: 2px solid #ff6b6b;
+    font-size: 14px;
+    top: 10px;
+    left: 10px;
+    z-index: 3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 .product-image-container {
     position: relative;
     width: 100%;

@@ -45,10 +45,13 @@
                     <c:when test="${not empty searchResult}">
                         <c:forEach var="p" items="${searchResult}">
                             <div class="product-card" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}">
+                                <c:if test="${p.stockQuantity <= 0}">
+                                    <div class="product-badge out-of-stock">Hết hàng</div>
+                                </c:if>
                                 <div class="product-image-container">
                                     <img src="ImageServlet?name=${p.imageURL}" alt="${p.productName}" class="product-image">
                                     <div class="product-actions">
-                                        <button class="action-btn add-to-cart-action" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}"><i class="fas fa-cart-plus"></i></button>
+                                        <button class="action-btn add-to-cart-action" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}" <c:if test="${p.stockQuantity <= 0}">disabled style='opacity:0.5;cursor:not-allowed;'</c:if>><i class="fas fa-cart-plus"></i></button>
                                         <a href="ProductDetail?id=${p.productID}" class="action-btn"><i class="fas fa-eye"></i></a>
                                     </div>
                                 </div>
@@ -97,8 +100,8 @@
                                         <fmt:formatNumber value="${p.price}" type="number" pattern="#,###" /> đ / ${p.unit}
                                     </div>
                                     <div class="button-group">
-                                        <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                        <a href="${pageContext.request.contextPath}/ProductDetail?id=${p.productID}" class="buy-now-btn">Mua ngay</a>
+                                        <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}" <c:if test="${p.stockQuantity <= 0}">disabled style='opacity:0.5;cursor:not-allowed;'</c:if>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                        <a href="${pageContext.request.contextPath}/ProductDetail?id=${p.productID}" class="buy-now-btn" <c:if test="${p.stockQuantity <= 0}">style='pointer-events:none;opacity:0.5;cursor:not-allowed;'</c:if>>Mua ngay</a>
                                     </div>
                                 </div>
                             </div>
