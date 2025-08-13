@@ -259,6 +259,7 @@ body {
 
 .table td {
   padding: 15px;
+  text-align: center;
   border-bottom: 1px solid var(--gray-200);
   vertical-align: middle;
 }
