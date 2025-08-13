@@ -37,9 +37,9 @@
         background-color: #eaf4ff;
         color: #007bff;
     }
-    
+
     .btn-admin {
-        background-color: gainsboro; 
+        background-color: gainsboro;
         color: white;
         padding: 8px 15px;
         border-radius: 5px;
@@ -47,12 +47,12 @@
         text-decoration: none;
         transition: background-color 0.2s;
     }
-    
+
     .btn-admin:hover {
         background-color: #f1f1f1;
         color: white;
     }
-    
+
     .btn-staff {
         background-color: gainsboro;
         color: white;
@@ -62,7 +62,7 @@
         text-decoration: none;
         transition: background-color 0.2s;
     }
-    
+
     .btn-staff:hover {
         background-color: #f1f1f1;
         color: white;
@@ -110,10 +110,31 @@
 
 <!-- Header -->
 <div class="header">
-    <div class="logo">
-        <a href="${pageContext.request.contextPath}/home"><img src="${pageContext.request.contextPath}/assets/img/eco.png" alt="Logo"></a>
+    <div class="logo" style="position: relative;">
+        <a href="${pageContext.request.contextPath}/home">
+            <img src="${pageContext.request.contextPath}/assets/img/eco.png" alt="Logo">
+        </a>
         <span>EcoMart</span>
+
+        <a class="logo-hit" href="${pageContext.request.contextPath}/home" aria-label="EcoMart"></a>
     </div>
+
+    <style>
+        .logo {
+            position: relative;
+        }
+        .logo .logo-hit {
+            position: absolute;
+            inset: 0;
+            display: block;
+            text-indent: -9999px;
+        }
+        .logo {
+            cursor: pointer;
+        }
+    </style>
+
+
 
     <form action="${pageContext.request.contextPath}/SearchProduct" method="get" class="search-bar" autocomplete="off">
         <i class="fas fa-search"></i>
@@ -175,30 +196,30 @@
         <!-- Logout -->
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
 
-        <% } else if (account != null && account.getRole() == 1) { %>
+        <% } else if (account != null && account.getRole() == 1) {%>
         <!-- Admin user -->
         <span>Chào, <%= account.getFullName()%> (Admin)</span>
-        
+
         <!-- Return to Admin -->
         <a href="<%= request.getContextPath()%>/admin" class="btn-admin">
             <i class="fas fa-user-shield"></i> Quay lại trang Admin
         </a>
-        
+
         <!-- Logout -->
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
-        
-        <% } else if (account != null && account.getRole() == 2) { %>
+
+        <% } else if (account != null && account.getRole() == 2) {%>
         <!-- Staff user -->
         <span>Chào, <%= account.getFullName()%> (Nhân viên)</span>
-        
+
         <!-- Return to Staff -->
         <a href="<%= request.getContextPath()%>/staff" class="btn-staff">
             <i class="fas fa-user-tie"></i> Quay lại trang Nhân viên
         </a>
-        
+
         <!-- Logout -->
         <a href="<%= request.getContextPath()%>/logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
-        
+
         <% } else if (account == null) {%>
         <!-- Chưa đăng nhập -->
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
@@ -223,7 +244,8 @@
                 <% } else { %>
                 <ul class="list-group">
                     <% for (model.Review reply : unreadList) {%>
-                    <a href="<%= request.getContextPath()%>/read-notification?reviewId=<%= reply.getReviewID()%>" style="text-decoration:none;color:inherit;">
+                    <a href="<%= request.getContextPath()%>/read-notification?reviewId=<%= reply.getReviewID()%>" style="text-decoration:none;
+                       color:inherit;">
                         <li class="list-group-item" style="cursor:pointer;">
                             <div><b>Nhân viên:</b> <%= reply.getAccountName()%></div>
                             <div><b>Sản phẩm:</b> <%= reply.getProductName() != null ? reply.getProductName() : ""%></div>
