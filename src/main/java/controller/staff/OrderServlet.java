@@ -15,7 +15,8 @@ import model.OrderDetail;
 @WebServlet(name = "OrderServlet", urlPatterns = {
     "/staff/order",
     "/staff/order/detail",
-    "/staff/order/updateStatus" // 👈 thêm dòng này
+    "/staff/order/updateStatus",
+    "/staff/order/nextStatus"
 })
 
 public class OrderServlet extends HttpServlet {
@@ -104,6 +105,8 @@ public class OrderServlet extends HttpServlet {
 
         if (path.equals("/staff/order/updateStatus")) {
             updateOrderStatus(request, response);
+        } else if (path.equals("/staff/order/nextStatus")) {
+            moveToNextStatus(request, response);
         }
     }
 
@@ -136,6 +139,53 @@ public class OrderServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect("order");
+        }
+    }
+
+    private void moveToNextStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int orderId = Integer.parseInt(request.getParameter("orderId"));
+            Order order = dao.getOrderById(orderId);
+            if (order == null) {
+                response.sendRedirect(request.getContextPath() + "/staff/order");
+                return;
+            }
+
+            String current = order.getOrderStatus();
+            String next = getNextStatus(current);
+
+            // Nếu trạng thái hiện tại là cuối cùng hoặc không xác định → không cập nhật
+            if (next == null) {
+                response.sendRedirect(request.getContextPath() + "/staff/order");
+                return;
+            }
+
+            boolean success = dao.updateOrderStatus(orderId, next);
+            if (success && "Đã giao".equals(next)) {
+                dao.updatePaymentStatus(orderId, "Đã thanh toán");
+            }
+
+            response.sendRedirect(request.getContextPath() + "/staff/order");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/staff/order");
+        }
+    }
+
+    private String getNextStatus(String current) {
+        if (current == null) return null;
+        switch (current) {
+            case "Đang xử lý":
+                return "Đã xử lý";
+            case "Đã xử lý":
+                return "Đang giao";
+            case "Đang giao":
+                return "Đã giao";
+            // Trạng thái cuối hoặc không xác định → không có next
+            case "Đã giao":
+            case "Đã hủy":
+            default:
+                return null;
         }
     }
 
