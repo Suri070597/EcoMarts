@@ -252,7 +252,7 @@ body {
   background-color: var(--gray-100);
   color: var(--accent-color);
   font-weight: 600;
-  text-align: left;
+  text-align: center;
   padding: 15px;
   border-bottom: 2px solid var(--gray-200);
 }
