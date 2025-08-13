@@ -92,7 +92,6 @@
                 object-fit: contain;
                 border-radius: 6px;
                 border: 1px solid #eaeaea;
-                text-align: center;
             }
 
             .table-products th {
@@ -220,11 +219,11 @@
                                         <tr>
                                             <td class="text-center">
                                                 <c:if test="${not empty od.product && not empty od.product.imageURL}">
-                                                    <img style="display:block; margin:auto;" src="${pageContext.request.contextPath}/ImageServlet?name=${od.product.imageURL}" 
+                                                    <img src="${pageContext.request.contextPath}/ImageServlet?name=${od.product.imageURL}" 
                                                          class="product-img" alt="${od.productName}">
                                                 </c:if>
                                                 <c:if test="${empty od.product || empty od.product.imageURL}">
-                                                    <div class="product-img bg-light d-flex align-items-center justify-content-center">
+                                                    <div style="margin:auto;" class="product-img bg-light d-flex align-items-center justify-content-center">
                                                         <i class="fas fa-image text-muted"></i>
                                                     </div>
                                                 </c:if>
