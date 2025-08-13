@@ -156,9 +156,9 @@ INSERT INTO Category (CategoryName, ParentID, [Description]) VALUES
 CREATE TABLE Product (
     ProductID INT PRIMARY KEY IDENTITY(1,1),
     ProductName NVARCHAR(255) NOT NULL,
-    Price DECIMAL(10,2) NOT NULL,
+    Price DECIMAL(10,2) NOT NULL, -- giá của 1 thùng
     [Description] NVARCHAR(MAX),
-    StockQuantity DECIMAL(10,2) NOT NULL DEFAULT 0, -- sửa kiểu + default
+    StockQuantity DECIMAL(10,2) NOT NULL DEFAULT 0, -- số lượng thùng
     ImageURL NVARCHAR(255),
     Unit NVARCHAR(50), -- đơn vị tính: kg, chai, gói,...
     CreatedAt DATETIME DEFAULT GETDATE(),
@@ -167,11 +167,23 @@ CREATE TABLE Product (
     CategoryID INT NOT NULL,
     SupplierID INT NOT NULL,
     [Status] NVARCHAR(50) DEFAULT N'Còn hàng',
-    UnitPerBox INT NOT NULL DEFAULT 1,
+    UnitPerBox INT NOT NULL DEFAULT 1,  -- số lượng lon trong thùng
     BoxUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
     ItemUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
     FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID)
+);
+
+
+CREATE TABLE ProductUnitConversion (
+    ConversionID INT PRIMARY KEY IDENTITY(1,1),
+    ProductID INT NOT NULL,
+    UnitPerBoxChange INT NOT NULL DEFAULT 0, -- Số lượng lon trong thùng sau khi chuyển đổi
+    UnitsPerPackChange INT NULL, -- Số lượng lốc trong 1 thùng sau khi chuyển đổi
+    UnitPrice DECIMAL(18,2) NULL, -- Giá của 1 đơn vị nhỏ
+    PackPrice DECIMAL(18,2) NULL, -- Giá của 1 lốc
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE
+    -- Bỏ UNIQUE constraint để cho phép nhiều chuyển đổi
 );
 
 
@@ -322,6 +334,19 @@ CREATE TABLE Inventory (
     Quantity DECIMAL(10,2) CHECK (Quantity >= 0),
     LastUpdated DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+-- Bảng quản lý đóng gói sản phẩm (thùng, lon, lốc)
+CREATE TABLE ProductPackaging (
+    PackagingID INT PRIMARY KEY IDENTITY(1,1),
+    ProductID INT NOT NULL,
+    PackageType NVARCHAR(10) NOT NULL, -- 'BOX' | 'UNIT' | 'PACK'
+    Quantity DECIMAL(18,2) NOT NULL DEFAULT 0,
+    UnitPrice DECIMAL(18,2) NULL,      -- Giá bán cho loại đóng gói này
+    LastUpdated DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_ProductPackaging_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE,
+    CONSTRAINT UQ_ProductPackaging UNIQUE (ProductID, PackageType),
+    CONSTRAINT CHK_PackageType CHECK (PackageType IN ('BOX', 'UNIT', 'PACK'))
 );
 
 CREATE TABLE AccountVoucher (

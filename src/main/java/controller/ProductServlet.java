@@ -18,11 +18,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import model.Category;
 import model.Product;
 import model.Supplier;
 
-@WebServlet(name = "ProductServlet", urlPatterns = {"/admin/product"})
+@WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
@@ -312,8 +313,8 @@ public class ProductServlet extends HttpServlet {
                         unitPerBox = Integer.parseInt(request.getParameter("unitPerBox"));
                         boxUnitName = request.getParameter("boxUnitName");
                         itemUnitName = request.getParameter("itemUnitName");
-                        stockQuantity = boxQuantity * unitPerBox;
-                        price = boxPrice / unitPerBox;
+                        stockQuantity = boxQuantity;
+                        price = boxPrice; // Giá của 1 thùng, không chia cho unitPerBox
                         // Chuẩn hóa ngày hết hạn
                         Date expirationTrunc = truncateTime(expirationDate);
                         if (expirationTrunc.before(todayTrunc)) {
@@ -463,8 +464,8 @@ public class ProductServlet extends HttpServlet {
                         unitPerBox = Integer.parseInt(unitPerBoxStr);
                         boxUnitName = boxUnitName;
                         itemUnitName = itemUnitName;
-                        stockQuantity = boxQuantity * unitPerBox;
-                        price = boxPrice / unitPerBox;
+                        stockQuantity = boxQuantity; // Số lượng thùng, không nhân với unitPerBox
+                        price = boxPrice; // Giá của 1 thùng, không chia cho unitPerBox
                         int months = Integer.parseInt(expirySelect);
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(manufactureDate);
@@ -553,6 +554,93 @@ public class ProductServlet extends HttpServlet {
                         ex.printStackTrace();
                     }
                     request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
+                }
+                break;
+
+            case "convertUnits":
+                try {
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    PrintWriter jsonOut = response.getWriter();
+
+                    int productId = Integer.parseInt(request.getParameter("productId"));
+                    int boxesToConvert = Integer.parseInt(request.getParameter("boxesToConvert"));
+                    int lonToLoc = 0;
+                    String lonToLocStr = request.getParameter("lonToLoc");
+                    if (lonToLocStr != null && !lonToLocStr.trim().isEmpty()) {
+                        lonToLoc = Integer.parseInt(lonToLocStr);
+                    }
+
+                    // Validate input
+                    if (boxesToConvert <= 0) {
+                        jsonOut.print("{\"success\": false, \"message\": \"Số lượng thùng phải lớn hơn 0\"}");
+                        return;
+                    }
+
+                    // Get current product to validate
+                    Product currentProduct = dao.getProductById(productId);
+                    if (currentProduct == null) {
+                        jsonOut.print("{\"success\": false, \"message\": \"Không tìm thấy sản phẩm\"}");
+                        return;
+                    }
+
+                    if (boxesToConvert > currentProduct.getStockQuantity()) {
+                        jsonOut.print(
+                                "{\"success\": false, \"message\": \"Số lượng thùng chuyển đổi vượt quá số lượng hiện có\"}");
+                        return;
+                    }
+
+                    // Validate lon to loc conversion
+                    if (lonToLoc > 0) {
+                        int totalLon = boxesToConvert * currentProduct.getUnitPerBox();
+                        if (totalLon % lonToLoc != 0) {
+                            jsonOut.print("{\"success\": false, \"message\": \"Số lon không chia hết cho " + lonToLoc
+                                    + "\"}");
+                            return;
+                        }
+                    }
+
+                    // Perform conversion
+                    boolean success = dao.convertUnits(productId, boxesToConvert, lonToLoc);
+
+                    if (success) {
+                        jsonOut.print("{\"success\": true, \"message\": \"Chuyển đổi thành công\"}");
+                    } else {
+                        jsonOut.print("{\"success\": false, \"message\": \"Chuyển đổi thất bại\"}");
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    PrintWriter jsonOut = response.getWriter();
+                    jsonOut.print("{\"success\": false, \"message\": \"Lỗi: " + e.getMessage() + "\"}");
+                }
+                break;
+
+            case "getProductPackaging":
+                try {
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    PrintWriter jsonOut = response.getWriter();
+
+                    int productId = Integer.parseInt(request.getParameter("productId"));
+                    Map<String, Object> packaging = dao.getProductPackaging(productId);
+
+                    double boxQuantity = (Double) packaging.getOrDefault("BOX_Quantity", 0.0);
+                    double boxPrice = (Double) packaging.getOrDefault("BOX_Price", 0.0);
+                    double unitQuantity = (Double) packaging.getOrDefault("UNIT_Quantity", 0.0);
+                    double packQuantity = (Double) packaging.getOrDefault("PACK_Quantity", 0.0);
+
+                    jsonOut.print("{\"success\": true, \"boxQuantity\": " + boxQuantity + ", \"boxPrice\": " + boxPrice
+                            + ", \"unitQuantity\": " + unitQuantity + ", \"packQuantity\": " + packQuantity + "}");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    PrintWriter jsonOut = response.getWriter();
+                    jsonOut.print("{\"success\": false, \"message\": \"Lỗi: " + e.getMessage() + "\"}");
                 }
                 break;
 
