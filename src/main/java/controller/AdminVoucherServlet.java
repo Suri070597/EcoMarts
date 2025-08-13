@@ -152,7 +152,7 @@ public class AdminVoucherServlet extends HttpServlet {
         voucher.setDiscountAmount(Double.parseDouble(request.getParameter("discountAmount")));
         voucher.setMinOrderValue(Double.parseDouble(request.getParameter("minOrderValue")));
         voucher.setMaxUsage(Integer.parseInt(request.getParameter("maxUsage")));
-        voucher.setUsageCount(Integer.parseInt(request.getParameter("usageCount")));
+        voucher.setUsageCount(0);
         voucher.setStartDate(java.sql.Timestamp.valueOf(request.getParameter("startDate") + " 00:00:00"));
         voucher.setEndDate(java.sql.Timestamp.valueOf(request.getParameter("endDate") + " 23:59:59"));
         voucher.setActive("on".equals(request.getParameter("isActive")));

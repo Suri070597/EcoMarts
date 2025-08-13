@@ -47,9 +47,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="discountAmount">Số tiền giảm giá</label>
+                    <label class="form-label" for="discountAmount">Số % giảm giá</label>
                     <input type="number" min='0' class="form-control" id="discountAmount" name="discountAmount" value="${param.discountAmount}" required>
-                    <div class="invalid-feedback">Vui lòng nhập số tiền giảm giá</div>
+                    <div class="invalid-feedback">Vui lòng nhập số % giảm giá</div>
                 </div>
 
                 <div class="mb-3">
@@ -62,12 +62,6 @@
                     <label class="form-label" for="maxUsage">Số lần sử dụng tối đa</label>
                     <input type="number" min='0' class="form-control" id="maxUsage" name="maxUsage" value="${param.maxUsage}" required>
                     <div class="invalid-feedback">Vui lòng nhập số lần sử dụng tối đa</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="usageCount">Số lần đã sử dụng</label>
-                    <input type="number" min='0' class="form-control" id="usageCount" name="usageCount" value="${param.usageCount}" required>
-                    <div class="invalid-feedback">Vui lòng nhập số lần đã sử dụng</div>
                 </div>
 
                 <div class="mb-3">
