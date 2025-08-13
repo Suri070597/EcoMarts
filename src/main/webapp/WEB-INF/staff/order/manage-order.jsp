@@ -14,6 +14,15 @@
               href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
+        <style>
+            .table td.action {
+                text-align: left;
+            }
+            
+            .table td.price {
+                text-align: right;
+            }
+        </style>
     </head>
     <body>
         <div class="container-fluid">
@@ -94,11 +103,11 @@
                                                 ${o.orderStatus}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="price">
                                             <fmt:formatNumber value="${o.grandTotal}" type="number" groupingUsed="true" /> đ
                                         </td>
 
-                                        <td>
+                                        <td class="action">
                                             <a href="${pageContext.request.contextPath}/staff/order/detail?id=${o.orderID}"
                                                class="btn btn-sm btn-info" title="Xem chi tiết">
                                                 <i class="fas fa-eye"></i>
