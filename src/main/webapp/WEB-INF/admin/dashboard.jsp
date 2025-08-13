@@ -36,7 +36,7 @@
                         </div>
                         <div class="stat-title">Tổng Doanh Thu</div>
                         <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.total}" type="number" maxFractionDigits="0" />
+                            <fmt:formatNumber value="${revenueSummary.total}" type="number" maxFractionDigits="0" /> ₫
                         </div>
                     </div>
                     <div class="stat-card">
@@ -70,7 +70,7 @@
                         </div>
                         <div class="stat-title">Tạm tính (trước thuế)</div>
                         <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.subtotal}" type="number" maxFractionDigits="0" />
+                            <fmt:formatNumber value="${revenueSummary.subtotal}" type="number" maxFractionDigits="0" /> ₫
                         </div>
                     </div>
                     <div class="stat-card">
@@ -79,7 +79,7 @@
                         </div>
                         <div class="stat-title">Thuế VAT (8%)</div>
                         <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.totalTax}" type="number" maxFractionDigits="0" />
+                            <fmt:formatNumber value="${revenueSummary.totalTax}" type="number" maxFractionDigits="0" /> ₫
                         </div>
                     </div>
                     <div class="stat-card">
@@ -88,7 +88,7 @@
                         </div>
                         <div class="stat-title">Giảm giá Voucher</div>
                         <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.totalDiscount}" type="number" maxFractionDigits="0" />
+                            <fmt:formatNumber value="${revenueSummary.totalDiscount}" type="number" maxFractionDigits="0" /> ₫
                         </div>
                     </div>
                     <div class="stat-card">
@@ -97,7 +97,7 @@
                         </div>
                         <div class="stat-title">Doanh thu tháng này</div>
                         <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.monthly}" type="number" maxFractionDigits="0" />
+                            <fmt:formatNumber value="${revenueSummary.monthly}" type="number" maxFractionDigits="0" /> ₫
                         </div>
                     </div>
                 </div>
@@ -129,8 +129,8 @@
                                                 <td>
                                                     <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy" />
                                                 </td>
-                                                <td>
-                                                    <fmt:formatNumber value="${order.grandTotal}" type="number" maxFractionDigits="0" />
+                                                <td class="price">
+                                                    <fmt:formatNumber value="${order.grandTotal}" type="number" maxFractionDigits="0" /> ₫
                                                 </td>
                                                 <td>
                                                     <c:choose>
