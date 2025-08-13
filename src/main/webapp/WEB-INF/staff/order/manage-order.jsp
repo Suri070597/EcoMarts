@@ -100,9 +100,17 @@
 
                                         <td>
                                             <a href="${pageContext.request.contextPath}/staff/order/detail?id=${o.orderID}"
-                                               class="btn btn-sm btn-info" title="View Details">
+                                               class="btn btn-sm btn-info" title="Xem chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+                                            <c:if test="${o.orderStatus ne 'Đã giao' and o.orderStatus ne 'Đã hủy'}">
+                                                <form action="${pageContext.request.contextPath}/staff/order/nextStatus" method="post" style="display:inline-block;margin-left:6px;">
+                                                    <input type="hidden" name="orderId" value="${o.orderID}" />
+                                                    <button type="submit" class="btn btn-sm btn-warning" title="Chuyển trạng thái tiếp theo">
+                                                        <i class="fas fa-forward"></i>
+                                                    </button>
+                                                </form>
+                                            </c:if>
                                         </td>
                                     </tr>
                                 </c:forEach>
