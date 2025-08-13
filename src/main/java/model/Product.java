@@ -32,6 +32,12 @@ public class Product {
     private int unitPerBox;
     private String boxUnitName;
     private String itemUnitName;
+    private int unitsPerPack; // Số lượng đơn vị nhỏ trong 1 đơn vị trung gian
+
+    // Giá tách bạch theo đơn vị
+    private double boxPrice; // Giá 1 thùng
+    private double unitPrice; // Giá 1 đơn vị nhỏ nhất (lon/gói)
+    private double packPrice; // Giá 1 lốc (nếu có)
 
     public InventoryTransaction getInventory() {
         return inventory;
@@ -227,6 +233,38 @@ public class Product {
 
     public void setItemUnitName(String itemUnitName) {
         this.itemUnitName = itemUnitName;
+    }
+
+    public int getUnitsPerPack() {
+        return unitsPerPack;
+    }
+
+    public void setUnitsPerPack(int unitsPerPack) {
+        this.unitsPerPack = unitsPerPack;
+    }
+
+    public double getBoxPrice() {
+        return boxPrice;
+    }
+
+    public void setBoxPrice(double boxPrice) {
+        this.boxPrice = boxPrice;
+    }
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public double getPackPrice() {
+        return packPrice;
+    }
+
+    public void setPackPrice(double packPrice) {
+        this.packPrice = packPrice;
     }
 
     /**

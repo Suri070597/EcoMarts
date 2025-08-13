@@ -89,8 +89,16 @@
                                     <td><%= parentName%></td>
                                     <td><%= pro.getProductName()%></td>
                                     <td>
-                                        <% double price = pro.getPrice();
-                                            out.print(new java.text.DecimalFormat("#,###").format(price));
+                                         <% double displayBoxPrice = 0;
+                                            try { displayBoxPrice = pro.getBoxPrice(); } catch (Exception ignore) {}
+                                            if (displayBoxPrice <= 0) {
+                                                if (pro.getUnitPerBox() > 0) {
+                                                    displayBoxPrice = pro.getPrice() * pro.getUnitPerBox();
+                                                } else {
+                                                    displayBoxPrice = pro.getPrice();
+                                                }
+                                            }
+                                            out.print(new java.text.DecimalFormat("#,###").format(displayBoxPrice));
                                         %> đ
                                     </td>
                                     <td>
@@ -137,10 +145,15 @@
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
-                                            <a  href="${pageContext.request.contextPath}/admin/product?action=delete&id=<%= pro.getProductID()%>" class="btn btn-sm btn-danger">
+                                                                                         <!-- Nút chuyển đổi đơn vị -->
+                                              <button type="button" class="btn btn-sm btn-warning" 
+                                                      onclick="console.log('Button clicked for product:', <%= pro.getProductID()%>); showUnitConversion(<%= pro.getProductID()%>, '<%= pro.getProductName()%>', <%= pro.getUnitPerBox()%>, <%= pro.getUnitsPerPack()%>, '<%= pro.getBoxUnitName()%>', '<%= pro.getItemUnitName()%>', <%= pro.getStockQuantity()%>, <%= pro.getBoxPrice() > 0 ? pro.getBoxPrice() : (pro.getUnitPerBox() > 0 ? pro.getPrice() * pro.getUnitPerBox() : pro.getPrice())%>)">
+                                                 <i class="fas fa-exchange-alt"></i> Chuyển đổi
+                                             </button>
+
+                                            <a href="${pageContext.request.contextPath}/admin/product?action=delete&id=<%= pro.getProductID()%>" class="btn btn-sm btn-danger">
                                                 <i class="fas fa-trash"></i>
                                             </a>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -156,19 +169,263 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Modal chuyển đổi đơn vị -->
+        <div class="modal fade" id="unitConversionModal" tabindex="-1" aria-labelledby="unitConversionModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="unitConversionModalLabel">Chuyển đổi đơn vị sản phẩm</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Thông tin hiện tại</h6>
+                                <p><strong>Tên sản phẩm:</strong> <span id="currentProductName"></span></p>
+                                <p><strong>Số lượng thùng:</strong> <span id="currentStockQuantity"></span></p>
+                                <p><strong>Giá 1 thùng:</strong> <span id="currentBoxPrice"></span> VNĐ</p>
+                                <p><strong>Giá 1 <span id="currentItemUnitName"></span>:</strong> <span id="currentUnitPrice"></span> VNĐ</p>
+                                <p><strong>1 thùng = </strong><span id="currentUnitPerBox"></span> <span id="currentItemUnitName"></span></p>
+                                <div id="currentUnitsPerPackDiv" style="display: none;">
+                                    <p><strong>1 thùng = </strong><span id="currentUnitsPerPack"></span> lốc</p>
+                                    <p><strong>1 lốc = </strong><span id="currentLonToLoc"></span> <span id="currentItemUnitName"></span></p>
+                                    <p><em>(Tự động tính toán: 1 thùng = <span id="currentUnitPerBox"></span> <span id="currentItemUnitName"></span> ÷ <span id="currentLonToLoc"></span> <span id="currentItemUnitName"></span>/lốc = <span id="currentUnitsPerPack"></span> lốc)</em></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Thiết lập chuyển đổi đơn vị</h6>
+                                
+                                <!-- Chuyển đổi 1 thùng = X lon -->
+                                <div class="mb-3">
+                                    <label class="form-label">1 thùng = ? lon:</label>
+                                    <input type="number" min="1" max="1000" class="form-control" id="thungToLon" placeholder="Ví dụ: 24" />
+                                    <div class="form-text">Số lượng lon trong 1 thùng</div>
+                                </div>
+                                
+                                <!-- Chuyển đổi Y lon = 1 lốc -->
+                                <div class="mb-3">
+                                    <label class="form-label">? lon = 1 lốc:</label>
+                                    <input type="number" min="1" max="1000" class="form-control" id="lonToLoc" placeholder="Ví dụ: 6" />
+                                    <div class="form-text">Số lượng lon cần để tạo 1 lốc (để trống nếu không cần)</div>
+                                </div>
+
+                                
+                                <button type="button" class="btn btn-primary" onclick="updateUnitConversion()">
+                                    <i class="fas fa-save"></i> Cập nhật chuyển đổi
+                                </button>
+                                
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
+            console.log('Script loaded');
+            
+            // Biến lưu thông tin sản phẩm hiện tại
+            let currentProductInfo = {};
+            
+            // Hiển thị modal chuyển đổi đơn vị
+            function showUnitConversion(productId, productName, unitPerBox, unitsPerPack, boxUnitName, itemUnitName, stockQuantity, boxPrice) {
+                console.log('showUnitConversion called with:', {productId, productName, unitPerBox, unitsPerPack, boxUnitName, itemUnitName, stockQuantity, boxPrice});
+                
+                // Lưu thông tin sản phẩm
+                currentProductInfo = {
+                    productId: productId,
+                    productName: productName,
+                    unitPerBox: unitPerBox,
+                    unitsPerPack: unitsPerPack,
+                    boxUnitName: boxUnitName,
+                    itemUnitName: itemUnitName,
+                    stockQuantity: stockQuantity,
+                    boxPrice: boxPrice, // Đây là giá 1 thùng
+                    thungToLon: unitPerBox, // Mặc định từ database
+                    lonToLoc: unitsPerPack > 1 ? unitsPerPack : 0 // Mặc định từ database
+                };
+                
+                // Cập nhật thông tin hiển thị
+                try {
+                    document.getElementById('currentProductName').textContent = productName;
+                    document.getElementById('currentStockQuantity').textContent = stockQuantity;
+                    document.getElementById('currentBoxPrice').textContent = boxPrice.toLocaleString();
+                    if (unitPerBox > 0) {
+                        document.getElementById('currentUnitPerBox').textContent = unitPerBox;
+                    } else {
+                        document.getElementById('currentUnitPerBox').textContent = 'chưa thiết lập';
+                    }
+                    document.getElementById('currentUnitsPerPack').textContent = unitsPerPack;
+                    document.getElementById('currentItemUnitName').textContent = itemUnitName;
+                    
+                    // Tính toán và hiển thị giá đơn vị nhỏ nhất
+                    if (unitPerBox > 0) {
+                        const unitPrice = Math.round(boxPrice / unitPerBox);
+                        document.getElementById('currentUnitPrice').textContent = unitPrice.toLocaleString();
+                    } else {
+                        document.getElementById('currentUnitPrice').textContent = boxPrice.toLocaleString();
+                    }
+                    
+                    // Tính toán và hiển thị thông tin về lốc
+                    if (unitPerBox === 0) {
+                        document.getElementById('currentUnitsPerPackDiv').style.display = 'none';
+                    } else if (unitsPerPack > 1 && unitPerBox > 0) {
+                        // Tính số lon trong 1 lốc (ngược lại từ unitsPerPack)
+                        const lonToLoc = Math.floor(unitPerBox / unitsPerPack);
+                        document.getElementById('currentLonToLoc').textContent = lonToLoc;
+                        document.getElementById('currentUnitsPerPackDiv').style.display = 'block';
+                    } else if (unitsPerPack > 0 && unitPerBox > 0) {
+                        // Trường hợp unitsPerPack = 1 (1 thùng = 1 lốc)
+                        const lonToLoc = unitPerBox;
+                        document.getElementById('currentLonToLoc').textContent = lonToLoc;
+                        document.getElementById('currentUnitsPerPackDiv').style.display = 'block';
+                    } else {
+                        document.getElementById('currentUnitsPerPackDiv').style.display = 'none';
+                    }
+                    
+                    // Cập nhật giá trị mặc định cho form chuyển đổi
+                    document.getElementById('thungToLon').value = unitPerBox;
+                    
+                    // Tính toán giá trị mặc định cho lonToLoc
+                    let defaultLonToLoc = '';
+                    if (unitsPerPack > 0 && unitPerBox > 0) {
+                        defaultLonToLoc = Math.floor(unitPerBox / unitsPerPack);
+                    }
+                    document.getElementById('lonToLoc').value = defaultLonToLoc;
+                    
+                } catch (error) {
+                    console.error('Error updating modal content:', error);
+                }
+                
+                // Hiển thị modal
+                try {
+                    const modalElement = document.getElementById('unitConversionModal');
+                    if (modalElement) {
+                        const modal = new bootstrap.Modal(modalElement);
+                        modal.show();
+                    } else {
+                        console.error('Modal element not found');
+                    }
+                } catch (error) {
+                    console.error('Error showing modal:', error);
+                }
+            }
+            
 
-            // Add search functionality for client-side filtering
-            document.querySelector('.search-box input').addEventListener('input', function (e) {
-                const searchText = e.target.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
 
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchText) ? '' : 'none';
+            // Function to update unit conversion settings
+            function updateUnitConversion() {
+                console.log('updateUnitConversion called');
+                
+                const thungToLon = parseInt(document.getElementById('thungToLon').value) || 0;
+                const lonToLoc = parseInt(document.getElementById('lonToLoc').value) || 0;
+                
+                console.log('Values:', {thungToLon, lonToLoc});
+
+                if (thungToLon <= 0) {
+                    alert('Vui lòng nhập số lượng lon trong 1 thùng hợp lệ.');
+                    return;
+                }
+
+                // Kiểm tra logic: nếu có lonToLoc thì phải nhỏ hơn hoặc bằng thungToLon
+                if (lonToLoc > 0 && lonToLoc > thungToLon) {
+                    alert('Số lượng lon trong 1 lốc không được lớn hơn số lượng lon trong 1 thùng.');
+                    return;
+                }
+                
+                // Kiểm tra xem có chia hết không
+                if (lonToLoc > 0 && thungToLon % lonToLoc !== 0) {
+                    alert('Số lượng lon trong 1 thùng (' + thungToLon + ') phải chia hết cho số lon trong 1 lốc (' + lonToLoc + '). Hiện tại sẽ bị dư ' + (thungToLon % lonToLoc) + ' lon.');
+                    return;
+                }
+
+                // Prepare data for AJAX request
+                const formData = new FormData();
+                formData.append('action', 'updateUnitConversion');
+                formData.append('productId', currentProductInfo.productId);
+                formData.append('thungToLon', thungToLon);
+                formData.append('lonToLoc', lonToLoc);
+
+                // Make AJAX request to save conversion settings
+                fetch('${pageContext.request.contextPath}/admin/product', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the currentProductInfo object with the new conversion rates
+                        currentProductInfo.thungToLon = thungToLon;
+                        currentProductInfo.lonToLoc = lonToLoc;
+                        
+                        // Tính toán số lượng lốc trong 1 thùng để hiển thị
+                        let soLocTrongThung = 0;
+                        if (lonToLoc > 0) {
+                            soLocTrongThung = thungToLon / lonToLoc; // Đã kiểm tra chia hết ở server
+                        }
+                        currentProductInfo.unitsPerPack = soLocTrongThung;
+                        currentProductInfo.unitPerBox = thungToLon; // Cập nhật unitPerBox
+
+                        // Cập nhật hiển thị thông tin hiện tại
+                        try {
+                            document.getElementById('currentUnitPerBox').textContent = thungToLon;
+                            
+                            // Cập nhật giá đơn vị
+                            if (thungToLon > 0) {
+                                const newUnitPrice = Math.round(currentProductInfo.boxPrice / thungToLon);
+                                document.getElementById('currentUnitPrice').textContent = newUnitPrice.toLocaleString();
+                            }
+                            // Nếu server tự mở 1 thùng lần đầu, cập nhật tồn kho hiển thị
+                            if (typeof data.autoOpenedBoxes === 'number' && data.autoOpenedBoxes > 0) {
+                                currentProductInfo.stockQuantity = data.newStockQuantity ?? (currentProductInfo.stockQuantity - data.autoOpenedBoxes);
+                                document.getElementById('currentStockQuantity').textContent = currentProductInfo.stockQuantity;
+                            }
+                            
+                            if (lonToLoc > 0) {
+                                document.getElementById('currentUnitsPerPack').textContent = soLocTrongThung;
+                                document.getElementById('currentLonToLoc').textContent = lonToLoc;
+                                document.getElementById('currentUnitsPerPackDiv').style.display = 'block';
+                            } else {
+                                document.getElementById('currentUnitsPerPack').textContent = '0';
+                                document.getElementById('currentLonToLoc').textContent = '0';
+                                document.getElementById('currentUnitsPerPackDiv').style.display = 'none';
+                            }
+                            
+                            // Cập nhật form thiết lập chuyển đổi đơn vị
+                            document.getElementById('thungToLon').value = thungToLon;
+                            document.getElementById('lonToLoc').value = lonToLoc > 0 ? lonToLoc : '';
+                            document.getElementById('openBoxes').value = 0;
+                            
+                            // Thêm hiệu ứng visual để người dùng biết form đã được cập nhật
+                            const thungToLonInput = document.getElementById('thungToLon');
+                            const lonToLocInput = document.getElementById('lonToLoc');
+                            thungToLonInput.style.backgroundColor = '#e8f5e8';
+                            lonToLocInput.style.backgroundColor = '#e8f5e8';
+                            setTimeout(() => {
+                                thungToLonInput.style.backgroundColor = '';
+                                lonToLocInput.style.backgroundColor = '';
+                            }, 1000);
+                            
+                        } catch (error) {
+                            console.error('Error updating display:', error);
+                        }
+
+                        alert('Đã cập nhật chuyển đổi đơn vị thành công!\n\nThông tin hiện tại và form thiết lập đã được cập nhật.');
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Đã xảy ra lỗi khi cập nhật chuyển đổi đơn vị');
                 });
-            });
+            }
         </script>
     </body>
 </html>

@@ -74,63 +74,24 @@
                             <label class="form-label">Số lượng tồn kho (kg)</label>
                             <input type="number" min="1" step="1" class="form-control" name="fruitQuantity" id="fruitQuantity" placeholder="Nhập số lượng theo kg (chỉ số nguyên, ví dụ: 10, 20, 50...)" />
                         </div>
+                        
+                        <!-- Phần sản phẩm đóng gói -->
                         <div class="mb-3 box-related">
-                            <label class="form-label">Giá 1 thùng/hộp/kiện</label>
-                            <input type="number" min="0" step="1" class="form-control" name="boxPrice" id="boxPrice" />
+                            <label class="form-label">Giá 1 thùng</label>
+                            <input type="number" min="0" step="1" class="form-control" name="boxPrice" required />
+                            <div class="form-text">Giá lốc và giá lon sẽ được thiết lập trong nút Chuyển đổi sau khi tạo sản phẩm.</div>
                         </div>
+                        
                         <div class="mb-3 box-related">
-                            <label class="form-label">Số lượng 1 thùng/hộp/kiện</label>
-                            <input type="number" min="0" class="form-control" name="boxQuantity" id="boxQuantity" oninput="updateBoxPreview()" />
-                            <div id="box-preview" class="form-text text-primary"></div>
-                        </div>
-                        <div class="mb-3 box-related">
-                            <label class="form-label">Số lượng sản phẩm trong 1 thùng/hộp/kiện</label>
-                            <input type="number" min="1" class="form-control" name="unitPerBox" id="unitPerBox" oninput="updateBoxPreview()" />
-                        </div>
-                        <div class="mb-3 box-related">
-                            <label class="form-label">Đơn vị 1 thùng/hộp/kiện</label>
-                            <select class="form-select" name="boxUnitName" id="boxUnitName">
-                                <option value="">-- Chọn đơn vị thùng/hộp/kiện --</option>
-                                <option value="thùng">thùng</option>
-                                <option value="hộp">hộp</option>
-                                <option value="kiện">kiện</option>
-                                <option value="lốc">lốc</option>
-                            </select>
-                        </div>
-                        <div class="mb-3" id="item-unit-group">
-                            <label class="form-label">Đơn vị nhỏ nhất</label>
-                            <select class="form-select" name="itemUnitName" id="itemUnitName" required>
-                                <option value="">-- Chọn đơn vị nhỏ nhất --</option>
-                                <!-- Đơn vị đóng gói -->
-                                <option value="gói">gói</option>
-                                <option value="túi">túi</option>
-                                <option value="lốc">lốc</option>
-                                <option value="cái">cái</option>
-                                <!-- Đơn vị nước -->
-                                <option value="lon">lon</option>
-                                <option value="chai">chai</option>
-                                <option value="hộp">hộp</option>
-                                <!-- Đơn vị bánh kẹo -->
-                                <option value="thanh">thanh</option>
-                                <option value="viên">viên</option>
-                                <option value="miếng">miếng</option>
-                                <!-- Đơn vị mẹ và bé -->
-                                <option value="tấm">tấm</option>
-                                <option value="bộ">bộ</option>
-                                <option value="cặp">cặp</option>
-                                <!-- Đơn vị mỹ phẩm -->
-                                <option value="tuýp">tuýp</option>
-                                <option value="lọ">lọ</option>
-                                <option value="bình">bình</option>
-                                <option value="thỏi">thỏi</option>
-                            </select>
+                            <label class="form-label">Số lượng thùng tồn kho</label>
+                            <input type="number" min="0" step="1" class="form-control" name="stockQuantity" required id="stockQuantity" />
+                            <div class="form-text text-muted">Số lượng thùng có sẵn trong kho</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Mô tả sản phẩm</label>
                             <textarea class="form-control" name="pDescription" rows="4" required></textarea>
                         </div>
-
 
                         <div class="mb-3">
                             <label class="form-label">Hình ảnh sản phẩm</label>
@@ -157,8 +118,6 @@
                             </select>
                         </div>
 
-
-                        
                         <div class="mb-3">
                             <label class="form-label">Nhà sản xuất</label>
                             <select name="supplierID" class="form-select" required>
@@ -194,23 +153,19 @@
                     }
                     return false;
                 }
+                
                 document.addEventListener('DOMContentLoaded', function() {
                     var cateSelect = document.querySelector('select[name="categoryID"]');
                     var boxFields = document.querySelectorAll('.box-related');
                     var fruitPriceGroup = document.getElementById('fruit-price-group');
                     var fruitQtyGroup = document.getElementById('fruit-qty-group');
-                    var itemUnitGroup = document.getElementById('item-unit-group');
-                    var itemUnitSelect = document.getElementById('itemUnitName');
                     var fruitPriceInput = document.getElementById('fruitPrice');
                     var fruitQtyInput = document.getElementById('fruitQuantity');
-                    var boxPriceInput = document.getElementById('boxPrice');
-                    var boxQtyInput = document.getElementById('boxQuantity');
-                    var unitPerBoxInput = document.getElementById('unitPerBox');
-                    var boxUnitNameInput = document.getElementById('boxUnitName');
                     var fruitExpiryGroup = document.getElementById('fruit-expiry-group');
                     var expirySelectGroup = document.getElementById('expiry-select-group');
                     var expirySelect = document.getElementById('expirySelect');
                     var fruitExpiryDaysInput = document.getElementById('fruitExpiryDays');
+                    
                     function updateForm() {
                         var selected = cateSelect.value;
                         if (isFruitCategory(selected)) {
@@ -234,8 +189,6 @@
                             expirySelectGroup.style.display = 'none';
                             expirySelect.required = false;
                             expirySelect.disabled = true;
-                            // Đơn vị nhỏ nhất chỉ là kg
-                            itemUnitSelect.innerHTML = '<option value="kg">kg</option>';
                             var label = document.getElementById('importOrManufactureLabel');
                             label.textContent = 'Import Date';
                         } else {
@@ -259,30 +212,6 @@
                             expirySelectGroup.style.display = '';
                             expirySelect.required = true;
                             expirySelect.disabled = false;
-                            // Khôi phục các đơn vị nhỏ nhất khác
-                            itemUnitSelect.innerHTML = '<option value="">-- Chọn đơn vị nhỏ nhất --</option>' +
-                                '<!-- Đơn vị đóng gói -->' +
-                                '<option value="gói">gói</option>' +
-                                '<option value="túi">túi</option>' +
-                                '<option value="lốc">lốc</option>' +
-                                '<option value="cái">cái</option>' +
-                                '<!-- Đơn vị nước -->' +
-                                '<option value="lon">lon</option>' +
-                                '<option value="chai">chai</option>' +
-                                '<option value="hộp">hộp</option>' +
-                                '<!-- Đơn vị bánh kẹo -->' +
-                                '<option value="thanh">thanh</option>' +
-                                '<option value="viên">viên</option>' +
-                                '<option value="miếng">miếng</option>' +
-                                '<!-- Đơn vị mẹ và bé -->' +
-                                '<option value="tấm">tấm</option>' +
-                                '<option value="bộ">bộ</option>' +
-                                '<option value="cặp">cặp</option>' +
-                                '<!-- Đơn vị mỹ phẩm -->' +
-                                '<option value="tuýp">tuýp</option>' +
-                                '<option value="lọ">lọ</option>' +
-                                '<option value="bình">bình</option>' +
-                                '<option value="thỏi">thỏi</option>';
                             var label = document.getElementById('importOrManufactureLabel');
                             label.textContent = 'Ngày Sản Xuất';
                         }
@@ -290,19 +219,6 @@
                     cateSelect.addEventListener('change', updateForm);
                     updateForm();
                 });
-            </script>
-            <script>
-                function updateBoxPreview() {
-                    var boxQty = parseInt(document.getElementById('boxQuantity').value) || 0;
-                    var unitPerBox = parseInt(document.getElementById('unitPerBox').value) || 0;
-                    var itemUnit = document.getElementById('itemUnitName') ? document.getElementById('itemUnitName').value : '';
-                    if (boxQty > 0 && unitPerBox > 0) {
-                        var total = boxQty * unitPerBox;
-                        document.getElementById('box-preview').textContent = boxQty + ' x ' + unitPerBox + ' = ' + total + (itemUnit ? ' ' + itemUnit : '');
-                    } else {
-                        document.getElementById('box-preview').textContent = '';
-                    }
-                }
             </script>
     </body>
 </html>

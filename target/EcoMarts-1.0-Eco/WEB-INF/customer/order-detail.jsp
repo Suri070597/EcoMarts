@@ -129,7 +129,7 @@
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
-                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/customer/reorder">Đơn hàng của tôi</a></li>
+                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/reorder">Đơn hàng của tôi</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Chi tiết đơn hàng #${order.orderID}</li>
                             </ol>
                         </nav>
@@ -258,20 +258,29 @@
                             <span>Tổng tiền sản phẩm:</span>
                             <span class="text-end"><fmt:formatNumber value="${total}" type="number"/> đ</span>
                         </div>
+
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>Phí vận chuyển:</span>
                             <span class="text-success">Miễn phí</span>
                         </div>
-                        <c:if test="${not empty discount}">
+
+                        <c:if test="${not empty voucherUsage}">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>Giảm giá:</span>
+                                <span>Mã giảm giá (${voucherUsage.voucher.voucherCode}):</span>
                                 <span class="text-danger">-<fmt:formatNumber value="${discount}" type="number"/> đ</span>
                             </div>
                         </c:if>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Thuế VAT (8%):</span>
+                            <span><fmt:formatNumber value="${vat}" type="number"/> đ</span>
+                        </div>
+
                         <hr>
+
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="fw-bold fs-5">Tổng thanh toán:</span>
-                            <span class="fw-bold fs-5 text-success"><fmt:formatNumber value="${order.totalAmount}" type="number"/> đ</span>
+                            <span class="fw-bold fs-5 text-success"><fmt:formatNumber value="${finalTotal}" type="number"/> đ</span>
                         </div>
                     </div>
                 </div>
@@ -325,7 +334,7 @@
                                 // Submit form for order cancellation
                                 const form = document.createElement('form');
                                 form.method = 'post';
-                                form.action = '${pageContext.request.contextPath}/customer/orderDetail';
+                                form.action = '${pageContext.request.contextPath}/orderDetail';
 
                                 const orderId = document.createElement('input');
                                 orderId.type = 'hidden';
@@ -353,7 +362,7 @@
                         // Submit form for reordering
                         const form = document.createElement('form');
                         form.method = 'post';
-                        form.action = '${pageContext.request.contextPath}/customer/orderDetail';
+                        form.action = '${pageContext.request.contextPath}/orderDetail';
 
                         const orderId = document.createElement('input');
                         orderId.type = 'hidden';

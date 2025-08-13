@@ -60,6 +60,7 @@ model\Voucher.class
 controller\staff\StaffServlet.class
 controller\register\LoginServlet.class
 controller\ProductServlet.class
+dao\VoucherUsageDAO.class
 controller\ReorderServlet.class
 controller\viewstaff\verifypasswordServlet.class
 controller\forgetpassword\ForgetPasswordServlet.class
