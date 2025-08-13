@@ -38,6 +38,16 @@
                 border: none;
             }
 
+            .order-card p {
+                margin-bottom: 10px;
+                line-height: 1.6;
+            }
+            
+            .fw-bold {
+                margin-bottom: 10px;
+                line-height: 1.6;
+            }
+
             .order-card-header {
                 background: linear-gradient(to right, #f5f5dc, #eae2d0);
                 border-bottom: 1px solid #e1d9c4;
@@ -82,6 +92,7 @@
                 object-fit: contain;
                 border-radius: 6px;
                 border: 1px solid #eaeaea;
+                text-align: center;
             }
 
             .table-products th {

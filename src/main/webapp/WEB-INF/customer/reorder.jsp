@@ -68,6 +68,10 @@
                 color: #333;
                 vertical-align: middle;
             }
+            
+            .order-table td.price {
+                text-align: right;
+            }
 
             .order-table tr:hover {
                 background-color: #f9f9f9;
@@ -185,7 +189,7 @@
                                         <tr>
                                             <td>#${order.orderID}</td>
                                             <td><fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" /></td>
-                                            <td><fmt:formatNumber value="${order.grandTotal}" type="number"/> đ<br/>
+                                            <td class="price"><fmt:formatNumber value="${order.grandTotal}" type="number"/> đ<br/>
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${order.orderStatus == 'Đang xử lý'}">
