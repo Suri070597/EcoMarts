@@ -23,29 +23,42 @@
 
                 <!-- Thông tin đơn hàng -->
                 <div class="order-info">
-                    <p><strong>Mã đơn hàng:</strong> ${order.orderID}</p>
-                    <p><strong>Khách hàng:</strong> ${order.accountName}</p>
-                    <p><strong>Số điện thoại:</strong> ${order.shippingPhone}</p>
-                    <p><strong>Địa chỉ giao hàng:</strong> ${order.shippingAddress}</p>
-                    <p><strong>Ngày đặt hàng:</strong> ${order.orderDate}</p>
-                    <form action="${pageContext.request.contextPath}/staff/order/updateStatus" method="post" style="margin-top: 10px;">
-                        <input type="hidden" name="orderId" value="${order.orderID}" />
-                        <label for="status"><strong>Thay đổi trạng thái đơn hàng:</strong></label>
-                        <select name="status" id="status" required>
-                            <option value="Đang xử lý" ${order.orderStatus == 'Đang xử lý' ? 'selected' : ''}>Đang xử lý</option>
-                            <option value="Đang giao hàng" ${order.orderStatus == 'Đang giao hàng' ? 'selected' : ''}>Đang giao hàng</option>
-                            <option value="Đã giao" ${order.orderStatus == 'Đã giao' ? 'selected' : ''}>Đã giao</option>
-                            <option value="Đã hủy" ${order.orderStatus == 'Đã hủy' ? 'selected' : ''}>Đã hủy</option>
-                        </select>
-                        <button type="submit" style="margin-left: 10px;">Cập nhật trạng thái</button>
-                    </form>
-
-                    <c:if test="${not empty message}">
-                        <p style="color: green; font-weight: bold;">${message}</p>
-                    </c:if>
-
-                    <p><strong>Phương thức thanh toán:</strong> ${order.paymentMethod}</p>
-                    <p><strong>Trạng thái thanh toán:</strong> ${order.paymentStatus}</p>
+                    <table class="order-info-table">
+                        <tbody>
+                            <tr>
+                                <th>Mã đơn hàng</th>
+                                <td>${order.orderID}</td>
+                            </tr>
+                            <tr>
+                                <th>Khách hàng</th>
+                                <td>${order.accountName}</td>
+                            </tr>
+                            <tr>
+                                <th>Số điện thoại</th>
+                                <td>${order.shippingPhone}</td>
+                            </tr>
+                            <tr>
+                                <th>Địa chỉ giao hàng</th>
+                                <td>${order.shippingAddress}</td>
+                            </tr>
+                            <tr>
+                                <th>Ngày đặt hàng</th>
+                                <td>${order.orderDate}</td>
+                            </tr>
+                            <tr>
+                                <th>Trạng thái đơn hàng</th>
+                                <td>${order.orderStatus}</td>
+                            </tr>
+                            <tr>
+                                <th>Phương thức thanh toán</th>
+                                <td>${order.paymentMethod}</td>
+                            </tr>
+                            <tr>
+                                <th>Trạng thái thanh toán</th>
+                                <td>${order.paymentStatus}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <!-- Danh sách sản phẩm -->
@@ -132,6 +145,39 @@
 
         .order-table th {
             background-color: #f1f1f1;
+        }
+
+        .order-info-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+        .order-info-table th,
+        .order-info-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .order-info-table th {
+            width: 260px;
+            background-color: #f1f1f1;
+            white-space: nowrap;
+        }
+
+        .status-form {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .status-message {
+            color: green;
+            font-weight: bold;
+            margin-left: 12px;
         }
 
         .order-total {
