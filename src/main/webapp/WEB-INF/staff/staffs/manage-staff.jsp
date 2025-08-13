@@ -1,126 +1,131 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<html>
+<%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%
+    request.setAttribute("activeMenu", "profile");
+    String flash = (String) session.getAttribute("flashMessage");
+    if (flash != null) {
+        request.setAttribute("message", flash);
+        session.removeAttribute("flashMessage");
+    }
+%>
+<!DOCTYPE html>
+<html lang="vi">
     <head>
-        <title>Thông tin cá nhân</title>
-        <link rel="shortcut icon" href="assets/img/eco.png" type="image/x-icon">
+        <meta charset="UTF-8">
+        <title>Thông tin nhân viên</title>
+        <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
         <style>
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(to right, #fff6ec, #fff);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                margin: 0;
+            .card-beige{
+                border-radius:15px
             }
-            .container {
-                background: #fff;
-                padding: 32px 38px;
-                border-radius: 15px;
-                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
-                width: 100%;
-                max-width: 480px;
+            .btn-beige{
+                background:#dbc09a;
+                color:#111;
+                border:none
             }
-            h2 {
-                text-align: center;
-                color: #111111;
-                margin-bottom: 26px;
-                letter-spacing: 0.5px;
+            .btn-beige:hover{
+                background:#bfa270;
+                color:#111
             }
-            label {
-                display: block;
-                margin-bottom: 7px;
-                color: #333;
-                font-weight: 500;
-                letter-spacing: 0.2px;
+            .btn-outline-beige{
+                border:1px solid #dbc09a;
+                color:#111;
+                background:#fff
             }
-            input[type="text"], select {
-                width: 100%;
-                padding: 11px 12px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                margin-bottom: 17px;
-                font-size: 16px;
-                background: #fff;
-                transition: border 0.3s;
+            .btn-outline-beige:hover{
+                background:#f4e6d0;
+                color:#111
             }
-            input[type="text"]:focus, select:focus {
-                border-color: #4CAF50;
-                outline: none;
-                background: #fff;
+            .main-content{
+                padding:24px
             }
-            .btn-container {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: 16px;
-                gap: 18px;
+            .card-header{
+                border-bottom:1px solid #eee
             }
-            button, a.button-link {
-                flex: 1;
-                padding: 10px 0;
-                border: none;
-                border-radius: 8px;
-                text-decoration: none;
-                font-size: 16px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: background 0.3s, color 0.3s;
-                text-align: center;
-                color: #111; /* chữ màu đen */
-                background-color: #dbc09a; /* nền nút màu vàng */
+            .card-body{
+                padding-left:1.25rem;
+                padding-right:1.25rem
             }
-            button:hover, a.button-link:hover {
-                background-color: #bfa270; /* nền nút đậm hơn khi hover */
-                color: #111; /* chữ vẫn màu đen */
+            .row.mb-3,.row.mb-4{
+                margin-bottom:.75rem!important
             }
-            a.button-link {
-                border: 1px solid #dbc09a; /* viền cũng vàng */
-            }
-            .message {
-                text-align: center;
-                margin-top: 20px;
-                color: #4CAF50;
-                font-weight: bold;
-                font-size: 17px;
+            .col-form-label{
+                font-weight:600;
+                color:#5a4634
             }
         </style>
-
     </head>
     <body>
-        <div class="container">
-            <h2>Thông tin nhân viên</h2>
-            <form action="ManageStaffServlet" method="post">
-                <input type="hidden" name="staffId" value="${staff.staffID}" />
+        <div class="container-fluid">
+            <jsp:include page="../components/sidebar.jsp" />
 
-                <label>Họ tên:</label>
-                <input type="text" name="fullName" value="${staff.fullName}" required />
+            <div class="main-content">
+                <div class="card card-beige shadow-sm">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h1 class="card-title mb-0">
+                            <i class="fa-solid fa-id-card me-2"></i> Thông tin nhân viên
+                        </h1>
+                        <div class="d-flex gap-2">
+                            <a href="${pageContext.request.contextPath}/ManageStaffServlet?action=edit" class="btn btn-beige">
+                                <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+                            </a>
+                            <a href="${pageContext.request.contextPath}/staff" class="btn btn-outline-beige">
+                                <i class="fa-solid fa-arrow-left-long me-1"></i> Quay lại
+                            </a>
+                        </div>
+                    </div>
 
-                <label>SĐT:</label>
-                <input type="text" name="phone" pattern="[0-9]{10}" required title="Số điện thoại phải có 10 chữ số" value="${staff.phone}" />
+                    <div class="card-body">
+                        <form>
+                            <input type="hidden" name="staffId" value="${staff.staffID}"/>
 
-                <label>Địa chỉ:</label>
-                <input type="text" name="address" value="${staff.address}" />
+                            <div class="row mb-3 align-items-center">
+                                <label class="col-sm-2 col-form-label">Họ tên:</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" value="${staff.fullName}" readonly>
+                                </div>
+                            </div>
 
-                <label>Giới tính:</label>
-                <select name="gender">
-                    <option value="Nam" ${staff.gender == 'Nam' ? 'selected' : ''}>Nam</option>
-                    <option value="Nữ" ${staff.gender == 'Nữ' ? 'selected' : ''}>Nữ</option>
-                </select>
+                            <div class="row mb-3 align-items-center">
+                                <label class="col-sm-2 col-form-label">SĐT:</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" value="${staff.phone}" readonly>
+                                </div>
+                            </div>
 
-                <label>Email:</label>
-                <input type="text" name="email" value="${staff.email}" disabled />
+                            <div class="row mb-3 align-items-center">
+                                <label class="col-sm-2 col-form-label">Địa chỉ:</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" value="${staff.address}" readonly>
+                                </div>
+                            </div>
 
-                <div class="btn-container">
-                    <button type="submit">Lưu</button>
-                    <a href="staff" class="button-link">Quay lại</a>
+                            <div class="row mb-3 align-items-center">
+                                <label class="col-sm-2 col-form-label">Giới tính:</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" value="${staff.gender}" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4 align-items-center">
+                                <label class="col-sm-2 col-form-label">Email:</label>
+                                <div class="col-sm-10">
+                                    <input type="email" class="form-control" value="${staff.email}" readonly>
+                                </div>
+                            </div>
+                        </form>
+
+                        <c:if test="${not empty message}">
+                            <p class="text-success fw-semibold mt-3">${message}</p>
+                        </c:if>
+                    </div>
                 </div>
-            </form>
-
-            <c:if test="${not empty message}">
-                <p class="message">${message}</p>
-            </c:if>
+            </div>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>
