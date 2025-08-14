@@ -24,17 +24,17 @@ import model.Product;
  *
  * @author LNQB
  */
-@WebServlet(name = "ViewAllProductServlet", urlPatterns = {"/ViewAllProductServlet"})
+@WebServlet(name = "ViewAllProductServlet", urlPatterns = { "/ViewAllProductServlet" })
 public class ViewAllProductServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -53,14 +53,15 @@ public class ViewAllProductServlet extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
+    // + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -81,23 +82,29 @@ public class ViewAllProductServlet extends HttpServlet {
 
             request.setAttribute("productList", productList);
             request.setAttribute("categoryId", categoryId);
-            
+
             // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
             try {
                 FeedBackDAO fbDao = new FeedBackDAO();
                 Map<Integer, Double> avgRatingMap = new HashMap<>();
                 Map<Integer, Integer> reviewCountMap = new HashMap<>();
-                
+                Map<Integer, Double> unitPriceMap = new HashMap<>();
+
                 for (Product p : productList) {
                     int pid = p.getProductID();
                     double avg = fbDao.getAverageRatingByProductId(pid);
                     int count = fbDao.countReviewsByProductId(pid);
                     avgRatingMap.put(pid, avg);
                     reviewCountMap.put(pid, count);
+
+                    // Lấy giá unit (lon) từ Inventory
+                    Double unitPrice = dao.getUnitPrice(pid);
+                    unitPriceMap.put(pid, unitPrice);
                 }
-                
+
                 request.setAttribute("avgRatingMap", avgRatingMap);
                 request.setAttribute("reviewCountMap", reviewCountMap);
+                request.setAttribute("unitPriceMap", unitPriceMap);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -112,10 +119,10 @@ public class ViewAllProductServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
