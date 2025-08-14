@@ -66,7 +66,7 @@ public class LoginServlets extends HttpServlet {
         String error = request.getParameter("error");
 
         if (error != null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login");
             return;
         }
 
@@ -98,10 +98,10 @@ public class LoginServlets extends HttpServlet {
                 }
             } catch (SQLException ex) {
                 ex.printStackTrace();
-                response.sendRedirect("login.jsp");
+                response.sendRedirect("login");
             }
         } else {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login");
         }
     }
 

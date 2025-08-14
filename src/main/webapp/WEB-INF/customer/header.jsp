@@ -182,8 +182,8 @@
         </a>
 
         <!-- Dropdown hồ sơ -->
-        <div class="dropdown">
-            <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <div class="dropdown profile-dropdown">
+            <button class="btn btn-link dropdown-toggle" type="button">
                 Hồ sơ <i class="fas fa-user-circle"></i>
             </button>
             <ul class="dropdown-menu">
