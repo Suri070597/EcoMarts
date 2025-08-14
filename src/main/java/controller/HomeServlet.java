@@ -44,6 +44,8 @@ public class HomeServlet extends HttpServlet {
             FeedBackDAO fbDao = new FeedBackDAO();
             java.util.Map<Integer, Double> avgRatingMap = new java.util.HashMap<>();
             java.util.Map<Integer, Integer> reviewCountMap = new java.util.HashMap<>();
+            java.util.Map<Integer, Double> unitPriceMap = new java.util.HashMap<>();
+
             List<List<Product>> allProductLists = java.util.Arrays.asList(
                     (List<Product>) request.getAttribute("featuredProducts1"),
                     (List<Product>) request.getAttribute("featuredProducts2"),
@@ -52,6 +54,7 @@ public class HomeServlet extends HttpServlet {
                     (List<Product>) request.getAttribute("featuredProducts5"),
                     (List<Product>) request.getAttribute("featuredProducts6"),
                     (List<Product>) request.getAttribute("featuredProducts7"));
+
             for (List<Product> plist : allProductLists) {
                 if (plist != null) {
                     for (Product p : plist) {
@@ -62,11 +65,18 @@ public class HomeServlet extends HttpServlet {
                             avgRatingMap.put(pid, avg);
                             reviewCountMap.put(pid, count);
                         }
+
+                        // Lấy giá unit (lon) từ ProductPackaging
+                        if (!unitPriceMap.containsKey(pid)) {
+                            Double unitPrice = dao.getUnitPrice(pid);
+                            unitPriceMap.put(pid, unitPrice);
+                        }
                     }
                 }
             }
             request.setAttribute("avgRatingMap", avgRatingMap);
             request.setAttribute("reviewCountMap", reviewCountMap);
+            request.setAttribute("unitPriceMap", unitPriceMap);
         } catch (Exception e) {
             e.printStackTrace();
         }

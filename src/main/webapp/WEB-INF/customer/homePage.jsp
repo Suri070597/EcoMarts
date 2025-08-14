@@ -168,14 +168,27 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <div class="product-price">
-    <%
-        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-        symbols.setGroupingSeparator('.');
-        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-        out.print(formatter.format(p.getPrice()));
-    %> đ / <%= p.getUnit() %>
-</div>
+                                <%
+                                    // Lấy giá unit (lon) từ ProductPackaging
+                                    java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
+                                    Double unitPrice = null;
+                                    if (unitPriceMap != null) {
+                                        unitPrice = unitPriceMap.get(p.getProductID());
+                                    }
+                                    
+                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                                    symbols.setGroupingSeparator('.');
+                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                                    
+                                    if (unitPrice != null) {
+                                        // Có giá lon → hiển thị giá lon
+                                        out.print(formatter.format(unitPrice) + " đ / lon");
+                                    } else {
+                                        // Không có giá lon → hiển thị giá thùng
+                                        out.print(formatter.format(p.getPrice()) + " đ / thùng");
+                                    }
+                                %>
+                            </div>
 
                             </div>
                             <div class="button-group">
@@ -260,15 +273,26 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <div class="product-price">
-    <%
-        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-        symbols.setGroupingSeparator('.');
-        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-        out.print(formatter.format(p.getPrice()));
-    %> đ / <%= p.getUnit() %>
-</div>
-
+                                <%
+                                    // Lấy giá unit (lon) từ ProductPackaging
+                                    java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
+                                    Double unitPrice = null;
+                                    if (unitPriceMap != null) {
+                                        unitPrice = unitPriceMap.get(p.getProductID());
+                                    }
+                                    
+                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                                    symbols.setGroupingSeparator('.');
+                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                                    
+                                    if (unitPrice != null) {
+                                        // Có giá lon → hiển thị giá lon
+                                        out.print(formatter.format(unitPrice) + " đ / lon");
+                                    } else {
+                                        // Không có giá lon → hiển thị giá thùng
+                                        out.print(formatter.format(p.getPrice()) + " đ / thùng");
+                                    }
+                                %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -541,15 +565,26 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <div class="product-price">
-    <%
-        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-        symbols.setGroupingSeparator('.');
-        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-        out.print(formatter.format(p.getPrice()));
-    %> đ / <%= p.getUnit() %>
-</div>
-
+                                <%
+                                    // Lấy giá unit (lon) từ ProductPackaging
+                                    java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
+                                    Double unitPrice = null;
+                                    if (unitPriceMap != null) {
+                                        unitPrice = unitPriceMap.get(p.getProductID());
+                                    }
+                                    
+                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                                    symbols.setGroupingSeparator('.');
+                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                                    
+                                    if (unitPrice != null) {
+                                        // Có giá lon → hiển thị giá lon
+                                        out.print(formatter.format(unitPrice) + " đ / lon");
+                                    } else {
+                                        // Không có giá lon → hiển thị giá thùng
+                                        out.print(formatter.format(p.getPrice()) + " đ / thùng");
+                                    }
+                                %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -736,15 +771,26 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <div class="product-price">
-    <%
-        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-        symbols.setGroupingSeparator('.');
-        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-        out.print(formatter.format(p.getPrice()));
-    %> đ / <%= p.getUnit() %>
-</div>
-
+                                <%
+                                    // Lấy giá unit (lon) từ ProductPackaging
+                                    java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
+                                    Double unitPrice = null;
+                                    if (unitPriceMap != null) {
+                                        unitPrice = unitPriceMap.get(p.getProductID());
+                                    }
+                                    
+                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                                    symbols.setGroupingSeparator('.');
+                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                                    
+                                    if (unitPrice != null) {
+                                        // Có giá lon → hiển thị giá lon
+                                        out.print(formatter.format(unitPrice) + " đ / lon");
+                                    } else {
+                                        // Không có giá lon → hiển thị giá thùng
+                                        out.print(formatter.format(p.getPrice()) + " đ / thùng");
+                                    }
+                                %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>

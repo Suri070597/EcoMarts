@@ -791,6 +791,29 @@ public class ProductDAO extends DBContext {
     }
 
     /**
+     * Lấy giá unit (lon) từ ProductPackaging cho việc hiển thị trên trang home
+     * 
+     * @param productId The product ID
+     * @return Giá của 1 lon, null nếu không có
+     */
+    public Double getUnitPrice(int productId) {
+        try {
+            String sql = "SELECT UnitPrice FROM ProductPackaging WHERE ProductID = ? AND PackageType = 'UNIT'";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    return rs.getDouble("UnitPrice");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * Get current packaging inventory for a product
      * 
      * @param productId The product ID
@@ -811,15 +834,6 @@ public class ProductDAO extends DBContext {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        // Nếu không có BOX trong ProductPackaging, lấy từ Product table
-        if (!packaging.containsKey("BOX_Quantity")) {
-            Product product = getProductById(productId);
-            if (product != null) {
-                packaging.put("BOX_Quantity", product.getStockQuantity());
-                packaging.put("BOX_Price", product.getPrice());
-            }
         }
 
         return packaging;

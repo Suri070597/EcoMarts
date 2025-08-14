@@ -1,6 +1,7 @@
 package controller;
 
 import dao.ViewProductDAO;
+import dao.ProductDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,6 +17,7 @@ import java.util.List;
 public class LoadMoreFeaturedServlet extends HttpServlet {
 
         private ViewProductDAO dao = new ViewProductDAO();
+        private ProductDAO productDao = new ProductDAO();
 
         @Override
         protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -98,10 +100,21 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 html.append("            <i class=\"far fa-star\"></i>");
                                 html.append("            <span>(0)</span>");
                                 html.append("        </div>");
-                                html.append("        <div class=\"product-price\">")
-                                                .append(String.format("%,.0f", p.getPrice()))
-                                                .append(" đ / ")
-                                                .append(p.getUnit()).append("</div>");
+                                html.append("        <div class=\"product-price\">");
+
+                                // Lấy giá unit (lon) từ ProductPackaging
+                                Double unitPrice = productDao.getUnitPrice(p.getProductID());
+                                if (unitPrice != null) {
+                                        // Có giá lon → hiển thị giá lon
+                                        html.append(String.format("%,.0f", unitPrice))
+                                                        .append(" đ / lon");
+                                } else {
+                                        // Không có giá lon → hiển thị giá thùng
+                                        html.append(String.format("%,.0f", p.getPrice()))
+                                                        .append(" đ / thùng");
+                                }
+
+                                html.append("</div>");
                                 html.append("        <div class=\"button-group\">");
                                 html.append("            <button class=\"add-to-cart-btn\" data-product-id=\"")
                                                 .append(p.getProductID())
