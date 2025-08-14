@@ -66,7 +66,7 @@ public class HomeServlet extends HttpServlet {
                             reviewCountMap.put(pid, count);
                         }
 
-                        // Lấy giá unit (lon) từ ProductPackaging
+                        // Lấy giá unit (lon) từ Inventory
                         if (!unitPriceMap.containsKey(pid)) {
                             Double unitPrice = dao.getUnitPrice(pid);
                             unitPriceMap.put(pid, unitPrice);

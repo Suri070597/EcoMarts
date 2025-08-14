@@ -97,7 +97,7 @@ public class ViewAllProductServlet extends HttpServlet {
                     avgRatingMap.put(pid, avg);
                     reviewCountMap.put(pid, count);
 
-                    // Lấy giá unit (lon) từ ProductPackaging
+                    // Lấy giá unit (lon) từ Inventory
                     Double unitPrice = dao.getUnitPrice(pid);
                     unitPriceMap.put(pid, unitPrice);
                 }

@@ -169,7 +169,7 @@
                             </div>
                             <div class="product-price">
                                 <%
-                                    // Lấy giá unit (lon) từ ProductPackaging
+                                    // Lấy giá unit (lon) từ Inventory
                                     java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
                                     Double unitPrice = null;
                                     if (unitPriceMap != null) {
@@ -274,7 +274,7 @@
                             </div>
                             <div class="product-price">
                                 <%
-                                    // Lấy giá unit (lon) từ ProductPackaging
+                                    // Lấy giá unit (lon) từ Inventory
                                     java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
                                     Double unitPrice = null;
                                     if (unitPriceMap != null) {
@@ -566,7 +566,7 @@
                             </div>
                             <div class="product-price">
                                 <%
-                                    // Lấy giá unit (lon) từ ProductPackaging
+                                    // Lấy giá unit (lon) từ Inventory
                                     java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
                                     Double unitPrice = null;
                                     if (unitPriceMap != null) {
@@ -772,7 +772,7 @@
                             </div>
                             <div class="product-price">
                                 <%
-                                    // Lấy giá unit (lon) từ ProductPackaging
+                                    // Lấy giá unit (lon) từ Inventory
                                     java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
                                     Double unitPrice = null;
                                     if (unitPriceMap != null) {

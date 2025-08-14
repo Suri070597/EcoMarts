@@ -145,10 +145,10 @@ public class ProductDAO extends DBContext {
             int result = ps.executeUpdate();
 
             if (result > 0) {
-                // Tự động tạo record BOX trong ProductPackaging
+                // Tự động tạo record BOX trong Inventory
                 int productId = getLastInsertedProductId();
                 if (productId > 0) {
-                    createProductPackagingBox(productId, quantity, price);
+                    createInventoryBox(productId, quantity, price);
                 }
             }
 
@@ -347,8 +347,8 @@ public class ProductDAO extends DBContext {
             int affectedRows = ps.executeUpdate();
 
             if (affectedRows > 0) {
-                // Đồng bộ BOX trong ProductPackaging
-                updateProductPackagingBox(product.getProductID(), product.getStockQuantity(), price);
+                // Đồng bộ BOX trong Inventory
+                updateInventoryBox(product.getProductID(), product.getStockQuantity(), price);
             }
 
             return affectedRows > 0;
@@ -467,6 +467,12 @@ public class ProductDAO extends DBContext {
                 // long roundedPrice = Math.round(rawPrice / 1000.0) * 1000;
                 p.setPrice(rawPrice);
                 p.setImageURL(rs.getString("ImageURL"));
+                // Bổ sung đơn vị đóng gói để hiển thị đúng "/ đơn vị"
+                try {
+                    p.setBoxUnitName(rs.getString("BoxUnitName"));
+                    p.setItemUnitName(rs.getString("ItemUnitName"));
+                } catch (Exception ignore) {
+                }
                 list.add(p);
             }
         } catch (Exception e) {
@@ -616,10 +622,10 @@ public class ProductDAO extends DBContext {
             int result = ps.executeUpdate();
 
             if (result > 0) {
-                // Đồng bộ BOX trong ProductPackaging
+                // Đồng bộ BOX trong Inventory
                 Product product = getProductById(productId);
                 if (product != null) {
-                    updateProductPackagingBox(productId, newStockQuantity, product.getPrice());
+                    updateInventoryBox(productId, newStockQuantity, product.getPrice());
                 }
             }
 
@@ -632,7 +638,7 @@ public class ProductDAO extends DBContext {
 
     /**
      * Convert units and save to ProductUnitConversion table, also update
-     * ProductPackaging
+     * Inventory
      * 
      * @param productId      The product ID
      * @param boxesToConvert Number of boxes to convert
@@ -663,7 +669,7 @@ public class ProductDAO extends DBContext {
             }
 
             // Insert into ProductUnitConversion (lưu lịch sử chuyển đổi)
-            String sql = "INSERT INTO ProductUnitConversion (ProductID, UnitPerBoxChange, UnitsPerPackChange, UnitPrice, PackPrice) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO ProductUnitConversion (ProductID, UnitPerBoxChange, UnitsPerPackChange, UnitPrice, PackPrice, ConversionDate) VALUES (?, ?, ?, ?, ?, GETDATE())";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ps.setInt(2, unitPerBoxChange);
@@ -687,8 +693,8 @@ public class ProductDAO extends DBContext {
                         return false;
                     }
 
-                    // Update ProductPackaging (tăng số lon và lốc)
-                    return updateProductPackaging(productId, unitPerBoxChange, unitsPerPackChange, unitPrice,
+                    // Update Inventory (tăng số lon và lốc)
+                    return updateInventory(productId, unitPerBoxChange, unitsPerPackChange, unitPrice,
                             packPrice);
                 }
             }
@@ -706,7 +712,7 @@ public class ProductDAO extends DBContext {
      */
     public List<Map<String, Object>> getConversionHistory(int productId) {
         List<Map<String, Object>> conversions = new ArrayList<>();
-        String sql = "SELECT * FROM ProductUnitConversion WHERE ProductID = ? ORDER BY ConversionID DESC";
+        String sql = "SELECT * FROM ProductUnitConversion WHERE ProductID = ? ORDER BY ConversionDate DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
@@ -719,6 +725,7 @@ public class ProductDAO extends DBContext {
                 conversion.put("unitsPerPackChange", rs.getObject("UnitsPerPackChange"));
                 conversion.put("unitPrice", rs.getObject("UnitPrice"));
                 conversion.put("packPrice", rs.getObject("PackPrice"));
+                conversion.put("conversionDate", rs.getTimestamp("ConversionDate"));
                 conversions.add(conversion);
             }
         } catch (Exception e) {
@@ -729,7 +736,7 @@ public class ProductDAO extends DBContext {
     }
 
     /**
-     * Update ProductPackaging table with converted units
+     * Update Inventory table with converted units
      * 
      * @param productId    The product ID
      * @param unitQuantity Number of units (lon) converted
@@ -738,11 +745,11 @@ public class ProductDAO extends DBContext {
      * @param packPrice    Price per pack (can be null)
      * @return true if update was successful, false otherwise
      */
-    public boolean updateProductPackaging(int productId, int unitQuantity, Integer packQuantity, double unitPrice,
+    public boolean updateInventory(int productId, int unitQuantity, Integer packQuantity, double unitPrice,
             Double packPrice) {
         try {
             // Update or insert UNIT (lon)
-            String sqlUnit = "MERGE ProductPackaging AS target " +
+            String sqlUnit = "MERGE Inventory AS target " +
                     "USING (SELECT ? AS ProductID, 'UNIT' AS PackageType) AS source " +
                     "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType) " +
                     "WHEN MATCHED THEN " +
@@ -763,7 +770,7 @@ public class ProductDAO extends DBContext {
 
             // Update or insert PACK (lốc) if exists
             if (packQuantity != null && packPrice != null) {
-                String sqlPack = "MERGE ProductPackaging AS target " +
+                String sqlPack = "MERGE Inventory AS target " +
                         "USING (SELECT ? AS ProductID, 'PACK' AS PackageType) AS source " +
                         "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType) " +
                         "WHEN MATCHED THEN " +
@@ -791,14 +798,14 @@ public class ProductDAO extends DBContext {
     }
 
     /**
-     * Lấy giá unit (lon) từ ProductPackaging cho việc hiển thị trên trang home
+     * Lấy giá unit (lon) từ Inventory cho việc hiển thị trên trang home
      * 
      * @param productId The product ID
      * @return Giá của 1 lon, null nếu không có
      */
     public Double getUnitPrice(int productId) {
         try {
-            String sql = "SELECT UnitPrice FROM ProductPackaging WHERE ProductID = ? AND PackageType = 'UNIT'";
+            String sql = "SELECT UnitPrice FROM Inventory WHERE ProductID = ? AND PackageType = 'UNIT'";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ResultSet rs = ps.executeQuery();
@@ -814,14 +821,14 @@ public class ProductDAO extends DBContext {
     }
 
     /**
-     * Get current packaging inventory for a product
+     * Get current inventory for a product
      * 
      * @param productId The product ID
-     * @return Map containing packaging information
+     * @return Map containing inventory information
      */
-    public Map<String, Object> getProductPackaging(int productId) {
-        Map<String, Object> packaging = new HashMap<>();
-        String sql = "SELECT PackageType, Quantity, UnitPrice FROM ProductPackaging WHERE ProductID = ?";
+    public Map<String, Object> getProductInventory(int productId) {
+        Map<String, Object> inventory = new HashMap<>();
+        String sql = "SELECT PackageType, Quantity, UnitPrice FROM Inventory WHERE ProductID = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
@@ -829,14 +836,14 @@ public class ProductDAO extends DBContext {
 
             while (rs.next()) {
                 String packageType = rs.getString("PackageType");
-                packaging.put(packageType + "_Quantity", rs.getDouble("Quantity"));
-                packaging.put(packageType + "_Price", rs.getDouble("UnitPrice"));
+                inventory.put(packageType + "_Quantity", rs.getDouble("Quantity"));
+                inventory.put(packageType + "_Price", rs.getDouble("UnitPrice"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return packaging;
+        return inventory;
     }
 
     /**
@@ -860,16 +867,16 @@ public class ProductDAO extends DBContext {
     }
 
     /**
-     * Tạo record BOX trong ProductPackaging khi tạo sản phẩm mới
+     * Tạo record BOX trong Inventory khi tạo sản phẩm mới
      * 
      * @param productId The product ID
      * @param quantity  Số lượng thùng
      * @param price     Giá 1 thùng
      * @return true nếu thành công, false nếu thất bại
      */
-    private boolean createProductPackagingBox(int productId, double quantity, double price) {
+    private boolean createInventoryBox(int productId, double quantity, double price) {
         try {
-            String sql = "INSERT INTO ProductPackaging (ProductID, PackageType, Quantity, UnitPrice, LastUpdated) VALUES (?, 'BOX', ?, ?, GETDATE())";
+            String sql = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, LastUpdated) VALUES (?, 'BOX', ?, ?, GETDATE())";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ps.setDouble(2, quantity);
@@ -883,16 +890,16 @@ public class ProductDAO extends DBContext {
     }
 
     /**
-     * Cập nhật hoặc tạo record BOX trong ProductPackaging
+     * Cập nhật hoặc tạo record BOX trong Inventory
      * 
      * @param productId The product ID
      * @param quantity  Số lượng thùng
      * @param price     Giá 1 thùng
      * @return true nếu thành công, false nếu thất bại
      */
-    private boolean updateProductPackagingBox(int productId, double quantity, double price) {
+    private boolean updateInventoryBox(int productId, double quantity, double price) {
         try {
-            String sql = "MERGE ProductPackaging AS target " +
+            String sql = "MERGE Inventory AS target " +
                     "USING (SELECT ? AS ProductID, 'BOX' AS PackageType) AS source " +
                     "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType) " +
                     "WHEN MATCHED THEN " +

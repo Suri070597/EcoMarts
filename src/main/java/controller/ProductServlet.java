@@ -618,19 +618,19 @@ public class ProductServlet extends HttpServlet {
                 }
                 break;
 
-            case "getProductPackaging":
+            case "getProductInventory":
                 try {
                     response.setContentType("application/json");
                     response.setCharacterEncoding("UTF-8");
                     PrintWriter jsonOut = response.getWriter();
 
                     int productId = Integer.parseInt(request.getParameter("productId"));
-                    Map<String, Object> packaging = dao.getProductPackaging(productId);
+                    Map<String, Object> inventory = dao.getProductInventory(productId);
 
-                    double boxQuantity = (Double) packaging.getOrDefault("BOX_Quantity", 0.0);
-                    double boxPrice = (Double) packaging.getOrDefault("BOX_Price", 0.0);
-                    double unitQuantity = (Double) packaging.getOrDefault("UNIT_Quantity", 0.0);
-                    double packQuantity = (Double) packaging.getOrDefault("PACK_Quantity", 0.0);
+                    double boxQuantity = (Double) inventory.getOrDefault("BOX_Quantity", 0.0);
+                    double boxPrice = (Double) inventory.getOrDefault("BOX_Price", 0.0);
+                    double unitQuantity = (Double) inventory.getOrDefault("UNIT_Quantity", 0.0);
+                    double packQuantity = (Double) inventory.getOrDefault("PACK_Quantity", 0.0);
 
                     jsonOut.print("{\"success\": true, \"boxQuantity\": " + boxQuantity + ", \"boxPrice\": " + boxPrice
                             + ", \"unitQuantity\": " + unitQuantity + ", \"packQuantity\": " + packQuantity + "}");

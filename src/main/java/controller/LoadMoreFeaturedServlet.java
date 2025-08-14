@@ -102,7 +102,7 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 html.append("        </div>");
                                 html.append("        <div class=\"product-price\">");
 
-                                // Lấy giá unit (lon) từ ProductPackaging
+                                // Lấy giá unit (lon) từ Inventory
                                 Double unitPrice = productDao.getUnitPrice(p.getProductID());
                                 if (unitPrice != null) {
                                         // Có giá lon → hiển thị giá lon
