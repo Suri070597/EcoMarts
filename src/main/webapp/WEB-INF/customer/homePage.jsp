@@ -92,52 +92,52 @@
             </section>
 
             <!-- Category Navigation -->
-<!-- Thêm scope để CSS không ảnh hưởng chỗ khác -->
-<section class="category-section category-section--shortcuts" data-aos="fade-up">
-  <div class="category-wrapper">
+            <!-- Thêm scope để CSS không ảnh hưởng chỗ khác -->
+            <section class="category-section category-section--shortcuts" data-aos="fade-up">
+                <div class="category-wrapper">
 
-    <!-- Đơn hàng của bạn -->
-    <div class="category-item">
-      <a href="${pageContext.request.contextPath}/reorder">
-        <div class="category-icon">
-          <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
-        </div>
-        <p>Đơn hàng của bạn</p>
-      </a>
-    </div>
+                    <!-- Đơn hàng của bạn -->
+                    <div class="category-item">
+                        <a href="${pageContext.request.contextPath}/reorder">
+                            <div class="category-icon">
+                                <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                            </div>
+                            <p>Đơn hàng của bạn</p>
+                        </a>
+                    </div>
 
-    <!-- Mã Voucher -->
-    <div class="category-item">
-      <a href="${pageContext.request.contextPath}/reorder">
-        <div class="category-icon">
-          <i class="fa-solid fa-ticket-simple" aria-hidden="true"></i>
-        </div>
-        <p>Mã Voucher</p>
-      </a>
-    </div>
+                    <!-- Mã Voucher -->
+                    <div class="category-item">
+                        <a href="${pageContext.request.contextPath}/voucher-shortcuts">
+                            <div class="category-icon">
+                                <i class="fa-solid fa-ticket-simple" aria-hidden="true"></i>
+                            </div>
+                            <p>Mã Voucher</p>
+                        </a>
+                    </div>
 
-    <!-- Flash Sale -->
-    <div class="category-item">
-      <a href="${pageContext.request.contextPath}/reorder">
-        <div class="category-icon">
-          <i class="fa-solid fa-bolt" aria-hidden="true"></i>
-        </div>
-        <p>Flash Sale</p>
-      </a>
-    </div>
+                    <!-- Flash Sale -->
+                    <div class="category-item">
+                        <a href="${pageContext.request.contextPath}/reorder">
+                            <div class="category-icon">
+                                <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                            </div>
+                            <p>Flash Sale</p>
+                        </a>
+                    </div>
 
-    <!-- Ưu đãi Hè 2025 -->
-    <div class="category-item">
-      <a href="${pageContext.request.contextPath}/reorder">
-        <div class="category-icon">
-          <i class="fa-solid fa-sun" aria-hidden="true"></i>
-        </div>
-        <p>Ưu đãi Hè 2025</p>
-      </a>
-    </div>
+                    <!-- Ưu đãi Hè 2025 -->
+                    <div class="category-item">
+                        <a href="${pageContext.request.contextPath}/reorder">
+                            <div class="category-icon">
+                                <i class="fa-solid fa-sun" aria-hidden="true"></i>
+                            </div>
+                            <p>Ưu đãi Hè 2025</p>
+                        </a>
+                    </div>
 
-  </div>
-</section>
+                </div>
+            </section>
 
 
 

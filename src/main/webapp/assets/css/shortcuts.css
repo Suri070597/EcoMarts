@@ -9,278 +9,509 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
 
 /* Scoped styles cho cụm "lối tắt" 5 thẻ trên trang chủ */
 .category-section--shortcuts .category-wrapper{
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr)); /* Desktop: 5 cột */
-  gap: 16px;
-  max-width: 1200px;
-  margin-inline: auto;
-  justify-items: center;
-  align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)); /* Desktop: 5 cột */
+    gap: 16px;
+    max-width: 1200px;
+    margin-inline: auto;
+    justify-items: center;
+    align-items: stretch;
 }
 
 .category-section--shortcuts .category-item{
-  width: 100%;
-  max-width: 180px;       /* Giới hạn bề ngang mỗi thẻ cho đều */
+    width: 100%;
+    max-width: 180px;       /* Giới hạn bề ngang mỗi thẻ cho đều */
 }
 
 .category-section--shortcuts .category-item a{
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  padding: 12px 8px;
-  border-radius: 16px;
-  transition: transform .2s ease, box-shadow .2s ease;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding: 12px 8px;
+    border-radius: 16px;
+    transition: transform .2s ease, box-shadow .2s ease;
 }
 
 .category-section--shortcuts .category-item a:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.08);
 }
 
 .category-section--shortcuts .category-icon{
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,.07);
-  margin: 0 auto 8px;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,.07);
+    margin: 0 auto 8px;
 }
 
 .category-section--shortcuts .category-icon img{
-  width: 48px; height: 48px; object-fit: contain;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
 }
 
 .category-section--shortcuts .category-item p{
-  margin: 6px 0 0;
-  font-weight: 500;
-  font-size: 14px;
-  text-align: center;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin: 6px 0 0;
+    font-weight: 500;
+    font-size: 14px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Responsive */
 @media (max-width: 1199.98px){
-  .category-section--shortcuts .category-wrapper{
-    grid-template-columns: repeat(4, minmax(0,1fr));
-  }
+    .category-section--shortcuts .category-wrapper{
+        grid-template-columns: repeat(4, minmax(0,1fr));
+    }
 }
 @media (max-width: 991.98px){
-  .category-section--shortcuts .category-wrapper{
-    grid-template-columns: repeat(3, minmax(0,1fr));
-  }
+    .category-section--shortcuts .category-wrapper{
+        grid-template-columns: repeat(3, minmax(0,1fr));
+    }
 }
 @media (max-width: 767.98px){
-  .category-section--shortcuts .category-wrapper{
-    grid-template-columns: repeat(2, minmax(0,1fr));
-  }
+    .category-section--shortcuts .category-wrapper{
+        grid-template-columns: repeat(2, minmax(0,1fr));
+    }
 }
 @media (max-width: 375px){
-  .category-section--shortcuts .category-wrapper{
-    grid-template-columns: 1fr 1fr;
-  }
+    .category-section--shortcuts .category-wrapper{
+        grid-template-columns: 1fr 1fr;
+    }
 }
 /* Chỉ áp dụng cho cụm lối tắt này */
-:root{ --shortcut-accent:#2f9e44; } /* xanh lá dịu, có thể đổi theo brand */
+:root{
+    --shortcut-accent:#2f9e44;
+} /* xanh lá dịu, có thể đổi theo brand */
 
 .category-section--shortcuts .category-wrapper{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 thẻ trên desktop */
-  gap: 28px;                  /* giãn cách thoáng hơn */
-  align-items: stretch;
-  justify-items: center;
-  max-width: 1100px;          /* canh giữa, đừng chiếm quá rộng */
-  margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 thẻ trên desktop */
+    gap: 28px;                  /* giãn cách thoáng hơn */
+    align-items: stretch;
+    justify-items: center;
+    max-width: 1100px;          /* canh giữa, đừng chiếm quá rộng */
+    margin: 0 auto;
 }
 
 .category-section--shortcuts .category-item{
-  width: 100%;
-  max-width: 220px;
+    width: 100%;
+    max-width: 220px;
 }
 
 .category-section--shortcuts .category-item a{
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  padding: 14px 10px;
-  border-radius: 16px;
-  transition: transform .2s ease, box-shadow .2s ease;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding: 14px 10px;
+    border-radius: 16px;
+    transition: transform .2s ease, box-shadow .2s ease;
 }
 
 .category-section--shortcuts .category-item a:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
 }
 
 .category-section--shortcuts .category-icon{
-  width: 78px; height: 78px;
-  border-radius: 50%;
-  display:flex; align-items:center; justify-content:center;
-  background:#fff;
-  box-shadow: 0 6px 16px rgba(0,0,0,.07);
-  margin: 0 auto 10px;
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+    box-shadow: 0 6px 16px rgba(0,0,0,.07);
+    margin: 0 auto 10px;
 }
 
 .category-section--shortcuts .category-icon i{
-  font-size: 34px;
-  color: var(--shortcut-accent);
+    font-size: 34px;
+    color: var(--shortcut-accent);
 }
 
 .category-section--shortcuts .category-item p{
-  margin: 6px 0 0;
-  font-weight: 600;
-  font-size: 15px;
-  text-align: center;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin: 6px 0 0;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Responsive */
 @media (max-width: 991.98px){
-  .category-section--shortcuts .category-wrapper{ grid-template-columns: repeat(3, 1fr); }
+    .category-section--shortcuts .category-wrapper{
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 @media (max-width: 767.98px){
-  .category-section--shortcuts .category-wrapper{ grid-template-columns: repeat(2, 1fr); }
+    .category-section--shortcuts .category-wrapper{
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 /* ===== EcoMart – warm neutral for 4 shortcuts (scoped) ===== */
 .category-section--shortcuts{
-  /* màu ấm trung tính – chỉnh 3 biến dưới nếu muốn */
-  --ec-primary:     #c8a46b;   /* gold-beige chủ đạo (giống chấm slider/tiêu đề) */
-  --ec-primary-200: #e9dcc5;   /* nhạt dùng cho viền hover */
-  --ec-border:      #efe6d8;   /* viền ấm nhạt khớp sidebar */
-  --ec-text:        #2f3438;   /* chữ trung tính */
-  --ec-muted:       #667085;   /* icon mặc định */
+    /* màu ấm trung tính – chỉnh 3 biến dưới nếu muốn */
+    --ec-primary:     #c8a46b;   /* gold-beige chủ đạo (giống chấm slider/tiêu đề) */
+    --ec-primary-200: #e9dcc5;   /* nhạt dùng cho viền hover */
+    --ec-border:      #efe6d8;   /* viền ấm nhạt khớp sidebar */
+    --ec-text:        #2f3438;   /* chữ trung tính */
+    --ec-muted:       #667085;   /* icon mặc định */
 }
 
 .category-section--shortcuts .category-wrapper{
-  gap: 28px;
-  max-width: 1200px;
-  margin-inline: auto;
+    gap: 28px;
+    max-width: 1200px;
+    margin-inline: auto;
 }
 
 /* card nhẹ, viền ấm – bỏ cảm giác “lạnh/xám” */
 .category-section--shortcuts .category-item a{
-  background: #fff;
-  border: 1px solid var(--ec-border);
-  border-radius: 16px;
-  box-shadow: none;
-  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    background: #fff;
+    border: 1px solid var(--ec-border);
+    border-radius: 16px;
+    box-shadow: none;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 .category-section--shortcuts .category-item a:hover{
-  transform: translateY(-2px);
-  border-color: var(--ec-primary-200);
-  box-shadow: 0 8px 18px rgba(0,0,0,.05);
+    transform: translateY(-2px);
+    border-color: var(--ec-primary-200);
+    box-shadow: 0 8px 18px rgba(0,0,0,.05);
 }
 
 /* vòng tròn icon ấm & sáng hơn */
 .category-section--shortcuts .category-icon{
-  width: 82px; height: 82px; border-radius: 999px;
-  background: #fff;
-  border: 2px solid var(--ec-border);
-  box-shadow: 0 3px 10px rgba(0,0,0,.04);
+    width: 82px;
+    height: 82px;
+    border-radius: 999px;
+    background: #fff;
+    border: 2px solid var(--ec-border);
+    box-shadow: 0 3px 10px rgba(0,0,0,.04);
 }
 .category-section--shortcuts .category-icon i{
-  font-size: 32px;
-  color: var(--ec-muted);     /* xám ấm */
-  opacity: .95;
+    font-size: 32px;
+    color: var(--ec-muted);     /* xám ấm */
+    opacity: .95;
 }
 
 /* hover: đổi icon sang gold-beige, viền ấm hơn một nấc */
 .category-section--shortcuts .category-item a:hover .category-icon{
-  border-color: var(--ec-primary-200);
-  box-shadow: 0 10px 22px rgba(200,164,107,.12);
+    border-color: var(--ec-primary-200);
+    box-shadow: 0 10px 22px rgba(200,164,107,.12);
 }
 .category-section--shortcuts .category-item a:hover .category-icon i{
-  color: var(--ec-primary);
+    color: var(--ec-primary);
 }
 
 .category-section--shortcuts .category-item p{
-  color: var(--ec-text);
-  font-weight: 600;
+    color: var(--ec-text);
+    font-weight: 600;
 }
 .category-section--shortcuts .category-item a:hover p{
-  color: var(--ec-primary);
+    color: var(--ec-primary);
 }
 
 /* responsive giữ cảm giác thoáng */
 @media (max-width: 992px){
-  .category-section--shortcuts .category-wrapper{ gap: 22px; }
+    .category-section--shortcuts .category-wrapper{
+        gap: 22px;
+    }
 }
 /* ===== Dropdown Notify – look & feel như popover, mở khi hover ===== */
 :root{
-  --ec-primary:     #c8a46b;
-  --ec-primary-200: #e9dcc5;
-  --ec-border:      #efe6d8;
-  --ec-text:        #2f3438;
+    --ec-primary:     #c8a46b;
+    --ec-primary-200: #e9dcc5;
+    --ec-border:      #efe6d8;
+    --ec-text:        #2f3438;
 
-  --notify-width:   420px;
-  --arrow-offset:   20px; /* khoảng cách mũi tên so với mép phải menu */
+    --notify-width:   420px;
+    --arrow-offset:   20px; /* khoảng cách mũi tên so với mép phải menu */
 }
 
-.dropdown-notify .dropdown-toggle{ position: relative; color: var(--ec-text); }
-.dropdown-notify .dropdown-toggle:hover{ color: var(--ec-primary); }
+.dropdown-notify .dropdown-toggle{
+    position: relative;
+    color: var(--ec-text);
+}
+.dropdown-notify .dropdown-toggle:hover{
+    color: var(--ec-primary);
+}
 
 .badge-notification{
-  position:absolute; top:-6px; right:-6px;
-  min-width:18px; height:18px; padding:0 5px;
-  background:var(--ec-primary); color:#fff;
-  border-radius:999px; border:2px solid #fff;
-  font-size:11px; line-height:14px;
-  display:inline-flex; align-items:center; justify-content:center;
+    position:absolute;
+    top:-6px;
+    right:-6px;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    background:var(--ec-primary);
+    color:#fff;
+    border-radius:999px;
+    border:2px solid #fff;
+    font-size:11px;
+    line-height:14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .dropdown-notify .dropdown-menu{
-  width: var(--notify-width);
-  border: 1px solid var(--ec-border);
-  border-radius: 14px;
-  box-shadow: 0 12px 28px rgba(0,0,0,.08);
-  overflow: hidden;
-  margin-top: 12px;                     /* khoảng cách dưới icon */
+    width: var(--notify-width);
+    border: 1px solid var(--ec-border);
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.08);
+    overflow: hidden;
+    margin-top: 12px;                     /* khoảng cách dưới icon */
 }
 
 /* Mũi tên chỉ lên icon chuông */
 .dropdown-notify .dropdown-menu::before{
-  content:"";
-  position:absolute;
-  top:-8px;
-  right: var(--arrow-offset);
-  width: 16px; height: 16px;
-  background:#fff;
-  border-left:1px solid var(--ec-border);
-  border-top:1px solid var(--ec-border);
-  transform: rotate(45deg);
+    content:"";
+    position:absolute;
+    top:-8px;
+    right: var(--arrow-offset);
+    width: 16px;
+    height: 16px;
+    background:#fff;
+    border-left:1px solid var(--ec-border);
+    border-top:1px solid var(--ec-border);
+    transform: rotate(45deg);
 }
 
 /* Header/body */
 .dropdown-notify .notify-header{
-  background:#fff;
-  border-bottom:1px solid #f3ecde;
-  color:var(--ec-text);
+    background:#fff;
+    border-bottom:1px solid #f3ecde;
+    color:var(--ec-text);
 }
-.dropdown-notify .notify-body{ max-height: 360px; overflow:auto; }
-.dropdown-notify .notify-item:hover{ background:#fffaf1; }
+.dropdown-notify .notify-body{
+    max-height: 360px;
+    overflow:auto;
+}
+.dropdown-notify .notify-item:hover{
+    background:#fffaf1;
+}
 
 /* Hover to open on desktop (giống "Hồ sơ") */
 @media (min-width: 992px){
-  .dropdown-notify:hover > .dropdown-menu{
-    display:block;
-  }
-  .dropdown-notify:hover > .dropdown-toggle{
-    color: var(--ec-primary);
-  }
-  /* bridge chống chớp khi đưa chuột từ icon xuống menu */
-  .dropdown-notify{
-    position: relative;
-  }
-  .dropdown-notify::after{
-    content:"";
-    position:absolute;
-    left: 50%; transform: translateX(-50%);
-    top: 100%; width: 120px; height: 14px;
-    background: transparent;
-  }
+    .dropdown-notify:hover > .dropdown-menu{
+        display:block;
+    }
+    .dropdown-notify:hover > .dropdown-toggle{
+        color: var(--ec-primary);
+    }
+    /* bridge chống chớp khi đưa chuột từ icon xuống menu */
+    .dropdown-notify{
+        position: relative;
+    }
+    .dropdown-notify::after{
+        content:"";
+        position:absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 100%;
+        width: 120px;
+        height: 14px;
+        background: transparent;
+    }
 }
 
 /* Mobile: vẫn click để mở, không dùng hover */
 @media (max-width: 991.98px){
-  .dropdown-notify .dropdown-menu{ width: calc(100vw - 24px); }
-  .dropdown-notify .dropdown-menu::before{ right: 32px; }
+    .dropdown-notify .dropdown-menu{
+        width: calc(100vw - 24px);
+    }
+    .dropdown-notify .dropdown-menu::before{
+        right: 32px;
+    }
+}
+/* =======================
+   VOUCHER SHORTCUTS (2/cột)
+   Gộp chung vào shortcuts.css
+   ======================= */
+
+.voucher-shortcuts{
+    /* dùng chung palette warm-neutral; lấy từ :root nếu đã có */
+    --ec-primary:   var(--ec-primary, #c8a46b);
+    --ec-border:    var(--ec-border, #efe6d8);
+    --text:         var(--ec-text,   #2f3438);
+    --muted:        #6b7280;
+    --bg:           #fff;
+}
+
+/* Grid 2 cột, tự xuống hàng khi thêm voucher mới */
+.voucher-shortcuts .voucher-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+    max-width:1100px;
+
+}
+@media (max-width: 992px){
+    .voucher-shortcuts .voucher-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+/* Card tổng */
+.voucher-shortcuts .voucher-card{
+    display:flex;
+    background:var(--bg);
+    border:1px solid var(--ec-border);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 6px 16px rgba(0,0,0,.05);
+}
+
+/* Panel trái (vé răng cưa) */
+.voucher-shortcuts .voucher-left{
+    position:relative;
+    width:38%;
+    min-width:240px;
+    background:var(--theme, #26a69a);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px 12px;
+
+    /* mép răng cưa */
+    -webkit-mask:
+        radial-gradient(12px at 0 20px,transparent 98%,#000 101%) 0 0/24px 40px repeat-y,
+        linear-gradient(#000 0 0) left;
+    mask:
+        radial-gradient(12px at 0 20px,transparent 98%,#000 101%) 0 0/24px 40px repeat-y,
+        linear-gradient(#000 0 0) left;
+}
+.voucher-shortcuts .voucher-badge-top{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:#ff6b6b;
+    color:#fff;
+    font-weight:700;
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:6px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+.voucher-shortcuts .voucher-left-content{
+    text-align:center;
+}
+.voucher-shortcuts .voucher-left-title{
+    font-size:28px;
+    line-height:1.1;
+    font-weight:900;
+    letter-spacing:.5px;
+}
+.voucher-shortcuts .voucher-left-sub{
+    margin-top:8px;
+    font-size:14px;
+    opacity:.95;
+}
+.voucher-shortcuts .voucher-brand{
+    width:56px;
+    height:56px;
+    object-fit:contain;
+    margin:0 auto 8px;
+    filter:brightness(0) invert(1) opacity(.95);
+}
+
+/* Panel phải */
+.voucher-shortcuts .voucher-right{
+    flex:1;
+    padding:14px 16px;
+    color:var(--text);
+}
+.voucher-shortcuts .voucher-right-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.voucher-shortcuts .voucher-flag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:#ff8a3d;
+    color:#fff;
+    font-weight:700;
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:6px;
+}
+.voucher-shortcuts .btn-save{
+    display:inline-block;
+    padding:8px 16px;
+    border-radius:10px;
+    background: var(--theme, #26a69a);
+    color:#fff;
+    text-decoration:none;
+    font-weight:700;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+.voucher-shortcuts .btn-save:hover{
+    filter:brightness(.95);
+}
+
+.voucher-shortcuts .voucher-title{
+    margin:8px 0 2px;
+    font-size:22px;
+    font-weight:800;
+}
+.voucher-shortcuts .voucher-meta{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* Tiến độ hết mã */
+.voucher-shortcuts .voucher-progress{
+    margin:10px 0 8px;
+    height:8px;
+    border-radius:6px;
+    background:#eee3cf;
+    overflow:hidden;
+}
+.voucher-shortcuts .voucher-progress .bar{
+    height:100%;
+    background:var(--theme, #26a69a);
+    border-radius:6px;
+    transition:width .25s ease;
+}
+
+/* Footer */
+.voucher-shortcuts .voucher-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:14px;
+}
+.voucher-shortcuts .voucher-footer .status.hot{
+    color:#e8590c;
+    font-weight:700;
+}
+.voucher-shortcuts .voucher-footer .terms{
+    color:#1a73e8;
+    text-decoration:none;
+    font-weight:700;
+}
+.voucher-shortcuts .voucher-footer .terms:hover{
+    text-decoration:underline;
+}
+
+/* Empty */
+.voucher-shortcuts .voucher-empty{
+    grid-column:1 / -1;
+    text-align:center;
+    color:var(--muted);
+    padding:24px 0;
 }
