@@ -334,9 +334,10 @@ CREATE TABLE Inventory (
     PackageType NVARCHAR(10) NOT NULL, -- 'BOX' | 'UNIT' | 'PACK'
     Quantity DECIMAL(18,2) NOT NULL DEFAULT 0,
     UnitPrice DECIMAL(18,2) NULL,      -- Giá bán cho loại đóng gói này
+    PackSize INT NOT NULL DEFAULT 0,   -- Số đơn vị trong 1 lốc (0 cho BOX/UNIT)
     LastUpdated DATETIME NOT NULL DEFAULT GETDATE(),
     CONSTRAINT FK_Inventory_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE,
-    CONSTRAINT UQ_Inventory UNIQUE (ProductID, PackageType),
+    CONSTRAINT UQ_Inventory UNIQUE (ProductID, PackageType, PackSize),
     CONSTRAINT CHK_PackageType CHECK (PackageType IN ('BOX', 'UNIT', 'PACK'))
 );
 

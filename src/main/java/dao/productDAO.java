@@ -750,13 +750,14 @@ public class ProductDAO extends DBContext {
         try {
             // Update or insert UNIT (lon)
             String sqlUnit = "MERGE Inventory AS target " +
-                    "USING (SELECT ? AS ProductID, 'UNIT' AS PackageType) AS source " +
-                    "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType) " +
+                    "USING (SELECT ? AS ProductID, 'UNIT' AS PackageType, 0 AS PackSize) AS source " +
+                    "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType AND target.PackSize = source.PackSize) "
+                    +
                     "WHEN MATCHED THEN " +
                     "    UPDATE SET Quantity = Quantity + ?, UnitPrice = ?, LastUpdated = GETDATE() " +
                     "WHEN NOT MATCHED THEN " +
-                    "    INSERT (ProductID, PackageType, Quantity, UnitPrice, LastUpdated) " +
-                    "    VALUES (?, 'UNIT', ?, ?, GETDATE());";
+                    "    INSERT (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) " +
+                    "    VALUES (?, 'UNIT', ?, ?, 0, GETDATE());";
 
             try (PreparedStatement ps = conn.prepareStatement(sqlUnit)) {
                 ps.setInt(1, productId);
@@ -770,22 +771,35 @@ public class ProductDAO extends DBContext {
 
             // Update or insert PACK (lốc) if exists
             if (packQuantity != null && packPrice != null) {
+                // Derive PackSize from last conversion inputs: units per pack (lonToLoc)
+                int packSize = 0;
+                try {
+                    // Safe best-effort: compute from quantities if divisible
+                    if (unitQuantity > 0 && packQuantity > 0 && unitQuantity % packQuantity == 0) {
+                        packSize = unitQuantity / packQuantity;
+                    }
+                } catch (Exception ignore) {
+                }
+
                 String sqlPack = "MERGE Inventory AS target " +
-                        "USING (SELECT ? AS ProductID, 'PACK' AS PackageType) AS source " +
-                        "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType) " +
+                        "USING (SELECT ? AS ProductID, 'PACK' AS PackageType, ? AS PackSize) AS source " +
+                        "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType AND target.PackSize = source.PackSize) "
+                        +
                         "WHEN MATCHED THEN " +
                         "    UPDATE SET Quantity = Quantity + ?, UnitPrice = ?, LastUpdated = GETDATE() " +
                         "WHEN NOT MATCHED THEN " +
-                        "    INSERT (ProductID, PackageType, Quantity, UnitPrice, LastUpdated) " +
-                        "    VALUES (?, 'PACK', ?, ?, GETDATE());";
+                        "    INSERT (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) " +
+                        "    VALUES (?, 'PACK', ?, ?, ?, GETDATE());";
 
                 try (PreparedStatement ps = conn.prepareStatement(sqlPack)) {
                     ps.setInt(1, productId);
-                    ps.setInt(2, packQuantity);
-                    ps.setDouble(3, packPrice);
-                    ps.setInt(4, productId);
-                    ps.setInt(5, packQuantity);
-                    ps.setDouble(6, packPrice);
+                    ps.setInt(2, packSize);
+                    ps.setInt(3, packQuantity);
+                    ps.setDouble(4, packPrice);
+                    ps.setInt(5, productId);
+                    ps.setInt(6, packQuantity);
+                    ps.setDouble(7, packPrice);
+                    ps.setInt(8, packSize);
                     ps.executeUpdate();
                 }
             }
@@ -876,7 +890,7 @@ public class ProductDAO extends DBContext {
      */
     private boolean createInventoryBox(int productId, double quantity, double price) {
         try {
-            String sql = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, LastUpdated) VALUES (?, 'BOX', ?, ?, GETDATE())";
+            String sql = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) VALUES (?, 'BOX', ?, ?, 0, GETDATE())";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ps.setDouble(2, quantity);
@@ -900,13 +914,14 @@ public class ProductDAO extends DBContext {
     private boolean updateInventoryBox(int productId, double quantity, double price) {
         try {
             String sql = "MERGE Inventory AS target " +
-                    "USING (SELECT ? AS ProductID, 'BOX' AS PackageType) AS source " +
-                    "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType) " +
+                    "USING (SELECT ? AS ProductID, 'BOX' AS PackageType, 0 AS PackSize) AS source " +
+                    "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType AND target.PackSize = source.PackSize) "
+                    +
                     "WHEN MATCHED THEN " +
                     "    UPDATE SET Quantity = ?, UnitPrice = ?, LastUpdated = GETDATE() " +
                     "WHEN NOT MATCHED THEN " +
-                    "    INSERT (ProductID, PackageType, Quantity, UnitPrice, LastUpdated) " +
-                    "    VALUES (?, 'BOX', ?, ?, GETDATE());";
+                    "    INSERT (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) " +
+                    "    VALUES (?, 'BOX', ?, ?, 0, GETDATE());";
 
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
