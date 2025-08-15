@@ -92,7 +92,6 @@
                 object-fit: contain;
                 border-radius: 6px;
                 border: 1px solid #eaeaea;
-                text-align: center;
             }
 
             .table-products th {
@@ -224,7 +223,7 @@
                                                          class="product-img" alt="${od.productName}">
                                                 </c:if>
                                                 <c:if test="${empty od.product || empty od.product.imageURL}">
-                                                    <div class="product-img bg-light d-flex align-items-center justify-content-center">
+                                                    <div style="display:block; margin:auto;" class="product-img bg-light d-flex align-items-center justify-content-center">
                                                         <i class="fas fa-image text-muted"></i>
                                                     </div>
                                                 </c:if>

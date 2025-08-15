@@ -53,6 +53,8 @@
         <script defer src="./assets/js/homeJs.js"></script>
         <!-- Animate on scroll -->
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+        <!-- shortcuts on scroll -->
+        <link rel="stylesheet" href="./assets/css/shortcuts.css?version=<%= System.currentTimeMillis()%>">
     </head>
 
     <body>
@@ -103,31 +105,50 @@
             </section>
 
             <!-- Category Navigation -->
-            <section class="category-section" data-aos="fade-up">
+            <section class="category-section category-section--shortcuts" data-aos="fade-up">
                 <div class="category-wrapper">
-                    <!-- Mục tĩnh "Mua lại đơn cũ" -->
+
+                    <!-- Đơn hàng của bạn -->
                     <div class="category-item">
                         <a href="${pageContext.request.contextPath}/reorder">
                             <div class="category-icon">
-                                <img src="https://cdn.tgdd.vn/bachhoaxanh/www/Content/images/icon-history.v202301091407.png"
-                                     alt="Mua lại đơn cũ">
+                                <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
                             </div>
-                            <p>Mua lại đơn cũ</p>
+                            <p>Đơn hàng của bạn</p>
                         </a>
                     </div>
 
-                    <!-- Vòng lặp hiển thị các danh mục cha từ database -->
-                    <c:forEach var="cat" items="${categories}">
-                        <div class="category-item">
-                            <a href="ViewAllProductServlet?categoryId=${cat.categoryID}">
-                                <div class="category-icon">
-                                    <img src="${cat.imageURL}" alt="${cat.categoryName}">
-                                </div>
-                                <p>${cat.categoryName}</p>
-                            </a>
-                        </div>
-                    </c:forEach>
-                </div> 
+                    <!-- Mã Voucher -->
+                    <div class="category-item">
+                        <a href="${pageContext.request.contextPath}/reorder">
+                            <div class="category-icon">
+                                <i class="fa-solid fa-ticket-simple" aria-hidden="true"></i>
+                            </div>
+                            <p>Mã Voucher</p>
+                        </a>
+                    </div>
+
+                    <!-- Flash Sale -->
+                    <div class="category-item">
+                        <a href="${pageContext.request.contextPath}/reorder">
+                            <div class="category-icon">
+                                <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                            </div>
+                            <p>Flash Sale</p>
+                        </a>
+                    </div>
+
+                    <!-- Ưu đãi Hè 2025 -->
+                    <div class="category-item">
+                        <a href="${pageContext.request.contextPath}/reorder">
+                            <div class="category-icon">
+                                <i class="fa-solid fa-sun" aria-hidden="true"></i>
+                            </div>
+                            <p>Ưu đãi Hè 2025</p>
+                        </a>
+                    </div>
+
+                </div>
             </section>
 
 
@@ -144,12 +165,12 @@
                     %>
                     <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                         <% if (p.getStockQuantity() <= 0) { %>
-                            <div class="product-badge out-of-stock">Hết hàng</div>
-                        <% } %>
+                        <div class="product-badge out-of-stock">Hết hàng</div>
+                        <% }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -160,24 +181,29 @@
                                     int productId = p.getProductID();
                                     Double avgRating = avgRatingMap != null ? avgRatingMap.get(productId) : 0.0;
                                     Integer reviewCount = reviewCountMap != null ? reviewCountMap.get(productId) : 0;
-                                    
-                                    if (avgRating == null) avgRating = 0.0;
-                                    if (reviewCount == null) reviewCount = 0;
-                                    
+
+                                    if (avgRating == null) {
+                                        avgRating = 0.0;
+                                    }
+                                    if (reviewCount == null) {
+                                        reviewCount = 0;
+                                    }
+
                                     int fullStars = avgRating.intValue();
                                     boolean hasHalfStar = (avgRating - fullStars) >= 0.5;
                                 %>
                                 <% for (int i = 0; i < fullStars; i++) { %>
-                                    <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                                 <% } %>
                                 <% if (hasHalfStar) { %>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star-half-alt"></i>
                                 <% } %>
                                 <% for (int i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) { %>
-                                    <i class="far fa-star"></i>
-                                <% } %>
-                                <span>(<%= reviewCount %>)</span>
+                                <i class="far fa-star"></i>
+                                <% }%>
+                                <span>(<%= reviewCount%>)</span>
                             </div>
+
                             <div class="product-price">
                                 <%
                                     // Lấy giá unit (lon) từ Inventory
@@ -199,14 +225,15 @@
                                         out.print(formatter.format(p.getPrice()) + " đ / thùng");
                                     }
                                 %>
+
                             </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>>Mua ngay</button> 
+                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
