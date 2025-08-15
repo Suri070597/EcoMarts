@@ -163,28 +163,68 @@
         %>
 
         <% if (account != null && account.getRole() == 0) {%>
-        <span>Chào, <%= account.getFullName()%></span>
 
-        <!-- Icon giỏ hàng -->
-        <a href="<%= request.getContextPath()%>/cart">
-            <i class="fas fa-shopping-cart"></i> Giỏ hàng
-            <% if (cartItemCount > 0) {%>
-            <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
-            <% } %>
-        </a>
+
+
 
         <!-- Icon thông báo -->
-        <a href="#" class="notification-link" data-bs-toggle="modal" data-bs-target="#notificationModal">
-            <i class="fas fa-bell"></i>
-            <% if (unreadCount > 0) {%>
-            <span class="badge-notification"><%= unreadCount%></span>
-            <% }%>
-        </a>
+        <div class="dropdown dropdown-notify">
+            <a style="margin-right: 20px" href="#" class="notification-link dropdown-toggle"
+               data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <i class="fas fa-bell"></i>
+                <% if (unreadCount > 0) {%>
+                <span class="badge-notification"><%= unreadCount%></span>
+                <% }%>
+            </a>
+            <!-- Icon giỏ hàng -->
+            <a style="margin-right: -23px;" href="<%= request.getContextPath()%>/cart">
+                <i  class="fas fa-shopping-cart"></i>
+                <% if (cartItemCount > 0) {%>
+                <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
+                <% } %>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end dropdown-notify-menu p-0">
+                <div class="notify-header d-flex justify-content-between align-items-center px-3 py-2">
+                    <strong>Thông báo</strong>
+                    <button type="button" class="btn btn-sm btn-link p-0 text-muted"
+                            onclick="this.closest('.dropdown').classList.remove('show'); this.closest('.dropdown-menu').classList.remove('show');"
+                            aria-label="Close">&times;</button>
+                </div>
+
+                <div class="notify-body">
+                    <% if (account != null && account.getRole() == 0) { %>
+                    <% if (unreadCount == 0 || unreadList == null || unreadList.size() == 0) { %>
+                    <div class="text-center text-muted py-3">Không có thông báo mới.</div>
+                    <% } else { %>
+                    <ul class="list-group list-group-flush">
+                        <% for (model.Review reply : unreadList) {%>
+                        <li class="list-group-item notify-item">
+                            <a class="stretched-link text-decoration-none text-reset"
+                               href="<%= request.getContextPath()%>/read-notification?reviewId=<%= reply.getReviewID()%>"></a>
+                            <div class="fw-semibold">Nhân viên: <%= reply.getAccountName()%></div>
+                            <div>Sản phẩm: <%= reply.getProductName() != null ? reply.getProductName() : ""%></div>
+                            <div>Phản hồi: <%= reply.getComment()%></div>
+                            <div class="text-muted small"><%= reply.getCreatedAt()%></div>
+                        </li>
+                        <% }%>
+                    </ul>
+                    <form method="post" action="<%= request.getContextPath()%>/mark-notifications-read"
+                          class="px-3 py-2 text-end">
+                        <button type="submit" class="btn btn-sm btn-primary">Đã đọc tất cả</button>
+                    </form>
+                    <% } %>
+                    <% } else { %>
+                    <div class="text-center text-muted py-3">Vui lòng đăng nhập để xem thông báo.</div>
+                    <% }%>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Dropdown hồ sơ -->
         <div class="dropdown profile-dropdown">
             <button class="btn btn-link dropdown-toggle" type="button">
-                Hồ sơ <i class="fas fa-user-circle"></i>
+                <i class="fas fa-user-circle"></i><span><%= account.getFullName()%></span>
             </button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="UpdateProfileServlet">Xem thông tin</a></li>
@@ -224,56 +264,19 @@
         <!-- Chưa đăng nhập -->
         <a href="<%= request.getContextPath()%>/login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
         <a href="<%= request.getContextPath()%>/register"><i class="fas fa-user-plus"></i> Đăng ký</a>
-        <% } %>
+        <% }%>
     </div>
 
 </div>
-</div>
-<!-- Modal notification cho customer đặt ở cuối file, không ảnh hưởng logic khác -->
-<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="notificationModalLabel">Thông báo phản hồi từ nhân viên</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <% if (account != null && account.getRole() == 0) { %>
-                <% if (unreadCount == 0 || unreadList == null || unreadList.size() == 0) { %>
-                <div class="text-center text-muted">Không có thông báo mới.</div>
-                <% } else { %>
-                <ul class="list-group">
-                    <% for (model.Review reply : unreadList) {%>
-                    <a href="<%= request.getContextPath()%>/read-notification?reviewId=<%= reply.getReviewID()%>" style="text-decoration:none;
-                       color:inherit;">
-                        <li class="list-group-item" style="cursor:pointer;">
-                            <div><b>Nhân viên:</b> <%= reply.getAccountName()%></div>
-                            <div><b>Sản phẩm:</b> <%= reply.getProductName() != null ? reply.getProductName() : ""%></div>
-                            <div><b>Phản hồi:</b> <%= reply.getComment()%></div>
-                            <div class="text-muted small"><%= reply.getCreatedAt()%></div>
-                        </li>
-                    </a>
-                    <% }%>
-                </ul>
-                <form method="post" action="<%= request.getContextPath()%>/mark-notifications-read" class="mt-3 text-end">
-                    <button type="submit" class="btn btn-sm btn-primary">Đã đọc tất cả</button>
-                </form>
-                <% } %>
-                <% } else { %>
-                <div class="text-center text-muted">Vui lòng đăng nhập bằng tài khoản khách hàng để xem thông báo.</div>
-                <% }%>
-            </div>
-        </div>
-    </div>
-</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- JS -->
 <script>
-                        function toggleCategory(button) {
-                            const content = button.nextElementSibling;
-                            content.style.display = content.style.display === "block" ? "none" : "block";
-                        }
+                                function toggleCategory(button) {
+                                    const content = button.nextElementSibling;
+                                    content.style.display = content.style.display === "block" ? "none" : "block";
+                                }
 </script>
 <script>
     document.getElementById("searchInput").addEventListener("input", function () {

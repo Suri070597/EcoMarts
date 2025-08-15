@@ -204,3 +204,83 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
 @media (max-width: 992px){
   .category-section--shortcuts .category-wrapper{ gap: 22px; }
 }
+/* ===== Dropdown Notify – look & feel như popover, mở khi hover ===== */
+:root{
+  --ec-primary:     #c8a46b;
+  --ec-primary-200: #e9dcc5;
+  --ec-border:      #efe6d8;
+  --ec-text:        #2f3438;
+
+  --notify-width:   420px;
+  --arrow-offset:   20px; /* khoảng cách mũi tên so với mép phải menu */
+}
+
+.dropdown-notify .dropdown-toggle{ position: relative; color: var(--ec-text); }
+.dropdown-notify .dropdown-toggle:hover{ color: var(--ec-primary); }
+
+.badge-notification{
+  position:absolute; top:-6px; right:-6px;
+  min-width:18px; height:18px; padding:0 5px;
+  background:var(--ec-primary); color:#fff;
+  border-radius:999px; border:2px solid #fff;
+  font-size:11px; line-height:14px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+
+.dropdown-notify .dropdown-menu{
+  width: var(--notify-width);
+  border: 1px solid var(--ec-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.08);
+  overflow: hidden;
+  margin-top: 12px;                     /* khoảng cách dưới icon */
+}
+
+/* Mũi tên chỉ lên icon chuông */
+.dropdown-notify .dropdown-menu::before{
+  content:"";
+  position:absolute;
+  top:-8px;
+  right: var(--arrow-offset);
+  width: 16px; height: 16px;
+  background:#fff;
+  border-left:1px solid var(--ec-border);
+  border-top:1px solid var(--ec-border);
+  transform: rotate(45deg);
+}
+
+/* Header/body */
+.dropdown-notify .notify-header{
+  background:#fff;
+  border-bottom:1px solid #f3ecde;
+  color:var(--ec-text);
+}
+.dropdown-notify .notify-body{ max-height: 360px; overflow:auto; }
+.dropdown-notify .notify-item:hover{ background:#fffaf1; }
+
+/* Hover to open on desktop (giống "Hồ sơ") */
+@media (min-width: 992px){
+  .dropdown-notify:hover > .dropdown-menu{
+    display:block;
+  }
+  .dropdown-notify:hover > .dropdown-toggle{
+    color: var(--ec-primary);
+  }
+  /* bridge chống chớp khi đưa chuột từ icon xuống menu */
+  .dropdown-notify{
+    position: relative;
+  }
+  .dropdown-notify::after{
+    content:"";
+    position:absolute;
+    left: 50%; transform: translateX(-50%);
+    top: 100%; width: 120px; height: 14px;
+    background: transparent;
+  }
+}
+
+/* Mobile: vẫn click để mở, không dùng hover */
+@media (max-width: 991.98px){
+  .dropdown-notify .dropdown-menu{ width: calc(100vw - 24px); }
+  .dropdown-notify .dropdown-menu::before{ right: 32px; }
+}
