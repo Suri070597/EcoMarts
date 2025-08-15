@@ -565,10 +565,11 @@ public class ProductServlet extends HttpServlet {
 
                     int productId = Integer.parseInt(request.getParameter("productId"));
                     int boxesToConvert = Integer.parseInt(request.getParameter("boxesToConvert"));
-                    int lonToLoc = 0;
-                    String lonToLocStr = request.getParameter("lonToLoc");
-                    if (lonToLocStr != null && !lonToLocStr.trim().isEmpty()) {
-                        lonToLoc = Integer.parseInt(lonToLocStr);
+                    String conversionType = request.getParameter("conversionType");
+                    int packSize = 0;
+                    String packSizeStr = request.getParameter("packSize");
+                    if (packSizeStr != null && !packSizeStr.trim().isEmpty()) {
+                        packSize = Integer.parseInt(packSizeStr);
                     }
 
                     // Validate input
@@ -590,18 +591,49 @@ public class ProductServlet extends HttpServlet {
                         return;
                     }
 
-                    // Validate lon to loc conversion
-                    if (lonToLoc > 0) {
-                        int totalLon = boxesToConvert * currentProduct.getUnitPerBox();
-                        if (totalLon % lonToLoc != 0) {
-                            jsonOut.print("{\"success\": false, \"message\": \"Số lon không chia hết cho " + lonToLoc
+                    // Validate pack size for pack conversion
+                    if (conversionType.equals("pack")) {
+                        if (packSize <= 0) {
+                            jsonOut.print("{\"success\": false, \"message\": \"Vui lòng nhập số lon = 1 lốc\"}");
+                            return;
+                        }
+                        if (packSize < 2 || packSize >= currentProduct.getUnitPerBox()) {
+                            jsonOut.print("{\"success\": false, \"message\": \"Số đơn vị/lốc phải từ 2 đến "
+                                    + (currentProduct.getUnitPerBox() - 1)
+                                    + ". Không thể tạo lốc có số đơn vị bằng hoặc lớn hơn số đơn vị trong thùng\"}");
+                            return;
+                        }
+
+                        int totalUnits = boxesToConvert * currentProduct.getUnitPerBox();
+                        if (totalUnits % packSize != 0) {
+                            jsonOut.print("{\"success\": false, \"message\": \"Số đơn vị không chia hết cho " + packSize
+                                    + "\"}");
+                            return;
+                        }
+                    } else if (conversionType.equals("both")) {
+                        // Bắt buộc nhập số lon = 1 lốc khi chọn chuyển đổi cả 2
+                        if (packSize <= 0) {
+                            jsonOut.print(
+                                    "{\"success\": false, \"message\": \"Khi chọn chuyển đổi cả 2, vui lòng nhập số lon = 1 lốc\"}");
+                            return;
+                        }
+                        if (packSize < 2 || packSize >= currentProduct.getUnitPerBox()) {
+                            jsonOut.print("{\"success\": false, \"message\": \"Số đơn vị/lốc phải từ 2 đến "
+                                    + (currentProduct.getUnitPerBox() - 1)
+                                    + ". Không thể tạo lốc có số đơn vị bằng hoặc lớn hơn số đơn vị trong thùng\"}");
+                            return;
+                        }
+
+                        int totalUnits = boxesToConvert * currentProduct.getUnitPerBox();
+                        if (totalUnits % packSize != 0) {
+                            jsonOut.print("{\"success\": false, \"message\": \"Số đơn vị không chia hết cho " + packSize
                                     + "\"}");
                             return;
                         }
                     }
 
                     // Perform conversion
-                    boolean success = dao.convertUnits(productId, boxesToConvert, lonToLoc);
+                    boolean success = dao.convertUnits(productId, boxesToConvert, conversionType, packSize);
 
                     if (success) {
                         jsonOut.print("{\"success\": true, \"message\": \"Chuyển đổi thành công\"}");

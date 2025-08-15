@@ -182,6 +182,8 @@ CREATE TABLE ProductUnitConversion (
     UnitsPerPackChange INT NULL, -- Số lượng lốc trong 1 thùng sau khi chuyển đổi
     UnitPrice DECIMAL(18,2) NULL, -- Giá của 1 đơn vị nhỏ
     PackPrice DECIMAL(18,2) NULL, -- Giá của 1 lốc
+    BoxQuantity INT NULL, -- Số lượng thùng sử dụng trong lần chuyển đổi
+    PackSize INT NULL, -- Số đơn vị trong 1 lốc tại thời điểm chuyển đổi (nếu có)
     ConversionDate DATETIME NOT NULL DEFAULT GETDATE(), -- Thời gian chuyển đổi
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE
     -- Bỏ UNIQUE constraint để cho phép nhiều chuyển đổi

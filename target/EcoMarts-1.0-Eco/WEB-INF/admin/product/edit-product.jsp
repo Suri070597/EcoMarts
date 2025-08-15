@@ -86,7 +86,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Số lượng tồn kho (kg)</label>
-                            <input type="number" min="0" step="0.01" class="form-control" name="fruitQuantity" value="<%= Math.round(mo.getStockQuantity())%>" required />
+                            <input type="number" min="0" step="0.01" class="form-control" name="fruitQuantity" value="<%= mo.getStockQuantity()%>" required />
                         </div>
                         <% } else {%>
                         <div class="mb-3">

@@ -122,9 +122,9 @@
                                                     }
                                                 %>
                                             </td></tr>
-                                                                                 <tr><th>Số lượng trong 1 thùng:</th><td><%= product.getUnitPerBox()%> <%= product.getItemUnitName()%> / <%= product.getBoxUnitName()%></td></tr>
-                                         <tr><th>Đơn vị nhỏ nhất:</th><td><%= product.getItemUnitName()%></td></tr>
-                                        <% }%>
+                                        <tr><th>Số lượng trong 1 thùng:</th><td><%= product.getUnitPerBox()%> <%= product.getItemUnitName()%> / <%= product.getBoxUnitName()%></td></tr>
+                                        <tr><th>Đơn vị nhỏ nhất:</th><td><%= product.getItemUnitName()%></td></tr>
+                                                <% }%>
                                         <tr><th>Trạng thái:</th>
                                             <td>
                                                 <% if (product.getStockQuantity() <= 0) { %>
@@ -156,7 +156,7 @@
                                         <tr><th>Mô tả:</th>
                                             <td style="white-space: pre-line;"><%= product.getDescription()%></td>
                                         </tr>
-                                                                         </table>
+                                    </table>
                                 </div>
                             </div>
                         </div>
