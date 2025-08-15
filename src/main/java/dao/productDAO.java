@@ -13,7 +13,11 @@ import java.util.Date;
 import java.util.List;
 
 import db.DBContext;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import model.Category;
 import model.InventoryTransaction;
 import model.Product;
@@ -570,8 +574,8 @@ public class ProductDAO extends DBContext {
 
     /**
      * Update product stock quantity
-     * 
-     * @param productId        The product ID
+     *
+     * @param productId The product ID
      * @param newStockQuantity The new stock quantity to set
      * @return true if update was successful, false otherwise
      */
@@ -586,6 +590,118 @@ public class ProductDAO extends DBContext {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<Product> getProductsByCategoryId(int categoryId) {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT * FROM Product WHERE category_id = ?";
+
+        // Tạo đối tượng DBContext
+        DBContext dbContext = new DBContext();
+
+        try (Connection conn = dbContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, categoryId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product();
+                    product.setProductID(rs.getInt("product_id"));
+                    product.setProductName(rs.getString("product_name"));
+                    product.setPrice(rs.getDouble("price"));
+                    // Set các field khác nếu cần
+                    products.add(product);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            dbContext.closeConnection(); // đóng kết nối khi xong
+        }
+
+        return products;
+    }
+
+    public List<Product> getAllProducts() {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT * FROM Category";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                list.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Product> getProductsByCategory(int categoryId) {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT ProductID, ProductName, StockQuantity, Price, ImageURL, ItemUnitName, BoxUnitName, UnitPerBox, Unit FROM Product WHERE CategoryID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product p = new Product();
+                    p.setProductID(rs.getInt("ProductID"));
+                    p.setProductName(rs.getString("ProductName"));
+                    p.setStockQuantity(rs.getInt("StockQuantity"));
+                    p.setPrice(rs.getDouble("Price"));
+                    p.setImageURL(rs.getString("ImageURL"));
+                    // set unit fields for UI dropdown
+                    p.setItemUnitName(rs.getString("ItemUnitName"));
+                    p.setBoxUnitName(rs.getString("BoxUnitName"));
+                    p.setUnitPerBox(rs.getInt("UnitPerBox"));
+                    p.setUnit(rs.getString("Unit"));
+                    products.add(p);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return products;
+    }
+
+    public Map<Integer, List<Product>> getProductsGroupedByParent() {
+        Map<Integer, List<Product>> groupedData = new LinkedHashMap<>();
+        String sql = """
+        SELECT c.CategoryID, c.ParentID, c.CategoryName,
+               p.ProductID, p.ProductName, p.Price, p.StockQuantity, p.ImageURL
+        FROM Category c
+        LEFT JOIN Product p ON c.CategoryID = p.CategoryID
+        ORDER BY c.CategoryID;
+    """;
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                // Lấy ParentID an toàn, null sẽ trở thành null chứ không phải 0
+                Integer parentId = rs.getObject("ParentID", Integer.class);
+
+                Product product = new Product();
+                product.setProductID(rs.getInt("ProductID"));
+                product.setProductName(rs.getString("ProductName"));
+                product.setStockQuantity(rs.getInt("StockQuantity"));
+                product.setImageURL(rs.getString("ImageURL"));
+
+                groupedData.computeIfAbsent(parentId, k -> new ArrayList<>()).add(product);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return groupedData;
     }
 
 }

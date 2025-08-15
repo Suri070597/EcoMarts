@@ -12,6 +12,7 @@ import java.util.List;
 import model.Supplier;
 import db.DBContext;
 import java.sql.Connection;
+import javax.sound.midi.Receiver;
 
 /**
  *
@@ -236,4 +237,6 @@ public class SupplierDAO extends DBContext {
         supplier.setStatus(rs.getInt("Status"));
         return supplier;
     }
+
+    
 }

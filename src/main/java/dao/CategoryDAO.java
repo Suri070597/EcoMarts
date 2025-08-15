@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import model.Category;
 import db.DBContext;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -20,8 +21,8 @@ public class CategoryDAO extends DBContext {
             ResultSet rs = execSelectQuery(parentSql);
             while (rs.next()) {
                 int id = rs.getInt("CategoryID");
-                Category parent = new Category(id, rs.getString("CategoryName"), 
-                        null, 
+                Category parent = new Category(id, rs.getString("CategoryName"),
+                        null,
                         rs.getString("ImageURL"));
                 parent.setChildren(getChildCategories(id));
                 parents.add(parent);
@@ -111,4 +112,26 @@ public class CategoryDAO extends DBContext {
             e.printStackTrace();
         }
     }
+
+    public List<Category> getAllCategories() {
+        List<Category> categories = new ArrayList<>();
+        String sql = "SELECT CategoryID, CategoryName, ParentID FROM Category ORDER BY CategoryID";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Category c = new Category();
+                c.setCategoryID(rs.getInt("CategoryID"));
+                c.setCategoryName(rs.getString("CategoryName"));
+                c.setParentID(rs.getInt("ParentID"));
+                categories.add(c);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return categories;
+    }
+
 }
