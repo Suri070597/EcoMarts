@@ -921,7 +921,8 @@ public class ProductDAO extends DBContext {
                         }
                         packCount = totalUnits / packSize;
                         packPrice = unitPrice * packSize;
-                        unitCount = 0;
+                        // Khi chuyển đổi cả hai, tạo cả lon và lốc
+                        unitCount = totalUnits;
                     }
                     break;
                 default:
@@ -1201,25 +1202,39 @@ public class ProductDAO extends DBContext {
             }
 
             if (packCount != null && packCount > 0 && packPrice != null) {
-                String sqlPack = "MERGE Inventory AS target "
-                        + "USING (SELECT ? AS ProductID, 'PACK' AS PackageType, ? AS PackSize) AS source "
-                        + "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType AND target.PackSize = source.PackSize) "
-                        + "WHEN MATCHED THEN "
-                        + "    UPDATE SET Quantity = Quantity + ?, UnitPrice = ?, LastUpdated = GETDATE() "
-                        + "WHEN NOT MATCHED THEN "
-                        + "    INSERT (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) "
-                        + "    VALUES (?, 'PACK', ?, ?, ?, GETDATE());";
+                // Kiểm tra xem đã có PACK với PackSize này chưa
+                String sqlCheckPack = "SELECT Quantity FROM Inventory WHERE ProductID = ? AND PackageType = 'PACK' AND PackSize = ?";
+                double currentPackQuantity = 0;
+                try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckPack)) {
+                    psCheck.setInt(1, productId);
+                    psCheck.setInt(2, packSize);
+                    ResultSet rs = psCheck.executeQuery();
+                    if (rs.next()) {
+                        currentPackQuantity = rs.getDouble("Quantity");
+                    }
+                }
 
-                try (PreparedStatement ps = conn.prepareStatement(sqlPack)) {
-                    ps.setInt(1, productId);
-                    ps.setInt(2, packSize);
-                    ps.setInt(3, packCount);
-                    ps.setDouble(4, packPrice);
-                    ps.setInt(5, productId);
-                    ps.setInt(6, packCount);
-                    ps.setDouble(7, packPrice);
-                    ps.setInt(8, packSize);
-                    ps.executeUpdate();
+                // Cập nhật hoặc thêm mới PACK
+                if (currentPackQuantity > 0) {
+                    String sqlUpdatePack = "UPDATE Inventory SET Quantity = ?, UnitPrice = ?, LastUpdated = GETDATE() "
+                            + "WHERE ProductID = ? AND PackageType = 'PACK' AND PackSize = ?";
+                    try (PreparedStatement ps = conn.prepareStatement(sqlUpdatePack)) {
+                        ps.setDouble(1, currentPackQuantity + packCount);
+                        ps.setDouble(2, packPrice);
+                        ps.setInt(3, productId);
+                        ps.setInt(4, packSize);
+                        ps.executeUpdate();
+                    }
+                } else {
+                    String sqlInsertPack = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) "
+                            + "VALUES (?, 'PACK', ?, ?, ?, GETDATE())";
+                    try (PreparedStatement ps = conn.prepareStatement(sqlInsertPack)) {
+                        ps.setInt(1, productId);
+                        ps.setDouble(2, packCount);
+                        ps.setDouble(3, packPrice);
+                        ps.setInt(4, packSize);
+                        ps.executeUpdate();
+                    }
                 }
             }
 
