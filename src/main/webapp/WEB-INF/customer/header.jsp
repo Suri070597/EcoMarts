@@ -176,13 +176,7 @@
                 <span class="badge-notification"><%= unreadCount%></span>
                 <% }%>
             </a>
-            <!-- Icon giỏ hàng -->
-            <a style="margin-right: -23px;" href="<%= request.getContextPath()%>/cart">
-                <i  class="fas fa-shopping-cart"></i>
-                <% if (cartItemCount > 0) {%>
-                <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
-                <% } %>
-            </a>
+
             <div class="dropdown-menu dropdown-menu-end dropdown-notify-menu p-0">
                 <div class="notify-header d-flex justify-content-between align-items-center px-3 py-2">
                     <strong>Thông báo</strong>
@@ -220,6 +214,15 @@
             </div>
         </div>
 
+        <!-- Icon giỏ hàng -->
+        <div>
+            <a style="margin-right: -23px;" href="<%= request.getContextPath()%>/cart">
+                <i  class="fas fa-shopping-cart"></i>
+                <% if (cartItemCount > 0) {%>
+                <span class="badge bg-danger rounded-pill"><%= cartItemCount%></span>
+                <% }%>
+            </a>
+        </div>
 
         <!-- Dropdown hồ sơ -->
         <div class="dropdown profile-dropdown">
