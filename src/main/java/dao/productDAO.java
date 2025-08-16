@@ -14,6 +14,7 @@ import java.util.List;
 
 import db.DBContext;
 import java.sql.SQLException;
+import java.util.Collections;
 import model.Category;
 import model.InventoryTransaction;
 import model.Product;
@@ -570,8 +571,8 @@ public class ProductDAO extends DBContext {
 
     /**
      * Update product stock quantity
-     * 
-     * @param productId        The product ID
+     *
+     * @param productId The product ID
      * @param newStockQuantity The new stock quantity to set
      * @return true if update was successful, false otherwise
      */
@@ -586,6 +587,30 @@ public class ProductDAO extends DBContext {
             e.printStackTrace();
             return false;
         }
+    }
+
+    //====================
+    //đừng xóa tôi có sài
+    //==========================
+
+public List<Integer> getProductIdsByCategoryIdsExpanded(List<Integer> categoryIds) {
+        List<Integer> result = new ArrayList<>();
+        if (categoryIds == null || categoryIds.isEmpty()) return result;
+
+        // Chunk nếu cần (ví dụ 500 id mỗi lần)
+        final int CHUNK = 500;
+        for (int offset = 0; offset < categoryIds.size(); offset += CHUNK) {
+            List<Integer> part = categoryIds.subList(offset, Math.min(offset + CHUNK, categoryIds.size()));
+            String placeholders = String.join(",", Collections.nCopies(part.size(), "?"));
+            String sql = "SELECT ProductID FROM Product WHERE CategoryID IN (" + placeholders + ")";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                for (int i = 0; i < part.size(); i++) ps.setInt(i + 1, part.get(i));
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) result.add(rs.getInt(1));
+                }
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return result;
     }
 
 }

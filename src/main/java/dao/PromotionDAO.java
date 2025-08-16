@@ -1,15 +1,25 @@
 package dao;
 
 import db.DBContext;
+import model.Category;
 import model.Promotion;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * PromotionDAO - Phiên bản đồng bộ với schema:
+ *  - Bảng Promotion có cột CategoryID (FK -> Category.CategoryID).
+ *  - Cột scope trong Promotion là "applyScope" (chữ a thường).
+ *  - Dùng alias ổn định để đọc ResultSet: PromoType, ApplyScope, CatID, CatName.
+ */
 public class PromotionDAO extends DBContext {
 
-    // --- Utility mapping ---
-    private Promotion mapResultSetToPromotion(ResultSet rs) throws SQLException {
+    // ======================
+    // Row mapper
+    // ======================
+    private Promotion mapRow(ResultSet rs) throws SQLException {
         Promotion p = new Promotion();
         p.setPromotionID(rs.getInt("PromotionID"));
         p.setPromotionName(rs.getString("PromotionName"));
@@ -18,194 +28,284 @@ public class PromotionDAO extends DBContext {
         p.setStartDate(rs.getTimestamp("StartDate"));
         p.setEndDate(rs.getTimestamp("EndDate"));
         p.setActive(rs.getBoolean("IsActive"));
+
+        // Đọc bằng nhãn alias ổn định
+        p.setPromoType(rs.getInt("PromoType"));
+        p.setApplyScope(rs.getInt("ApplyScope"));
+
+        // Map Category (nếu có CatID)
+        Category c = null;
+        int catId;
+        try {
+            catId = rs.getInt("CatID");
+            if (!rs.wasNull()) {
+                c = new Category();
+                c.setCategoryID(catId);
+                try { c.setCategoryName(rs.getString("CatName")); } catch (SQLException ignore) {}
+            }
+        } catch (SQLException ignore) {
+            // SELECT có thể không alias CatID/CatName (trường hợp không JOIN)
+        }
+        p.setCategory(c);
+
         return p;
     }
 
-    private List<Promotion> getPromotionsFromQuery(String sql, Object... params) {
-        List<Promotion> list = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            for (int i = 0; i < params.length; i++) {
-                ps.setObject(i + 1, params[i]);
-            }
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapResultSetToPromotion(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
+    // ======================
+    // Queries
+    // ======================
 
-    // --- CRUD ---
+    /** Lấy toàn bộ promotions, order mới nhất */
     public List<Promotion> getAllPromotions() {
-        return getPromotionsFromQuery("SELECT * FROM Promotion ORDER BY PromotionID");
-    }
-
-    public Promotion getPromotionById(int id) {
-        List<Promotion> result = getPromotionsFromQuery("SELECT * FROM Promotion WHERE PromotionID = ?", id);
-        return result.isEmpty() ? null : result.get(0);
-    }
-
-    public boolean insertPromotion(Promotion p) {
-        String sql = "INSERT INTO Promotion (PromotionName, Description, DiscountPercent, StartDate, EndDate, IsActive) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, p.getPromotionName());
-            ps.setString(2, p.getDescription());
-            ps.setDouble(3, p.getDiscountPercent());
-            ps.setTimestamp(4, p.getStartDate());
-            ps.setTimestamp(5, p.getEndDate());
-            ps.setBoolean(6, p.isActive());
-            return ps.executeUpdate() > 0;
+        String sql = """
+            SELECT 
+              p.PromotionID,
+              p.PromotionName,
+              p.Description,
+              p.DiscountPercent,
+              p.StartDate,
+              p.EndDate,
+              p.IsActive,
+              p.PromoType       AS PromoType,
+              p.applyScope      AS ApplyScope,
+              c.CategoryID      AS CatID,
+              c.CategoryName    AS CatName
+            FROM Promotion p
+            LEFT JOIN Category c ON p.CategoryID = c.CategoryID
+            ORDER BY p.PromotionID DESC
+        """;
+        List<Promotion> out = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) out.add(mapRow(rs));
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return out;
     }
 
-    public boolean updatePromotion(Promotion p) {
-        String sql = "UPDATE Promotion SET PromotionName = ?, Description = ?, DiscountPercent = ?, StartDate = ?, EndDate = ?, IsActive = ? WHERE PromotionID = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, p.getPromotionName());
-            ps.setString(2, p.getDescription());
-            ps.setDouble(3, p.getDiscountPercent());
-            ps.setTimestamp(4, p.getStartDate());
-            ps.setTimestamp(5, p.getEndDate());
-            ps.setBoolean(6, p.isActive());
-            ps.setInt(7, p.getPromotionID());
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+    /**
+     * Danh sách có filter + phân trang.
+     * @param q         tìm theo tên/description (LIKE)
+     * @param promoType null = bỏ lọc
+     * @param status    null = bỏ lọc; 0/1 -> false/true
+     * @param from      lọc EndDate >= from
+     * @param to        lọc StartDate <= to
+     * @param page      1-based; <=0 sẽ bỏ phân trang
+     * @param size      >0; <=0 sẽ bỏ phân trang
+     */
+    public List<Promotion> list(String q, Integer promoType, Integer status,
+                                Timestamp from, Timestamp to, int page, int size) {
+
+        StringBuilder sb = new StringBuilder("""
+            SELECT 
+              p.PromotionID,
+              p.PromotionName,
+              p.Description,
+              p.DiscountPercent,
+              p.StartDate,
+              p.EndDate,
+              p.IsActive,
+              p.PromoType       AS PromoType,
+              p.applyScope      AS ApplyScope,
+              c.CategoryID      AS CatID,
+              c.CategoryName    AS CatName
+            FROM Promotion p
+            LEFT JOIN Category c ON p.CategoryID = c.CategoryID
+            WHERE 1=1
+        """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (q != null && !q.isBlank()) {
+            sb.append(" AND (p.PromotionName LIKE ? OR p.Description LIKE ?)");
+            String k = "%" + q.trim() + "%";
+            params.add(k); params.add(k);
         }
-    }
-
-    public boolean deletePromotion(int id) {
-        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM Promotion WHERE PromotionID = ?")) {
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+        if (promoType != null) {
+            sb.append(" AND p.PromoType = ?");
+            params.add(promoType);
         }
-    }
+        if (status != null) {
+            sb.append(" AND p.IsActive = ?");
+            params.add(status == 1);
+        }
+        if (from != null) {
+            sb.append(" AND p.EndDate >= ?");
+            params.add(from);
+        }
+        if (to != null) {
+            sb.append(" AND p.StartDate <= ?");
+            params.add(to);
+        }
 
-    public List<Promotion> searchPromotions(String keyword) {
-        return getPromotionsFromQuery("SELECT * FROM Promotion WHERE PromotionName LIKE ? OR Description LIKE ? ORDER BY PromotionID", "%" + keyword + "%", "%" + keyword + "%");
-    }
+        // ORDER BY bắt buộc nếu dùng OFFSET/FETCH
+        sb.append(" ORDER BY p.EndDate ASC, p.PromotionID DESC ");
 
-    public int countPromotions() {
-        try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM Promotion")) {
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
+        boolean usePaging = page > 0 && size > 0;
+        if (usePaging) {
+            sb.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
+        }
+
+        List<Promotion> out = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sb.toString())) {
+            int idx = 1;
+            for (Object param : params) ps.setObject(idx++, param);
+            if (usePaging) {
+                int offset = Math.max(0, (page - 1) * size);
+                ps.setInt(idx++, offset);
+                ps.setInt(idx, size);
             }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) out.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return out;
+    }
+
+    /** Lấy 1 promotion theo ID */
+    public Promotion getPromotionById(int id) {
+        String sql = """
+            SELECT 
+              p.PromotionID,
+              p.PromotionName,
+              p.Description,
+              p.DiscountPercent,
+              p.StartDate,
+              p.EndDate,
+              p.IsActive,
+              p.PromoType       AS PromoType,
+              p.applyScope      AS ApplyScope,
+              c.CategoryID      AS CatID,
+              c.CategoryName    AS CatName
+            FROM Promotion p
+            LEFT JOIN Category c ON p.CategoryID = c.CategoryID
+            WHERE p.PromotionID = ?
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapRow(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /** Đếm tổng số promotion (không filter) */
+    public int countPromotions() {
+        String sql = "SELECT COUNT(*) FROM Promotion";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return 0;
     }
 
+    // ======================
+    // Mutations
+    // ======================
+
+    /** Thêm mới, trả ID sinh ra; -1 nếu thất bại */
+    public int insertPromotionReturningId(Promotion p) {
+        String sql = """
+            INSERT INTO Promotion
+              (PromotionName, Description, DiscountPercent, StartDate, EndDate,
+               IsActive, PromoType, ApplyScope, CategoryID)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, p.getPromotionName());
+            ps.setString(2, p.getDescription());
+            ps.setDouble(3, p.getDiscountPercent());
+            ps.setTimestamp(4, p.getStartDate());
+            ps.setTimestamp(5, p.getEndDate());
+            ps.setBoolean(6, p.isActive());
+            ps.setInt(7, p.getPromoType());
+            ps.setInt(8, p.getApplyScope());
+
+            if (p.getApplyScope() == Promotion.SCOPE_CATEGORY && p.getCategory() != null) {
+                ps.setInt(9, p.getCategory().getCategoryID());
+            } else {
+                ps.setNull(9, Types.INTEGER);
+            }
+
+            int affected = ps.executeUpdate();
+            if (affected == 0) return -1;
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) return keys.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    /** Cập nhật theo ID; true nếu thành công */
+    public boolean updatePromotion(Promotion p) {
+        String sql = """
+            UPDATE Promotion
+               SET PromotionName=?, Description=?, DiscountPercent=?, StartDate=?, EndDate=?,
+                   IsActive=?, PromoType=?, ApplyScope=?, CategoryID=?
+             WHERE PromotionID=?
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, p.getPromotionName());
+            ps.setString(2, p.getDescription());
+            ps.setDouble(3, p.getDiscountPercent());
+            ps.setTimestamp(4, p.getStartDate());
+            ps.setTimestamp(5, p.getEndDate());
+            ps.setBoolean(6, p.isActive());
+            ps.setInt(7, p.getPromoType());
+            ps.setInt(8, p.getApplyScope());
+            if (p.getApplyScope() == Promotion.SCOPE_CATEGORY && p.getCategory() != null) {
+                ps.setInt(9, p.getCategory().getCategoryID());
+            } else {
+                ps.setNull(9, Types.INTEGER);
+            }
+            ps.setInt(10, p.getPromotionID());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /** Xoá theo ID; xoá mapping sản phẩm trước nếu có */
+    public boolean deletePromotion(int id) {
+        clearProductAssignments(id);
+        String sql = "DELETE FROM Promotion WHERE PromotionID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /** Bật/tắt IsActive */
     public boolean updatePromotionStatus(int id, boolean active) {
-        try (PreparedStatement ps = conn.prepareStatement("UPDATE Promotion SET IsActive = ? WHERE PromotionID = ?")) {
+        String sql = "UPDATE Promotion SET IsActive=? WHERE PromotionID=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBoolean(1, active);
             ps.setInt(2, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
-    // --- Product-Promotion Assignments ---
-    public List<Integer> updateProductAssignments(int promotionID, String[] productIDs) {
-        List<Integer> failed = new ArrayList<>();
-        String deleteOldSQL = "DELETE FROM Product_Promotion WHERE ProductID = ?";
-        String insertSQL = "INSERT INTO Product_Promotion (ProductID, PromotionID) VALUES (?, ?)";
-        if (productIDs == null || productIDs.length == 0) {
-            return failed;
-        }
-
-        try {
-            conn.setAutoCommit(false);
-            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteOldSQL); PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
-
-                for (String pidStr : productIDs) {
-                    int productID = Integer.parseInt(pidStr);
-
-                    deleteStmt.setInt(1, productID);
-                    deleteStmt.executeUpdate();
-
-                    insertStmt.setInt(1, productID);
-                    insertStmt.setInt(2, promotionID);
-                    insertStmt.addBatch();
-                }
-                insertStmt.executeBatch();
-                conn.commit();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            try {
-                conn.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-        } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return failed;
-    }
-
-    public List<Integer> getAssignedProductIDsByPromotion(int promotionID) {
-        List<Integer> list = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement("SELECT ProductID FROM Product_Promotion WHERE PromotionID = ?")) {
-            ps.setInt(1, promotionID);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(rs.getInt("ProductID"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public Promotion getValidPromotionForProduct(int productID) {
-        String sql = """
-            SELECT TOP 1 pr.* FROM Promotion pr
-            JOIN Product_Promotion pp ON pr.PromotionID = pp.PromotionID
-            WHERE pp.ProductID = ? AND pr.IsActive = 1
-              AND pr.StartDate <= GETDATE() AND pr.EndDate >= GETDATE()
-            ORDER BY pr.EndDate DESC
-        """;
-        List<Promotion> result = getPromotionsFromQuery(sql, productID);
-        return result.isEmpty() ? null : result.get(0);
-    }
-
-    public List<Object[]> getProductPromotionInfoExcept(int currentPromotionID) {
-        List<Object[]> result = new ArrayList<>();
-        String sql = """
-            SELECT pp.ProductID, pr.PromotionName
-            FROM Product_Promotion pp
-            JOIN Promotion pr ON pp.PromotionID = pr.PromotionID
-            WHERE pr.IsActive = 1 AND pr.EndDate > GETDATE()
-              AND pr.PromotionID != ?
-        """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, currentPromotionID);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                result.add(new Object[]{rs.getInt("ProductID"), rs.getString("PromotionName")});
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
+    // ======================
+    // Product assignments
+    // ======================
 
     public void clearProductAssignments(int promotionID) {
         String sql = "DELETE FROM Product_Promotion WHERE PromotionID = ?";
@@ -217,4 +317,106 @@ public class PromotionDAO extends DBContext {
         }
     }
 
+    /** Gán danh sách sản phẩm cho promotion; trả list id thất bại (nếu có) */
+    public List<Integer> updateProductAssignments(int promotionID, String[] productIDs) {
+        clearProductAssignments(promotionID);
+        List<Integer> failed = new ArrayList<>();
+        if (productIDs == null || productIDs.length == 0) return failed;
+
+        String insertSQL = "INSERT INTO Product_Promotion (ProductID, PromotionID) VALUES (?, ?)";
+        try {
+            conn.setAutoCommit(false);
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
+                for (String pidStr : productIDs) {
+                    try {
+                        int productID = Integer.parseInt(pidStr);
+                        insertStmt.setInt(1, productID);
+                        insertStmt.setInt(2, promotionID);
+                        insertStmt.addBatch();
+                    } catch (Exception ex) {
+                        failed.add(-1);
+                    }
+                }
+                insertStmt.executeBatch();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                e.printStackTrace();
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return failed;
+    }
+
+    public int countAssignedProducts(int promotionId) {
+        String sql = "SELECT COUNT(*) FROM Product_Promotion WHERE PromotionID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, promotionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Lấy promotion hợp lệ (đang active & trong thời gian) áp cho 1 sản phẩm.
+     * JOIN bảng mapping Product_Promotion (không cần Category ở đây).
+     */
+    public Promotion getValidPromotionForProduct(int productID) {
+        String sql = """
+            SELECT TOP 1 
+              p.PromotionID,
+              p.PromotionName,
+              p.Description,
+              p.DiscountPercent,
+              p.StartDate,
+              p.EndDate,
+              p.IsActive,
+              p.PromoType       AS PromoType,
+              p.applyScope      AS ApplyScope
+            FROM Promotion p
+            JOIN Product_Promotion pp ON p.PromotionID = pp.PromotionID
+            WHERE pp.ProductID = ?
+              AND p.IsActive = 1
+              AND p.StartDate <= GETDATE()
+              AND p.EndDate   >= GETDATE()
+            ORDER BY p.EndDate DESC
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapRow(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // ======================
+    // Main test nhanh
+    // ======================
+    public static void main(String[] args) {
+        try {
+            PromotionDAO dao = new PromotionDAO();
+
+            System.out.println("===== TEST list() không filter =====");
+            List<Promotion> list = dao.list(null, null, null, null, null, 1, 50);
+            System.out.println("Tổng số khuyến mãi lấy được = " + list.size());
+            for (Promotion p : list) System.out.println(p);
+
+            System.out.println("\n===== TEST getPromotionById(1) =====");
+            Promotion one = dao.getPromotionById(1);
+            System.out.println(one != null ? one : "Không tìm thấy ID=1");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
