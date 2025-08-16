@@ -92,7 +92,7 @@
                                        }
                                     %>
                                     </td>
-                                    <td><%= pro.getUnit()%></td>
+                                    <td><%= pro.getBoxUnitName()%></td>
                                     <td>
                                         <% if (pro.getStockQuantity() <= 0) { %>
                                             <span class="badge bg-danger">Hết hàng</span>
