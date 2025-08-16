@@ -45,18 +45,21 @@
 
                     <div class="dashboard-stats row m-2">
                         <div class="col-md-10">
-                            <div class="stat-card d-flex align-items-center p-3 bg-light rounded">
-                                <div class="stat-icon bg-primary text-white rounded-circle p-3 me-3">
-                                    <i class="fas fa-clipboard-list"></i>
+                            <a href="${pageContext.request.contextPath}/staff/order" class="text-decoration-none text-reset">
+                                <div class="stat-card d-flex align-items-center p-3 bg-light rounded">
+                                    <div class="stat-icon bg-primary text-white rounded-circle p-3 me-3">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                    <div>
+                                        <h5>${total}</h5>
+                                        <p class="mb-0">Tổng đơn hàng</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h5>${total}</h5>
-                                    <p class="mb-0">Tổng đơn hàng</p>
-                                </div>
-                            </div>
+                            </a>
                         </div>
                         <div class="col-md-10">
-                            <div class="stat-card d-flex align-items-center p-3 bg-light rounded">
+                            <a href="${pageContext.request.contextPath}/staff/order?status=Đã giao" class="text-decoration-none text-reset">
+                                <div class="stat-card d-flex align-items-center p-3 bg-light rounded">
                                 <div class="stat-icon bg-success text-white rounded-circle p-3 me-3">
                                     <i class="fas fa-truck"></i>
                                 </div>
@@ -64,10 +67,12 @@
                                     <h5>${delivered}</h5>
                                     <p class="mb-0">Đơn hàng đã giao</p>
                                 </div>
-                            </div>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-md-10">
-                            <div class="stat-card d-flex align-items-center p-3 bg-light rounded">
+                            <a href="${pageContext.request.contextPath}/staff/order?status=Đã hủy" class="text-decoration-none text-reset">
+                                <div class="stat-card d-flex align-items-center p-3 bg-light rounded">
                                 <div class="stat-icon bg-danger text-white rounded-circle p-3 me-3">
                                     <i class="fas fa-times-circle"></i>
                                 </div>
@@ -75,7 +80,8 @@
                                     <h5>${cancelled}</h5>
                                     <p class="mb-0">Đơn hàng đã hủy</p>
                                 </div>
-                            </div>
+                                </div>
+                            </a>
                         </div>
 
                     </div>
@@ -99,12 +105,42 @@
                                         <td>${o.accountName}</td>
                                         <td><fmt:formatDate value="${o.orderDate}" pattern="yyyy-MM-dd HH:mm" /></td>
                                         <td>
-                                            <span class="badge ${o.orderStatus eq 'Delivered' ? 'bg-success' : 'bg-secondary'}">
-                                                ${o.orderStatus}
-                                            </span>
+                                            <c:choose>
+                                                <c:when test="${o.orderStatus == 'Đang xử lý'}">
+                                                    <span class="badge bg-warning text-dark">${o.orderStatus}</span>
+                                                </c:when>
+                                                <c:when test="${o.orderStatus == 'Đang giao hàng' || o.orderStatus == 'Đang giao'}">
+                                                    <span class="badge bg-info text-dark">${o.orderStatus}</span>
+                                                </c:when>
+                                                <c:when test="${o.orderStatus == 'Đã giao'}">
+                                                    <span class="badge bg-success">${o.orderStatus}</span>
+                                                </c:when>
+                                                <c:when test="${o.orderStatus == 'Đã hủy'}">
+                                                    <span class="badge bg-danger">${o.orderStatus}</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-secondary">${o.orderStatus}</span>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </td>
                                         <td class="price">
-                                            <fmt:formatNumber value="${o.grandTotal}" type="number" groupingUsed="true" /> đ
+                                            <c:choose>
+                                                <c:when test="${not empty o.grandTotal}">
+                                                    <fmt:formatNumber value="${o.grandTotal}" type="number" groupingUsed="true" /> đ
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <%
+                                                        dao.OrderDAO _orderDAO = new dao.OrderDAO();
+                                                        model.Order _curr = (model.Order) pageContext.findAttribute("o");
+                                                        double _totalAfterDiscount = _curr != null ? _curr.getTotalAmount() : 0.0;
+                                                        double _discount = _orderDAO.getDiscountAmountByOrderID(_curr.getOrderID()).doubleValue();
+                                                        double _subtotal = _totalAfterDiscount + _discount;
+                                                        double _vat = _subtotal * 0.08;
+                                                        double _grandTotal = _totalAfterDiscount + _vat;
+                                                    %>
+                                                    <fmt:formatNumber value="<%= _grandTotal %>" type="number" groupingUsed="true" /> đ
+                                                </c:otherwise>
+                                            </c:choose>
                                         </td>
 
                                         <td class="action">
