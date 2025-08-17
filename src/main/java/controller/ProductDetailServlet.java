@@ -62,7 +62,7 @@ public class ProductDetailServlet extends HttpServlet {
 
             request.setAttribute("mo", mo);
             request.setAttribute("dataCate", dao.getCategory());
-            request.setAttribute("dataSup", dao.getAllSuppliers());
+            request.setAttribute("dataSup", dao.getAllManufacturers());
 
             // Lấy reviewList và orderId nếu có account đăng nhập
             FeedBackDAO fbDao = new FeedBackDAO();

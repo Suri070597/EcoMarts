@@ -7,7 +7,7 @@
 <%@page import="dao.FeedBackDAO"%>
 <%@page import="model.Review"%>
 <%@page import="java.text.SimpleDateFormat"%>
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="java.util.List"%>
 <%@page import="model.Product"%>
@@ -191,7 +191,7 @@
                                 %>
                             </p>
                             <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p>
-                            <p><strong>Nhà Sản Xuất:</strong> <%=mo.getSupplier().getCompanyName()%></p>
+                            <p><strong>Nhà Sản Xuất:</strong> <%=mo.getManufacturer().getCompanyName()%></p>
 
                             <form action="cart" method="post">
                                 <input type="hidden" name="action" value="add">

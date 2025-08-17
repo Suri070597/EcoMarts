@@ -1,4 +1,4 @@
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="model.Product"%>
 <%@page import="java.util.List"%>

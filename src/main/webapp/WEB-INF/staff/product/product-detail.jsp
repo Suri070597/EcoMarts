@@ -100,7 +100,7 @@
                                         <tr><th>Đơn vị nhỏ nhất:</th><td><%= product.getItemUnitName()%></td></tr>
                                                 <% }%>
                                         <tr><th>Danh mục:</th><td><%= product.getCategory() != null ? product.getCategory().getCategoryName() : ""%></td></tr>
-                                        <tr><th>Nhà sản xuất:</th><td><%= product.getSupplier() != null ? product.getSupplier().getCompanyName() : ""%></td></tr>
+                                        <tr><th>Nhà sản xuất:</th><td><%= product.getManufacturer() != null ? product.getManufacturer().getCompanyName() : ""%></td></tr>
                                         <tr><th>Ngày sản xuất:</th>
                                             <td>
                                                 <%= product.getManufactureDate() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(product.getManufactureDate()) : ""%>

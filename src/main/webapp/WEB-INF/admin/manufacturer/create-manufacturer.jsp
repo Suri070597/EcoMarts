@@ -1,5 +1,5 @@
 <%-- 
-    Tài liệu   : create-supplier
+    Tài liệu   : create-manufacturer
     Tạo ngày   : 17/06/2025, 21:53:39
     Tác giả    : ADMIN
 --%>
@@ -29,7 +29,7 @@
                     <c:if test="${not empty errorMessage}">
                         <div class="alert alert-danger" role="alert">${errorMessage}</div>
                     </c:if>
-                    <form method="POST" action="${pageContext.request.contextPath}/admin/supplier" class="needs-validation" novalidate>
+                    <form method="POST" action="${pageContext.request.contextPath}/admin/manufacturer" class="needs-validation" novalidate>
                         <input type="hidden" name="action" value="create">
                         <div class="mb-3">
                             <label class="form-label" for="brandName">Tên thương hiệu</label>
@@ -64,7 +64,7 @@
                             <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
                         </div>
                         <div class="btn-group">
-                            <a href="${pageContext.request.contextPath}/admin/supplier" class="btn btn-secondary">Quay lại</a>
+                            <a href="${pageContext.request.contextPath}/admin/manufacturer" class="btn btn-secondary">Quay lại</a>
                             <button type="submit" class="btn btn-primary">Thêm nhà sản xuất</button>
                         </div>
                     </form>

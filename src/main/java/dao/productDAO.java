@@ -18,7 +18,7 @@ import java.util.Collections;
 import model.Category;
 import model.InventoryTransaction;
 import model.Product;
-import model.Supplier;
+import model.Manufacturer;
 
 /**
  *
@@ -30,7 +30,7 @@ public class ProductDAO extends DBContext {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p \n"
                 + "                                JOIN Category c ON p.categoryID = c.categoryID \n"
-                + "                               JOIN Supplier s ON p.supplierID = s.supplierID";
+                + "                               JOIN Manufacturer s ON p.manufacturerID = s.manufacturerID";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -40,8 +40,8 @@ public class ProductDAO extends DBContext {
                 cat.setCategoryName(rs.getString("categoryName"));
                 cat.setParentID(rs.getInt("parentID"));
 
-                Supplier sup = new Supplier();
-                sup.setSupplierID(rs.getInt("supplierID"));
+                Manufacturer sup = new Manufacturer();
+                sup.setManufacturerID(rs.getInt("manufacturerID"));
                 sup.setCompanyName(rs.getString("CompanyName"));
 
                 Product p = new Product();
@@ -54,7 +54,7 @@ public class ProductDAO extends DBContext {
                 p.setUnit(rs.getString("unit"));
                 p.setCreatedAt(rs.getTimestamp("createdAt"));
                 p.setCategory(cat);
-                p.setSupplier(sup);
+                p.setManufacturer(sup);
 
                 list.add(p);
             }
@@ -68,7 +68,7 @@ public class ProductDAO extends DBContext {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p \n"
                 + "                                JOIN Category c ON p.categoryID = c.categoryID \n"
-                + "                               JOIN Supplier s ON p.supplierID = s.supplierID";
+                + "                               JOIN Manufacturer s ON p.manufacturerID = s.manufacturerID";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -78,8 +78,8 @@ public class ProductDAO extends DBContext {
                 cat.setCategoryName(rs.getString("categoryName"));
                 cat.setParentID(rs.getInt("parentID"));
 
-                Supplier sup = new Supplier();
-                sup.setSupplierID(rs.getInt("supplierID"));
+                Manufacturer sup = new Manufacturer();
+                sup.setManufacturerID(rs.getInt("manufacturerID"));
                 sup.setCompanyName(rs.getString("CompanyName"));
 
                 Product p = new Product();
@@ -92,7 +92,7 @@ public class ProductDAO extends DBContext {
                 p.setUnit(rs.getString("unit"));
                 p.setCreatedAt(rs.getTimestamp("createdAt"));
                 p.setCategory(cat);
-                p.setSupplier(sup);
+                p.setManufacturer(sup);
 
                 list.add(p);
             }
@@ -104,7 +104,7 @@ public class ProductDAO extends DBContext {
 
     public int insert(String name, double price, String description, double quantity,
             String ImageURL, String unit, Timestamp createdAt,
-            int categoryID, int supplierID,
+            int categoryID, int manufacturerID,
             Date manufactureDate, Date expirationDate,
             int unitPerBox, String boxUnitName, String itemUnitName) {
 
@@ -112,7 +112,7 @@ public class ProductDAO extends DBContext {
             price *= 1000;
         }
 
-        String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, supplierID, ManufactureDate, ExpirationDate, UnitPerBox, BoxUnitName, ItemUnitName) "
+        String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, manufacturerID, ManufactureDate, ExpirationDate, UnitPerBox, BoxUnitName, ItemUnitName) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -124,7 +124,7 @@ public class ProductDAO extends DBContext {
             ps.setString(6, unit);
             ps.setTimestamp(7, createdAt);
             ps.setInt(8, categoryID);
-            ps.setInt(9, supplierID);
+            ps.setInt(9, manufacturerID);
             ps.setDate(10, new java.sql.Date(manufactureDate.getTime()));
             ps.setDate(11, new java.sql.Date(expirationDate.getTime()));
             ps.setInt(12, unitPerBox);
@@ -141,11 +141,11 @@ public class ProductDAO extends DBContext {
 
     // public Product getProductById(int id) {
     // Product product = null;
-    // String sql = "SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID,
+    // String sql = "SELECT p.*, c.CategoryName, c.ParentID, s.ManufacturerID,
     // s.CompanyName \n"
     // + "FROM product p \n"
     // + "LEFT JOIN Category c ON p.CategoryID = c.CategoryID \n"
-    // + "LEFT JOIN Supplier s ON p.SupplierID = s.SupplierID \n"
+    // + "LEFT JOIN Manufacturer s ON p.ManufacturerID = s.ManufacturerID \n"
     // + "WHERE p.ProductID = ?";
     // try {
     // PreparedStatement ps = conn.prepareStatement(sql);
@@ -170,14 +170,14 @@ public class ProductDAO extends DBContext {
     // int parentId = rs.getInt("ParentID");
     // Category category = new Category(categoryId, categoryName, parentId);
     //
-    // int supplierId = rs.getInt("SupplierID");
-    // String supplierName = rs.getString("CompanyName");
-    // Supplier supplier = new Supplier(supplierId, supplierName);
+    // int manufacturerId = rs.getInt("ManufacturerID");
+    // String manufacturerName = rs.getString("CompanyName");
+    // Manufacturer manufacturer = new Manufacturer(manufacturerId, manufacturerName);
     //
     // product = new Product(id, proName, proPrice, description, quantity, imageURL,
     // unit, createdAt, manufactureDate, expirationDate);
     // product.setCategory(category);
-    // product.setSupplier(supplier);
+    // product.setManufacturer(manufacturer);
     // }
     // } catch (Exception e) {
     // System.out.println("Error in getProductById: " + e.getMessage());
@@ -188,11 +188,11 @@ public class ProductDAO extends DBContext {
         Product product = null;
         String sql = "SELECT p.*, \n"
                 + "       c.CategoryName, c.ParentID, \n"
-                + "       s.SupplierID, s.CompanyName,\n"
+                + "       s.ManufacturerID, s.CompanyName,\n"
                 + "       i.Quantity AS InventoryQuantity, i.LastUpdated\n"
                 + "FROM product p\n"
                 + "LEFT JOIN Category c ON p.CategoryID = c.CategoryID\n"
-                + "LEFT JOIN Supplier s ON p.SupplierID = s.SupplierID\n"
+                + "LEFT JOIN Manufacturer s ON p.ManufacturerID = s.ManufacturerID\n"
                 + "LEFT JOIN Inventory i ON p.ProductID = i.ProductID\n"
                 + "WHERE p.ProductID = ?";
         try {
@@ -218,9 +218,9 @@ public class ProductDAO extends DBContext {
                 int parentId = rs.getInt("ParentID");
                 Category category = new Category(categoryId, categoryName, parentId, rs.getString("ImageURL"));
 
-                int supplierId = rs.getInt("SupplierID");
-                String supplierName = rs.getString("CompanyName");
-                Supplier supplier = new Supplier(supplierId, supplierName);
+                int manufacturerId = rs.getInt("ManufacturerID");
+                String manufacturerName = rs.getString("CompanyName");
+                Manufacturer manufacturer = new Manufacturer(manufacturerId, manufacturerName);
 
                 int inventoryQty = rs.getInt("InventoryQuantity");
                 Timestamp lastUpdated = rs.getTimestamp("LastUpdated");
@@ -229,7 +229,7 @@ public class ProductDAO extends DBContext {
                 product = new Product(id, proName, proPrice, description, quantity, imageURL, unit, createdAt,
                         manufactureDate, expirationDate);
                 product.setCategory(category);
-                product.setSupplier(supplier);
+                product.setManufacturer(manufacturer);
                 product.setInventory(inventory);
                 // Bổ sung các trường đóng gói
                 product.setUnitPerBox(rs.getInt("UnitPerBox"));
@@ -294,7 +294,7 @@ public class ProductDAO extends DBContext {
                 + "ManufactureDate = ?, "
                 + "ExpirationDate = ?, "
                 + "CategoryID = ?, "
-                + "SupplierID = ?, "
+                + "ManufacturerID = ?, "
                 + "UnitPerBox = ?, "
                 + "BoxUnitName = ?, "
                 + "ItemUnitName = ? "
@@ -317,7 +317,7 @@ public class ProductDAO extends DBContext {
             ps.setDate(8, new java.sql.Date(product.getManufactureDate().getTime()));
             ps.setDate(9, new java.sql.Date(product.getExpirationDate().getTime()));
             ps.setInt(10, product.getCategory().getCategoryID());
-            ps.setInt(11, product.getSupplier().getSupplierId());
+            ps.setInt(11, product.getManufacturer().getManufacturerId());
             ps.setInt(12, product.getUnitPerBox());
             ps.setString(13, product.getBoxUnitName());
             ps.setString(14, product.getItemUnitName());
@@ -351,17 +351,17 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
-    public List<Supplier> getAllSuppliers() {
-        List<Supplier> list = new ArrayList<>();
-        String sql = "SELECT * FROM Supplier";
+    public List<Manufacturer> getAllManufacturers() {
+        List<Manufacturer> list = new ArrayList<>();
+        String sql = "SELECT * FROM Manufacturer";
 
         try {
             PreparedStatement st = conn.prepareStatement(sql);
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
-                Supplier s = new Supplier();
-                s.setSupplierID(rs.getInt("SupplierID"));
+                Manufacturer s = new Manufacturer();
+                s.setManufacturerID(rs.getInt("ManufacturerID"));
                 s.setCompanyName(rs.getString("CompanyName"));
                 list.add(s);
             }
@@ -376,10 +376,10 @@ public class ProductDAO extends DBContext {
     public List<Product> searchProductsByName(String keyword) {
         List<Product> list = new ArrayList<>();
         String sql = """
-                    SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
+                    SELECT p.*, c.CategoryName, c.ParentID, s.ManufacturerID, s.CompanyName
                     FROM Product p
                     JOIN Category c ON p.CategoryID = c.CategoryID
-                    JOIN Supplier s ON p.SupplierID = s.SupplierID
+                    JOIN Manufacturer s ON p.ManufacturerID = s.ManufacturerID
                     WHERE p.ProductName LIKE ? AND p.StockQuantity > 0
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -404,11 +404,11 @@ public class ProductDAO extends DBContext {
                 c.setParentID(rs.getInt("ParentID"));
                 p.setCategory(c);
 
-                // Set Supplier
-                Supplier s = new Supplier();
-                s.setSupplierID(rs.getInt("SupplierID"));
+                // Set Manufacturer
+                Manufacturer s = new Manufacturer();
+                s.setManufacturerID(rs.getInt("ManufacturerID"));
                 s.setCompanyName(rs.getString("CompanyName"));
-                p.setSupplier(s);
+                p.setManufacturer(s);
 
                 list.add(p);
             }
@@ -447,10 +447,10 @@ public class ProductDAO extends DBContext {
         List<Product> list = new ArrayList<>();
 
         String sql = """
-                    SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
+                    SELECT p.*, c.CategoryName, c.ParentID, s.ManufacturerID, s.CompanyName
                     FROM Product p
                     JOIN Category c ON p.CategoryID = c.CategoryID
-                    JOIN Supplier s ON p.SupplierID = s.SupplierID
+                    JOIN Manufacturer s ON p.ManufacturerID = s.ManufacturerID
                     WHERE p.CategoryID IN (
                         SELECT CategoryID FROM Category
                         WHERE ParentID = ? OR CategoryID = ?
@@ -482,11 +482,11 @@ public class ProductDAO extends DBContext {
                 c.setParentID(rs.getInt("ParentID"));
                 p.setCategory(c);
 
-                // Set Supplier
-                Supplier s = new Supplier();
-                s.setSupplierID(rs.getInt("SupplierID"));
+                // Set Manufacturer
+                Manufacturer s = new Manufacturer();
+                s.setManufacturerID(rs.getInt("ManufacturerID"));
                 s.setCompanyName(rs.getString("CompanyName"));
-                p.setSupplier(s);
+                p.setManufacturer(s);
 
                 list.add(p);
             }
