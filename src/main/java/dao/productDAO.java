@@ -67,7 +67,7 @@ public class ProductDAO extends DBContext {
         }
         return list;
     }
-  
+
     public List<Product> getAllIncludingOutOfStock() {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p \n"
@@ -117,7 +117,7 @@ public class ProductDAO extends DBContext {
         }
         String sql = "INSERT INTO Product (productName, price, description, StockQuantity, ImageURL, unit, createdAt, categoryID, manufacturerID, ManufactureDate, ExpirationDate, UnitPerBox, BoxUnitName, ItemUnitName) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, name);
             ps.setDouble(2, price);
             ps.setString(3, description);
@@ -132,24 +132,27 @@ public class ProductDAO extends DBContext {
             ps.setInt(12, unitPerBox);
             ps.setString(13, boxUnitName);
             ps.setString(14, itemUnitName);
-            ResultSet rs = ps.executeQuery();
-            int productId = -1;
-            if (rs.next()) {
-                productId = rs.getInt("ProductID");
-                if (!checkInventoryTable()) {
-                    return 1;
+
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                int productId = -1;
+                if (rs.next()) {
+                    productId = rs.getInt(1);
+                    if (!checkInventoryTable()) {
+                        return 1;
+                    }
+                    if (productId > 0) {
+                        boolean boxCreated = createInventoryBox(productId, quantity, price);
+                    }
                 }
-                if (productId > 0) {
-                    boolean boxCreated = createInventoryBox(productId, quantity, price);
-                }
+                return productId > 0 ? 1 : 0;
             }
-            return productId > 0 ? 1 : 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
     }
-
 
     public Product getProductById(int id) {
         Product product = null;
@@ -322,11 +325,9 @@ public class ProductDAO extends DBContext {
 
     }
 
-
     public List<Manufacturer> getAllManufacturers() {
         List<Manufacturer> list = new ArrayList<>();
         String sql = "SELECT * FROM Manufacturer";
-
 
         try {
 
@@ -1135,13 +1136,14 @@ public class ProductDAO extends DBContext {
         }
     }
 
-    //====================
-    //đừng xóa tôi có sài
-    //==========================
+    // ====================
+    // đừng xóa tôi có sài
+    // ==========================
 
-public List<Integer> getProductIdsByCategoryIdsExpanded(List<Integer> categoryIds) {
+    public List<Integer> getProductIdsByCategoryIdsExpanded(List<Integer> categoryIds) {
         List<Integer> result = new ArrayList<>();
-        if (categoryIds == null || categoryIds.isEmpty()) return result;
+        if (categoryIds == null || categoryIds.isEmpty())
+            return result;
 
         // Chunk nếu cần (ví dụ 500 id mỗi lần)
         final int CHUNK = 500;
@@ -1150,11 +1152,15 @@ public List<Integer> getProductIdsByCategoryIdsExpanded(List<Integer> categoryId
             String placeholders = String.join(",", Collections.nCopies(part.size(), "?"));
             String sql = "SELECT ProductID FROM Product WHERE CategoryID IN (" + placeholders + ")";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                for (int i = 0; i < part.size(); i++) ps.setInt(i + 1, part.get(i));
+                for (int i = 0; i < part.size(); i++)
+                    ps.setInt(i + 1, part.get(i));
                 try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) result.add(rs.getInt(1));
+                    while (rs.next())
+                        result.add(rs.getInt(1));
                 }
-            } catch (SQLException e) { e.printStackTrace(); }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return result;
     }
