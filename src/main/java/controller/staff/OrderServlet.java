@@ -38,9 +38,13 @@ public class OrderServlet extends HttpServlet {
     private void handleOrderList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String search = request.getParameter("search");
+        String status = request.getParameter("status");
 
         List<Order> orders;
-        if (search != null && !search.trim().isEmpty()) {
+        if (status != null && !status.trim().isEmpty()) {
+            // Lọc theo trạng thái
+            orders = dao.getOrdersByStatus(status.trim());
+        } else if (search != null && !search.trim().isEmpty()) {
             try {
                 // Nếu nhập số → tìm theo OrderID
                 int orderId = Integer.parseInt(search.trim());
@@ -52,16 +56,18 @@ public class OrderServlet extends HttpServlet {
             }
         } else {
             orders = dao.getAllOrders();
-            for (Order o : orders) {
-                calculateOrderSummary(o);
-            }
+        }
 
+        // Tính toán tổng tiền và các giá trị liên quan cho tất cả kết quả (kể cả khi tìm kiếm)
+        for (Order o : orders) {
+            calculateOrderSummary(o);
         }
 
         int total = dao.countAllOrders();
         int delivered = dao.countDeliveredOrders();
         int cancelled = dao.countCancelledOrders();
         request.setAttribute("cancelled", cancelled);
+        request.setAttribute("status", status);
         request.setAttribute("orders", orders);
         request.setAttribute("total", total);
         request.setAttribute("delivered", delivered);

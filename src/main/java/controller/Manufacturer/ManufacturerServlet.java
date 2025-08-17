@@ -1,6 +1,6 @@
-package controller.supplier;
+package controller.Manufacturer;
 
-import dao.SupplierDAO;
+import dao.ManufacturerDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -8,33 +8,33 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
-import model.Supplier;
+import model.Manufacturer;
 
 /**
  *
  * @author HuuDuc
  */
-@WebServlet(urlPatterns = {"/admin/supplier"})
-public class SupplierServlet extends HttpServlet {
+@WebServlet(urlPatterns = {"/admin/manufacturer"})
+public class ManufacturerServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String view = request.getParameter("view");
         String action = request.getParameter("action");
-        SupplierDAO supplierDAO = new SupplierDAO();
+        ManufacturerDAO manufacturerDAO = new ManufacturerDAO();
 
         if (action != null) {
             if (action.equals("delete")) {
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
-                    boolean result = supplierDAO.deleteSupplier(id);
-                    response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                    boolean result = manufacturerDAO.deleteManufacturer(id);
+                    response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                     return;
                 } catch (NumberFormatException e) {
-                    request.setAttribute("errorMessage", "Invalid supplier ID.");
+                    request.setAttribute("errorMessage", "Invalid manufacturer ID.");
                     // Chuyển tiếp đến trang lỗi hoặc danh sách nhà cung cấp
-                    request.getRequestDispatcher("/WEB-INF/admin/supplier/manage-supplier.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
                     return;
                 }
             } else if (action.equals("status")) {
@@ -43,25 +43,25 @@ public class SupplierServlet extends HttpServlet {
                     String status = request.getParameter("status");
                     if (status == null || (!status.equals("1") && !status.equals("0"))) {
                         request.setAttribute("errorMessage", "Giá trị trạng thái không hợp lệ.");
-                        request.getRequestDispatcher("/WEB-INF/admin/supplier/manage-supplier.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
                         return;
                     }
                     int newStatus = "1".equals(status) ? 0 : 1;
-                    boolean result = supplierDAO.updateSupplierStatus(id, newStatus);
+                    boolean result = manufacturerDAO.updateManufacturerStatus(id, newStatus);
                     if (!result) {
                         request.setAttribute("errorMessage", "Cập nhật trạng thái nhà sản xuất thất bại.");
-                        request.getRequestDispatcher("/WEB-INF/admin/supplier/manage-supplier.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
                         return;
                     }
-                    response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                    response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                     return;
                 } catch (NumberFormatException e) {
                     request.setAttribute("errorMessage", "ID nhà sản xuất không hợp lệ.");
-                    request.getRequestDispatcher("/WEB-INF/admin/supplier/manage-supplier.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
                     return;
                 } catch (Exception e) {
                     request.setAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
-                    request.getRequestDispatcher("/WEB-INF/admin/supplier/manage-supplier.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
                     return;
                 }
             }
@@ -69,75 +69,75 @@ public class SupplierServlet extends HttpServlet {
         if (view != null) {
             switch (view) {
                 case "create":
-                    request.getRequestDispatcher("/WEB-INF/admin/supplier/create-supplier.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/create-manufacturer.jsp").forward(request, response);
                     break;
                 case "edit":
                     try {
                         int id = Integer.parseInt(request.getParameter("id"));
-                        Supplier supplier = supplierDAO.getSupplierById(id);
-                        if (supplier != null) {
-                            request.setAttribute("supplier", supplier);
-                            request.getRequestDispatcher("/WEB-INF/admin/supplier/edit-supplier.jsp").forward(request, response);
+                        Manufacturer manufacturer = manufacturerDAO.getManufacturerById(id);
+                        if (manufacturer != null) {
+                            request.setAttribute("manufacturer", manufacturer);
+                            request.getRequestDispatcher("/WEB-INF/admin/manufacturer/edit-manufacturer.jsp").forward(request, response);
                         } else {
                             request.setAttribute("errorMessage", "Không tìm thấy nhà sản xuất.");
-                            response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                            response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                         }
                     } catch (NumberFormatException e) {
                         request.setAttribute("errorMessage", "ID nhà sản xuất không hợp lệ.");
-                        response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                        response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                     } catch (Exception e) {
                         request.setAttribute("errorMessage", "Lỗi khi lấy thông tin nhà cung cấp: " + e.getMessage());
-                        response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                        response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                     }
                     break;
 
                 case "detail":
                     // Xử lý xem chi tiết
-                    int supplierId = Integer.parseInt(request.getParameter("id"));
-                    Supplier supplierDetail = supplierDAO.getSupplierById(supplierId);
-                    if (supplierDetail != null) {
-                        request.setAttribute("supplier", supplierDetail);
-                        request.getRequestDispatcher("/WEB-INF/admin/supplier/supplier-detail.jsp").forward(request, response);
+                    int manufacturerId = Integer.parseInt(request.getParameter("id"));
+                    Manufacturer manufacturerDetail = manufacturerDAO.getManufacturerById(manufacturerId);
+                    if (manufacturerDetail != null) {
+                        request.setAttribute("manufacturer", manufacturerDetail);
+                        request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manufacturer-detail.jsp").forward(request, response);
                     } else {
-                        response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                        response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                     }
                     break;
                 default:
                     // Hiển thị danh sách nhà cung cấp
                     String keyword = request.getParameter("search");
-                    List<Supplier> suppliers;
+                    List<Manufacturer> manufacturers;
                     if (keyword != null && !keyword.trim().isEmpty()) {
-                        suppliers = supplierDAO.searchSuppliers(keyword);
+                        manufacturers = manufacturerDAO.searchManufacturers(keyword);
                         request.setAttribute("keyword", keyword);
                     } else {
-                        suppliers = supplierDAO.getAllSuppliers();
+                        manufacturers = manufacturerDAO.getAllManufacturers();
                     }
 
-                    int totalSuppliers = supplierDAO.countSuppliers();
-                    int activeSuppliers = supplierDAO.countSuppliersByStatus(1);
-                    int inactiveSuppliers = supplierDAO.countSuppliersByStatus(0);
+                    int totalManufacturers = manufacturerDAO.countManufacturers();
+                    int activeManufacturers = manufacturerDAO.countManufacturersByStatus(1);
+                    int inactiveManufacturers = manufacturerDAO.countManufacturersByStatus(0);
 
-                    request.setAttribute("suppliers", suppliers);
-                    request.setAttribute("totalSuppliers", totalSuppliers);
-                    request.setAttribute("activeSuppliers", activeSuppliers);
-                    request.setAttribute("inactiveSuppliers", inactiveSuppliers);
+                    request.setAttribute("manufacturers", manufacturers);
+                    request.setAttribute("totalManufacturers", totalManufacturers);
+                    request.setAttribute("activeManufacturers", activeManufacturers);
+                    request.setAttribute("inactiveManufacturers", inactiveManufacturers);
 
-                    request.getRequestDispatcher("/WEB-INF/admin/supplier/manage-supplier.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
                     break;
             }
         } else {
             // Nếu không có tham số view, hiển thị danh sách nhà cung cấp
-            List<Supplier> suppliers = supplierDAO.getAllSuppliers();
-            int totalSuppliers = supplierDAO.countSuppliers();
-            int activeSuppliers = supplierDAO.countSuppliersByStatus(1);
-            int inactiveSuppliers = supplierDAO.countSuppliersByStatus(0);
+            List<Manufacturer> manufacturers = manufacturerDAO.getAllManufacturers();
+            int totalManufacturers = manufacturerDAO.countManufacturers();
+            int activeManufacturers = manufacturerDAO.countManufacturersByStatus(1);
+            int inactiveManufacturers = manufacturerDAO.countManufacturersByStatus(0);
 
-            request.setAttribute("suppliers", suppliers);
-            request.setAttribute("totalSuppliers", totalSuppliers);
-            request.setAttribute("activeSuppliers", activeSuppliers);
-            request.setAttribute("inactiveSuppliers", inactiveSuppliers);
+            request.setAttribute("manufacturers", manufacturers);
+            request.setAttribute("totalManufacturers", totalManufacturers);
+            request.setAttribute("activeManufacturers", activeManufacturers);
+            request.setAttribute("inactiveManufacturers", inactiveManufacturers);
 
-            request.getRequestDispatcher("/WEB-INF/admin/supplier/manage-supplier.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
         }
     }
 
@@ -145,7 +145,7 @@ public class SupplierServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-        SupplierDAO supplierDAO = new SupplierDAO();
+        ManufacturerDAO manufacturerDAO = new ManufacturerDAO();
 
         if ("create".equals(action)) {
             try {
@@ -156,26 +156,26 @@ public class SupplierServlet extends HttpServlet {
                 String phone = request.getParameter("phone");
                 int status = Integer.parseInt(request.getParameter("status"));
 
-                Supplier supplier = new Supplier();
-                supplier.setBrandName(brandName);
-                supplier.setCompanyName(companyName);
-                supplier.setAddress(address);
-                supplier.setEmail(email);
-                supplier.setPhone(phone);
-                supplier.setStatus(status);
+                Manufacturer manufacturer = new Manufacturer();
+                manufacturer.setBrandName(brandName);
+                manufacturer.setCompanyName(companyName);
+                manufacturer.setAddress(address);
+                manufacturer.setEmail(email);
+                manufacturer.setPhone(phone);
+                manufacturer.setStatus(status);
 
-                boolean res = supplierDAO.insert(supplier);
+                boolean res = manufacturerDAO.insert(manufacturer);
 
                 if (res) {
-                    response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                    response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                 } else {
                     request.setAttribute("errorMessage", "Tạo nhà cung cấp thất bại. Vui lòng thử lại.");
-                    request.setAttribute("supplier", supplier); // Return the data back to the form
-                    response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                    request.setAttribute("manufacturer", manufacturer); // Return the data back to the form
+                    response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                 }
             } catch (Exception e) {
                 request.setAttribute("errorMessage", "Error: " + e.getMessage());
-                response.sendRedirect(request.getContextPath() + "/admin/supplier?action=create");
+                response.sendRedirect(request.getContextPath() + "/admin/manufacturer?action=create");
 
             }
         } else if ("edit".equals(action)) {
@@ -202,36 +202,36 @@ public class SupplierServlet extends HttpServlet {
                     throw new Exception("Giá trị trạng thái không hợp lệ.");
                 }
 
-                Supplier supplier = new Supplier();
-                supplier.setSupplierID(id);
-                supplier.setBrandName(brandName);
-                supplier.setCompanyName(companyName);
-                supplier.setAddress(address != null ? address : "");
-                supplier.setEmail(email);
-                supplier.setPhone(phone);
-                supplier.setStatus(status);
+                Manufacturer manufacturer = new Manufacturer();
+                manufacturer.setManufacturerID(id);
+                manufacturer.setBrandName(brandName);
+                manufacturer.setCompanyName(companyName);
+                manufacturer.setAddress(address != null ? address : "");
+                manufacturer.setEmail(email);
+                manufacturer.setPhone(phone);
+                manufacturer.setStatus(status);
 
-                boolean res = supplierDAO.update(supplier);
+                boolean res = manufacturerDAO.update(manufacturer);
 
                 if (res) {
-                    response.sendRedirect(request.getContextPath() + "/admin/supplier");
+                    response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
                 } else {
                     request.setAttribute("errorMessage", "Cập nhật nhà sản xuất thất bại. Vui lòng thử lại.");
-                    request.setAttribute("supplier", supplier);
-                    request.getRequestDispatcher("/WEB-INF/admin/supplier/edit-supplier.jsp").forward(request, response);
+                    request.setAttribute("manufacturer", manufacturer);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/edit-manufacturer.jsp").forward(request, response);
                 }
             } catch (NumberFormatException e) {
                 request.setAttribute("errorMessage", "Định dạng ID hoặc trạng thái không hợp lệ.");
-                request.getRequestDispatcher("/WEB-INF/admin/supplier/edit-supplier.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/admin/manufacturer/edit-manufacturer.jsp").forward(request, response);
             } catch (Exception e) {
                 request.setAttribute("errorMessage", "Error: " + e.getMessage());
-                request.getRequestDispatcher("/WEB-INF/admin/supplier/edit-supplier.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/admin/manufacturer/edit-manufacturer.jsp").forward(request, response);
             }
         }
     }
 
     @Override
     public String getServletInfo() {
-        return "Servlet for managing suppliers in the admin panel";
+        return "Servlet for managing manufacturers in the admin panel";
     }
 }

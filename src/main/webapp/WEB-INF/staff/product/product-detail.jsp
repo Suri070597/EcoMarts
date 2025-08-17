@@ -133,7 +133,7 @@
                                             </td>
                                         </tr>
                                         <tr><th>Danh mục:</th><td><%= product.getCategory() != null ? product.getCategory().getCategoryName() : ""%></td></tr>
-                                        <tr><th>Nhà sản xuất:</th><td><%= product.getSupplier() != null ? product.getSupplier().getCompanyName() : ""%></td></tr>
+                                        <tr><th>Nhà sản xuất:</th><td><%= product.getManufacturer() != null ? product.getManufacturer().getCompanyName() : ""%></td></tr>
                                         <tr>
                                             <% if (isFruit) { %>
                                             <th>Ngày nhập kho:</th>

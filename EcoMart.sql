@@ -52,8 +52,8 @@ CREATE TABLE Token_Table (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE
 );
 
-CREATE TABLE Supplier (
-    SupplierID INT PRIMARY KEY IDENTITY(1,1),
+CREATE TABLE Manufacturer (
+    ManufacturerID INT PRIMARY KEY IDENTITY(1,1),
     BrandName NVARCHAR(100) NOT NULL,
     CompanyName NVARCHAR(100) NOT NULL,
     [Address] NVARCHAR(255),
@@ -62,7 +62,7 @@ CREATE TABLE Supplier (
     [Status] BIT DEFAULT 1
 );
 
-INSERT INTO Supplier (BrandName, CompanyName, [Address], Email, Phone, [Status])
+INSERT INTO Manufacturer (BrandName, CompanyName, [Address], Email, Phone, [Status])
 VALUES
 (N'Thịnh An', N'Công ty Thịnh An', N'123 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'thinhan@fruit.vn', '0909123456', 1),
 (N'SUNTORY PEPSICO', N'Công ty TNHH Nước giải khát SUNTORY PEPSICO Việt Nam', N'Sun Avenue, Quận 2, TP.HCM', N'contact@suntorypepsico.vn', '02838912345', 1),
@@ -165,13 +165,13 @@ CREATE TABLE Product (
     ManufactureDate DATE, 
     ExpirationDate DATE,
     CategoryID INT NOT NULL,
-    SupplierID INT NOT NULL,
+    ManufacturerID INT NOT NULL,
     [Status] NVARCHAR(50) DEFAULT N'Còn hàng',
     UnitPerBox INT NOT NULL DEFAULT 1,  -- số lượng lon trong thùng
     BoxUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
     ItemUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-    FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID)
+    FOREIGN KEY (ManufacturerID) REFERENCES Manufacturer(ManufacturerID)
 );
 
 
@@ -400,3 +400,4 @@ INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Ge
 VALUES
 -- Admin = admin123@
 (N'admin123', N'ecd00aa1acd325ba7575cb0f638b04a5', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'Nguyễn Văn Cừ, TP.Cần Thơ', N'Nữ', 1, N'Active')
+

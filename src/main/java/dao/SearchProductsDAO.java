@@ -31,7 +31,7 @@ public class SearchProductsDAO extends DBContext {
                     FROM Product p
                     JOIN Category c ON p.CategoryID = c.CategoryID
                     LEFT JOIN Category pc ON c.ParentID = pc.CategoryID
-                    JOIN Supplier s ON p.SupplierID = s.SupplierID
+                    JOIN Manufacturer s ON p.ManufacturerID = s.ManufacturerID
                     WHERE 1=1 AND
                 """);
 
@@ -65,7 +65,7 @@ public class SearchProductsDAO extends DBContext {
                 p.setManufactureDate(rs.getDate("ManufactureDate"));
                 p.setExpirationDate(rs.getDate("ExpirationDate"));
                 p.setCategoryID(rs.getInt("CategoryID"));
-                p.setSupplierID(rs.getInt("SupplierID"));
+                p.setManufacturerID(rs.getInt("ManufacturerID"));
                 productList.add(p);
             }
         }

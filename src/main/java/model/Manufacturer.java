@@ -1,8 +1,8 @@
 package model;
 
-public class Supplier {
+public class Manufacturer {
 
-    private int supplierID;
+    private int manufacturerID;
     private String brandName;
     private String companyName;
     private String address;
@@ -10,17 +10,17 @@ public class Supplier {
     private String phone;
     private int status; // Đang hợp tác, Ngừng hợp tác, etc.
 
-    public Supplier() {
+    public Manufacturer() {
     }
 
-    public Supplier(int supplierID, String companyName) {
-        this.supplierID = supplierID;
+    public Manufacturer(int manufacturerID, String companyName) {
+        this.manufacturerID = manufacturerID;
         this.companyName = companyName;
     }
 
-    public Supplier(int supplierID, String brandName, String companyName, String address, String email, String phone,
+    public Manufacturer(int manufacturerID, String brandName, String companyName, String address, String email, String phone,
             int status) {
-        this.supplierID = supplierID;
+        this.manufacturerID = manufacturerID;
         this.brandName = brandName;
         this.companyName = companyName;
         this.address = address;
@@ -29,12 +29,12 @@ public class Supplier {
         this.status = status;
     }
 
-    public int getSupplierID() {
-        return supplierID;
+    public int getManufacturerID() {
+        return manufacturerID;
     }
 
-    public void setSupplierID(int supplierID) {
-        this.supplierID = supplierID;
+    public void setManufacturerID(int manufacturerID) {
+        this.manufacturerID = manufacturerID;
     }
 
     public String getBrandName() {
@@ -85,14 +85,14 @@ public class Supplier {
         this.status = status;
     }
 
-    public int getSupplierId() {
-        return supplierID;
+    public int getManufacturerId() {
+        return manufacturerID;
     }
     
     @Override
     public String toString() {
-        return "Supplier{"
-                + "supplierID=" + supplierID
+        return "Manufacturer{"
+                + "manufacturerID=" + manufacturerID
                 + ", brandName='" + brandName + '\''
                 + ", companyName='" + companyName + '\''
                 + ", address='" + address + '\''
