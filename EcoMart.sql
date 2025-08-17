@@ -343,26 +343,6 @@ CREATE TABLE Inventory (
     CONSTRAINT CHK_PackageType CHECK (PackageType IN ('BOX', 'UNIT', 'PACK'))
 );
 
---CREATE TABLE Inventory (
---    InventoryID INT PRIMARY KEY IDENTITY(1,1),
---    ProductID INT NOT NULL,
---    Quantity DECIMAL(10,2) CHECK (Quantity >= 0),
---    LastUpdated DATETIME DEFAULT GETDATE(),
---    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
---);
-
--- Bảng quản lý đóng gói sản phẩm (thùng, lon, lốc)
---CREATE TABLE ProductPackaging (
---    PackagingID INT PRIMARY KEY IDENTITY(1,1),
---    ProductID INT NOT NULL,
---    PackageType NVARCHAR(10) NOT NULL, -- 'BOX' | 'UNIT' | 'PACK'
---    Quantity DECIMAL(18,2) NOT NULL DEFAULT 0,
---    UnitPrice DECIMAL(18,2) NULL,      -- Giá bán cho loại đóng gói này
---    LastUpdated DATETIME NOT NULL DEFAULT GETDATE(),
---    CONSTRAINT FK_ProductPackaging_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE,
---    CONSTRAINT UQ_ProductPackaging UNIQUE (ProductID, PackageType),
---    CONSTRAINT CHK_PackageType CHECK (PackageType IN ('BOX', 'UNIT', 'PACK'))
---);
 
 CREATE TABLE AccountVoucher (
     AccountVoucherID INT PRIMARY KEY IDENTITY(1,1),
