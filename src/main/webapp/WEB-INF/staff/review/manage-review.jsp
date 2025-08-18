@@ -16,6 +16,36 @@
         th, td {
             white-space: nowrap;
         }
+        
+        /* CSS đặc biệt cho cột nội dung đánh giá */
+        .review-content {
+            white-space: normal !important;
+            word-wrap: break-word;
+            max-width: 250px;
+            min-width: 200px;
+            text-align: left;
+            padding: 8px 12px;
+            vertical-align: top;
+        }
+        
+        /* CSS cho cột ngày đánh giá để tránh bị che */
+        .review-date {
+            white-space: nowrap;
+            min-width: 120px;
+        }
+        
+        /* CSS cho cột trạng thái */
+        .review-status {
+            white-space: nowrap;
+            min-width: 100px;
+        }
+        
+        /* CSS cho cột thao tác */
+        .review-actions {
+            white-space: nowrap;
+            min-width: 120px;
+        }
+        
         .table-container {
             overflow-x: auto;
         }
@@ -61,6 +91,11 @@
                 font-size: 0.9em;
                 padding: 3px 6px;
                 min-width: 100px;
+            }
+            
+            .review-content {
+                max-width: 150px;
+                min-width: 120px;
             }
         }
     </style>
@@ -118,7 +153,7 @@
                                             <%= r.getProductName() %>
                                         </a>
                                     </td>
-                                    <td style="max-width:250px;"><%= r.getComment() %></td>
+                                    <td class="review-content"><%= r.getComment() %></td>
                                     <td>
                                         <% int fullStars = r.getRating(); %>
                                         <% for (int i = 0; i < fullStars; i++) { %>
@@ -139,7 +174,7 @@
                                             <span class="text-muted">(Không có)</span>
                                         <% } %>
                                     </td>
-                                    <td>
+                                    <td class="review-date">
                                         <%
                                             java.sql.Timestamp createdAt = r.getCreatedAt();
                                             if (createdAt != null) {
@@ -150,7 +185,7 @@
                                             }
                                         %>
                                     </td>
-                                    <td>
+                                    <td class="review-status">
                                         <% String status = r.getStatus(); %>
                                         <% if ("VISIBLE".equalsIgnoreCase(status)) { %>
                                             <span class="badge bg-success">Hiển thị</span>
@@ -161,7 +196,7 @@
                                         <% } %>
                                     </td>
                                     <!--<td><%= r.getParentReviewID() != null ? r.getParentReviewID() : "(Root)" %></td>-->
-                                    <td>
+                                    <td class="review-actions">
                                         <div class="d-flex gap-2 justify-content-center">
                                             <% if ("VISIBLE".equalsIgnoreCase(status)) { %>
                                             <a href="<%= request.getContextPath() %>/staff/manage-review?action=hide&id=<%= r.getReviewID() %>" class="btn btn-sm btn-warning" title="Ẩn đánh giá">

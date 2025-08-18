@@ -45,17 +45,23 @@
                                     <h3 class="mb-3"><%= product.getProductName()%></h3>
                                     <table class="table table-borderless">
                                         <tr><th>Mã sản phẩm:</th><td><%= product.getProductID()%></td></tr>
-                                                <% if (isFruit) {%>
-                                        <tr><th>Giá bán:</th><td><%= new java.text.DecimalFormat("#,###").format(product.getPrice())%> đ / kg</td></tr>
+                                        <% if (isFruit) { %>
+                                        <%
+                                            java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                                            symbols.setGroupingSeparator('.');
+                                            java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                                        %>
+                                        <tr>
+                                            <th>Giá bán:</th>
+                                            <td><%= formatter.format(product.getPrice())%> đ / kg</td>
+                                        </tr>
                                         <tr><th>Số lượng tồn kho:</th>
                                             <td>
                                                 <% double kg = product.getStockQuantity();
                                                     String display;
                                                     if (kg == Math.floor(kg)) {
-                                                        // Nếu là số nguyên thì không hiển thị .0
                                                         display = new java.text.DecimalFormat("#,##0").format(kg) + "kg";
                                                     } else {
-                                                        // Nếu có phần thập phân thì hiển thị .0
                                                         display = new java.text.DecimalFormat("#,##0.0").format(kg) + "kg";
                                                     }
                                                     if (kg >= 1000) {
@@ -69,39 +75,71 @@
                                                 %>
                                             </td>
                                         </tr>
-                                        <% } else {%>
-                                        <tr><th>Giá lẻ:</th><td><%= new java.text.DecimalFormat("#,###").format(product.getPrice())%> đ / <%= product.getUnit()%></td></tr>
-                                        <tr><th>Giá thùng:</th><td><%= product.getUnitPerBox() > 0 ? new java.text.DecimalFormat("#,###").format(product.getPrice() * product.getUnitPerBox()) : "-"%> đ / <%= product.getBoxUnitName()%></td></tr>
+                                        <% } else { %>
+                                        <%
+                                            java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                                            symbols.setGroupingSeparator('.');
+                                            java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                                        %>
+                                        <tr>
+                                            <th>Giá 1 <%= product.getBoxUnitName()%>:</th>
+                                            <td><%= formatter.format(product.getPrice())%> đ</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Giá 1 <%= product.getItemUnitName()%>:</th>
+                                            <td>
+                                                <%= product.getUnitPerBox() > 0 ? formatter.format(product.getPrice() / product.getUnitPerBox()) : "-"%> đ
+                                            </td>
+                                        </tr>
                                         <tr><th>Số lượng tồn kho:</th><td>
                                                 <% double qty = product.getStockQuantity();
                                                     int unitPerBox = product.getUnitPerBox();
                                                     String boxUnit = product.getBoxUnitName();
                                                     String itemUnit = product.getItemUnitName();
+                                                    
+                                                    // Hiển thị số lượng thùng/hộp/kiện
                                                     if (qty == Math.floor(qty)) {
                                                         out.print((long) qty);
                                                     } else {
-                                                        out.print(qty);
+                                                        out.print(new java.text.DecimalFormat("#").format(qty));
                                                     }
-                                                    out.print(" " + (itemUnit != null ? itemUnit : product.getUnit()));
-                                                    if (unitPerBox > 1 && boxUnit != null && !boxUnit.isEmpty()) {
-                                                        double boxQty = qty / unitPerBox;
+                                                    out.print(" " + boxUnit);
+                                                    
+                                                    // Hiển thị số lượng đơn vị nhỏ
+                                                    if (unitPerBox > 1 && itemUnit != null && !itemUnit.isEmpty()) {
+                                                        double totalItems = qty * unitPerBox;
                                                         out.print(" (");
-                                                        if (boxQty == Math.floor(boxQty)) {
-                                                            out.print((long) boxQty);
+                                                        if (totalItems == Math.floor(totalItems)) {
+                                                            out.print((long) totalItems);
                                                         } else {
-                                                            out.print(boxQty);
+                                                            out.print(new java.text.DecimalFormat("#").format(totalItems));
                                                         }
-                                                        out.print(" " + boxUnit + ")");
+                                                        out.print(" " + itemUnit + ")");
                                                     }
                                                 %>
                                             </td></tr>
                                         <tr><th>Số lượng trong 1 thùng:</th><td><%= product.getUnitPerBox()%> <%= product.getItemUnitName()%> / <%= product.getBoxUnitName()%></td></tr>
-                                        <tr><th>Đơn vị thùng:</th><td><%= product.getBoxUnitName()%></td></tr>
                                         <tr><th>Đơn vị nhỏ nhất:</th><td><%= product.getItemUnitName()%></td></tr>
-                                                <% }%>
+                                        <% } %>
+                                        <tr><th>Trạng thái:</th>
+                                            <td>
+                                                <% if (product.getStockQuantity() <= 0) { %>
+                                                <span class="badge bg-danger">Hết hàng</span>
+                                                <% } else if (product.getStockQuantity() <= 10) { %>
+                                                <span class="badge bg-warning">Sắp hết</span>
+                                                <% } else { %>
+                                                <span class="badge bg-success">Còn hàng</span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
                                         <tr><th>Danh mục:</th><td><%= product.getCategory() != null ? product.getCategory().getCategoryName() : ""%></td></tr>
                                         <tr><th>Nhà sản xuất:</th><td><%= product.getManufacturer() != null ? product.getManufacturer().getCompanyName() : ""%></td></tr>
-                                        <tr><th>Ngày sản xuất:</th>
+                                        <tr>
+                                            <% if (isFruit) { %>
+                                            <th>Ngày nhập kho:</th>
+                                            <% } else { %>
+                                            <th>Ngày sản xuất:</th>
+                                            <% } %>
                                             <td>
                                                 <%= product.getManufactureDate() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(product.getManufactureDate()) : ""%>
                                             </td>
@@ -111,7 +149,9 @@
                                                 <%= product.getExpirationDate() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(product.getExpirationDate()) : ""%>
                                             </td>
                                         </tr>
-                                        <tr><th>Mô tả:</th><td><%= product.getDescription()%></td></tr>
+                                        <tr><th>Mô tả:</th>
+                                            <td style="white-space: pre-line;"><%= product.getDescription()%></td>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>

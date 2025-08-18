@@ -64,6 +64,24 @@ public class ProductDetailServlet extends HttpServlet {
             request.setAttribute("dataCate", dao.getCategory());
             request.setAttribute("dataSup", dao.getAllManufacturers());
 
+            // Ưu tiên giá lẻ (UNIT) nếu tồn tại trong Inventory, nếu không thì dùng giá
+            // thùng
+            Double unitPrice = dao.getUnitPrice(mo.getProductID());
+            request.setAttribute("unitPrice", unitPrice);
+
+            // Chuẩn bị giá lẻ cho danh sách sản phẩm liên quan
+            if (request.getAttribute("relatedProducts") != null) {
+                @SuppressWarnings("unchecked")
+                List<Product> related = (List<Product>) request.getAttribute("relatedProducts");
+                java.util.Map<Integer, Double> relatedUnitPriceMap = new java.util.HashMap<>();
+                for (Product rp : related) {
+                    Double up = dao.getUnitPrice(rp.getProductID());
+                    if (up != null)
+                        relatedUnitPriceMap.put(rp.getProductID(), up);
+                }
+                request.setAttribute("relatedUnitPriceMap", relatedUnitPriceMap);
+            }
+
             // Lấy reviewList và orderId nếu có account đăng nhập
             FeedBackDAO fbDao = new FeedBackDAO();
             List<Review> allReviews = fbDao.getReviewsByProductId(mo.getProductID());
