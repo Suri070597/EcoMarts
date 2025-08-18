@@ -223,11 +223,14 @@
                             <label class="form-label">Nhà sản xuất</label>
                             <select name="manufacturerID" class="form-select" required>
                                 <option value="">-- Chọn nhà sản xuất --</option>
-                                <% for (Manufacturer s : sup) {%>
-                                <option value="<%= s.getManufacturerId()%>" <%= (mo.getManufacturer() != null && mo.getManufacturer().getManufacturerId() == s.getManufacturerId()) ? "selected" : ""%>>
+                                <% for (Manufacturer s : sup) {
+                                       boolean isCurrent = (mo.getManufacturer() != null && mo.getManufacturer().getManufacturerId() == s.getManufacturerId());
+                                       if (s.getStatus() == 1 || isCurrent) { %>
+                                <option value="<%= s.getManufacturerId()%>" <%= isCurrent ? "selected" : ""%>>
                                     <%= s.getCompanyName()%>
                                 </option>
-                                <% } %>
+                                <%     }
+                                   } %>
                             </select>
                         </div>
 
