@@ -97,6 +97,35 @@ public class ManufacturerDAO extends DBContext {
         }
     }
 
+    /** Kiểm tra số điện thoại đã tồn tại (dùng cho create) */
+    public boolean isPhoneExists(String phone) {
+        String sql = "SELECT 1 FROM Manufacturer WHERE Phone = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in isPhoneExists: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /** Kiểm tra số điện thoại đã tồn tại cho bản ghi khác (dùng cho edit) */
+    public boolean isPhoneExistsForOther(String phone, int excludeManufacturerId) {
+        String sql = "SELECT 1 FROM Manufacturer WHERE Phone = ? AND ManufacturerID <> ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, phone);
+            ps.setInt(2, excludeManufacturerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in isPhoneExistsForOther: " + e.getMessage());
+            return false;
+        }
+    }
+
     public boolean update(Manufacturer manufacturer) {
         String sql = "UPDATE Manufacturer SET BrandName = ?, CompanyName = ?, [Address] = ?, Email = ?, Phone = ?, [Status] = ? WHERE ManufacturerID = ?";
         try (Connection conn = getConnection(); // Hàm lấy kết nối database

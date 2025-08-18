@@ -168,6 +168,14 @@ public class ManufacturerServlet extends HttpServlet {
                 manufacturer.setPhone(phone);
                 manufacturer.setStatus(status);
 
+                // Check duplicate phone
+                if (manufacturerDAO.isPhoneExists(phone)) {
+                    request.setAttribute("errorMessage", "Số điện thoại đã tồn tại.");
+                    request.setAttribute("manufacturer", manufacturer);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/create-manufacturer.jsp").forward(request, response);
+                    return;
+                }
+
                 boolean res = manufacturerDAO.insert(manufacturer);
 
                 if (res) {
@@ -214,6 +222,14 @@ public class ManufacturerServlet extends HttpServlet {
                 manufacturer.setEmail(email);
                 manufacturer.setPhone(phone);
                 manufacturer.setStatus(status);
+
+                // Check duplicate phone for other records
+                if (manufacturerDAO.isPhoneExistsForOther(phone, id)) {
+                    request.setAttribute("errorMessage", "Số điện thoại đã tồn tại.");
+                    request.setAttribute("manufacturer", manufacturer);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/edit-manufacturer.jsp").forward(request, response);
+                    return;
+                }
 
                 boolean res = manufacturerDAO.update(manufacturer);
 
