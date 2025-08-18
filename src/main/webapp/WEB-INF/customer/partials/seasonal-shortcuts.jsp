@@ -146,7 +146,7 @@
                 <section class="product-section" data-aos="fade-up">
                     <div class="section-header">
                         <div class="section-title">
-                            <i class="fas fa-fire"></i> Flash Sale nhận ngàn deal hời !!!
+                            <i class="fas fa-fire"></i> Khuyến mãi mùa hè
                         </div>
                         <a href="ViewAllProductServlet?categoryId=7" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                     </div>
@@ -244,6 +244,7 @@
                     data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
                 <% } %>
         </section>
+
 
         <!-- Tips Section -->
         <section class="tips-section" data-aos="fade-up">

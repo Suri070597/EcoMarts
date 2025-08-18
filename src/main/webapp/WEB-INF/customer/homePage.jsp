@@ -118,7 +118,7 @@
 
                     <!-- Flash Sale -->
                     <div class="category-item">
-                        <a href="${pageContext.request.contextPath}/reorder">
+                        <a href="${pageContext.request.contextPath}/flashsale-shortcuts">
                             <div class="category-icon">
                                 <i class="fa-solid fa-bolt" aria-hidden="true"></i>
                             </div>
@@ -128,7 +128,7 @@
 
                     <!-- Ưu đãi Hè 2025 -->
                     <div class="category-item">
-                        <a href="${pageContext.request.contextPath}/reorder">
+                        <a href="${pageContext.request.contextPath}/seasonal-shortcuts">
                             <div class="category-icon">
                                 <i class="fa-solid fa-sun" aria-hidden="true"></i>
                             </div>
