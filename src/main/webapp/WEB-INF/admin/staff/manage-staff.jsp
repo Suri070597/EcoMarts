@@ -24,6 +24,11 @@
         <jsp:include page="../components/sidebar.jsp" />
 
         <div class="main-content">
+            <c:if test="${not empty param.message}">
+                <div class="alert ${param.type == 'success' ? 'alert-success' : 'alert-danger'}" role="alert">
+                    ${param.message}
+                </div>
+            </c:if>
             <div class="card">
                 <div class="card-header">
                     <div class="header-actions">
@@ -230,6 +235,21 @@
                 }
             });
         }
+
+        // Flash message via URL params (SweetAlert)
+        window.addEventListener('load', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get('message');
+            const type = urlParams.get('type');
+            if (message) {
+                Swal.fire({
+                    title: type === 'success' ? 'Thành công!' : 'Lỗi!',
+                    text: message,
+                    icon: type === 'success' ? 'success' : 'error',
+                    confirmButtonColor: type === 'success' ? '#8b6c42' : '#c35f5f'
+                });
+            }
+        });
     </script>
 </body>
 

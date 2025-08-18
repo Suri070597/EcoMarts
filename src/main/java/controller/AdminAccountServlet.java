@@ -23,25 +23,32 @@ public class AdminAccountServlet extends HttpServlet {
         AccountDAO accDAO = new AccountDAO();
 
         if (action != null && action.equals("delete")) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            boolean result = accDAO.deleteAccount(id);
-            if (!result) {
-                request.setAttribute("errorMessage", "Không thể xóa tài khoản này vì có dữ liệu liên quan!");
-                List<Account> accounts = accDAO.getAllAccountsFull();
-                request.setAttribute("accounts", accounts);
-                request.getRequestDispatcher("/WEB-INF/admin/account/manage-account.jsp").forward(request, response);
-                return;
+            try {
+                int id = Integer.parseInt(request.getParameter("id"));
+                boolean result = accDAO.deleteAccount(id);
+                String base = request.getContextPath() + "/admin/account";
+                if (result) {
+                    response.sendRedirect(base + "?type=success&message=" + java.net.URLEncoder.encode("Xóa tài khoản thành công", java.nio.charset.StandardCharsets.UTF_8));
+                } else {
+                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Không thể xóa vì có liên kết dữ liệu liên quan", java.nio.charset.StandardCharsets.UTF_8));
+                }
+            } catch (Exception e) {
+                String base = request.getContextPath() + "/admin/account";
+                response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Không thể xóa vì có liên kết dữ liệu liên quan", java.nio.charset.StandardCharsets.UTF_8));
             }
-            response.sendRedirect(request.getContextPath() + "/admin/account");
             return;
         }
 
         if (action != null && action.equals("status")) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            String status = request.getParameter("status");
-            String newStatus = status.equals("Active") ? "Inactive" : "Active";
-            accDAO.updateAccountStatus(id, newStatus);
-            response.sendRedirect(request.getContextPath() + "/admin/account");
+            try {
+                int id = Integer.parseInt(request.getParameter("id"));
+                String status = request.getParameter("status");
+                String newStatus = status.equals("Active") ? "Inactive" : "Active";
+                accDAO.updateAccountStatus(id, newStatus);
+                response.sendRedirect(request.getContextPath() + "/admin/account?type=success&message=" + java.net.URLEncoder.encode("Cập nhật trạng thái thành công", java.nio.charset.StandardCharsets.UTF_8));
+            } catch (Exception e) {
+                response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Lỗi khi cập nhật trạng thái", java.nio.charset.StandardCharsets.UTF_8));
+            }
             return;
         }
 
