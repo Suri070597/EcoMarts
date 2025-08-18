@@ -159,13 +159,13 @@
                             <select name="manufacturerID" class="form-select" required>
                                 <option value="">-- Chọn nhà sản xuất --</option>
                                 <% if (sup != null) {
-
                                         for (Manufacturer s : sup) {
+                                            if (s.getStatus() == 1) {
                                 %>
                                 <option value="<%= s.getManufacturerId()%>"><%= s.getCompanyName()%></option>
-                                <%
-                                        }
+                                <%      }
                                     }
+                                }
                                 %>
                             </select>
                         </div>

@@ -339,6 +339,37 @@ public class ProductDAO extends DBContext {
                 Manufacturer s = new Manufacturer();
                 s.setManufacturerID(rs.getInt("ManufacturerID"));
                 s.setCompanyName(rs.getString("CompanyName"));
+                try {
+                    s.setStatus(rs.getInt("Status"));
+                } catch (Exception ignore) {
+                }
+                list.add(s);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Manufacturer> getActiveManufacturers() {
+        List<Manufacturer> list = new ArrayList<>();
+        String sql = "SELECT ManufacturerID, CompanyName, [Status] FROM Manufacturer WHERE [Status] = 1 ORDER BY CompanyName";
+
+        try {
+
+            PreparedStatement st = conn.prepareStatement(sql);
+
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                Manufacturer s = new Manufacturer();
+                s.setManufacturerID(rs.getInt("ManufacturerID"));
+                s.setCompanyName(rs.getString("CompanyName"));
+                try {
+                    s.setStatus(rs.getInt("Status"));
+                } catch (Exception ignore) {
+                }
                 list.add(s);
             }
 

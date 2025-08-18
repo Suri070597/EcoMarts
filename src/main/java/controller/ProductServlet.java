@@ -48,7 +48,7 @@ public class ProductServlet extends HttpServlet {
                 break;
             case "create":
                 request.setAttribute("dataCate", dao.getCategory());
-                request.setAttribute("dataSup", dao.getAllManufacturers());
+                request.setAttribute("dataSup", dao.getActiveManufacturers());
                 request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
                 break;
             case "delete":
@@ -74,7 +74,21 @@ public class ProductServlet extends HttpServlet {
                     request.setAttribute("mo", mo);
 
                     request.setAttribute("dataCate", dao.getCategory());
-                    request.setAttribute("dataSup", dao.getAllManufacturers());
+                    java.util.List<Manufacturer> activeSuppliers = dao.getActiveManufacturers();
+                    if (mo != null && mo.getManufacturer() != null) {
+                        Manufacturer currentSup = mo.getManufacturer();
+                        boolean exists = false;
+                        for (Manufacturer m : activeSuppliers) {
+                            if (m.getManufacturerId() == currentSup.getManufacturerId()) {
+                                exists = true;
+                                break;
+                            }
+                        }
+                        if (!exists) {
+                            activeSuppliers.add(currentSup);
+                        }
+                    }
+                    request.setAttribute("dataSup", activeSuppliers);
                     request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -130,7 +144,7 @@ public class ProductServlet extends HttpServlet {
                     if (pName == null || pName.trim().isEmpty()) {
                         request.setAttribute("error", "Vui lòng nhập tên sản phẩm.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -138,7 +152,7 @@ public class ProductServlet extends HttpServlet {
                     if (categoryIDStr == null || categoryIDStr.trim().isEmpty()) {
                         request.setAttribute("error", "Vui lòng chọn danh mục sản phẩm.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -146,7 +160,7 @@ public class ProductServlet extends HttpServlet {
                     if (manufacturerIDStr == null || manufacturerIDStr.trim().isEmpty()) {
                         request.setAttribute("error", "Vui lòng chọn nhà cung cấp.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -154,7 +168,7 @@ public class ProductServlet extends HttpServlet {
                     if (manufactureDateStr == null || manufactureDateStr.trim().isEmpty()) {
                         request.setAttribute("error", "Vui lòng nhập ngày sản xuất.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -175,7 +189,7 @@ public class ProductServlet extends HttpServlet {
                     if (!isFruit && (expiryMonthsStr == null || expiryMonthsStr.trim().isEmpty())) {
                         request.setAttribute("error", "Vui lòng chọn hạn sử dụng.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -199,7 +213,7 @@ public class ProductServlet extends HttpServlet {
                     if (manufactureDate.after(todayTrunc)) {
                         request.setAttribute("error", "Ngày sản xuất không được ở tương lai.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -212,7 +226,7 @@ public class ProductServlet extends HttpServlet {
                     if (manufactureDate.before(twoYearsBefore)) {
                         request.setAttribute("error", "Ngày sản xuất không được quá 2 năm trước.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -220,7 +234,7 @@ public class ProductServlet extends HttpServlet {
                     if (expirationDate.before(todayTrunc)) {
                         request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -249,7 +263,7 @@ public class ProductServlet extends HttpServlet {
                         if (fruitPriceStr == null || fruitPriceStr.trim().isEmpty()) {
                             request.setAttribute("error", "Vui lòng nhập giá cho trái cây.");
                             request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
+                            request.setAttribute("dataSup", dao.getActiveManufacturers());
                             request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                     response);
                             return;
@@ -257,7 +271,7 @@ public class ProductServlet extends HttpServlet {
                         if (fruitQtyStr == null || fruitQtyStr.trim().isEmpty()) {
                             request.setAttribute("error", "Vui lòng nhập số lượng (kg) cho trái cây.");
                             request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
+                            request.setAttribute("dataSup", dao.getActiveManufacturers());
                             request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                     response);
                             return;
@@ -265,7 +279,7 @@ public class ProductServlet extends HttpServlet {
                         if (fruitExpiryDaysStr == null || fruitExpiryDaysStr.trim().isEmpty()) {
                             request.setAttribute("error", "Vui lòng nhập hạn sử dụng (ngày) cho trái cây.");
                             request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
+                            request.setAttribute("dataSup", dao.getActiveManufacturers());
                             request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                     response);
                             return;
@@ -277,7 +291,7 @@ public class ProductServlet extends HttpServlet {
                         if (stockQuantity <= 0 || stockQuantity != Math.floor(stockQuantity)) {
                             request.setAttribute("error", "Số lượng trái cây phải là số nguyên dương (kg).");
                             request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
+                            request.setAttribute("dataSup", dao.getActiveManufacturers());
                             request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                     response);
                             return;
@@ -285,7 +299,7 @@ public class ProductServlet extends HttpServlet {
                         if (price <= 0 || fruitExpiryDays <= 0) {
                             request.setAttribute("error", "Giá và hạn sử dụng phải lớn hơn 0.");
                             request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
+                            request.setAttribute("dataSup", dao.getActiveManufacturers());
                             request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                     response);
                             return;
@@ -302,7 +316,7 @@ public class ProductServlet extends HttpServlet {
                         if (expirationTrunc.before(todayTrunc)) {
                             request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
                             request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
+                            request.setAttribute("dataSup", dao.getActiveManufacturers());
                             request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                     response);
                             return;
@@ -320,7 +334,7 @@ public class ProductServlet extends HttpServlet {
                         if (expirationTrunc.before(todayTrunc)) {
                             request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
                             request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
+                            request.setAttribute("dataSup", dao.getActiveManufacturers());
                             request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                     response);
                             return;
@@ -336,7 +350,7 @@ public class ProductServlet extends HttpServlet {
                     } else {
                         request.setAttribute("error", "❌ Thêm sản phẩm thất bại.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                     }
@@ -345,7 +359,7 @@ public class ProductServlet extends HttpServlet {
                     e.printStackTrace();
                     request.setAttribute("error", "❌ Đã xảy ra lỗi khi tạo sản phẩm: " + e.getMessage());
                     request.setAttribute("dataCate", dao.getCategory());
-                    request.setAttribute("dataSup", dao.getAllManufacturers());
+                    request.setAttribute("dataSup", dao.getActiveManufacturers());
                     request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                             response);
                 }
