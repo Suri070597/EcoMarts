@@ -5,16 +5,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%
-    ViewProductDAO dao = new ViewProductDAO();
-    List<Category> cate = (List<Category>) request.getAttribute("dataCate");
-    List<Product> product = (List<Product>) request.getAttribute("data");
-    List<Product> drinkProducts = (List<Product>) request.getAttribute("featuredProducts1");
-    List<Product> FruitProducts = (List<Product>) request.getAttribute("featuredProducts3");
-    List<Product> CandyProducts = (List<Product>) request.getAttribute("featuredProducts4");
-    List<Product> CosmeticProducts = (List<Product>) request.getAttribute("featuredProducts6");
-    List<Product> MilkProducts = (List<Product>) request.getAttribute("featuredProducts2");
-    List<Product> MotherBabyProducts = (List<Product>) request.getAttribute("featuredProducts5");
-    List<Product> featuredProducts = (List<Product>) request.getAttribute("featuredProducts7");
+    List<Product> flash = (List<Product>) request.getAttribute("flashSaleProducts");
 %>
 <!DOCTYPE html>
 <html>
@@ -142,18 +133,23 @@
 
 
 
-                <!-- Hot Products Section -->
+                <!--mở đầu-->
+
+                <section class="banner-section" data-aos="fade-up">
+                    <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                </section>
+
                 <section class="product-section" data-aos="fade-up">
                     <div class="section-header">
                         <div class="section-title">
-                            <i class="fas fa-fire"></i> Flash Sale nhận ngàn deal hời !!!
+                            <i class="fas fa-glass-cheers"></i> Flash Sale nhận ngàn deal hời
                         </div>
-                        <a href="ViewAllProductServlet?categoryId=7" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                        <a href="ViewAllProductServlet?categoryId=1" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>    
                     </div>
-                    <div class="product-grid" id="featured-products">
+                    <div class="product-grid" id="drink-products">
                         <%
-                            if (featuredProducts != null && !featuredProducts.isEmpty()) {
-                                for (Product p : featuredProducts) {
+                            if (flash != null && !flash.isEmpty()) {
+                                for (Product p : flash) {
                         %>
                         <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
                             <% if (p.getStockQuantity() <= 0) { %>
@@ -214,170 +210,170 @@
                                             out.print(formatter.format(p.getPrice()) + " đ / thùng");
                                         }
                                     %>
+
                                 </div>
-
-
-
+                                <div class="button-group">
+                                    <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                    <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
+                                        <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
+                                        <input type="hidden" name="quantity" value="1"> 
+                                        <input type="hidden" name="action" value="initiate"> 
+                                        <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    </form>
+                                </div>
                             </div>
-                            <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
-                                    <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
-                                    <input type="hidden" name="quantity" value="1"> 
-                                    <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
-                                </form>
-                            </div>
+                        </div>
+                        <%
+                            }
+                        } else {
+                        %>
+                        <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+                        <%
+                            }
+                        %>
+                    </div>
+                    <% if (flash != null && flash.size() >= 6) { %>
+                    <button id="load-more-drink" class="see-more-btn"
+                            data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+                        <% }%>
+                </section>
+
+                <!--kết thúc-->
+
+
+                <!-- Tips Section -->
+                <section class="tips-section" data-aos="fade-up">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <i class="fas fa-lightbulb"></i> Mẹo vặt hữu ích
                         </div>
                     </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
-                    <%
-                        }
-                    %>
+
+                    <div class="tips-container">
+                        <div class="tips-video">
+                            <iframe width="560" height="315"
+                                    src="https://www.youtube.com/embed/jN58QsGK4WI?si=2bBTyZJ0KCMstDbu"
+                                    title="YouTube video player" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+
+                        <div class="tips-list">
+                            <a href="https://eva.vn/tu-van-nha-cua/cach-de-thit-ca-tuan-khong-hoi-khong-hong-nhieu-nguoi-dung-tu-lanh-hon-20-nam-khong-biet-c172a455815.html" class="tip-item">
+                                <div class="tip-image">
+                                    <img src="https://th.bing.com/th/id/OIP.z6N7VnK2aWx6YlRmR-gpCwHaEK?w=200&h=112&rs=1&qlt=80&o=6&dpr=1.3&pid=3.1"
+                                         alt="Làm sạch rau củ">
+                                </div>
+                                <div class="tip-content">
+                                    <h3 class="tip-title">Cách làm sạch rau củ nhanh chóng</h3>
+                                    <p class="tip-desc">Học cách rửa rau củ đúng cách để loại bỏ bụi bẩn và hóa
+                                        chất.</p>
+                                </div>
+                            </a>
+
+                            <a href="https://eva.vn/tu-van-nha-cua/cach-de-thit-ca-tuan-khong-hoi-khong-hong-nhieu-nguoi-dung-tu-lanh-hon-20-nam-khong-biet-c172a455815.html" class="tip-item">
+                                <div class="tip-image">
+                                    <img src="https://th.bing.com/th/id/OIP.quVOFTDt4CAdc7VhwyocagHaEo?w=295&h=184&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
+                                         alt="Bảo quản thịt cá">
+                                </div>
+                                <div class="tip-content">
+                                    <h3 class="tip-title">Bí quyết bảo quản thịt cá tươi lâu</h3>
+                                    <p class="tip-desc">Mẹo giữ thịt cá tươi ngon trong tủ lạnh hoặc tủ đông.
+                                    </p>
+                                </div>
+                            </a>
+
+                            <a href="https://afamily.vn/nhung-cach-thong-minh-de-giam-lang-phi-thuc-pham-20230411120935868.chn" class="tip-item">
+                                <div class="tip-image">
+                                    <img src="https://th.bing.com/th/id/OIP.-2dh96wDCZIaPp8k1q3b7gHaE8?w=269&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
+                                         alt="Chống lãng phí">
+                                </div>
+                                <div class="tip-content">
+                                    <h3 class="tip-title">Mẹo chống lãng phí thực phẩm</h3>
+                                    <p class="tip-desc">Cách tận dụng thức ăn thừa để tiết kiệm và bảo vệ môi
+                                        trường.</p>
+                                </div>
+                            </a>
+
+                            <a href="https://drinkocany.com/nuoc-uong-giai-nhiet-mua-he/" class="tip-item">
+                                <div class="tip-image">
+                                    <img src="https://th.bing.com/th/id/OIP.qtsxKJLVM8WZX27VbcEp3AHaE8?w=242&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
+                                         alt="Nước uống tại nhà">
+                                </div>
+                                <div class="tip-content">
+                                    <h3 class="tip-title">Cách làm nước uống giải nhiệt tại nhà</h3>
+                                    <p class="tip-desc">Công thức đơn giản để tạo ra thức uống mát lành từ trái
+                                        cây tươi.</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
             </div>
-            <% if (featuredProducts != null && featuredProducts.size() >= 6) { %>
-            <button id="load-more-featured" class="see-more-btn"
-                    data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
-                <% } %>
-        </section>
 
-        <!-- Tips Section -->
-        <section class="tips-section" data-aos="fade-up">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-lightbulb"></i> Mẹo vặt hữu ích
-                </div>
-            </div>
+            <jsp:include page="../scrollToTop.jsp" />
+            <jsp:include page="../footer.jsp" />
 
-            <div class="tips-container">
-                <div class="tips-video">
-                    <iframe width="560" height="315"
-                            src="https://www.youtube.com/embed/jN58QsGK4WI?si=2bBTyZJ0KCMstDbu"
-                            title="YouTube video player" frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                </div>
+            <!-- JavaScript -->
+            <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
+            <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+            <script>
+                                    // Initialize AOS
+                                    AOS.init({
+                                        duration: 800,
+                                        easing: 'ease-in-out',
+                                        once: true,
+                                        delay: 100
+                                    });
 
-                <div class="tips-list">
-                    <a href="https://eva.vn/tu-van-nha-cua/cach-de-thit-ca-tuan-khong-hoi-khong-hong-nhieu-nguoi-dung-tu-lanh-hon-20-nam-khong-biet-c172a455815.html" class="tip-item">
-                        <div class="tip-image">
-                            <img src="https://th.bing.com/th/id/OIP.z6N7VnK2aWx6YlRmR-gpCwHaEK?w=200&h=112&rs=1&qlt=80&o=6&dpr=1.3&pid=3.1"
-                                 alt="Làm sạch rau củ">
-                        </div>
-                        <div class="tip-content">
-                            <h3 class="tip-title">Cách làm sạch rau củ nhanh chóng</h3>
-                            <p class="tip-desc">Học cách rửa rau củ đúng cách để loại bỏ bụi bẩn và hóa
-                                chất.</p>
-                        </div>
-                    </a>
+                                    // Make sure cart functionality is initialized
+                                    if (typeof setupCartButtons === 'function') {
+                                        setupCartButtons();
+                                    }
 
-                    <a href="https://eva.vn/tu-van-nha-cua/cach-de-thit-ca-tuan-khong-hoi-khong-hong-nhieu-nguoi-dung-tu-lanh-hon-20-nam-khong-biet-c172a455815.html" class="tip-item">
-                        <div class="tip-image">
-                            <img src="https://th.bing.com/th/id/OIP.quVOFTDt4CAdc7VhwyocagHaEo?w=295&h=184&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
-                                 alt="Bảo quản thịt cá">
-                        </div>
-                        <div class="tip-content">
-                            <h3 class="tip-title">Bí quyết bảo quản thịt cá tươi lâu</h3>
-                            <p class="tip-desc">Mẹo giữ thịt cá tươi ngon trong tủ lạnh hoặc tủ đông.
-                            </p>
-                        </div>
-                    </a>
+                                    // Current slide index
+                                    let slideIndex = 1;
+                                    showSlides(slideIndex);
 
-                    <a href="https://afamily.vn/nhung-cach-thong-minh-de-giam-lang-phi-thuc-pham-20230411120935868.chn" class="tip-item">
-                        <div class="tip-image">
-                            <img src="https://th.bing.com/th/id/OIP.-2dh96wDCZIaPp8k1q3b7gHaE8?w=269&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
-                                 alt="Chống lãng phí">
-                        </div>
-                        <div class="tip-content">
-                            <h3 class="tip-title">Mẹo chống lãng phí thực phẩm</h3>
-                            <p class="tip-desc">Cách tận dụng thức ăn thừa để tiết kiệm và bảo vệ môi
-                                trường.</p>
-                        </div>
-                    </a>
+                                    // Auto slide every 4 seconds
+                                    setInterval(function () {
+                                        plusSlides(1);
+                                    }, 4000);
 
-                    <a href="https://drinkocany.com/nuoc-uong-giai-nhiet-mua-he/" class="tip-item">
-                        <div class="tip-image">
-                            <img src="https://th.bing.com/th/id/OIP.qtsxKJLVM8WZX27VbcEp3AHaE8?w=242&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
-                                 alt="Nước uống tại nhà">
-                        </div>
-                        <div class="tip-content">
-                            <h3 class="tip-title">Cách làm nước uống giải nhiệt tại nhà</h3>
-                            <p class="tip-desc">Công thức đơn giản để tạo ra thức uống mát lành từ trái
-                                cây tươi.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </section>
-    </div>
+                                    // Next/previous controls
+                                    function plusSlides(n) {
+                                        showSlides(slideIndex += n);
+                                    }
 
-    <jsp:include page="../scrollToTop.jsp" />
-    <jsp:include page="../footer.jsp" />
+                                    // Thumbnail image controls
+                                    function currentSlide(n) {
+                                        showSlides(slideIndex = n);
+                                    }
 
-    <!-- JavaScript -->
-    <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-                    // Initialize AOS
-                    AOS.init({
-                        duration: 800,
-                        easing: 'ease-in-out',
-                        once: true,
-                        delay: 100
-                    });
-
-                    // Make sure cart functionality is initialized
-                    if (typeof setupCartButtons === 'function') {
-                        setupCartButtons();
-                    }
-
-                    // Current slide index
-                    let slideIndex = 1;
-                    showSlides(slideIndex);
-
-                    // Auto slide every 4 seconds
-                    setInterval(function () {
-                        plusSlides(1);
-                    }, 4000);
-
-                    // Next/previous controls
-                    function plusSlides(n) {
-                        showSlides(slideIndex += n);
-                    }
-
-                    // Thumbnail image controls
-                    function currentSlide(n) {
-                        showSlides(slideIndex = n);
-                    }
-
-                    function showSlides(n) {
-                        let i;
-                        let slides = document.getElementsByClassName("mySlides");
-                        let dots = document.getElementsByClassName("dot");
-                        if (n > slides.length) {
-                            slideIndex = 1
-                        }
-                        if (n < 1) {
-                            slideIndex = slides.length
-                        }
-                        for (i = 0; i < slides.length; i++) {
-                            slides[i].style.display = "none";
-                        }
-                        for (i = 0; i < dots.length; i++) {
-                            dots[i].className = dots[i].className.replace(" active", "");
-                        }
-                        slides[slideIndex - 1].style.display = "block";
-                        dots[slideIndex - 1].className += " active";
-                    }
-    </script>
+                                    function showSlides(n) {
+                                        let i;
+                                        let slides = document.getElementsByClassName("mySlides");
+                                        let dots = document.getElementsByClassName("dot");
+                                        if (n > slides.length) {
+                                            slideIndex = 1
+                                        }
+                                        if (n < 1) {
+                                            slideIndex = slides.length
+                                        }
+                                        for (i = 0; i < slides.length; i++) {
+                                            slides[i].style.display = "none";
+                                        }
+                                        for (i = 0; i < dots.length; i++) {
+                                            dots[i].className = dots[i].className.replace(" active", "");
+                                        }
+                                        slides[slideIndex - 1].style.display = "block";
+                                        dots[slideIndex - 1].className += " active";
+                                    }
+            </script>
 
 
-    <!-- Load More JavaScript -->
-    <script src="${pageContext.request.contextPath}/assets/js/loadMore.js?version=<%= System.currentTimeMillis()%>"></script>
-</body>
+            <!-- Load More JavaScript -->
+            <script src="${pageContext.request.contextPath}/assets/js/loadMore.js?version=<%= System.currentTimeMillis()%>"></script>
+    </body>
 
 </html>

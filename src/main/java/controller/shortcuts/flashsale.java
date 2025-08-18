@@ -4,6 +4,7 @@ import dao.CategoryDAO;
 import dao.ProductDAO;
 import dao.ViewProductDAO;
 import dao.FeedBackDAO;
+import dao.PromotionDAO;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.*;
@@ -11,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.Category;
 import model.Product;
+import model.Promotion;
 
 @WebServlet("/flashsale-shortcuts")
 public class flashsale extends HttpServlet {
@@ -29,16 +31,9 @@ public class flashsale extends HttpServlet {
         List<Product> list = dao.getAll();
         request.setAttribute("products", list);
 
-        // Lấy 7 danh sách sản phẩm theo từng ParentID
-        ViewProductDAO viewDao = new ViewProductDAO();
-        request.setAttribute("featuredProducts1", viewDao.getFeaturedProductsByPage(1, 0, 6));
-        request.setAttribute("featuredProducts2", viewDao.getFeaturedProductsByPage(2, 0, 6));
-        request.setAttribute("featuredProducts3", viewDao.getFeaturedProductsByPage(3, 0, 6));
-        request.setAttribute("featuredProducts4", viewDao.getFeaturedProductsByPage(4, 0, 6));
-        request.setAttribute("featuredProducts5", viewDao.getFeaturedProductsByPage(5, 0, 6));
-        request.setAttribute("featuredProducts6", viewDao.getFeaturedProductsByPage(6, 0, 6));
-        request.setAttribute("featuredProducts7", viewDao.getFeaturedProductsByPage(7, 0, 6));
-
+        PromotionDAO promoDao = new PromotionDAO();
+        List<Product> flash = promoDao.listFlashSaleFromMapping();
+        request.setAttribute("flashSaleProducts", flash);
         // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
         try {
             FeedBackDAO fbDao = new FeedBackDAO();
@@ -47,13 +42,7 @@ public class flashsale extends HttpServlet {
             java.util.Map<Integer, Double> unitPriceMap = new java.util.HashMap<>();
 
             List<List<Product>> allProductLists = java.util.Arrays.asList(
-                    (List<Product>) request.getAttribute("featuredProducts1"),
-                    (List<Product>) request.getAttribute("featuredProducts2"),
-                    (List<Product>) request.getAttribute("featuredProducts3"),
-                    (List<Product>) request.getAttribute("featuredProducts4"),
-                    (List<Product>) request.getAttribute("featuredProducts5"),
-                    (List<Product>) request.getAttribute("featuredProducts6"),
-                    (List<Product>) request.getAttribute("featuredProducts7"));
+                    (List<Product>) request.getAttribute("flashSaleProducts"));
 
             for (List<Product> plist : allProductLists) {
                 if (plist != null) {

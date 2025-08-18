@@ -142,14 +142,20 @@
 
 
             <!-- Hot Products Section -->
+            <!--mở đầu-->
+
+            <section class="banner-section" data-aos="fade-up">
+                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+            </section>
+
             <section class="product-section" data-aos="fade-up">
                 <div class="section-header">
                     <div class="section-title">
-                        <i class="fas fa-fire"></i> Sản phẩm nổi bật
+                        <i class="fas fa-glass-cheers"></i> Sản phẩm nổi bậtt
                     </div>
-                    <a href="ViewAllProductServlet?categoryId=7" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                    <a href="ViewAllProductServlet?categoryId=1" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>    
                 </div>
-                <div class="product-grid" id="featured-products">
+                <div class="product-grid" id="featured-Products">
                     <%
                         if (featuredProducts != null && !featuredProducts.isEmpty()) {
                             for (Product p : featuredProducts) {
@@ -200,11 +206,11 @@
                                     if (unitPriceMap != null) {
                                         unitPrice = unitPriceMap.get(p.getProductID());
                                     }
-                                    
+
                                     java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
                                     symbols.setGroupingSeparator('.');
                                     java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                    
+
                                     if (unitPrice != null) {
                                         // Có giá lon → hiển thị giá lon
                                         out.print(formatter.format(unitPrice) + " đ / lon");
@@ -213,9 +219,6 @@
                                         out.print(formatter.format(p.getPrice()) + " đ / thùng");
                                     }
                                 %>
-                            </div>
-
-
 
                             </div>
                             <div class="button-group">
@@ -238,11 +241,13 @@
                         }
                     %>
                 </div>
-                <% if (featuredProducts != null && featuredProducts.size() >= 6) { %>
-                <button id="load-more-featured" class="see-more-btn"
-                        data-parent="7" data-target="featured-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+                <% if (drinkProducts != null && drinkProducts.size() >= 6) { %>
+                <button id="load-more-drink" class="see-more-btn"
+                        data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
                     <% } %>
             </section>
+
+            <!--kết thúc-->
 
             <!--mở đầu-->
 
@@ -308,11 +313,11 @@
                                     if (unitPriceMap != null) {
                                         unitPrice = unitPriceMap.get(p.getProductID());
                                     }
-                                    
+
                                     java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
                                     symbols.setGroupingSeparator('.');
                                     java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                    
+
                                     if (unitPrice != null) {
                                         // Có giá lon → hiển thị giá lon
                                         out.print(formatter.format(unitPrice) + " đ / lon");
@@ -601,11 +606,11 @@
                                     if (unitPriceMap != null) {
                                         unitPrice = unitPriceMap.get(p.getProductID());
                                     }
-                                    
+
                                     java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
                                     symbols.setGroupingSeparator('.');
                                     java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                    
+
                                     if (unitPrice != null) {
                                         // Có giá lon → hiển thị giá lon
                                         out.print(formatter.format(unitPrice) + " đ / lon");
@@ -808,11 +813,11 @@
                                     if (unitPriceMap != null) {
                                         unitPrice = unitPriceMap.get(p.getProductID());
                                     }
-                                    
+
                                     java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
                                     symbols.setGroupingSeparator('.');
                                     java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                    
+
                                     if (unitPrice != null) {
                                         // Có giá lon → hiển thị giá lon
                                         out.print(formatter.format(unitPrice) + " đ / lon");
