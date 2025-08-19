@@ -28,51 +28,22 @@ public class AdminStaffServlet extends HttpServlet {
         if ("delete".equals(action)) {
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.trim().isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/admin/staff");
+                response.sendRedirect(request.getContextPath() + "/admin/staff?type=error&message=" + java.net.URLEncoder.encode("ID nhân viên không hợp lệ", java.nio.charset.StandardCharsets.UTF_8));
                 return;
             }
             try {
                 int staffId = Integer.parseInt(idParam);
                 boolean deleted = staffDAO.deleteStaffCompletely(staffId);
+                String base = request.getContextPath() + "/admin/staff";
                 if (!deleted) {
-                    request.setAttribute("errorMessage", "Không thể xóa nhân viên này vì có dữ liệu liên quan!");
-                    List<Staff> staffList = staffDAO.getAllStaff();
-                    int totalStaff = staffDAO.countStaff();
-                    int activeCount = staffDAO.countStaffByStatus("Active");
-                    int inactiveCount = staffDAO.countStaffByStatus("Inactive");
-
-                    request.setAttribute("staffList", staffList);
-                    request.setAttribute("totalStaff", totalStaff);
-                    request.setAttribute("activeStaffCount", activeCount);
-                    request.setAttribute("inactiveStaffCount", inactiveCount);
-                    request.getRequestDispatcher("/WEB-INF/admin/staff/manage-staff.jsp").forward(request, response);
+                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Không thể xóa vì có liên kết dữ liệu liên quan", java.nio.charset.StandardCharsets.UTF_8));
                     return;
                 }
-                response.sendRedirect(request.getContextPath() + "/admin/staff");
+                response.sendRedirect(base + "?type=success&message=" + java.net.URLEncoder.encode("Xóa nhân viên thành công", java.nio.charset.StandardCharsets.UTF_8));
             } catch (NumberFormatException e) {
-                request.setAttribute("errorMessage", "ID nhân viên không hợp lệ.");
-                List<Staff> staffList = staffDAO.getAllStaff();
-                int totalStaff = staffDAO.countStaff();
-                int activeCount = staffDAO.countStaffByStatus("Active");
-                int inactiveCount = staffDAO.countStaffByStatus("Inactive");
-
-                request.setAttribute("staffList", staffList);
-                request.setAttribute("totalStaff", totalStaff);
-                request.setAttribute("activeStaffCount", activeCount);
-                request.setAttribute("inactiveStaffCount", inactiveCount);
-                request.getRequestDispatcher("/WEB-INF/admin/staff/manage-staff.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/admin/staff?type=error&message=" + java.net.URLEncoder.encode("ID nhân viên không hợp lệ", java.nio.charset.StandardCharsets.UTF_8));
             } catch (Exception e) {
-                request.setAttribute("errorMessage", "Lỗi khi xóa nhân viên: " + e.getMessage());
-                List<Staff> staffList = staffDAO.getAllStaff();
-                int totalStaff = staffDAO.countStaff();
-                int activeCount = staffDAO.countStaffByStatus("Active");
-                int inactiveCount = staffDAO.countStaffByStatus("Inactive");
-
-                request.setAttribute("staffList", staffList);
-                request.setAttribute("totalStaff", totalStaff);
-                request.setAttribute("activeStaffCount", activeCount);
-                request.setAttribute("inactiveStaffCount", inactiveCount);
-                request.getRequestDispatcher("/WEB-INF/admin/staff/manage-staff.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/admin/staff?type=error&message=" + java.net.URLEncoder.encode("Lỗi khi xóa nhân viên", java.nio.charset.StandardCharsets.UTF_8));
             }
             return;
         }
@@ -90,13 +61,11 @@ public class AdminStaffServlet extends HttpServlet {
                 staffDAO.updateStaffStatus(id, newStatus);
                 Staff staff = staffDAO.getStaffById(id);
                 accDAO.updateAccountStatus(staff.getAccountID(), newStatus);
-                response.sendRedirect(request.getContextPath() + "/admin/staff");
+                response.sendRedirect(request.getContextPath() + "/admin/staff?type=success&message=" + java.net.URLEncoder.encode("Cập nhật trạng thái thành công", java.nio.charset.StandardCharsets.UTF_8));
             } catch (NumberFormatException e) {
-                request.setAttribute("errorMessage", "ID nhân viên không hợp lệ.");
-                response.sendRedirect(request.getContextPath() + "/admin/staff");
+                response.sendRedirect(request.getContextPath() + "/admin/staff?type=error&message=" + java.net.URLEncoder.encode("ID nhân viên không hợp lệ", java.nio.charset.StandardCharsets.UTF_8));
             } catch (Exception e) {
-                request.setAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
-                response.sendRedirect(request.getContextPath() + "/admin/staff");
+                response.sendRedirect(request.getContextPath() + "/admin/staff?type=error&message=" + java.net.URLEncoder.encode("Lỗi khi cập nhật trạng thái", java.nio.charset.StandardCharsets.UTF_8));
             }
             return;
         }
@@ -262,7 +231,7 @@ public class AdminStaffServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
                     return;
                 }
-                
+
                 if (accDAO.isPhoneExists(phone)) {
                     request.setAttribute("errorMessage", "Phone đã tồn tại.");
                     request.getRequestDispatcher("/WEB-INF/admin/account/create-staff.jsp").forward(request, response);
@@ -280,9 +249,35 @@ public class AdminStaffServlet extends HttpServlet {
                 account.setRole(role);
                 account.setStatus(status);
 
+                // Insert vào bảng Account trước
                 boolean accountCreated = accDAO.insertFullAccount(account);
                 if (!accountCreated) {
                     request.setAttribute("errorMessage", "Tạo tài khoản thất bại. Vui lòng thử lại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+                    return;
+                }
+
+                // Lấy AccountID vừa tạo để insert vào bảng Staff
+                int accountId = accDAO.getAccountIdByUsername(username);
+                if (accountId == -1) {
+                    request.setAttribute("errorMessage", "Không thể lấy ID tài khoản. Vui lòng thử lại.");
+                    request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
+                    return;
+                }
+
+                // Tạo Staff object và insert vào bảng Staff
+                Staff staff = new Staff();
+                staff.setAccountID(accountId);
+                staff.setFullName(fullName);
+                staff.setEmail(email);
+                staff.setPhone(phone);
+                staff.setGender(gender);
+                staff.setAddress(address);
+                staff.setStatus(status);
+
+                boolean staffCreated = staffDAO.insertStaff(staff);
+                if (!staffCreated) {
+                    request.setAttribute("errorMessage", "Tạo thông tin staff thất bại. Vui lòng thử lại.");
                     request.getRequestDispatcher("/WEB-INF/admin/staff/create-staff.jsp").forward(request, response);
                     return;
                 }
@@ -298,8 +293,8 @@ public class AdminStaffServlet extends HttpServlet {
                 String staffIDParam = request.getParameter("staffID");
                 String accountIDParam = request.getParameter("accountID");
 
-                if (staffIDParam == null || staffIDParam.trim().isEmpty() ||
-                    accountIDParam == null || accountIDParam.trim().isEmpty()) {
+                if (staffIDParam == null || staffIDParam.trim().isEmpty()
+                        || accountIDParam == null || accountIDParam.trim().isEmpty()) {
                     request.setAttribute("errorMessage", "ID không hợp lệ.");
                     request.getRequestDispatcher("/WEB-INF/admin/staff/edit-staff.jsp").forward(request, response);
                     return;
@@ -387,7 +382,7 @@ public class AdminStaffServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/staff/edit-staff.jsp").forward(request, response);
                     return;
                 }
-                
+
                 Account checkPhone = accDAO.getAccountByPhone(phone);
                 if (checkPhone != null && checkPhone.getAccountID() != accountID) {
                     request.setAttribute("errorMessage", "Email đã tồn tại.");

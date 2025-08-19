@@ -29,12 +29,16 @@ public class ManufacturerServlet extends HttpServlet {
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
                     boolean result = manufacturerDAO.deleteManufacturer(id);
-                    response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
+                    String base = request.getContextPath() + "/admin/manufacturer";
+                    if (result) {
+                        response.sendRedirect(base + "?type=success&message=" + java.net.URLEncoder.encode("Xóa nhà sản xuất thành công", java.nio.charset.StandardCharsets.UTF_8));
+                    } else {
+                        response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Không thể xóa vì có liên kết dữ liệu liên quan", java.nio.charset.StandardCharsets.UTF_8));
+                    }
                     return;
                 } catch (NumberFormatException e) {
-                    request.setAttribute("errorMessage", "Invalid manufacturer ID.");
-                    // Chuyển tiếp đến trang lỗi hoặc danh sách nhà cung cấp
-                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
+                    String base = request.getContextPath() + "/admin/manufacturer";
+                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("ID nhà sản xuất không hợp lệ", java.nio.charset.StandardCharsets.UTF_8));
                     return;
                 }
             } else if (action.equals("status")) {
@@ -42,26 +46,26 @@ public class ManufacturerServlet extends HttpServlet {
                     int id = Integer.parseInt(request.getParameter("id"));
                     String status = request.getParameter("status");
                     if (status == null || (!status.equals("1") && !status.equals("0"))) {
-                        request.setAttribute("errorMessage", "Giá trị trạng thái không hợp lệ.");
-                        request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
+                        String base = request.getContextPath() + "/admin/manufacturer";
+                        response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Giá trị trạng thái không hợp lệ", java.nio.charset.StandardCharsets.UTF_8));
                         return;
                     }
                     int newStatus = "1".equals(status) ? 0 : 1;
                     boolean result = manufacturerDAO.updateManufacturerStatus(id, newStatus);
                     if (!result) {
-                        request.setAttribute("errorMessage", "Cập nhật trạng thái nhà sản xuất thất bại.");
-                        request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
+                        String base = request.getContextPath() + "/admin/manufacturer";
+                        response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Cập nhật trạng thái nhà sản xuất thất bại", java.nio.charset.StandardCharsets.UTF_8));
                         return;
                     }
-                    response.sendRedirect(request.getContextPath() + "/admin/manufacturer");
+                    response.sendRedirect(request.getContextPath() + "/admin/manufacturer?type=success&message=" + java.net.URLEncoder.encode("Cập nhật trạng thái thành công", java.nio.charset.StandardCharsets.UTF_8));
                     return;
                 } catch (NumberFormatException e) {
-                    request.setAttribute("errorMessage", "ID nhà sản xuất không hợp lệ.");
-                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
+                    String base = request.getContextPath() + "/admin/manufacturer";
+                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("ID nhà sản xuất không hợp lệ", java.nio.charset.StandardCharsets.UTF_8));
                     return;
                 } catch (Exception e) {
-                    request.setAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
-                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/manage-manufacturer.jsp").forward(request, response);
+                    String base = request.getContextPath() + "/admin/manufacturer";
+                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Lỗi khi cập nhật trạng thái", java.nio.charset.StandardCharsets.UTF_8));
                     return;
                 }
             }
@@ -163,6 +167,14 @@ public class ManufacturerServlet extends HttpServlet {
                 manufacturer.setEmail(email);
                 manufacturer.setPhone(phone);
                 manufacturer.setStatus(status);
+
+                // Check duplicate phone
+                if (manufacturerDAO.isPhoneExists(phone)) {
+                    request.setAttribute("errorMessage", "Số điện thoại đã tồn tại.");
+                    request.setAttribute("manufacturer", manufacturer);
+                    request.getRequestDispatcher("/WEB-INF/admin/manufacturer/create-manufacturer.jsp").forward(request, response);
+                    return;
+                }
 
                 boolean res = manufacturerDAO.insert(manufacturer);
 

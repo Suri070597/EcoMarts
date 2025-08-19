@@ -29,6 +29,11 @@ CREATE TABLE Account (
     [Status] NVARCHAR(50) DEFAULT 'Active', -- Active, Inactive, Suspended
 );
 
+INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
+VALUES
+-- Admin = admin123@
+(N'admin123', N'ecd00aa1acd325ba7575cb0f638b04a5', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'Nguyễn Văn Cừ, TP.Cần Thơ', N'Nữ', 1, N'Active')
+
 CREATE TABLE Staff (
     StaffID INT PRIMARY KEY IDENTITY(1,1),
     AccountID INT NOT NULL,
@@ -58,7 +63,7 @@ CREATE TABLE Manufacturer (
     CompanyName NVARCHAR(100) NOT NULL,
     [Address] NVARCHAR(255),
     Email NVARCHAR(255),
-    Phone VARCHAR(15),
+    Phone VARCHAR(15) NOT NULL,
     [Status] BIT DEFAULT 1
 );
 
@@ -313,6 +318,7 @@ CREATE TABLE Voucher (
     EndDate DATETIME NOT NULL,
     IsActive BIT DEFAULT 1,
     CategoryID INT NULL, -- NULL if applicable to all categories
+    ClaimLimit INT NULL, -- Số lượt có thể lấy tối đa (NULL => không giới hạn)
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
     CHECK (StartDate < EndDate)
 );
@@ -352,32 +358,4 @@ CREATE TABLE AccountVoucher (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID),
     FOREIGN KEY (VoucherID) REFERENCES Voucher(VoucherID)
 );
-
-
-
-
-
-
--- Chạy hết cái trên ròi, mới chạy trigger này xong ròi mới insert dữ liệu admin vô  bảng account 
---ròi muốn chạy staff thì vô staff tạo tài khoản cho staff ròi lấy đó đăng nhập qua cho satff nha !!!!!!!!!
-
-CREATE TRIGGER trg_AfterInsert_Account_ToStaff
-ON Account
-AFTER INSERT
-AS
-BEGIN
-    INSERT INTO Staff (AccountID, FullName, Email, Phone, Gender, [Address])
-    SELECT 
-        i.AccountID, i.FullName, i.Email, i.Phone, i.Gender, i.[Address]
-    FROM 
-        inserted i
-    WHERE 
-        i.[Role] = 2;
-END
-
-
-INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
-VALUES
--- Admin = admin123@
-(N'admin123', N'ecd00aa1acd325ba7575cb0f638b04a5', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'Nguyễn Văn Cừ, TP.Cần Thơ', N'Nữ', 1, N'Active')
 

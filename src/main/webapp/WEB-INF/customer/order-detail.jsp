@@ -211,6 +211,7 @@
                                         <th>Sản phẩm</th>
                                         <th class="text-center">Đơn giá</th>
                                         <th class="text-center">Số lượng</th>
+                                        <th class="text-center">Đánh giá</th>
                                         <th class="text-end">Thành tiền</th>
                                     </tr>
                                 </thead>
@@ -251,6 +252,9 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                                 ${od.unit}
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="${pageContext.request.contextPath}/ProductDetail?id=${od.productID}" class="btn btn-sm btn-outline-primary">Đánh giá</a>
                                             </td>
                                             <td class="text-end fw-bold"><fmt:formatNumber value="${od.subTotal}" type="number"/> đ</td>
                                         </tr>

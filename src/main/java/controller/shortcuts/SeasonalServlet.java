@@ -1,22 +1,20 @@
-package controller;
+package controller.shortcuts;
 
 import dao.CategoryDAO;
 import dao.ProductDAO;
 import dao.ViewProductDAO;
 import dao.FeedBackDAO;
-import dao.OrderDAO;
+import dao.PromotionDAO;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import java.util.ArrayList;
-import java.util.Map;
 import model.Category;
 import model.Product;
 
-@WebServlet("/home")
-public class HomeServlet extends HttpServlet {
+@WebServlet("/seasonal-shortcuts")
+public class SeasonalServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -30,27 +28,11 @@ public class HomeServlet extends HttpServlet {
         // Get products
         ProductDAO dao = new ProductDAO();
         List<Product> list = dao.getAll();
-        OrderDAO order = new OrderDAO();
         request.setAttribute("products", list);
-
-        // Lấy 7 danh sách sản phẩm theo từng ParentID
-        ViewProductDAO viewDao = new ViewProductDAO();
-        request.setAttribute("featuredProducts1", viewDao.getFeaturedProductsByPage(1, 0, 6));
-        request.setAttribute("featuredProducts2", viewDao.getFeaturedProductsByPage(2, 0, 6));
-        request.setAttribute("featuredProducts3", viewDao.getFeaturedProductsByPage(3, 0, 6));
-        request.setAttribute("featuredProducts4", viewDao.getFeaturedProductsByPage(4, 0, 6));
-        request.setAttribute("featuredProducts5", viewDao.getFeaturedProductsByPage(5, 0, 6));
-        request.setAttribute("featuredProducts6", viewDao.getFeaturedProductsByPage(6, 0, 6));
-        List<Map<String, Object>> topRows = order.getTopSellingProducts(10);
-        List<Product> topSellingProducts = new ArrayList<>();
-        for (Map<String, Object> row : topRows) {
-            int pid = ((Number) row.get("productId")).intValue();
-            Product p = dao.getProductById(pid);   // dùng ProductDAO đang có sẵn phía trên
-            if (p != null) {
-                topSellingProducts.add(p);
-            }
-        }
-        request.setAttribute("featuredProducts7", topSellingProducts);
+        
+        PromotionDAO promoDao = new PromotionDAO();
+        List<Product> flash = promoDao.listSeasonalFromMapping();
+        request.setAttribute("flashSaleProducts", flash);
 
         // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
         try {
@@ -60,13 +42,7 @@ public class HomeServlet extends HttpServlet {
             java.util.Map<Integer, Double> unitPriceMap = new java.util.HashMap<>();
 
             List<List<Product>> allProductLists = java.util.Arrays.asList(
-                    (List<Product>) request.getAttribute("featuredProducts1"),
-                    (List<Product>) request.getAttribute("featuredProducts2"),
-                    (List<Product>) request.getAttribute("featuredProducts3"),
-                    (List<Product>) request.getAttribute("featuredProducts4"),
-                    (List<Product>) request.getAttribute("featuredProducts5"),
-                    (List<Product>) request.getAttribute("featuredProducts6"),
-                    (List<Product>) request.getAttribute("featuredProducts7"));
+                    (List<Product>) request.getAttribute("flash"));
 
             for (List<Product> plist : allProductLists) {
                 if (plist != null) {
@@ -94,6 +70,6 @@ public class HomeServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        request.getRequestDispatcher("/WEB-INF/customer/homePage.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/customer/partials/seasonal-shortcuts.jsp").forward(request, response);
     }
 }

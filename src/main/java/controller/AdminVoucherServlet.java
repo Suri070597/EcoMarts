@@ -301,6 +301,12 @@ public class AdminVoucherServlet extends HttpServlet {
         } else {
             v.setCategoryID(null);
         }
+        String claimLimitParam = request.getParameter("claimLimit");
+        if (notBlank(claimLimitParam)) {
+            v.setClaimLimit(Integer.parseInt(claimLimitParam.trim()));
+        } else {
+            v.setClaimLimit(null);
+        }
         return v;
     }
 }

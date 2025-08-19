@@ -122,20 +122,35 @@
                                                        class='btn btn-sm btn-info'>
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href='${pageContext.request.contextPath}/admin/account?view=edit&id=${acc.accountID}'
-                                                       class='btn btn-sm btn-primary'>
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href='javascript:void(0)'
-                                                       onclick='confirmStatusChange("${pageContext.request.contextPath}/admin/account?action=status&id=${acc.accountID}&status=${acc.status}", "${acc.status}")'
-                                                       class='btn btn-sm ${acc.status eq "Active" ? "btn-warning" : "btn-success"}'>
-                                                        <i class="fas ${acc.status eq "Active" ? "fa-ban" : "fa-check"}"></i>
-                                                    </a>
-                                                    <a href='${pageContext.request.contextPath}/admin/account?action=delete&id=${acc.accountID}'
-                                                       class='btn btn-sm btn-danger'
-                                                       onclick="return confirmDelete(event, '${acc.accountID}')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                                    <c:choose>
+                                                        <c:when test='${acc.role == 1}'>
+                                                            <button type='button' class='btn btn-sm btn-secondary' disabled title='Không thể chỉnh sửa tài khoản quản trị viên'>
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <button type='button' class='btn btn-sm btn-secondary' disabled title='Không thể đổi trạng thái tài khoản quản trị viên'>
+                                                                <i class="fas fa-ban"></i>
+                                                            </button>
+                                                            <button type='button' class='btn btn-sm btn-secondary' disabled title='Không thể xóa tài khoản quản trị viên'>
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <a href='${pageContext.request.contextPath}/admin/account?view=edit&id=${acc.accountID}'
+                                                               class='btn btn-sm btn-primary'>
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <a href='javascript:void(0)'
+                                                               onclick='confirmStatusChange("${pageContext.request.contextPath}/admin/account?action=status&id=${acc.accountID}&status=${acc.status}", "${acc.status}")'
+                                                               class='btn btn-sm ${acc.status eq "Active" ? "btn-warning" : "btn-success"}'>
+                                                                <i class="fas ${acc.status eq "Active" ? "fa-ban" : "fa-check"}"></i>
+                                                            </a>
+                                                            <a href='${pageContext.request.contextPath}/admin/account?action=delete&id=${acc.accountID}'
+                                                               class='btn btn-sm btn-danger'
+                                                               onclick="return confirmDelete(event, '${acc.accountID}')">
+                                                                <i class="fas fa-trash"></i>
+                                                            </a>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </div>
                                             </td>
                                         </tr>
@@ -203,6 +218,23 @@
                                                                });
                                                                return false;
                                                            }
+        </script>
+
+        <script>
+            // Flash message via URL params (SweetAlert)
+            window.addEventListener('load', function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                const message = urlParams.get('message');
+                const type = urlParams.get('type');
+                if (message) {
+                    Swal.fire({
+                        title: type === 'success' ? 'Thành công!' : 'Lỗi!',
+                        text: message,
+                        icon: type === 'success' ? 'success' : 'error',
+                        confirmButtonColor: type === 'success' ? '#8b6c42' : '#c35f5f'
+                    });
+                }
+            });
         </script>
     </body>
 </html>     
