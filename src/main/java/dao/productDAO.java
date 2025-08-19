@@ -143,7 +143,11 @@ public class ProductDAO extends DBContext {
                         return 1;
                     }
                     if (productId > 0) {
-                        boolean boxCreated = createInventoryBox(productId, quantity, price);
+                        if (isFruitCategory(categoryID)) {
+                            createInventoryUnit(productId, quantity, price);
+                        } else {
+                            createInventoryBox(productId, quantity, price);
+                        }
                     }
                 }
                 return productId > 0 ? 1 : 0;
@@ -281,7 +285,11 @@ public class ProductDAO extends DBContext {
             ps.setInt(15, product.getProductID());
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
-                updateInventoryBox(product.getProductID(), product.getStockQuantity(), price);
+                if (isFruitCategory(product.getCategory().getCategoryID())) {
+                    updateInventoryUnit(product.getProductID(), product.getStockQuantity(), price);
+                } else {
+                    updateInventoryBox(product.getProductID(), product.getStockQuantity(), price);
+                }
             }
             return affectedRows > 0;
         } catch (Exception e) {
@@ -1038,7 +1046,7 @@ public class ProductDAO extends DBContext {
      */
     public Double getUnitPrice(int productId) {
         try {
-            String sql = "SELECT UnitPrice FROM Inventory WHERE ProductID = ? AND PackageType = 'UNIT'";
+            String sql = "SELECT TOP 1 UnitPrice FROM Inventory WHERE ProductID = ? AND PackageType IN ('KG','UNIT') ORDER BY CASE WHEN PackageType = 'KG' THEN 0 ELSE 1 END";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ResultSet rs = ps.executeQuery();
@@ -1087,8 +1095,12 @@ public class ProductDAO extends DBContext {
                     packList.add(p);
                     totalPackQty += qty;
                 } else {
-                    inventory.put(packageType + "_Quantity", qty);
-                    inventory.put(packageType + "_Price", price);
+                    String effectiveType = packageType;
+                    if ("KG".equalsIgnoreCase(packageType)) {
+                        effectiveType = "UNIT"; // Chuẩn hóa key để phía gọi không cần đổi
+                    }
+                    inventory.put(effectiveType + "_Quantity", qty);
+                    inventory.put(effectiveType + "_Price", price);
                 }
             }
             if (!packList.isEmpty()) {
@@ -1130,6 +1142,25 @@ public class ProductDAO extends DBContext {
         try {
 
             String sql = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) VALUES (?, 'BOX', ?, ?, 0, GETDATE())";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setDouble(2, quantity);
+                ps.setDouble(3, price);
+                int result = ps.executeUpdate();
+
+                return result > 0;
+            }
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean createInventoryUnit(int productId, double quantity, double price) {
+        try {
+
+            String sql = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) VALUES (?, 'KG', ?, ?, 0, GETDATE())";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ps.setDouble(2, quantity);
@@ -1188,6 +1219,51 @@ public class ProductDAO extends DBContext {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private boolean updateInventoryUnit(int productId, double quantity, double price) {
+        try {
+
+            String sql = "MERGE Inventory AS target "
+                    + "USING (SELECT ? AS ProductID, 'KG' AS PackageType, 0 AS PackSize) AS source "
+                    + "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType AND target.PackSize = source.PackSize) "
+                    + "WHEN MATCHED THEN "
+                    + "    UPDATE SET Quantity = ?, UnitPrice = ?, LastUpdated = GETDATE() "
+                    + "WHEN NOT MATCHED THEN "
+                    + "    INSERT (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) "
+                    + "    VALUES (?, 'KG', ?, ?, 0, GETDATE());";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setDouble(2, quantity);
+                ps.setDouble(3, price);
+                ps.setInt(4, productId);
+                ps.setDouble(5, quantity);
+                ps.setDouble(6, price);
+                int result = ps.executeUpdate();
+
+                return result > 0;
+            }
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean isFruitCategory(int categoryId) {
+        String sql = "SELECT CASE WHEN c.CategoryID = 3 OR c.ParentID = 3 THEN 1 ELSE 0 END AS IsFruit FROM Category c WHERE c.CategoryID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("IsFruit") == 1;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     // ====================
