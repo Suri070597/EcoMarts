@@ -89,7 +89,9 @@ public class StaffProductServlet extends HttpServlet {
                 try {
                     int idDetail = Integer.parseInt(idDetailRaw);
                     Product productDetail = dao.getProductById(idDetail);
+                    java.util.Map<String, Object> inventory = dao.getProductInventory(idDetail);
                     request.setAttribute("productDetail", productDetail);
+                    request.setAttribute("inventory", inventory);
                     request.getRequestDispatcher("/WEB-INF/staff/product/product-detail.jsp").forward(request,
                             response);
                 } catch (Exception e) {

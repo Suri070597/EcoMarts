@@ -107,7 +107,9 @@ public class ProductServlet extends HttpServlet {
                 try {
                     int idDetail = Integer.parseInt(idDetailRaw);
                     Product productDetail = dao.getProductById(idDetail);
+                    Map<String, Object> inventory = dao.getProductInventory(idDetail);
                     request.setAttribute("productDetail", productDetail);
+                    request.setAttribute("inventory", inventory);
                     request.getRequestDispatcher("/WEB-INF/admin/product/product-detail.jsp").forward(request,
                             response);
                 } catch (Exception e) {
