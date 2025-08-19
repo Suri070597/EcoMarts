@@ -5,6 +5,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%
+    Promotion pro = new Promotion();
     List<Product> flash = (List<Product>) request.getAttribute("flashSaleProducts");
 %>
 <!DOCTYPE html>
@@ -142,7 +143,7 @@
                 <section class="product-section" data-aos="fade-up">
                     <div class="section-header">
                         <div class="section-title">
-                            <i class="fas fa-glass-cheers"></i> Flash Sale nhận ngàn deal hời
+                            <i class="fas fa-glass-cheers"></i> Ngập tràn khuyến mãi !!!
                         </div>
                         <a href="ViewAllProductServlet?categoryId=1" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>    
                     </div>

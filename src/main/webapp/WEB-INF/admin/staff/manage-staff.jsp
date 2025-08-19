@@ -24,11 +24,6 @@
         <jsp:include page="../components/sidebar.jsp" />
 
         <div class="main-content">
-            <c:if test="${not empty param.message}">
-                <div class="alert ${param.type == 'success' ? 'alert-success' : 'alert-danger'}" role="alert">
-                    ${param.message}
-                </div>
-            </c:if>
             <div class="card">
                 <div class="card-header">
                     <div class="header-actions">

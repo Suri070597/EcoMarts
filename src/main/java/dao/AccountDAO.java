@@ -452,4 +452,25 @@ public class AccountDAO extends DBContext {
     public Account getUserDetail(int accountId) {
         return getFullAccountById(accountId);
     }
+    
+     public int getAccountIdByUsername(String username) {
+        String sql = "SELECT AccountID FROM Account WHERE Username = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int accountId = rs.getInt("AccountID");
+                rs.close();
+                ps.close();
+                return accountId;
+            }
+            rs.close();
+            ps.close();
+            return -1;
+        } catch (SQLException e) {
+            System.out.println("Get AccountID by Username failed: " + e.getMessage());
+            return -1;
+        }
+    }
 }
