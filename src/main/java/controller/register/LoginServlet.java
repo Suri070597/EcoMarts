@@ -109,8 +109,8 @@ public class LoginServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/home");
                 }
             } else {
-                System.out.println("Đăng nhập thất bại: email hoặc mật khẩu không hợp lệ cho email=" + email);
-                request.getSession().setAttribute("error", "Email hoặc mật khẩu không đúng!");
+                System.out.println("Tài khoản không tồn tại!");
+                request.getSession().setAttribute("error", "Tài khoản không tồn tại!");
                 response.sendRedirect(request.getContextPath() + "/login");
             }
         } catch (SQLException e) {
