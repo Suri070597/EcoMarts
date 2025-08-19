@@ -5,6 +5,8 @@ import dao.ProductDAO;
 import dao.ViewProductDAO;
 import dao.FeedBackDAO;
 import dao.PromotionDAO;
+import static dao.PromotionDAO.TYPE_FLASHSALE;
+import static dao.PromotionDAO.TYPE_SEASONAL;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.*;
@@ -30,8 +32,11 @@ public class flashsale extends HttpServlet {
         ProductDAO dao = new ProductDAO();
         List<Product> list = dao.getAll();
         request.setAttribute("products", list);
-
+        
+        Promotion pro = new Promotion();
         PromotionDAO promoDao = new PromotionDAO();
+        int flashInserted   = promoDao.rebuildMappingsForActiveType(TYPE_FLASHSALE);
+        System.out.println("[Rebuild] FlashSale inserted rows = " + flashInserted);
         List<Product> flash = promoDao.listFlashSaleFromMapping();
         request.setAttribute("flashSaleProducts", flash);
         // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm

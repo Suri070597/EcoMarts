@@ -318,36 +318,69 @@ public class PromotionDAO extends DBContext {
         }
     }
 
-    /** Gán danh sách sản phẩm cho promotion; trả list id thất bại (nếu có) */
+    /** Gán danh sách sản phẩm cho promotion; trả list ProductID bị từ chối (đã có promotion khác) */
     public List<Integer> updateProductAssignments(int promotionID, String[] productIDs) {
-        clearProductAssignments(promotionID);
         List<Integer> failed = new ArrayList<>();
         if (productIDs == null || productIDs.length == 0) return failed;
 
-        String insertSQL = "INSERT INTO Product_Promotion (ProductID, PromotionID) VALUES (?, ?)";
+        final String insertSQL = "INSERT INTO Product_Promotion (ProductID, PromotionID) VALUES (?, ?)";
+        final String checkSQL  = "SELECT TOP 1 PromotionID FROM Product_Promotion WHERE ProductID = ?";
+
+        boolean startedTx = false;
+        boolean oldAuto = true;
+
         try {
-            conn.setAutoCommit(false);
-            try (PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
+            oldAuto = conn.getAutoCommit();
+            if (oldAuto) {                 // chỉ mở TX nếu trước đó đang autoCommit
+                conn.setAutoCommit(false);
+                startedTx = true;
+            }
+
+            // Xoá mapping cũ của chính promotion này TRONG CÙNG TX
+            clearProductAssignments(promotionID);
+
+            try (PreparedStatement chk = conn.prepareStatement(checkSQL);
+                 PreparedStatement ins = conn.prepareStatement(insertSQL)) {
+
                 for (String pidStr : productIDs) {
                     try {
                         int productID = Integer.parseInt(pidStr);
-                        insertStmt.setInt(1, productID);
-                        insertStmt.setInt(2, promotionID);
-                        insertStmt.addBatch();
+
+                        // Kiểm tra độc quyền promotion cho product
+                        chk.setInt(1, productID);
+                        try (ResultSet rs = chk.executeQuery()) {
+                            if (rs.next()) {
+                                int existed = rs.getInt(1);
+                                if (existed != promotionID) {      // đã có promotion khác
+                                    failed.add(productID);          // đánh dấu từ chối
+                                    continue;                       // bỏ qua insert
+                                }
+                            }
+                        }
+
+                        // Hợp lệ -> insert
+                        ins.setInt(1, productID);
+                        ins.setInt(2, promotionID);
+                        ins.addBatch();
+
                     } catch (Exception ex) {
-                        failed.add(-1);
+                        failed.add(-1); // lỗi parse / lỗi khác
                     }
                 }
-                insertStmt.executeBatch();
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                e.printStackTrace();
-            } finally {
-                conn.setAutoCommit(true);
+
+                ins.executeBatch();
             }
+
+            if (startedTx) conn.commit();
         } catch (SQLException e) {
+            if (startedTx) {
+                try { conn.rollback(); } catch (SQLException ignore) {}
+            }
             e.printStackTrace();
+        } finally {
+            if (startedTx) {
+                try { conn.setAutoCommit(oldAuto); } catch (SQLException ignore) {}
+            }
         }
         return failed;
     }
@@ -503,9 +536,16 @@ public class PromotionDAO extends DBContext {
         final String insertSQL = "INSERT INTO Product_Promotion (ProductID, PromotionID) VALUES (?, ?)";
 
         int inserted = 0;
+        boolean startedTx = false;
+        boolean oldAuto = true;
+
         try {
-            boolean old = conn.getAutoCommit();
-            conn.setAutoCommit(false);
+            oldAuto = conn.getAutoCommit();
+            if (oldAuto) {                 // chỉ mở TX nếu trước đó đang autoCommit
+                conn.setAutoCommit(false);
+                startedTx = true;
+            }
+
             try (PreparedStatement del = conn.prepareStatement(deleteSQL)) {
                 del.setInt(1, promotionId);
                 del.executeUpdate();
@@ -519,12 +559,18 @@ public class PromotionDAO extends DBContext {
                 int[] res = ins.executeBatch();
                 for (int r : res) inserted += (r >= 0 ? r : 1);
             }
-            conn.commit();
-            conn.setAutoCommit(old);
+
+            if (startedTx) conn.commit();
             return inserted;
         } catch (SQLException e) {
-            try { conn.rollback(); } catch (SQLException ignore) {}
+            if (startedTx) {
+                try { conn.rollback(); } catch (SQLException ignore) {}
+            }
             throw new RuntimeException("materializeMappingsForPromotion failed: " + promotionId, e);
+        } finally {
+            if (startedTx) {
+                try { conn.setAutoCommit(oldAuto); } catch (SQLException ignore) {}
+            }
         }
     }
 
@@ -550,14 +596,44 @@ public class PromotionDAO extends DBContext {
         return ids;
     }
 
-    // ====== REBUILD MAPPING CHO TẤT CẢ PROMOTION ĐANG HIỆU LỰC CỦA 1 TYPE ======
+    // ====== REBUILD MAPPING CHO TẤT CẢ PROMOTION ĐANG HIỆU LỰC CỦA 1 TYPE (ATOMIC) ======
     public int rebuildMappingsForActiveType(int promoType) {
         List<Integer> promoIds = listActivePromotionIdsByType(promoType);
+        if (promoIds.isEmpty()) return 0;
+
         int total = 0;
-        for (Integer id : promoIds) {
-            total += materializeMappingsForPromotion(id);
+        boolean startedTx = false;
+        boolean oldAuto = true;
+
+        try {
+            oldAuto = conn.getAutoCommit();
+            if (oldAuto) {
+                conn.setAutoCommit(false);     // mở 1 TX lớn bao toàn bộ vòng lặp
+                startedTx = true;
+            }
+
+            for (Integer id : promoIds) {
+                // materialize... sẽ KHÔNG tự commit nếu đang ở trong TX ngoài
+                total += materializeMappingsForPromotion(id);
+            }
+
+            if (startedTx) conn.commit();      // commit 1 lần cho toàn bộ
+            return total;
+        } catch (RuntimeException e) {
+            if (startedTx) {
+                try { conn.rollback(); } catch (SQLException ignore) {}
+            }
+            throw e;
+        } catch (SQLException e) {
+            if (startedTx) {
+                try { conn.rollback(); } catch (SQLException ignore) {}
+            }
+            throw new RuntimeException("rebuildMappingsForActiveType failed: " + promoType, e);
+        } finally {
+            if (startedTx) {
+                try { conn.setAutoCommit(oldAuto); } catch (SQLException ignore) {}
+            }
         }
-        return total;
     }
 
     // ====== LẤY SẢN PHẨM THEO TYPE TỪ BẢNG MAPPING (CÁCH B) ======
@@ -633,6 +709,36 @@ public class PromotionDAO extends DBContext {
             System.out.println("\nDONE.");
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    
+    /** Lấy PromotionID đang gán cho 1 sản phẩm; null nếu chưa có */
+    public Integer getAssignedPromotionId(int productID) {
+        final String sql = "SELECT TOP 1 PromotionID FROM Product_Promotion WHERE ProductID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("getAssignedPromotionId failed: " + productID, e);
+        }
+        return null;
+    }
+
+    /** True nếu có thể gán (chưa có promotion nào, hoặc đã gán chính promotionID này) */
+    public boolean canAssignProductToPromotion(int productID, int promotionID) {
+        Integer existed = getAssignedPromotionId(productID);
+        return existed == null || existed == promotionID;
+    }
+
+    /** Ném lỗi nếu product đang thuộc promotion khác */
+    public void assertCanAssignProductToPromotion(int productID, int promotionID) {
+        Integer existed = getAssignedPromotionId(productID);
+        if (existed != null && existed != promotionID) {
+            throw new IllegalStateException(
+                "Product " + productID + " đã thuộc Promotion " + existed +
+                " — không thể gán thêm Promotion " + promotionID);
         }
     }
 }
