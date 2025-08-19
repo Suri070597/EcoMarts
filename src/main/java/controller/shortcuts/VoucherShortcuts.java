@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Category;
+import model.Account;
 import model.Voucher;
 
 import java.io.IOException;
@@ -37,9 +38,23 @@ public class VoucherShortcuts extends HttpServlet {
         Instant now = Instant.now();
 
         List<Voucher> vouchers = new ArrayList<>();
+
+        // Lấy account hiện tại (nếu có)
+        model.Account currentAccount = (model.Account) request.getSession().getAttribute("account");
+        Integer accountId = currentAccount != null ? currentAccount.getAccountID() : null;
+
         for (Voucher v : all) {
             if (!v.isActive()) continue;
             if (!within(v.getStartDate(), v.getEndDate(), now)) continue;
+            // Ẩn voucher mà user đã có
+            if (accountId != null && voucherDAO.userHasVoucher(v.getVoucherID(), accountId)) continue;
+            // Ẩn voucher đã hết lượt claim (ClaimLimit) nếu cấu hình
+            Integer claimLimit = v.getClaimLimit();
+            if (claimLimit != null && claimLimit >= 0) {
+                int assigned = voucherDAO.countAssigned(v.getVoucherID());
+                if (assigned >= claimLimit) continue;
+                request.setAttribute("claimRemaining:" + v.getVoucherID(), Math.max(claimLimit - assigned, 0));
+            }
             vouchers.add(v);
         }
 
