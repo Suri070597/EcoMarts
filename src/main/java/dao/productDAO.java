@@ -1061,16 +1061,39 @@ public class ProductDAO extends DBContext {
      */
     public Map<String, Object> getProductInventory(int productId) {
         Map<String, Object> inventory = new HashMap<>();
-        String sql = "SELECT PackageType, Quantity, UnitPrice FROM Inventory WHERE ProductID = ?";
+        List<Map<String, Object>> packList = new ArrayList<>();
+        String sql = "SELECT PackageType, Quantity, UnitPrice, PackSize FROM Inventory WHERE ProductID = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
             ResultSet rs = ps.executeQuery();
 
+            double totalPackQty = 0.0;
             while (rs.next()) {
                 String packageType = rs.getString("PackageType");
-                inventory.put(packageType + "_Quantity", rs.getDouble("Quantity"));
-                inventory.put(packageType + "_Price", rs.getDouble("UnitPrice"));
+                double qty = rs.getDouble("Quantity");
+                double price = rs.getDouble("UnitPrice");
+                int packSize = 0;
+                try {
+                    packSize = rs.getInt("PackSize");
+                } catch (Exception ignore) {
+                }
+
+                if ("PACK".equalsIgnoreCase(packageType)) {
+                    Map<String, Object> p = new HashMap<>();
+                    p.put("packSize", packSize);
+                    p.put("quantity", qty);
+                    p.put("price", price);
+                    packList.add(p);
+                    totalPackQty += qty;
+                } else {
+                    inventory.put(packageType + "_Quantity", qty);
+                    inventory.put(packageType + "_Price", price);
+                }
+            }
+            if (!packList.isEmpty()) {
+                inventory.put("PACK_LIST", packList);
+                inventory.put("PACK_Quantity", totalPackQty);
             }
         } catch (Exception e) {
             e.printStackTrace();
