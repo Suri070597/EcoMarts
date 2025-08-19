@@ -4,11 +4,14 @@ import dao.CategoryDAO;
 import dao.ProductDAO;
 import dao.ViewProductDAO;
 import dao.FeedBackDAO;
+import dao.OrderDAO;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import java.util.ArrayList;
+import java.util.Map;
 import model.Category;
 import model.Product;
 
@@ -27,6 +30,7 @@ public class HomeServlet extends HttpServlet {
         // Get products
         ProductDAO dao = new ProductDAO();
         List<Product> list = dao.getAll();
+        OrderDAO order = new OrderDAO();
         request.setAttribute("products", list);
 
         // Lấy 7 danh sách sản phẩm theo từng ParentID
@@ -37,13 +41,24 @@ public class HomeServlet extends HttpServlet {
         request.setAttribute("featuredProducts4", viewDao.getFeaturedProductsByPage(4, 0, 6));
         request.setAttribute("featuredProducts5", viewDao.getFeaturedProductsByPage(5, 0, 6));
         request.setAttribute("featuredProducts6", viewDao.getFeaturedProductsByPage(6, 0, 6));
-        request.setAttribute("featuredProducts7", viewDao.getFeaturedProductsByPage(7, 0, 6));
+        List<Map<String, Object>> topRows = order.getTopSellingProducts(10);
+        List<Product> topSellingProducts = new ArrayList<>();
+        for (Map<String, Object> row : topRows) {
+            int pid = ((Number) row.get("productId")).intValue();
+            Product p = dao.getProductById(pid);   // dùng ProductDAO đang có sẵn phía trên
+            if (p != null) {
+                topSellingProducts.add(p);
+            }
+        }
+        request.setAttribute("featuredProducts7", topSellingProducts);
 
         // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
         try {
             FeedBackDAO fbDao = new FeedBackDAO();
             java.util.Map<Integer, Double> avgRatingMap = new java.util.HashMap<>();
             java.util.Map<Integer, Integer> reviewCountMap = new java.util.HashMap<>();
+            java.util.Map<Integer, Double> unitPriceMap = new java.util.HashMap<>();
+
             List<List<Product>> allProductLists = java.util.Arrays.asList(
                     (List<Product>) request.getAttribute("featuredProducts1"),
                     (List<Product>) request.getAttribute("featuredProducts2"),
@@ -52,6 +67,7 @@ public class HomeServlet extends HttpServlet {
                     (List<Product>) request.getAttribute("featuredProducts5"),
                     (List<Product>) request.getAttribute("featuredProducts6"),
                     (List<Product>) request.getAttribute("featuredProducts7"));
+
             for (List<Product> plist : allProductLists) {
                 if (plist != null) {
                     for (Product p : plist) {
@@ -62,11 +78,18 @@ public class HomeServlet extends HttpServlet {
                             avgRatingMap.put(pid, avg);
                             reviewCountMap.put(pid, count);
                         }
+
+                        // Lấy giá unit (lon) từ Inventory
+                        if (!unitPriceMap.containsKey(pid)) {
+                            Double unitPrice = dao.getUnitPrice(pid);
+                            unitPriceMap.put(pid, unitPrice);
+                        }
                     }
                 }
             }
             request.setAttribute("avgRatingMap", avgRatingMap);
             request.setAttribute("reviewCountMap", reviewCountMap);
+            request.setAttribute("unitPriceMap", unitPriceMap);
         } catch (Exception e) {
             e.printStackTrace();
         }

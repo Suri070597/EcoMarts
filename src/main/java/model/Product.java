@@ -23,12 +23,12 @@ public class Product {
     private String unit;
     private Timestamp createdAt;
     private int categoryID;
-    private int supplierID;
+    private int manufacturerID;
     private String status;
     private Date manufactureDate;
     private Date expirationDate;
     private Category category;
-    private Supplier supplier;
+    private Manufacturer manufacturer;
     private InventoryTransaction inventory;
     private int unitPerBox;
     private String boxUnitName;
@@ -62,17 +62,17 @@ public class Product {
         this.categoryID = categoryID;
     }
 
-    public Product(Category category, Supplier supplier) {
+    public Product(Category category, Manufacturer manufacturer) {
         this.category = category;
-        this.supplier = supplier;
+        this.manufacturer = manufacturer;
     }
 
-    public Supplier getSupplier() {
-        return supplier;
+    public Manufacturer getManufacturer() {
+        return manufacturer;
     }
 
-    public void setSupplier(Supplier supplier) {
-        this.supplier = supplier;
+    public void setManufacturer(Manufacturer manufacturer) {
+        this.manufacturer = manufacturer;
     }
 
     // Constructors
@@ -90,7 +90,7 @@ public class Product {
         this.unit = unit;
         this.createdAt = createdAt;
         // this.categoryID = categoryID;
-        // this.supplierID = supplierID;
+        // this.manufacturerID = manufacturerID;
         // this.status = status;
     }
 
@@ -190,12 +190,12 @@ public class Product {
         this.createdAt = createdAt;
     }
 
-    public int getSupplierID() {
-        return supplierID;
+    public int getManufacturerID() {
+        return manufacturerID;
     }
 
-    public void setSupplierID(int supplierID) {
-        this.supplierID = supplierID;
+    public void setManufacturerID(int manufacturerID) {
+        this.manufacturerID = manufacturerID;
     }
 
     public String getStatus() {
@@ -243,8 +243,8 @@ public class Product {
     public String toString() {
         return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price
                 + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL
-                + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", supplierID="
-                + supplierID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate="
-                + expirationDate + ", category=" + category + ", supplier=" + supplier + '}';
+                + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", manufacturerID="
+                + manufacturerID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate="
+                + expirationDate + ", category=" + category + ", manufacturer=" + manufacturer + '}';
     }
 }

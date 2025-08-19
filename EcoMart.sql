@@ -29,6 +29,11 @@ CREATE TABLE Account (
     [Status] NVARCHAR(50) DEFAULT 'Active', -- Active, Inactive, Suspended
 );
 
+INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
+VALUES
+-- Admin = admin123@
+(N'admin123', N'ecd00aa1acd325ba7575cb0f638b04a5', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'Nguyễn Văn Cừ, TP.Cần Thơ', N'Nữ', 1, N'Active')
+
 CREATE TABLE Staff (
     StaffID INT PRIMARY KEY IDENTITY(1,1),
     AccountID INT NOT NULL,
@@ -52,17 +57,17 @@ CREATE TABLE Token_Table (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE
 );
 
-CREATE TABLE Supplier (
-    SupplierID INT PRIMARY KEY IDENTITY(1,1),
+CREATE TABLE Manufacturer (
+    ManufacturerID INT PRIMARY KEY IDENTITY(1,1),
     BrandName NVARCHAR(100) NOT NULL,
     CompanyName NVARCHAR(100) NOT NULL,
     [Address] NVARCHAR(255),
     Email NVARCHAR(255),
-    Phone VARCHAR(15),
+    Phone VARCHAR(15) NOT NULL,
     [Status] BIT DEFAULT 1
 );
 
-INSERT INTO Supplier (BrandName, CompanyName, [Address], Email, Phone, [Status])
+INSERT INTO Manufacturer (BrandName, CompanyName, [Address], Email, Phone, [Status])
 VALUES
 (N'Thịnh An', N'Công ty Thịnh An', N'123 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'thinhan@fruit.vn', '0909123456', 1),
 (N'SUNTORY PEPSICO', N'Công ty TNHH Nước giải khát SUNTORY PEPSICO Việt Nam', N'Sun Avenue, Quận 2, TP.HCM', N'contact@suntorypepsico.vn', '02838912345', 1),
@@ -156,22 +161,37 @@ INSERT INTO Category (CategoryName, ParentID, [Description]) VALUES
 CREATE TABLE Product (
     ProductID INT PRIMARY KEY IDENTITY(1,1),
     ProductName NVARCHAR(255) NOT NULL,
-    Price DECIMAL(10,2) NOT NULL,
+    Price DECIMAL(10,2) NOT NULL, -- giá của 1 thùng
     [Description] NVARCHAR(MAX),
-    StockQuantity DECIMAL(10,2) NOT NULL DEFAULT 0, -- sửa kiểu + default
+    StockQuantity DECIMAL(10,2) NOT NULL DEFAULT 0, -- số lượng thùng
     ImageURL NVARCHAR(255),
     Unit NVARCHAR(50), -- đơn vị tính: kg, chai, gói,...
     CreatedAt DATETIME DEFAULT GETDATE(),
     ManufactureDate DATE, 
     ExpirationDate DATE,
     CategoryID INT NOT NULL,
-    SupplierID INT NOT NULL,
+    ManufacturerID INT NOT NULL,
     [Status] NVARCHAR(50) DEFAULT N'Còn hàng',
-    UnitPerBox INT NOT NULL DEFAULT 1,
+    UnitPerBox INT NOT NULL DEFAULT 1,  -- số lượng lon trong thùng
     BoxUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
     ItemUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-    FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID)
+    FOREIGN KEY (ManufacturerID) REFERENCES Manufacturer(ManufacturerID)
+);
+
+
+CREATE TABLE ProductUnitConversion (
+    ConversionID INT PRIMARY KEY IDENTITY(1,1),
+    ProductID INT NOT NULL,
+    UnitPerBoxChange INT NOT NULL DEFAULT 0, -- Số lượng lon trong thùng sau khi chuyển đổi
+    UnitsPerPackChange INT NULL, -- Số lượng lốc trong 1 thùng sau khi chuyển đổi
+    UnitPrice DECIMAL(18,2) NULL, -- Giá của 1 đơn vị nhỏ
+    PackPrice DECIMAL(18,2) NULL, -- Giá của 1 lốc
+    BoxQuantity INT NULL, -- Số lượng thùng sử dụng trong lần chuyển đổi
+    PackSize INT NULL, -- Số đơn vị trong 1 lốc tại thời điểm chuyển đổi (nếu có)
+    ConversionDate DATETIME NOT NULL DEFAULT GETDATE(), -- Thời gian chuyển đổi
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE
+    -- Bỏ UNIQUE constraint để cho phép nhiều chuyển đổi
 );
 
 
@@ -315,14 +335,19 @@ CREATE TABLE VoucherUsage (
     FOREIGN KEY (OrderID) REFERENCES [Order](OrderID)
 );
 
-
 CREATE TABLE Inventory (
     InventoryID INT PRIMARY KEY IDENTITY(1,1),
     ProductID INT NOT NULL,
-    Quantity DECIMAL(10,2) CHECK (Quantity >= 0),
-    LastUpdated DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+    PackageType NVARCHAR(10) NOT NULL, -- 'BOX' | 'UNIT' | 'PACK'
+    Quantity DECIMAL(18,2) NOT NULL DEFAULT 0,
+    UnitPrice DECIMAL(18,2) NULL,      -- Giá bán cho loại đóng gói này
+    PackSize INT NOT NULL DEFAULT 0,   -- Số đơn vị trong 1 lốc (0 cho BOX/UNIT)
+    LastUpdated DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_Inventory_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE,
+    CONSTRAINT UQ_Inventory UNIQUE (ProductID, PackageType, PackSize),
+    CONSTRAINT CHK_PackageType CHECK (PackageType IN ('BOX', 'UNIT', 'PACK'))
 );
+
 
 CREATE TABLE AccountVoucher (
     AccountVoucherID INT PRIMARY KEY IDENTITY(1,1),
@@ -333,30 +358,3 @@ CREATE TABLE AccountVoucher (
     FOREIGN KEY (VoucherID) REFERENCES Voucher(VoucherID)
 );
 
-
-
-
-
-
--- Chạy hết cái trên ròi, mới chạy trigger này xong ròi mới insert dữ liệu admin vô  bảng account 
---ròi muốn chạy staff thì vô staff tạo tài khoản cho staff ròi lấy đó đăng nhập qua cho satff nha !!!!!!!!!
-
-CREATE TRIGGER trg_AfterInsert_Account_ToStaff
-ON Account
-AFTER INSERT
-AS
-BEGIN
-    INSERT INTO Staff (AccountID, FullName, Email, Phone, Gender, [Address])
-    SELECT 
-        i.AccountID, i.FullName, i.Email, i.Phone, i.Gender, i.[Address]
-    FROM 
-        inserted i
-    WHERE 
-        i.[Role] = 2;
-END
-
-
-INSERT INTO Account (Username, [Password], Email, FullName, Phone, [Address], Gender, [Role], [Status])
-VALUES
--- Admin = admin123@
-(N'admin123', N'ecd00aa1acd325ba7575cb0f638b04a5', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'Nguyễn Văn Cừ, TP.Cần Thơ', N'Nữ', 1, N'Active')

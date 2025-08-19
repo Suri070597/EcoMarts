@@ -173,4 +173,15 @@ public class Order {
         this.grandTotal = grandTotal;
     }
 
+    // Thêm field để lưu tên các sản phẩm trong order
+    private String productNames;
+
+    public String getProductNames() {
+        return productNames;
+    }
+
+    public void setProductNames(String productNames) {
+        this.productNames = productNames;
+    }
+
 }

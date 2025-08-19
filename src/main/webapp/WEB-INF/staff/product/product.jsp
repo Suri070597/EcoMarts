@@ -1,4 +1,4 @@
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="model.Product"%>
 <%@page import="java.util.List"%>
@@ -92,7 +92,7 @@
                                        }
                                     %>
                                     </td>
-                                    <td><%= pro.getUnit()%></td>
+                                    <td><%= pro.getBoxUnitName()%></td>
                                     <td>
                                         <% if (pro.getStockQuantity() <= 0) { %>
                                             <span class="badge bg-danger">Hết hàng</span>

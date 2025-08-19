@@ -1,12 +1,12 @@
 <%@page import="java.util.List"%>
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="model.Product"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     Product mo = (Product) request.getAttribute("mo");
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
-    List<Supplier> sup = (List<Supplier>) request.getAttribute("dataSup");
+    List<Manufacturer> sup = (List<Manufacturer>) request.getAttribute("dataSup");
 %>
 <%-- Thêm biến xác định sản phẩm là trái cây --%>
 <%
@@ -82,7 +82,7 @@
                         <% if (isFruit) {%>
                         <div class="mb-3">
                             <label class="form-label">Giá (đ/kg)</label>
-                            <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" value="<%= mo.getPrice()%>" required />
+                            <input type="number" min="0" step="0.01" class="form-control" name="fruitPrice" value="<%= Math.round(mo.getPrice())%>" required />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Số lượng tồn kho (kg)</label>
@@ -90,26 +90,21 @@
                         </div>
                         <% } else {%>
                         <div class="mb-3">
-                            <label class="form-label">Giá 1 thùng/hộp/kiện</label>
-                            <input type="number" min="0" step="1" class="form-control" name="boxPrice" required value="<%= mo.getUnitPerBox() > 0 ? Math.round(mo.getPrice() * mo.getUnitPerBox()) : ""%>" />
+                            <label class="form-label">Giá 1 thùng</label>
+                            <input type="number" min="0" step="1" class="form-control" name="boxPrice" required value="<%= Math.round(mo.getPrice())%>" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Số lượng thùng/hộp/kiện</label>
-                            <input type="number" min="0" step="1" class="form-control" name="boxQuantity" required value="<%= mo.getUnitPerBox() > 0 ? (long) (mo.getStockQuantity() / mo.getUnitPerBox()) : (long) mo.getStockQuantity()%>" id="boxQuantity" />
+                            <label class="form-label">Số lượng thùng</label>
+                            <input type="number" min="0" step="1" class="form-control" name="boxQuantity" required value="<%= (long) mo.getStockQuantity()%>" id="boxQuantity" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Số lượng sản phẩm trong 1 thùng/hộp/kiện</label>
+                            <label class="form-label">Số lượng sản phẩm trong 1 thùng</label>
                             <input type="number" min="1" step="1" class="form-control" name="unitPerBox" required value="<%= (long) mo.getUnitPerBox()%>" id="unitPerBox" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Đơn vị thùng/hộp/kiện</label>
-                            <select class="form-select" name="boxUnitName" required>
-                                <option value="">-- Chọn đơn vị thùng/hộp/kiện --</option>
-                                <option value="thùng" <%= "thùng".equals(mo.getBoxUnitName()) ? "selected" : ""%>>thùng</option>
-                                <option value="hộp" <%= "hộp".equals(mo.getBoxUnitName()) ? "selected" : ""%>>hộp</option>
-                                <option value="kiện" <%= "kiện".equals(mo.getBoxUnitName()) ? "selected" : ""%>>kiện</option>
-                                <option value="lốc" <%= "lốc".equals(mo.getBoxUnitName()) ? "selected" : ""%>>lốc</option>
-                            </select>
+                            <label class="form-label">Đơn vị thùng</label>
+                            <input type="text" class="form-control" value="thùng" readonly>
+                            <input type="hidden" name="boxUnitName" value="thùng">
                         </div>
                         <% } %>
                         <div class="mb-3" id="item-unit-group">
@@ -226,13 +221,16 @@
 
                         <div class="mb-3">
                             <label class="form-label">Nhà sản xuất</label>
-                            <select name="supplierID" class="form-select" required>
+                            <select name="manufacturerID" class="form-select" required>
                                 <option value="">-- Chọn nhà sản xuất --</option>
-                                <% for (Supplier s : sup) {%>
-                                <option value="<%= s.getSupplierId()%>" <%= (mo.getSupplier() != null && mo.getSupplier().getSupplierId() == s.getSupplierId()) ? "selected" : ""%>>
+                                <% for (Manufacturer s : sup) {
+                                       boolean isCurrent = (mo.getManufacturer() != null && mo.getManufacturer().getManufacturerId() == s.getManufacturerId());
+                                       if (s.getStatus() == 1 || isCurrent) { %>
+                                <option value="<%= s.getManufacturerId()%>" <%= isCurrent ? "selected" : ""%>>
                                     <%= s.getCompanyName()%>
                                 </option>
-                                <% } %>
+                                <%     }
+                                   } %>
                             </select>
                         </div>
 

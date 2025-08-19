@@ -7,7 +7,7 @@
 <%@page import="dao.FeedBackDAO"%>
 <%@page import="model.Review"%>
 <%@page import="java.text.SimpleDateFormat"%>
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="java.util.List"%>
 <%@page import="model.Product"%>
@@ -121,10 +121,24 @@
                                         </div>
                                         <div class="mt-3">
                                             <span class="flash-sale-price">
-                                                <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ
+                                                <c:choose>
+                                                    <c:when test="${unitPrice != null}">
+                                                        <fmt:formatNumber value="${unitPrice * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </span>
                                             <span class="original-price">
-                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
+                                                <c:choose>
+                                                    <c:when test="${unitPrice != null}">
+                                                        <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </span>
                                             <span class="discount-percent">
                                                 -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
@@ -134,11 +148,18 @@
                                 </c:when>
                                 <c:otherwise>
                                     <div class="flash-sale-banner mt-3">
-                                        <div class="flash-sale-header">
-                                            <span class="flash-sale-price">
-                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
-                                            </span>
-                                        </div>
+                                    <div class="flash-sale-header">
+                                        <span class="flash-sale-price">
+                                            <c:choose>
+                                                <c:when test="${unitPrice != null}">
+                                                    <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </span>
+                                    </div>
                                     </div>
                                 </c:otherwise>
                             </c:choose>
@@ -191,7 +212,7 @@
                                 %>
                             </p>
                             <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p>
-                            <p><strong>Nhà Sản Xuất:</strong> <%=mo.getSupplier().getCompanyName()%></p>
+                            <p><strong>Nhà Sản Xuất:</strong> <%=mo.getManufacturer().getCompanyName()%></p>
 
                             <form action="cart" method="post">
                                 <input type="hidden" name="action" value="add">
@@ -545,10 +566,21 @@
                                             <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>">
                                                 <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= p.getImageURL()%>"
                                                      class="card-img-top img-fluid product-image1" style="height: 350px; object-fit: cover;" alt="<%= p.getProductName()%>">
-                                                <div class="card-body">
-                                                    <p class="card-title mb-1"><%= p.getProductName()%></p>
-                                                    <p class="text-danger fw-bold"><%= new java.text.DecimalFormat("#,###").format(p.getPrice())%>đ</p>
-                                                </div>
+                                                    <div class="card-body">
+                                                        <p class="card-title mb-1"><%= p.getProductName()%></p>
+                                                        <p class="text-danger fw-bold">
+                                                            <%
+                                                                java.util.Map<Integer, Double> relatedUnitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("relatedUnitPriceMap");
+                                                                Double rup = relatedUnitPriceMap != null ? relatedUnitPriceMap.get(p.getProductID()) : null;
+                                                                java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+                                                                if (rup != null) {
+                                                                    out.print(df.format(rup) + "đ / " + p.getItemUnitName());
+                                                                } else {
+                                                                    out.print(df.format(p.getPrice()) + "đ / " + (p.getBoxUnitName() != null ? p.getBoxUnitName() : "thùng"));
+                                                                }
+                                                            %>
+                                                        </p>
+                                                    </div>
                                             </a>
                                         </div>
                                     </div>

@@ -65,12 +65,6 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="usageCount">Số lần đã sử dụng</label>
-                    <input type="number" min='0' class="form-control" id="usageCount" name="usageCount" value="${param.usageCount}" required>
-                    <div class="invalid-feedback">Vui lòng nhập số lần đã sử dụng</div>
-                </div>
-
-                <div class="mb-3">
                     <label class="form-label" for="startDate">Ngày bắt đầu</label>
                     <input type="date" class="form-control" id="startDate" name="startDate" value="${param.startDate}" required>
                     <div class="invalid-feedback">Vui lòng chọn ngày bắt đầu</div>
