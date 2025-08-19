@@ -27,8 +27,17 @@ public class AdminAccountServlet extends HttpServlet {
         if (action != null && action.equals("delete")) {
             try {
                 int id = Integer.parseInt(request.getParameter("id"));
-                boolean result = accDAO.deleteAccount(id);
                 String base = request.getContextPath() + "/admin/account";
+                Account target = accDAO.getFullAccountById(id);
+                if (target == null) {
+                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Tài khoản không tồn tại", java.nio.charset.StandardCharsets.UTF_8));
+                    return;
+                }
+                if (target.getRole() == 1) {
+                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Không thể xóa tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
+                    return;
+                }
+                boolean result = accDAO.deleteAccount(id);
                 if (result) {
                     response.sendRedirect(base + "?type=success&message=" + java.net.URLEncoder.encode("Xóa tài khoản thành công", java.nio.charset.StandardCharsets.UTF_8));
                 } else {
@@ -44,6 +53,15 @@ public class AdminAccountServlet extends HttpServlet {
         if (action != null && action.equals("status")) {
             try {
                 int id = Integer.parseInt(request.getParameter("id"));
+                Account target = accDAO.getFullAccountById(id);
+                if (target == null) {
+                    response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Tài khoản không tồn tại", java.nio.charset.StandardCharsets.UTF_8));
+                    return;
+                }
+                if (target.getRole() == 1) {
+                    response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Không thể cập nhật trạng thái tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
+                    return;
+                }
                 String status = request.getParameter("status");
                 String newStatus = status.equals("Active") ? "Inactive" : "Active";
                 accDAO.updateAccountStatus(id, newStatus);
@@ -63,6 +81,10 @@ public class AdminAccountServlet extends HttpServlet {
                     int id = Integer.parseInt(request.getParameter("id"));
                     Account account = accDAO.getFullAccountById(id);
                     if (account != null) {
+                        if (account.getRole() == 1) {
+                            response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Không thể chỉnh sửa tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
+                            return;
+                        }
                         request.setAttribute("account", account);
                         request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     } else {
@@ -123,7 +145,7 @@ public class AdminAccountServlet extends HttpServlet {
         String action = request.getParameter("action");
         AccountDAO accDAO = new AccountDAO();
 
-         if ("create".equals(action)) {
+        if ("create".equals(action)) {
             try {
                 String username = request.getParameter("username").trim();
                 String password = request.getParameter("password").trim();
@@ -135,6 +157,16 @@ public class AdminAccountServlet extends HttpServlet {
                 int role = Integer.parseInt(request.getParameter("role"));
                 String status = request.getParameter("status").trim();
 
+                role = 0;
+                status = "Active";
+
+                // Block creating admin accounts
+                if (role == 1) {
+                    request.setAttribute("errorMessage", "Không thể tạo tài khoản quản trị viên.");
+                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                    return;
+                }
+
                 if (accDAO.isUsernameExists(username)) {
                     request.setAttribute("errorMessage", "Tên đăng nhập đã tồn tại.");
                     request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
@@ -145,7 +177,7 @@ public class AdminAccountServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
                     return;
                 }
-                
+
                 if (accDAO.isPhoneExists(phone)) {
                     request.setAttribute("errorMessage", "Phone đã tồn tại.");
                     request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
@@ -246,7 +278,7 @@ public class AdminAccountServlet extends HttpServlet {
                             return;
                         }
                     }
-                    
+
                     response.sendRedirect(request.getContextPath() + "/admin/account");
                 } else {
                     request.setAttribute("errorMessage", "Tạo tài khoản thất bại. Vui lòng thử lại.");
@@ -271,10 +303,27 @@ public class AdminAccountServlet extends HttpServlet {
                 int role = Integer.parseInt(request.getParameter("role"));
                 String status = request.getParameter("status").trim();
 
+                // Keep role fixed to customer; do not override status so it uses existing data from form
+                role = 0;
+
                 Account existingAccount = accDAO.getFullAccountById(id);
 
-                if (username.isEmpty() || email.isEmpty() || fullName.isEmpty() ||
-                    phone.isEmpty() || address.isEmpty() || gender.isEmpty() || status.isEmpty()) {
+                // Block editing admin accounts
+                if (existingAccount != null && existingAccount.getRole() == 1) {
+                    response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Không thể chỉnh sửa tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
+                    return;
+                }
+
+                // Block turning any account into admin
+                if (role == 1) {
+                    request.setAttribute("errorMessage", "Không thể cập nhật vai trò thành quản trị viên.");
+                    request.setAttribute("account", existingAccount);
+                    request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
+                    return;
+                }
+
+                if (username.isEmpty() || email.isEmpty() || fullName.isEmpty()
+                        || phone.isEmpty() || address.isEmpty() || gender.isEmpty() || status.isEmpty()) {
                     request.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin.");
                     request.setAttribute("account", existingAccount);
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
@@ -296,7 +345,7 @@ public class AdminAccountServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     return;
                 }
-                
+
                 Account checkPhone = accDAO.getAccountByPhone(phone);
                 if (checkPhone != null && checkPhone.getAccountID() != id) {
                     request.setAttribute("errorMessage", "Email đã tồn tại.");
@@ -304,7 +353,7 @@ public class AdminAccountServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     return;
                 }
-                
+
                 Account account = new Account();
                 account.setAccountID(id);
                 account.setUsername(username);
