@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import dao.AccountDAO;
+import dao.CustomerDAO;
 import dao.StaffDAO;
 import db.MD5Util;
 import jakarta.servlet.ServletException;
@@ -11,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.sql.SQLException;
 import model.Account;
 import model.Staff;
 
@@ -239,7 +241,41 @@ public class AdminAccountServlet extends HttpServlet {
                 boolean res = accDAO.insertFullAccount(account);
 
                 if (res) {
-                    // Nếu tạo tài khoản staff (role = 2), cần insert vào bảng Staff
+                    // Nếu tạo tài khoản customer (role = 0), cần insert vào bảng Customer (HuuDuc)
+                    if (role == 0) {
+                        try {
+                            int accountId = accDAO.getAccountIdByUsername(username);
+                            if (accountId != -1) {
+                                model.Customer customer = new model.Customer();
+                                customer.setAccountID(accountId);
+                                customer.setFullName(fullName);
+                                customer.setEmail(email);
+                                customer.setPhone(phone);
+                                customer.setGender(gender);
+                                customer.setAddress(address);
+
+                                CustomerDAO customerDAO = new CustomerDAO();
+                                int customerId = customerDAO.insert(customer);
+                                if (customerId <= 0) {
+                                    accDAO.deleteAccount(accountId);
+                                    request.setAttribute("errorMessage", "Tạo thông tin customer thất bại. Vui lòng thử lại.");
+                                    request.setAttribute("account", account);
+                                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                                    return;
+                                }
+                            }
+                        } catch (ServletException | IOException | SQLException e) {
+                            int accountId = accDAO.getAccountIdByUsername(username);
+                            if (accountId != -1) {
+                                accDAO.deleteAccount(accountId);
+                            }
+                            request.setAttribute("errorMessage", "Lỗi khi tạo thông tin customer: " + e.getMessage());
+                            request.setAttribute("account", account);
+                            request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
+                            return;
+                        }
+                    }
+                    // Nếu tạo tài khoản staff (role = 2), cần insert vào bảng Staff(HuuDuc)
                     if (role == 2) {
                         try {
                             // Lấy AccountID vừa tạo
@@ -266,7 +302,7 @@ public class AdminAccountServlet extends HttpServlet {
                                     return;
                                 }
                             }
-                        } catch (Exception e) {
+                        } catch (ServletException | IOException e) {
                             // Nếu có lỗi, xóa tài khoản vừa tạo
                             int accountId = accDAO.getAccountIdByUsername(username);
                             if (accountId != -1) {

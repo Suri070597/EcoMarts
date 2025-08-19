@@ -16,6 +16,7 @@ GO
 USE EcoMart;
 GO
 
+
 CREATE TABLE Account (
     AccountID INT PRIMARY KEY IDENTITY(1,1),
     Username NVARCHAR(100) NOT NULL UNIQUE,
@@ -34,6 +35,16 @@ VALUES
 -- Admin = admin123@
 (N'admin123', N'ecd00aa1acd325ba7575cb0f638b04a5', N'admin@ecomart.vn', N'Admin EcoMart', '0938123456', N'Nguyễn Văn Cừ, TP.Cần Thơ', N'Nữ', 1, N'Active')
 
+CREATE TABLE Customer (
+    CustomerID INT PRIMARY KEY IDENTITY(1,1),
+    AccountID INT NOT NULL,
+    FullName NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100) UNIQUE NOT NULL,
+    Phone VARCHAR(20),
+    Gender NVARCHAR(10),
+    [Address] NVARCHAR(200),
+    FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE
+);
 CREATE TABLE Staff (
     StaffID INT PRIMARY KEY IDENTITY(1,1),
     AccountID INT NOT NULL,
@@ -69,11 +80,7 @@ CREATE TABLE Manufacturer (
 
 INSERT INTO Manufacturer (BrandName, CompanyName, [Address], Email, Phone, [Status])
 VALUES
-(N'Thịnh An', N'Công ty Thịnh An', N'123 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'thinhan@fruit.vn', '0909123456', 1),
-(N'SUNTORY PEPSICO', N'Công ty TNHH Nước giải khát SUNTORY PEPSICO Việt Nam', N'Sun Avenue, Quận 2, TP.HCM', N'contact@suntorypepsico.vn', '02838912345', 1),
-(N'Mondelez Kinh Đô', N'Công ty cổ phần bánh kẹo Mondelez Kinh Đô', N'138-142 Hai Bà Trưng, Quận 1, TP.HCM', N'info@mondelezkinhdo.vn', '02838212345', 1),
-(N'Vinamilk', N'Công ty Cổ phần Sữa Việt Nam', N'10 Tân Trào, Quận 7, TP.HCM', N'vinamilk@vinamilk.com.vn', '02854155555', 1),
-(N'IFREE BEAUTY', N'Công ty TNHH IFREE BEAUTY', N'18A Cộng Hòa, Quận Tân Bình, TP.HCM', N'cs@ifreebeauty.vn', '02839451234', 1);
+(N'Thịnh An', N'Công ty Thịnh An', N'123 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'thinhan@fruit.vn', '0909123456', 1);
 
 CREATE TABLE Category (
     CategoryID INT PRIMARY KEY IDENTITY(1,1),
