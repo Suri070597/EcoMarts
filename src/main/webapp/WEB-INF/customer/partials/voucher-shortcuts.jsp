@@ -3,6 +3,8 @@
 <%@ page import="model.*" %>
 <%@ page import="dao.*" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%
     ViewProductDAO dao = new ViewProductDAO();
@@ -153,10 +155,16 @@
 
                             <c:forEach var="v" items="${vouchers}">
 
-                                <!-- Tính số còn lại & % còn lại -->
+                                <!-- Tính số còn lại & % còn lại (sử dụng UsageCount/MaxUsage cho tiến độ) -->
                                 <c:set var="remaining"     value="${v.maxUsage > 0 ? (v.maxUsage - v.usageCount) : -1}" />
                                 <c:set var="safeRemaining" value="${remaining >= 0 ? remaining : 0}" />
                                 <c:set var="percent"       value="${v.maxUsage > 0 ? (safeRemaining * 100 / v.maxUsage) : 100}" />
+                                <!-- Số lượt có thể lấy còn lại (ClaimLimit - Assigned) được nhúng từ servlet trong request attribute claimRemaining:{voucherId} -->
+                                <c:set var="claimKey">claimRemaining:${v.voucherID}</c:set>
+                                <c:set var="claimRemaining" value="${requestScope[claimKey]}" />
+                                <c:set var="claimLimit" value="${v.claimLimit}" />
+                                <c:set var="claimPercent" value="${(claimLimit ne null && claimLimit > 0 && claimRemaining ne null) ? (claimRemaining * 100 / claimLimit) : null}" />
+                                <c:set var="barPercent" value="${claimPercent ne null ? claimPercent : percent}" />
 
                                 <article class="voucher-card" style="--theme:#26a69a">
                                     <!-- Panel trái -->
@@ -166,8 +174,7 @@
                                                 <c:out value="${v.voucherCode}" default="VOUCHER"/>
                                             </div>
                                             <div class="voucher-left-sub">
-                                                Giảm tối đa
-                                                <strong><fmt:formatNumber value="${v.discountAmount}" type="number" groupingUsed="true"/>đ</strong>
+                                                <c:out value="${v.description}"/>
                                             </div>
                                         </div>
                                     </div>
@@ -188,37 +195,41 @@
 
                                         <div class="voucher-title">
                                             <span>Giảm</span>
-                                            <strong>
-                                                tối đa <fmt:formatNumber value="${v.discountAmount}" type="number" groupingUsed="true"/>đ
-                                            </strong>
+                                            <strong><fmt:formatNumber value="${v.discountAmount}" type="number" groupingUsed="true"/>đ</strong>
                                         </div>
 
                                         <div class="voucher-meta">
-                                            Đơn tối thiểu
-                                            <strong><fmt:formatNumber value="${v.minOrderValue}" type="number" groupingUsed="true"/>đ</strong>
+                                            <strong>Đơn tối thiểu: </strong>
+                                            <fmt:formatNumber value="${v.minOrderValue}" type="number" groupingUsed="true"/>đ
                                         </div>
 
-                                        <c:if test="${v.maxUsage > 0}">
-                                            <div class="voucher-progress">
-                                                <div class="bar" style="width:${percent}%"></div>
-                                            </div>
-                                        </c:if>
+                                        <c:choose>
+                                            <c:when test="${claimPercent ne null}">
+                                                <div class="voucher-progress" style="--p:${barPercent}%;">
+                                                    <div class="bar" style="width: var(--p);"></div>
+                                                </div>
+                                            </c:when>
+                                            <c:when test="${v.maxUsage > 0}">
+                                                <div class="voucher-progress" style="--p:${barPercent}%;">
+                                                    <div class="bar" style="width: var(--p);"></div>
+                                                </div>
+                                            </c:when>
+                                        </c:choose>
 
                                         <div class="voucher-footer">
-                                            <c:choose>
-                                                <c:when test="${v.maxUsage <= 0}">
-                                                    <span class="status">Không giới hạn</span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="status ${percent < 20 ? 'hot' : ''}">
-                                                        ${percent < 20 ? 'Đang hết nhanh' : 'Còn '}${safeRemaining}/${v.maxUsage}
-                                                    </span>
-                                                </c:otherwise>
-                                            </c:choose>
-
-                                            <a class="terms" href="${pageContext.request.contextPath}/voucher/${v.voucherID}">
-                                                Điều kiện
-                                            </a>
+                                            <span class="status ${barPercent < 20 ? 'hot' : ''}">
+                                                <c:choose>
+                                                    <c:when test="${claimRemaining ne null}">
+                                                        Còn ${claimRemaining} lượt nhận
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <c:choose>
+                                                            <c:when test="${v.maxUsage <= 0}">Không giới hạn</c:when>
+                                                            <c:otherwise>Còn ${safeRemaining}/${v.maxUsage}</c:otherwise>
+                                                        </c:choose>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </span>
                                         </div>
                                     </div>
                                 </article>

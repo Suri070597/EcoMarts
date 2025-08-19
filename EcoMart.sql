@@ -318,6 +318,7 @@ CREATE TABLE Voucher (
     EndDate DATETIME NOT NULL,
     IsActive BIT DEFAULT 1,
     CategoryID INT NULL, -- NULL if applicable to all categories
+    ClaimLimit INT NULL, -- Số lượt có thể lấy tối đa (NULL => không giới hạn)
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
     CHECK (StartDate < EndDate)
 );

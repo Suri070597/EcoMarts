@@ -30,12 +30,18 @@ public class VoucherDAO extends DBContext {
             = "SELECT * FROM Voucher WHERE VoucherCode = ?";
 
     private static final String SQL_VOUCHER_INSERT
-            = "INSERT INTO Voucher (VoucherCode, Description, DiscountAmount, MinOrderValue, MaxUsage, UsageCount, StartDate, EndDate, IsActive, CategoryID) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            = "INSERT INTO Voucher (VoucherCode, Description, DiscountAmount, MinOrderValue, MaxUsage, UsageCount, StartDate, EndDate, IsActive, CategoryID, ClaimLimit) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_VOUCHER_UPDATE
-            = "UPDATE Voucher SET VoucherCode = ?, Description = ?, DiscountAmount = ?, MinOrderValue = ?, MaxUsage = ?, UsageCount = ?, StartDate = ?, EndDate = ?, IsActive = ?, CategoryID = ? "
+            = "UPDATE Voucher SET VoucherCode = ?, Description = ?, DiscountAmount = ?, MinOrderValue = ?, MaxUsage = ?, UsageCount = ?, StartDate = ?, EndDate = ?, IsActive = ?, CategoryID = ?, ClaimLimit = ? "
             + "WHERE VoucherID = ?";
+    private static final String SQL_COUNT_ASSIGNED
+            = "SELECT COUNT(*) FROM AccountVoucher WHERE VoucherID = ?";
+
+    private static final String SQL_CHECK_USER_HAS_VOUCHER
+            = "SELECT 1 FROM AccountVoucher WHERE VoucherID = ? AND AccountID = ?";
+
 
     private static final String SQL_VOUCHER_DELETE
             = "DELETE FROM Voucher WHERE VoucherID = ?";
@@ -163,6 +169,11 @@ public class VoucherDAO extends DBContext {
             } else {
                 ps.setNull(10, Types.INTEGER);
             }
+            if (v.getClaimLimit() != null) {
+                ps.setInt(11, v.getClaimLimit());
+            } else {
+                ps.setNull(11, Types.INTEGER);
+            }
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             logErr("insertVoucher", e);
@@ -186,7 +197,12 @@ public class VoucherDAO extends DBContext {
             } else {
                 ps.setNull(10, Types.INTEGER);
             }
-            ps.setInt(11, v.getVoucherID());
+            if (v.getClaimLimit() != null) {
+                ps.setInt(11, v.getClaimLimit());
+            } else {
+                ps.setNull(11, Types.INTEGER);
+            }
+            ps.setInt(12, v.getVoucherID());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             logErr("updateVoucher", e);
@@ -407,7 +423,33 @@ public class VoucherDAO extends DBContext {
         v.setEndDate(rs.getTimestamp("EndDate"));
         v.setActive(rs.getBoolean("IsActive"));
         v.setCategoryID(rs.getObject("CategoryID") != null ? rs.getInt("CategoryID") : null);
+        v.setClaimLimit(rs.getObject("ClaimLimit") != null ? rs.getInt("ClaimLimit") : null);
         return v;
+    }
+
+    public int countAssigned(int voucherId) {
+        try (PreparedStatement ps = conn.prepareStatement(SQL_COUNT_ASSIGNED)) {
+            ps.setInt(1, voucherId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            logErr("countAssigned", e);
+            return 0;
+        }
+    }
+
+    public boolean userHasVoucher(int voucherId, int accountId) {
+        try (PreparedStatement ps = conn.prepareStatement(SQL_CHECK_USER_HAS_VOUCHER)) {
+            ps.setInt(1, voucherId);
+            ps.setInt(2, accountId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            logErr("userHasVoucher", e);
+            return false;
+        }
     }
 
     private Account mapAccountBasic(ResultSet rs) throws SQLException {
