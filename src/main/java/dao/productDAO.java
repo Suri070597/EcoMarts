@@ -1062,6 +1062,63 @@ public class ProductDAO extends DBContext {
     }
 
     /**
+     * Lấy giá theo loại đóng gói cụ thể từ Inventory
+     *
+     * @param productId   ID sản phẩm
+     * @param packageType 'BOX' | 'UNIT' | 'PACK' | 'KG'
+     * @return UnitPrice hoặc null nếu không có
+     */
+    public Double getPriceByPackageType(int productId, String packageType) {
+        try {
+            String sql = "SELECT TOP 1 UnitPrice FROM Inventory WHERE ProductID = ? AND PackageType = ? ORDER BY LastUpdated DESC";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setString(2, packageType);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return rs.getDouble("UnitPrice");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Lấy giá thùng (BOX) từ Inventory
+     */
+    public Double getBoxPrice(int productId) {
+        return getPriceByPackageType(productId, "BOX");
+    }
+
+    /**
+     * Lấy giá đơn vị nhỏ nhất (UNIT) từ Inventory. KHÔNG bao gồm 'KG'.
+     */
+    public Double getUnitOnlyPrice(int productId) {
+        return getPriceByPackageType(productId, "UNIT");
+    }
+
+    /**
+     * Lấy tên đơn vị nhỏ nhất (ItemUnitName) từ bảng Product
+     */
+    public String getItemUnitName(int productId) {
+        try {
+            String sql = "SELECT ItemUnitName FROM Product WHERE ProductID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return rs.getString("ItemUnitName");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * Get current inventory for a product
      * 
      * @param productId The product ID

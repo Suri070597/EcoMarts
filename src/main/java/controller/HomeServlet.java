@@ -35,22 +35,204 @@ public class HomeServlet extends HttpServlet {
 
         // Lấy 7 danh sách sản phẩm theo từng ParentID
         ViewProductDAO viewDao = new ViewProductDAO();
-        request.setAttribute("featuredProducts1", viewDao.getFeaturedProductsByPage(1, 0, 6));
-        request.setAttribute("featuredProducts2", viewDao.getFeaturedProductsByPage(2, 0, 6));
-        request.setAttribute("featuredProducts3", viewDao.getFeaturedProductsByPage(3, 0, 6));
-        request.setAttribute("featuredProducts4", viewDao.getFeaturedProductsByPage(4, 0, 6));
-        request.setAttribute("featuredProducts5", viewDao.getFeaturedProductsByPage(5, 0, 6));
-        request.setAttribute("featuredProducts6", viewDao.getFeaturedProductsByPage(6, 0, 6));
+        List<Product> list1 = viewDao.getFeaturedProductsByPage(1, 0, 6); // Nước giải khát
+        List<Product> list2 = viewDao.getFeaturedProductsByPage(2, 0, 6); // Sữa các loại
+        List<Product> list3 = viewDao.getFeaturedProductsByPage(3, 0, 6); // Trái cây
+        List<Product> list4 = viewDao.getFeaturedProductsByPage(4, 0, 6); // Bánh kẹo
+        List<Product> list5 = viewDao.getFeaturedProductsByPage(5, 0, 6); // Mẹ & Bé
+        List<Product> list6 = viewDao.getFeaturedProductsByPage(6, 0, 6); // Mỹ phẩm
         List<Map<String, Object>> topRows = order.getTopSellingProducts(10);
         List<Product> topSellingProducts = new ArrayList<>();
         for (Map<String, Object> row : topRows) {
             int pid = ((Number) row.get("productId")).intValue();
-            Product p = dao.getProductById(pid);   // dùng ProductDAO đang có sẵn phía trên
+            Product p = dao.getProductById(pid); // dùng ProductDAO đang có sẵn phía trên
             if (p != null) {
                 topSellingProducts.add(p);
             }
         }
         request.setAttribute("featuredProducts7", topSellingProducts);
+
+        // Tạo map hiển thị giá theo quy tắc
+        java.util.Map<Integer, String> priceDisplayMap = new java.util.HashMap<>();
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+
+        // Helper cho format
+        java.util.function.BiConsumer<Integer, Double> putThung = (pid, priceVal) -> {
+            if (priceVal != null)
+                priceDisplayMap.put(pid, formatter.format(priceVal) + " đ / thùng");
+        };
+        java.util.function.Consumer<Product> putTraiCay = (p) -> {
+            priceDisplayMap.put(p.getProductID(), formatter.format(p.getPrice()) + " đ / " + p.getUnit());
+        };
+        java.util.function.BiConsumer<Integer, String> putUnit = (pid, unitLabel) -> {
+            Double up = dao.getUnitOnlyPrice(pid);
+            if (up != null && unitLabel != null && !unitLabel.trim().isEmpty()) {
+                priceDisplayMap.put(pid, formatter.format(up) + " đ / " + unitLabel);
+            }
+        };
+
+        // Lọc danh sách theo yêu cầu và build price map
+        // 1) Nước giải khát & 2) Sữa: giá thùng từ Inventory (BOX)
+        java.util.List<Product> filtered1 = new java.util.ArrayList<>();
+        if (list1 != null) {
+            for (Product p : list1) {
+                Double boxPrice = dao.getBoxPrice(p.getProductID());
+                if (boxPrice == null)
+                    boxPrice = p.getPrice(); // phòng hờ
+                // Build display with unit-per-box info if available
+                String display = formatter.format(boxPrice) + " đ / thùng";
+                try {
+                    Integer upbObj = null;
+                    String iun = null;
+                    try {
+                        upbObj = p.getUnitPerBox();
+                        iun = p.getItemUnitName();
+                    } catch (Exception ignore) {
+                    }
+                    if (upbObj == null || upbObj <= 0 || iun == null || iun.trim().isEmpty()) {
+                        Product full = dao.getProductById(p.getProductID());
+                        if (full != null) {
+                            upbObj = full.getUnitPerBox();
+                            iun = full.getItemUnitName();
+                        }
+                    }
+                    if (upbObj != null && upbObj > 0 && iun != null && !iun.trim().isEmpty()) {
+                        display += " (" + upbObj + " " + iun + ")";
+                    }
+                } catch (Exception ignore) {
+                }
+                priceDisplayMap.put(p.getProductID(), display);
+                filtered1.add(p);
+            }
+        }
+        java.util.List<Product> filtered2 = new java.util.ArrayList<>();
+        if (list2 != null) {
+            for (Product p : list2) {
+                Double boxPrice = dao.getBoxPrice(p.getProductID());
+                if (boxPrice == null)
+                    boxPrice = p.getPrice();
+                // Build display with unit-per-box info if available
+                String display = formatter.format(boxPrice) + " đ / thùng";
+                try {
+                    Integer upbObj = null;
+                    String iun = null;
+                    try {
+                        upbObj = p.getUnitPerBox();
+                        iun = p.getItemUnitName();
+                    } catch (Exception ignore) {
+                    }
+                    if (upbObj == null || upbObj <= 0 || iun == null || iun.trim().isEmpty()) {
+                        Product full = dao.getProductById(p.getProductID());
+                        if (full != null) {
+                            upbObj = full.getUnitPerBox();
+                            iun = full.getItemUnitName();
+                        }
+                    }
+                    if (upbObj != null && upbObj > 0 && iun != null && !iun.trim().isEmpty()) {
+                        display += " (" + upbObj + " " + iun + ")";
+                    }
+                } catch (Exception ignore) {
+                }
+                priceDisplayMap.put(p.getProductID(), display);
+                filtered2.add(p);
+            }
+        }
+
+        // 3) Trái cây: giữ nguyên
+        java.util.List<Product> filtered3 = new java.util.ArrayList<>();
+        if (list3 != null) {
+            for (Product p : list3) {
+                putTraiCay.accept(p);
+                filtered3.add(p);
+            }
+        }
+
+        // 4/5/6) Khác: bắt buộc có UNIT, nếu không thì ẩn (lọc)
+        java.util.List<Product> filtered4 = new java.util.ArrayList<>();
+        if (list4 != null) {
+            for (Product p : list4) {
+                Double up = dao.getUnitOnlyPrice(p.getProductID());
+                if (up != null) {
+                    String unitLabel = dao.getItemUnitName(p.getProductID());
+                    putUnit.accept(p.getProductID(), unitLabel);
+                    filtered4.add(p);
+                }
+            }
+        }
+        java.util.List<Product> filtered5 = new java.util.ArrayList<>();
+        if (list5 != null) {
+            for (Product p : list5) {
+                Double up = dao.getUnitOnlyPrice(p.getProductID());
+                if (up != null) {
+                    String unitLabel = dao.getItemUnitName(p.getProductID());
+                    putUnit.accept(p.getProductID(), unitLabel);
+                    filtered5.add(p);
+                }
+            }
+        }
+        java.util.List<Product> filtered6 = new java.util.ArrayList<>();
+        if (list6 != null) {
+            for (Product p : list6) {
+                Double up = dao.getUnitOnlyPrice(p.getProductID());
+                if (up != null) {
+                    String unitLabel = dao.getItemUnitName(p.getProductID());
+                    putUnit.accept(p.getProductID(), unitLabel);
+                    filtered6.add(p);
+                }
+            }
+        }
+
+        // 7) Sản phẩm nổi bật: áp dụng theo loại thật của sản phẩm
+        java.util.List<Product> filtered7 = new java.util.ArrayList<>();
+        if (topSellingProducts != null) {
+            for (Product p : topSellingProducts) {
+                int parentId = 0;
+                try {
+                    if (p.getCategory() != null)
+                        parentId = p.getCategory().getParentID();
+                } catch (Exception ignore) {
+                }
+
+                if (parentId == 1 || parentId == 2) {
+                    Double boxPrice = dao.getBoxPrice(p.getProductID());
+                    if (boxPrice == null)
+                        boxPrice = p.getPrice();
+                    String display = formatter.format(boxPrice) + " đ / thùng";
+                    try {
+                        int upb = p.getUnitPerBox();
+                        String iun = p.getItemUnitName();
+                        if (upb > 0 && iun != null && !iun.trim().isEmpty()) {
+                            display += " (" + upb + " " + iun + ")";
+                        }
+                    } catch (Exception ignore) {
+                    }
+                    priceDisplayMap.put(p.getProductID(), display);
+                    filtered7.add(p);
+                } else if (parentId == 3) {
+                    putTraiCay.accept(p);
+                    filtered7.add(p);
+                } else {
+                    Double up = dao.getUnitOnlyPrice(p.getProductID());
+                    if (up != null) {
+                        String unitLabel = dao.getItemUnitName(p.getProductID());
+                        putUnit.accept(p.getProductID(), unitLabel);
+                        filtered7.add(p);
+                    }
+                }
+            }
+        }
+
+        // Đẩy danh sách đã lọc
+        request.setAttribute("featuredProducts1", filtered1);
+        request.setAttribute("featuredProducts2", filtered2);
+        request.setAttribute("featuredProducts3", filtered3);
+        request.setAttribute("featuredProducts4", filtered4);
+        request.setAttribute("featuredProducts5", filtered5);
+        request.setAttribute("featuredProducts6", filtered6);
+        request.setAttribute("featuredProducts7", filtered7);
+        request.setAttribute("priceDisplayMap", priceDisplayMap);
 
         // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
         try {
@@ -79,10 +261,9 @@ public class HomeServlet extends HttpServlet {
                             reviewCountMap.put(pid, count);
                         }
 
-                        // Lấy giá unit (lon) từ Inventory
+                        // Map cũ để tương thích (không còn dùng ở JSP sau khi cập nhật)
                         if (!unitPriceMap.containsKey(pid)) {
-                            Double unitPrice = dao.getUnitPrice(pid);
-                            unitPriceMap.put(pid, unitPrice);
+                            unitPriceMap.put(pid, null);
                         }
                     }
                 }

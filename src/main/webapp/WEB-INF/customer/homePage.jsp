@@ -15,6 +15,7 @@
     List<Product> MilkProducts = (List<Product>) request.getAttribute("featuredProducts2");
     List<Product> MotherBabyProducts = (List<Product>) request.getAttribute("featuredProducts5");
     List<Product> featuredProducts = (List<Product>) request.getAttribute("featuredProducts7");
+    java.util.Map<Integer, String> priceDisplayMap = (java.util.Map<Integer, String>) request.getAttribute("priceDisplayMap");
 %>
 <!DOCTYPE html>
 <html>
@@ -151,9 +152,9 @@
             <section class="product-section" data-aos="fade-up">
                 <div class="section-header">
                     <div class="section-title">
-                        <i class="fas fa-glass-cheers"></i> Sản phẩm nổi bậtt
+                        <i class="fas fa-glass-cheers"></i> Sản phẩm nổi bật
                     </div>
-                    <a href="ViewAllProductServlet?categoryId=1" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>    
+                    <a href="ViewAllProductServlet?type=featured" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>    
                 </div>
                 <div class="product-grid" id="featured-Products">
                     <%
@@ -198,28 +199,19 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-
                                 <%
-                                    // Lấy giá unit (lon) từ Inventory
-                                    java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
-                                    Double unitPrice = null;
-                                    if (unitPriceMap != null) {
-                                        unitPrice = unitPriceMap.get(p.getProductID());
-                                    }
-
-                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                    symbols.setGroupingSeparator('.');
-                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-
-                                    if (unitPrice != null) {
-                                        // Có giá lon → hiển thị giá lon
-                                        out.print(formatter.format(unitPrice) + " đ / lon");
-                                    } else {
-                                        // Không có giá lon → hiển thị giá thùng
-                                        out.print(formatter.format(p.getPrice()) + " đ / thùng");
+                                    String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
+                                    if (display != null) out.print(display);
+                                    // Only append unit info here for Drinks/Milk; skip for Fruits to avoid (1 kg)
+                                    if (display == null || (display != null && display.indexOf("(") == -1)) {
+                                        Integer parentId = p.getCategory() != null ? p.getCategory().getParentID() : null;
+                                        int cid = p.getCategory() != null ? p.getCategory().getCategoryID() : p.getCategoryID();
+                                        boolean isDrinkMilk = (cid == 1) || (cid == 2) || (parentId != null && (parentId == 1 || parentId == 2));
+                                        if (isDrinkMilk && p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
+                                            out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
+                                        }
                                     }
                                 %>
-
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -236,14 +228,14 @@
                         }
                     } else {
                     %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+                    <p class="no-featured-products">Không có sản phẩm nào để hiển thị.</p>
                     <%
                         }
                     %>
                 </div>
-                <% if (drinkProducts != null && drinkProducts.size() >= 6) { %>
-                <button id="load-more-drink" class="see-more-btn"
-                        data-parent="1" data-target="drink-products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+                <% if (featuredProducts != null && featuredProducts.size() >= 6) { %>
+                <button id="load-more-featured" class="see-more-btn"
+                        data-type="featured" data-target="featured-Products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
                     <% } %>
             </section>
 
@@ -305,28 +297,16 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-
                                 <%
-                                    // Lấy giá unit (lon) từ Inventory
-                                    java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
-                                    Double unitPrice = null;
-                                    if (unitPriceMap != null) {
-                                        unitPrice = unitPriceMap.get(p.getProductID());
-                                    }
-
-                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                    symbols.setGroupingSeparator('.');
-                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-
-                                    if (unitPrice != null) {
-                                        // Có giá lon → hiển thị giá lon
-                                        out.print(formatter.format(unitPrice) + " đ / lon");
-                                    } else {
-                                        // Không có giá lon → hiển thị giá thùng
-                                        out.print(formatter.format(p.getPrice()) + " đ / thùng");
+                                    String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
+                                    if (display != null) out.print(display);
+                                    // Avoid duplicate unit info if already in display
+                                    if (display == null || (display != null && display.indexOf("(") == -1)) {
+                                        if (p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
+                                            out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
+                                        }
                                     }
                                 %>
-
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -343,7 +323,7 @@
                         }
                     } else {
                     %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+                    <p class="no-featured-products">Không có sản phẩm nào để hiển thị.</p>
                     <%
                         }
                     %>
@@ -413,11 +393,16 @@
                             </div>
                             <div class="product-price">
                                 <%
-                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                    symbols.setGroupingSeparator('.');
-                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                    out.print(formatter.format(p.getPrice()));
-                                %> đ / <%= p.getUnit()%>
+                                    String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
+                                    if (display != null) out.print(display);
+                                    // Append unit info for Drinks (1) and Milk (2)
+                                    Integer parentId = p.getCategory() != null ? p.getCategory().getParentID() : null;
+                                    int cid = p.getCategory() != null ? p.getCategory().getCategoryID() : p.getCategoryID();
+                                    boolean isDrinkMilk = (cid == 1) || (cid == 2) || (parentId != null && (parentId == 1 || parentId == 2));
+                                    if (isDrinkMilk && p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
+                                        out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
+                                    }
+                                %>
                             </div>
 
                             <div class="button-group">
@@ -435,7 +420,7 @@
                         }
                     } else {
                     %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+                    <p class="no-featured-products">Không có sản phẩm nào để hiển thị.</p>
                     <%
                         }
                     %>
@@ -507,11 +492,9 @@
                             </div>
                             <div class="product-price">
                                 <%
-                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                    symbols.setGroupingSeparator('.');
-                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                    out.print(formatter.format(p.getPrice()));
-                                %> đ / <%= p.getUnit()%>
+                                    String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
+                                    if (display != null) out.print(display);
+                                %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -528,7 +511,7 @@
                         }
                     } else {
                     %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+                    <p class="no-featured-products">Không có sản phẩm nào để hiển thị.</p>
                     <%
                         }
                     %>
@@ -600,26 +583,9 @@
                             </div>
                             <div class="product-price">
                                 <%
-                                    // Lấy giá unit (lon) từ Inventory
-                                    java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
-                                    Double unitPrice = null;
-                                    if (unitPriceMap != null) {
-                                        unitPrice = unitPriceMap.get(p.getProductID());
-                                    }
-
-                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                    symbols.setGroupingSeparator('.');
-                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-
-                                    if (unitPrice != null) {
-                                        // Có giá lon → hiển thị giá lon
-                                        out.print(formatter.format(unitPrice) + " đ / lon");
-                                    } else {
-                                        // Không có giá lon → hiển thị giá thùng
-                                        out.print(formatter.format(p.getPrice()) + " đ / thùng");
-                                    }
+                                    String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
+                                    if (display != null) out.print(display);
                                 %>
-
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -636,7 +602,7 @@
                         }
                     } else {
                     %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+                    <p class="no-featured-products">Không có sản phẩm nào để hiển thị.</p>
                     <%
                         }
                     %>
@@ -710,15 +676,10 @@
                                 <span>(<%= count%>)</span>
                             </div>
                             <div class="product-price">
-                                <div class="product-price">
-                                    <%
-                                        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                        symbols.setGroupingSeparator('.');
-                                        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                        out.print(formatter.format(p.getPrice()));
-                                    %> đ / <%= p.getUnit()%>
-                                </div>
-
+                                <%
+                                    String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
+                                    if (display != null) out.print(display);
+                                %>
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -735,7 +696,7 @@
                         }
                     } else {
                     %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+                    <p class="no-featured-products">Không có sản phẩm nào để hiển thị.</p>
                     <%
                         }
                     %>
@@ -807,28 +768,9 @@
                             </div>
                             <div class="product-price">
                                 <%
-                                    // Lấy giá unit (lon) từ Inventory
-                                    java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
-                                    Double unitPrice = null;
-                                    if (unitPriceMap != null) {
-                                        unitPrice = unitPriceMap.get(p.getProductID());
-                                    }
-
-                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                    symbols.setGroupingSeparator('.');
-                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-
-                                    if (unitPrice != null) {
-                                        // Có giá lon → hiển thị giá lon
-                                        out.print(formatter.format(unitPrice) + " đ / lon");
-                                    } else {
-                                        // Không có giá lon → hiển thị giá thùng
-                                        out.print(formatter.format(p.getPrice()) + " đ / thùng");
-                                    }
+                                    String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
+                                    if (display != null) out.print(display);
                                 %>
-
-
-
                             </div>
                             <div class="button-group">
                                 <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -845,7 +787,7 @@
                         }
                     } else {
                     %>
-                    <p class="no-featured-products">Không có sản phẩm nổi bật nào để hiển thị.</p>
+                    <p class="no-featured-products">Không có sản phẩm nào để hiển thị.</p>
                     <%
                         }
                     %>
