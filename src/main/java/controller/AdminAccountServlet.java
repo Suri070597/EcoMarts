@@ -339,18 +339,16 @@ public class AdminAccountServlet extends HttpServlet {
                 int role = Integer.parseInt(request.getParameter("role"));
                 String status = request.getParameter("status").trim();
 
-                // Keep role fixed to customer; do not override status so it uses existing data from form
-                role = 0;
+                role = 0; // ép về customer
 
                 Account existingAccount = accDAO.getFullAccountById(id);
 
-                // Block editing admin accounts
                 if (existingAccount != null && existingAccount.getRole() == 1) {
-                    response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Không thể chỉnh sửa tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
+                    response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message="
+                            + java.net.URLEncoder.encode("Không thể chỉnh sửa tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
                     return;
                 }
 
-                // Block turning any account into admin
                 if (role == 1) {
                     request.setAttribute("errorMessage", "Không thể cập nhật vai trò thành quản trị viên.");
                     request.setAttribute("account", existingAccount);
@@ -384,7 +382,7 @@ public class AdminAccountServlet extends HttpServlet {
 
                 Account checkPhone = accDAO.getAccountByPhone(phone);
                 if (checkPhone != null && checkPhone.getAccountID() != id) {
-                    request.setAttribute("errorMessage", "Email đã tồn tại.");
+                    request.setAttribute("errorMessage", "Số điện thoại đã tồn tại."); // <-- FIX
                     request.setAttribute("account", existingAccount);
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     return;
@@ -409,6 +407,27 @@ public class AdminAccountServlet extends HttpServlet {
                 boolean res = accDAO.updateFullAccount(account);
 
                 if (res) {
+                    // === Đồng bộ sang bảng Customer === (HuuDuc)
+                    CustomerDAO customerDAO = new CustomerDAO();
+                    model.Customer acc = new model.Customer();
+                    acc.setAccountID(id);
+                    acc.setFullName(fullName);
+                    acc.setEmail(email);
+                    acc.setPhone(phone);
+                    acc.setGender(gender);
+                    acc.setAddress(address);
+
+                    try {
+                        boolean ok = customerDAO.upsertByAccountId(acc);
+                        if (!ok) {
+                            // Không chặn flow, nhưng hiển thị cảnh báo (tuỳ bạn muốn rollback hay không)
+                            request.setAttribute("warningMessage", "Cập nhật Customer không thay đổi hoặc thất bại. Vui lòng kiểm tra.");
+                        }
+                    } catch (SQLException sqlEx) {
+                        // Nếu bạn muốn rollback thực sự, cần refactor DAO để dùng chung 1 Connection + transaction.
+                        request.setAttribute("warningMessage", "Lỗi khi cập nhật Customer: " + sqlEx.getMessage());
+                    }
+
                     response.sendRedirect(request.getContextPath() + "/admin/account");
                 } else {
                     request.setAttribute("errorMessage", "Cập nhật tài khoản thất bại. Vui lòng thử lại.");
@@ -424,10 +443,10 @@ public class AdminAccountServlet extends HttpServlet {
                     Account acc = accDAO.getFullAccountById(id);
                     request.setAttribute("account", acc);
                 } catch (Exception ex) {
-                    // Bỏ qua
-                }
+                    /* bỏ qua */ }
                 request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
             }
+
         }
     }
 }
