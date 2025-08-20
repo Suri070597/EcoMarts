@@ -26,6 +26,21 @@
         hsd = sdf.format(mo.getExpirationDate());
     }
 %>
+<c:set var="isDrinkOrMilk" value="false"/>
+<c:if test="${mo ne null}">
+    <c:choose>
+        <c:when test="${mo.category ne null}">
+            <c:if test="${mo.category.categoryID == 1 or mo.category.parentID == 1 or mo.category.categoryID == 2 or mo.category.parentID == 2}">
+                <c:set var="isDrinkOrMilk" value="true"/>
+            </c:if>
+        </c:when>
+        <c:otherwise>
+            <c:if test="${mo.categoryID == 1 or mo.categoryID == 2}">
+                <c:set var="isDrinkOrMilk" value="true"/>
+            </c:if>
+        </c:otherwise>
+    </c:choose>
+</c:if>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -106,6 +121,7 @@
                     <div class="col-md-6">
                         <h2 class="product-name"><%= mo.getProductName()%></h2>
                         <div class="promotion-section">
+                            <%-- OLD PRICE BLOCK (kept for reference):
                             <c:choose>
                                 <c:when test="${not empty appliedPromotion}">
                                     <div class="flash-sale-banner mt-3">
@@ -148,19 +164,120 @@
                                 </c:when>
                                 <c:otherwise>
                                     <div class="flash-sale-banner mt-3">
-                                    <div class="flash-sale-header">
-                                        <span class="flash-sale-price">
-                                            <c:choose>
-                                                <c:when test="${unitPrice != null}">
-                                                    <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </span>
+                                        <div class="flash-sale-header">
+                                            <span class="flash-sale-price">
+                                                <c:choose>
+                                                    <c:when test="${unitPrice != null}">
+                                                        <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                        </div>
                                     </div>
-                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                            --%>
+
+                            <c:choose>
+                                <c:when test="${isDrinkOrMilk}">
+                                    <c:choose>
+                                        <c:when test="${not empty appliedPromotion}">
+                                            <div class="flash-sale-banner mt-3">
+                                                <div class="flash-sale-header">
+                                                    <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
+                                                    <div class="countdown-text">
+                                                        <i class="bi bi-clock"></i> KẾT THÚC TRONG 
+                                                        <span class="countdown-box" id="timer-dd">--</span> :
+                                                        <span class="countdown-box" id="timer-hh">--</span> :
+                                                        <span class="countdown-box" id="timer-mm">--</span> :
+                                                        <span class="countdown-box" id="timer-ss">--</span>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <span class="flash-sale-price">
+                                                        <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
+                                                    </span>
+                                                    <span class="original-price">
+                                                        <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
+                                                    </span>
+                                                    <span class="discount-percent">
+                                                        -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="flash-sale-banner mt-3">
+                                                <div class="flash-sale-header">
+                                                    <span class="flash-sale-price">
+                                                        <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:choose>
+                                        <c:when test="${not empty appliedPromotion}">
+                                            <div class="flash-sale-banner mt-3">
+                                                <div class="flash-sale-header">
+                                                    <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
+                                                    <div class="countdown-text">
+                                                        <i class="bi bi-clock"></i> KẾT THÚC TRONG 
+                                                        <span class="countdown-box" id="timer-dd">--</span> :
+                                                        <span class="countdown-box" id="timer-hh">--</span> :
+                                                        <span class="countdown-box" id="timer-mm">--</span> :
+                                                        <span class="countdown-box" id="timer-ss">--</span>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <span class="flash-sale-price">
+                                                        <c:choose>
+                                                            <c:when test="${unitPrice != null}">
+                                                                <fmt:formatNumber value="${unitPrice * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                    <span class="original-price">
+                                                        <c:choose>
+                                                            <c:when test="${unitPrice != null}">
+                                                                <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                    <span class="discount-percent">
+                                                        -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="flash-sale-banner mt-3">
+                                                <div class="flash-sale-header">
+                                                    <span class="flash-sale-price">
+                                                        <c:choose>
+                                                            <c:when test="${unitPrice != null}">
+                                                                <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </c:otherwise>
                             </c:choose>
                         </div>
@@ -570,13 +687,22 @@
                                                         <p class="card-title mb-1"><%= p.getProductName()%></p>
                                                         <p class="text-danger fw-bold">
                                                             <%
-                                                                java.util.Map<Integer, Double> relatedUnitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("relatedUnitPriceMap");
-                                                                Double rup = relatedUnitPriceMap != null ? relatedUnitPriceMap.get(p.getProductID()) : null;
-                                                                java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
-                                                                if (rup != null) {
-                                                                    out.print(df.format(rup) + "đ / " + p.getItemUnitName());
-                                                                } else {
-                                                                    out.print(df.format(p.getPrice()) + "đ / " + (p.getBoxUnitName() != null ? p.getBoxUnitName() : "thùng"));
+                                                                java.util.Map<Integer, String> relatedPriceDisplayMap = (java.util.Map<Integer, String>) request.getAttribute("relatedPriceDisplayMap");
+                                                                if (relatedPriceDisplayMap != null) {
+                                                                    String display = relatedPriceDisplayMap.get(p.getProductID());
+                                                                    if (display != null && !display.trim().isEmpty()) {
+                                                                        out.print(display);
+                                                                    } else {
+                                                                        // Fallback: giữ cách cũ nếu thiếu map
+                                                                        java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+                                                                        java.util.Map<Integer, Double> relatedUnitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("relatedUnitPriceMap");
+                                                                        Double rup = relatedUnitPriceMap != null ? relatedUnitPriceMap.get(p.getProductID()) : null;
+                                                                        if (rup != null) {
+                                                                            out.print(df.format(rup) + "đ / " + p.getItemUnitName());
+                                                                        } else {
+                                                                            out.print(df.format(p.getPrice()) + "đ / " + (p.getBoxUnitName() != null ? p.getBoxUnitName() : "thùng"));
+                                                                        }
+                                                                    }
                                                                 }
                                                             %>
                                                         </p>
