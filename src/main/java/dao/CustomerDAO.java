@@ -58,4 +58,41 @@ public class CustomerDAO {
         }
         return null;
     }
+
+    // ĐÃ CÓ: update theo Email (giữ lại nếu nơi khác đang dùng)
+    public boolean updateAccountByEmail(Customer acc) throws SQLException {
+        String sql = "UPDATE Customer SET FullName=?, Phone=?, [Address]=?, Gender=? WHERE Email=?";
+        try (Connection conn = dbContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, acc.getFullName());
+            ps.setString(2, acc.getPhone());
+            ps.setString(3, acc.getAddress());
+            ps.setString(4, acc.getGender());
+            ps.setString(5, acc.getEmail());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // MỚI: update theo AccountID (an toàn hơn khi Email có thể đổi)
+    public boolean updateByAccountId(Customer acc) throws SQLException {
+        String sql = "UPDATE Customer SET FullName=?, Email=?, Phone=?, Gender=?, [Address]=? WHERE AccountID=?";
+        try (Connection conn = dbContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, acc.getFullName());
+            ps.setString(2, acc.getEmail());
+            ps.setString(3, acc.getPhone());
+            ps.setString(4, acc.getGender());
+            ps.setString(5, acc.getAddress());
+            ps.setInt(6, acc.getAccountID());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // MỚI: upsert theo AccountID
+    public boolean upsertByAccountId(Customer acc) throws SQLException {
+        Customer existed = getByAccountId(acc.getAccountID());
+        if (existed == null) {
+            return insert(acc) > 0;
+        } else {
+            return updateByAccountId(acc);
+        }
+    }
 }
