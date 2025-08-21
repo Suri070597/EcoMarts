@@ -506,88 +506,66 @@
                                                         </h5>
                                                     </div>
                                                     <div class="action-buttons">
-                                                        <c:if test="${sessionScope.account != null && sessionScope.account.role == 2}">
-                                                            <button type="button" class="btn btn-link btn-sm" onclick="setReply('${review.reviewID}', '${review.orderID}', '${review.productID}')">Trả lời</button>
-                                                        </c:if>
-                                                        <!-- Nút sửa review -->
-                                                        <c:if test="${sessionScope.account != null && review.accountID == sessionScope.account.accountID}">
+                                                        <!-- Nút sửa review chỉ cho customer -->
+                                                        <c:if test="${sessionScope.account != null && sessionScope.account.role == 0 && review.accountID == sessionScope.account.accountID}">
                                                             <a href="Review?action=edit&reviewId=${review.reviewID}" class="btn btn-link btn-sm">Sửa</a>
+                                                            <button type="button" class="btn btn-link btn-sm text-danger" onclick="deleteReview(${review.reviewID})">Xóa</button>
                                                         </c:if>
                                                     </div>
                                                 </div>
-                                                <div style="white-space: pre-wrap;">${review.comment}</div>
+                                                <div class="review-comment-text">${review.comment}</div>
                                                 <c:if test="${not empty review.imageURL}">
                                                     <div>
                                                         <img src="${pageContext.request.contextPath}/ImageServlet_2?name=${review.imageURL}" alt="Ảnh review" style="max-width:150px;max-height:150px;">
                                                     </div>
                                                 </c:if>
-                                                <c:if test="${not empty review.replies}">
+                                                <c:if test="${not empty flatRepliesMap[review.reviewID]}">
                                                     <div class="toggle-reply-box my-2">
                                                         <button type="button" class="btn btn-outline-info btn-sm" style="border-radius: 20px; font-weight: 500;"
                                                                 onclick="toggleReply('${review.reviewID}')">
                                                             <span id="arrow${review.reviewID}" style="font-size: 1.1em;">&#9654;</span>
-                                                            <span class="ms-1">Xem phản hồi của nhân viên</span>
+                                                            <span class="ms-1">Xem phản hồi</span>
                                                         </button>
                                                     </div>
                                                 </c:if>
-                                                <div id="replySection${review.reviewID}" style="display:none;">
-                                                    <c:forEach var="reply" items="${review.replies}">
-                                                        <div class="review-reply ms-4 mt-2">
-                                                            <div class="d-flex justify-content-between align-items-start">
-                                                                <div>
-                                                                    <strong>${reply.userName}<c:if test="${reply.accountRole == 2}"> (Staff)</c:if></strong>
-                                                                    <c:if test="${reply.accountRole != 2}">
-                                                                        <span class="text-warning">
-                                                                            <c:forEach begin="1" end="${reply.rating}" var="i">★</c:forEach>
-                                                                            <c:forEach begin="1" end="${5 - reply.rating}" var="i">☆</c:forEach>
-                                                                            </span>
-                                                                    </c:if>
-                                                                    <span class="text-muted small ms-2">
-                                                                        <fmt:formatDate value="${reply.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
-                                                                    </span>
-                                                                </div>
-                                                                <div class="action-buttons">
-                                                                    <c:if test="${sessionScope.account != null && sessionScope.account.role == 0 && reply.accountRole == 2}">
-                                                                        <button type="button" class="btn btn-link btn-sm" onclick="setReply('${reply.reviewID}', '${reply.orderID}', '${reply.productID}')">Trả lời nhân viên</button>
-                                                                    </c:if>
-                                                                    <!-- Nút sửa reply -->
-                                                                    <c:if test="${sessionScope.account != null && reply.accountID == sessionScope.account.accountID}">
-                                                                        <a href="Review?action=edit&reviewId=${reply.reviewID}" class="btn btn-link btn-sm">Sửa</a>
-                                                                    </c:if>
-                                                                </div>
-                                                            </div>
-                                                            <div style="white-space: pre-wrap;">${reply.comment}</div>
-                                                            <c:if test="${not empty reply.imageURL}">
-                                                                <div>
-                                                                    <img src="${pageContext.request.contextPath}/ImageServlet_2?name=${reply.imageURL}" alt="Ảnh reply" style="max-width:120px;max-height:120px;">
-                                                                </div>
-                                                            </c:if>
-                                                            <c:if test="${not empty reply.replies}">
-                                                                <div class="review-reply ms-4 mt-2" style="background: #f8f9fa;">
-                                                                    <c:forEach var="subreply" items="${reply.replies}">
-                                                                        <div class="d-flex justify-content-between align-items-start">
-                                                                            <div>
-                                                                                <strong>${subreply.userName}</strong>
-                                                                                <span class="text-muted small ms-2">
-                                                                                    <fmt:formatDate value="${subreply.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
-                                                                                </span>
-                                                                            </div>
-                                                                            <div class="action-buttons">
-                                                                                <!-- Nút sửa subreply -->
-                                                                                <c:if test="${sessionScope.account != null && subreply.accountID == sessionScope.account.accountID}">
-                                                                                    <a href="Review?action=edit&reviewId=${subreply.reviewID}" class="btn btn-link btn-sm">Sửa</a>
-                                                                                </c:if>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div style="white-space: pre-wrap;">${subreply.comment}</div>
-                                                                        <c:if test="${not empty subreply.imageURL}">
-                                                                            <div>
-                                                                                <img src="${pageContext.request.contextPath}/ImageServlet_2?name=${subreply.imageURL}" alt="Ảnh reply" style="max-width:120px;max-height:120px;">
-                                                                            </div>
+                                                <div id="replySection${review.reviewID}" style="display:none;" class="reply-thread compact reply-group">
+                                                    <c:forEach var="reply" items="${flatRepliesMap[review.reviewID]}">
+                                                        <div class="reply-item" style="margin-left: ${(reply.depth > 0 ? reply.depth * 24 : 0)}px; margin-right: 0;">
+                                                            <div class="bubble ${reply.accountRole == 2 ? 'bubble-staff' : ''}" style="position: relative; z-index: 2; margin-left: 0; display: block; width: 100%;">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <div class="d-flex align-items-center gap-2">
+                                                                        <strong>${reply.userName}</strong>
+                                                                        <c:choose>
+                                                                            <c:when test="${reply.accountRole == 2}">
+                                                                                <span class="badge badge-staff">Nhân viên</span>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <span class="badge badge-customer">Khách hàng</span>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                        <span class="text-muted small">
+                                                                            <fmt:formatDate value="${reply.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="action-buttons">
+                                                                        <!-- Chỉ customer mới được reply vào staff comment -->
+                                                                        <c:if test="${sessionScope.account != null && sessionScope.account.role == 0 && reply.accountRole == 2}">
+                                                                            <button type="button" class="btn btn-link btn-sm" onclick="setReply('${reply.reviewID}', '${reply.orderID}', '${reply.productID}')">Trả lời</button>
                                                                         </c:if>
-                                                                    </c:forEach>
+                                                                        <!-- Nút sửa/xóa chỉ cho customer sở hữu -->
+                                                                        <c:if test="${sessionScope.account != null && sessionScope.account.role == 0 && reply.accountID == sessionScope.account.accountID}">
+                                                                            <a href="Review?action=edit&reviewId=${reply.reviewID}" class="btn btn-link btn-sm">Sửa</a>
+                                                                            <button type="button" class="btn btn-link btn-sm text-danger" onclick="deleteReview(${reply.reviewID})">Xóa</button>
+                                                                        </c:if>
+                                                                    </div>
                                                                 </div>
-                                                            </c:if>
+                                                                <div class="mt-2">${reply.comment}</div>
+                                                                <c:if test="${not empty reply.imageURL}">
+                                                                    <div class="mt-2">
+                                                                        <img class="reply-image" src="${pageContext.request.contextPath}/ImageServlet_2?name=${reply.imageURL}" alt="Ảnh reply">
+                                                                    </div>
+                                                                </c:if>
+                                                            </div>
                                                         </div>
                                                     </c:forEach>
                                                 </div>
@@ -619,26 +597,24 @@
                                     <c:if test="${sessionScope.account != null && sessionScope.account.role == 1}">
                                         <div class="alert alert-warning mt-3">Tài khoản admin không được phép gửi đánh giá hoặc phản hồi.</div>
                                     </c:if>
-                                    <!-- Chỉ hiển thị form review nếu là customer hoặc staff -->
-                                    <c:if test="${sessionScope.account != null && (sessionScope.account.role == 0 || sessionScope.account.role == 2)}">
+                                    <!-- Chỉ hiển thị form review nếu là customer -->
+                                    <c:if test="${sessionScope.account != null && sessionScope.account.role == 0}">
                                         <form method="post" action="Review" enctype="multipart/form-data" id="reviewForm">
                                             <input type="hidden" name="parentReviewId" id="parentReviewId" value="" />
                                             <input type="hidden" name="reviewId" id="reviewId" value="${editingReview.reviewID}" />
                                             <input type="hidden" name="action" id="action" value="${not empty editingReview ? 'edit' : 'add'}" />
                                             <input type="hidden" name="orderId" value="${orderId}">
                                             <input type="hidden" name="productId" value="<%=mo.getProductID()%>">
-                                            <c:if test="${sessionScope.account != null && sessionScope.account.role == 0}">
-                                                <div class="mb-3" id="ratingSection" style="${empty editingReview ? 'display:block' : (editingReview.parentReviewID == null or editingReview.parentReviewID == 0 ? 'display:block' : 'display:none')}">
-                                                    <label for="rating" class="form-label">Xếp Hạng Của Bạn</label>
-                                                    <div class="star-rating">
-                                                        <input type="radio" id="star5" name="rating" value="5" ${not empty editingReview and editingReview.rating == 5 ? 'checked' : ''} ${empty editingReview or (editingReview.parentReviewID == null or editingReview.parentReviewID == 0) ? 'required' : ''}><label for="star5" class="fas fa-star"></label>
-                                                        <input type="radio" id="star4" name="rating" value="4" ${not empty editingReview and editingReview.rating == 4 ? 'checked' : ''}><label for="star4" class="fas fa-star"></label>
-                                                        <input type="radio" id="star3" name="rating" value="3" ${not empty editingReview and editingReview.rating == 3 ? 'checked' : ''}><label for="star3" class="fas fa-star"></label>
-                                                        <input type="radio" id="star2" name="rating" value="2" ${not empty editingReview and editingReview.rating == 2 ? 'checked' : ''}><label for="star2" class="fas fa-star"></label>
-                                                        <input type="radio" id="star1" name="rating" value="1" ${not empty editingReview and editingReview.rating == 1 ? 'checked' : ''}><label for="star1" class="fas fa-star"></label>
-                                                    </div>
+                                            <div class="mb-3" id="ratingSection" style="${empty editingReview ? 'display:block' : (editingReview.parentReviewID == null or editingReview.parentReviewID == 0 ? 'display:block' : 'display:none')}">
+                                                <label for="rating" class="form-label">Xếp Hạng Của Bạn</label>
+                                                <div class="star-rating">
+                                                    <input type="radio" id="star5" name="rating" value="5" ${not empty editingReview and editingReview.rating == 5 ? 'checked' : ''} ${empty editingReview or (editingReview.parentReviewID == null or editingReview.parentReviewID == 0) ? 'required' : ''}><label for="star5" class="fas fa-star"></label>
+                                                    <input type="radio" id="star4" name="rating" value="4" ${not empty editingReview and editingReview.rating == 4 ? 'checked' : ''}><label for="star4" class="fas fa-star"></label>
+                                                    <input type="radio" id="star3" name="rating" value="3" ${not empty editingReview and editingReview.rating == 3 ? 'checked' : ''}><label for="star3" class="fas fa-star"></label>
+                                                    <input type="radio" id="star2" name="rating" value="2" ${not empty editingReview and editingReview.rating == 2 ? 'checked' : ''}><label for="star2" class="fas fa-star"></label>
+                                                    <input type="radio" id="star1" name="rating" value="1" ${not empty editingReview and editingReview.rating == 1 ? 'checked' : ''}><label for="star1" class="fas fa-star"></label>
                                                 </div>
-                                            </c:if>
+                                            </div>
                                             <div class="mb-3">
                                                 <label for="comment" class="form-label">Bình Luận/Trả Lời</label>
                                                 <textarea class="form-control" id="comment" name="comment" rows="6" required>${editingReview.comment}</textarea>
@@ -782,6 +758,12 @@
                                                                             // Đổi text button
                                                                             document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
                                                                         }
+
+                                                                        function deleteReview(reviewId) {
+                                                                            if (confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
+                                                                                window.location.href = 'Review?action=delete&reviewId=' + reviewId;
+                                                                            }
+                                                                        }
         </script>
 
         <script>
@@ -803,6 +785,46 @@
                 display: flex;
                 align-items: center;
                 margin-bottom: 0.5rem;
+            }
+            .review-comment-text {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow-wrap: anywhere;
+            }
+            .reply-thread {
+                position: relative;
+                margin-top: 8px;
+                background: transparent;
+                border: 0;
+                border-radius: 0;
+                padding: 0;
+            }
+            .reply-group {
+                background: #fdfaf3;
+                border: 1px solid #eadfca;
+                border-radius: 10px;
+                padding: 10px 8px;
+                margin-top: 6px;
+            }
+            .reply-item { position: relative; margin: 8px 0; }
+            .reply-item:before { content: ""; position: absolute; left: -16px; top: 0; bottom: 0; border-left: 2px dashed #e0cba4; }
+            .bubble { background: #fffdf7; border: 1px solid #e8d7bc; border-radius: 8px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(139,108,66,0.06); width: 100%; box-sizing: border-box; }
+            .bubble:before { content: ""; position: absolute; left: -8px; top: 12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-right:8px solid #e8d7bc; }
+            .bubble:after { content: ""; position: absolute; left: -7px; top: 12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-right:8px solid #fffdf7; }
+            .bubble-staff { background:#f7fbff; border-color:#c8def2; }
+            .bubble-staff:after { border-right-color:#f7fbff; }
+            .badge-staff {
+                background: #0d6efd;
+                color: #fff;
+                font-size: .75rem;
+            }
+            .badge-customer {
+                background: #8b6c42;
+                color: #fff;
+                font-size: .75rem;
+            }
+            .reply-image {
+                max-width: 140px; max-height: 140px; border-radius: 6px; border: 1px solid #e1e1e1;
             }
             .toggle-reply-box button {
                 transition: all 0.3s ease;
@@ -863,13 +885,10 @@
                 outline: 2px solid #8b6c42;
                 outline-offset: 2px;
             }
-            .review-comment, .review-reply {
+            .review-comment {
                 border-left: 3px solid #e9ecef;
                 padding-left: 15px;
                 margin-bottom: 15px;
-            }
-            .review-reply {
-                border-left-color: #dee2e6;
             }
             .flash-sale-banner {
                 background: linear-gradient(to right, #ff512f, #dd2476);

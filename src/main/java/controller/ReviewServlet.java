@@ -22,7 +22,7 @@ import dao.FeedBackDAO;
  *
  * @author LNQB
  */
-@WebServlet(name = "ReviewServlet", urlPatterns = { "/Review" })
+@WebServlet(name = "ReviewServlet", urlPatterns = {"/Review"})
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
         maxFileSize = 1024 * 1024 * 10, // 10 MB
         maxRequestSize = 1024 * 1024 * 15 // 15 MB
@@ -33,10 +33,10 @@ public class ReviewServlet extends HttpServlet {
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -60,16 +60,49 @@ public class ReviewServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-        if ("edit".equals(action)) {
+        if ("delete".equals(action)) {
+            // Xử lý xóa review
+            String reviewIdStr = request.getParameter("reviewId");
+            if (reviewIdStr != null && !reviewIdStr.isEmpty()) {
+                try {
+                    int reviewId = Integer.parseInt(reviewIdStr);
+                    FeedBackDAO dao = new FeedBackDAO();
+
+                    // Kiểm tra quyền xóa
+                    Account acc = (Account) request.getSession().getAttribute("account");
+                    if (acc != null && dao.canDeleteReview(reviewId, acc.getAccountID())) {
+                        dao.deleteReview(reviewId);
+                        request.getSession().setAttribute("message", "Xóa đánh giá thành công!");
+                    } else {
+                        request.getSession().setAttribute("message",
+                                "Bạn chỉ có thể xóa đánh giá của chính mình và trong vòng 30 ngày!");
+                    }
+
+                    // Redirect về trang trước
+                    String referer = request.getHeader("Referer");
+                    if (referer != null) {
+                        response.sendRedirect(referer);
+                    } else {
+                        response.sendRedirect("home");
+                    }
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.getSession().setAttribute("message", "Có lỗi xảy ra khi xóa đánh giá!");
+                    response.sendRedirect("home");
+                    return;
+                }
+            }
+        } else if ("edit".equals(action)) {
             // Xử lý sửa review - forward về ProductDetail
             String reviewIdStr = request.getParameter("reviewId");
             if (reviewIdStr != null && !reviewIdStr.isEmpty()) {
@@ -108,10 +141,10 @@ public class ReviewServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -162,6 +195,7 @@ public class ReviewServlet extends HttpServlet {
         FeedBackDAO dao = new FeedBackDAO();
         boolean success = false;
         String customError = null;
+        String from = request.getParameter("from");
 
         try {
             if ("edit".equals(action) && reviewIdStr != null && !reviewIdStr.isEmpty()) {
@@ -187,14 +221,6 @@ public class ReviewServlet extends HttpServlet {
                 // Xử lý thêm review/reply mới (logic cũ)
                 Integer parentReviewId = (parentReviewIdStr == null || parentReviewIdStr.isEmpty()) ? null
                         : Integer.parseInt(parentReviewIdStr);
-
-                // Chặn staff gửi review gốc, nhưng cho phép staff trả lời và sửa review
-                if (acc.getRole() == 2 && parentReviewId == null && !("edit".equals(action))) {
-                    request.getSession().setAttribute("message",
-                            "Staff không được phép gửi đánh giá cho sản phẩm này!");
-                    response.sendRedirect("ProductDetail?id=" + (productIdStr != null ? productIdStr : ""));
-                    return;
-                }
 
                 // Kiểm tra dữ liệu đầu vào
                 if (parentReviewId == null) {
@@ -228,9 +254,9 @@ public class ReviewServlet extends HttpServlet {
                     rating = Integer.parseInt(ratingStr);
                 }
                 int productId = Integer.parseInt(productIdStr);
-                int orderId = 0;
+                Integer orderId = null;
                 if (orderIdStr != null && !orderIdStr.isEmpty()) {
-                    orderId = Integer.parseInt(orderIdStr);
+                    orderId = Integer.valueOf(orderIdStr);
                 }
 
                 success = dao.addReview(parentReviewId, orderId, productId, accountId, rating, comment, imageUrl);
@@ -261,8 +287,13 @@ public class ReviewServlet extends HttpServlet {
             request.getSession().setAttribute("message", customError);
         }
 
-        // Redirect về ProductDetailServlet để load lại dữ liệu sản phẩm
-        response.sendRedirect("ProductDetail?id=" + productIdStr);
+        // Redirect: nếu đến từ staff manage-review thì quay lại đó
+        if ("staff".equals(from)) {
+            response.sendRedirect("staff/manage-review");
+        } else {
+            // Redirect về ProductDetailServlet để load lại dữ liệu sản phẩm
+            response.sendRedirect("ProductDetail?id=" + productIdStr);
+        }
     }
 
     /**
