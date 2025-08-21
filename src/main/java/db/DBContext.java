@@ -17,7 +17,7 @@ public class DBContext {
     String password = "123456";
 
     protected Connection conn;
-
+    
     public DBContext() {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");

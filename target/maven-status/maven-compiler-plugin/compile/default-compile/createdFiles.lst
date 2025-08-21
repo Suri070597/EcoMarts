@@ -1,4 +1,5 @@
 controller\ViewAllProductServlet.class
+dao\InventoryDAO.class
 dao\OrderDAO.class
 controller\CartServlet.class
 controller\ImageServlet_2.class
@@ -14,6 +15,7 @@ controller\ProductDetailServlet.class
 controller\dangky\RegistrationServlet.class
 controller\viewstaff\Changepasswordstaff.class
 model\ProductPromotion.class
+controller\supplier\rd.class
 util\VNPayUtil.class
 controller\ReviewServlet.class
 controller\SearchProductServlet.class
@@ -27,7 +29,9 @@ controller\AdminDashboardServlet.class
 dao\StaffDAO.class
 model\AccountVoucher.class
 controller\ImageServlet.class
+model\StockInDetail.class
 dao\ProductDAO.class
+dao\StockDAO.class
 controller\supplier\SupplierServlet.class
 model\Supplier.class
 db\DBContext1.class
@@ -50,6 +54,7 @@ db\MD5Util.class
 controller\LoadMoreFeaturedServlet.class
 controller\ReadNotificationServlet.class
 controller\MonthlyRevenueServlet.class
+model\StockIn.class
 util\CartUtil.class
 controller\HomeServlet.class
 controller\google\LoginServlets.class
@@ -60,6 +65,7 @@ model\Voucher.class
 controller\staff\StaffServlet.class
 controller\register\LoginServlet.class
 controller\ProductServlet.class
+dao\VoucherUsageDAO.class
 controller\ReorderServlet.class
 controller\viewstaff\verifypasswordServlet.class
 controller\forgetpassword\ForgetPasswordServlet.class
@@ -70,17 +76,21 @@ model\Token.class
 model\CartItem.class
 model\OrderDetail.class
 controller\AdminStaffServlet.class
+dao\ReceiverDAO.class
 controller\AdminPromotionServlet.class
 db\EmailUtil.class
 controller\BuyNowServlet.class
 model\VoucherUsage.class
+controller\AdminInventoryServlet.class
 controller\UpdateProfileServlet.class
+controller\supplier\StockInFormServlet.class
 dao\VoucherDAO.class
 controller\ExportMonthlyRevenueServlet.class
 controller\MyVoucherServlet.class
 controller\StaffProductServlet.class
 controller\AuthenticationFilter.class
 model\AccountManager.class
+model\Inventory.class
 controller\MarkNotificationsReadServlet.class
 Iconstant\Iconstant.class
 controller\google\GoogleLogin.class
@@ -90,6 +100,7 @@ controller\register\AdminServlet.class
 filter\AuthenticationFilter.class
 model\Order.class
 controller\google\UpdateGoogleServlet.class
+model\Receiver.class
 dao\SearchProductsDAO.class
 controller\SimpleTestServlet.class
 controller\NotificationFilter.class

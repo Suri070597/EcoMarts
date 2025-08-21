@@ -420,6 +420,52 @@ public class ProductDAO extends DBContext {
         }
         return list;
     }
+    
+    public List<Product> searchProductsByName1(String keyword) {
+        List<Product> list = new ArrayList<>();
+        String sql = """
+                    SELECT p.*, c.CategoryName, c.ParentID, s.SupplierID, s.CompanyName
+                    FROM Product p
+                    JOIN Category c ON p.CategoryID = c.CategoryID
+                    JOIN Supplier s ON p.SupplierID = s.SupplierID
+                    WHERE p.ProductName LIKE ?
+                """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                p.setPrice(rs.getDouble("Price"));
+                p.setDescription(rs.getString("Description"));
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                p.setImageURL(rs.getString("ImageURL"));
+                p.setUnit(rs.getString("Unit"));
+                p.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                p.setStatus(rs.getString("Status"));
+                p.setBoxUnitName(rs.getString("BoxUnitName"));
+
+                // Set Category
+                Category c = new Category();
+                c.setCategoryID(rs.getInt("CategoryID"));
+                c.setCategoryName(rs.getString("CategoryName"));
+                c.setParentID(rs.getInt("ParentID"));
+                p.setCategory(c);
+
+                // Set Supplier
+                Supplier s = new Supplier();
+                s.setSupplierID(rs.getInt("SupplierID"));
+                s.setCompanyName(rs.getString("CompanyName"));
+                p.setSupplier(s);
+
+                list.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     public List<Product> getRelatedProductsByParentCategory(int parentId, int excludeProductId) {
         List<Product> list = new ArrayList<>();
@@ -625,17 +671,17 @@ public class ProductDAO extends DBContext {
 
     public List<Product> getAllProducts() {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT * FROM Category";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+        String sql = "SELECT ProductID, ProductName FROM Product";
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
                 Product p = new Product();
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 list.add(p);
             }
-        } catch (Exception e) {
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return list;

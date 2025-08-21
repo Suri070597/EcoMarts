@@ -107,7 +107,7 @@
                 <div class="category-wrapper">
                     <!-- Mục tĩnh "Mua lại đơn cũ" -->
                     <div class="category-item">
-                        <a href="${pageContext.request.contextPath}/customer/reorder">
+                        <a href="${pageContext.request.contextPath}/reorder">
                             <div class="category-icon">
                                 <img src="https://cdn.tgdd.vn/bachhoaxanh/www/Content/images/icon-history.v202301091407.png"
                                      alt="Mua lại đơn cũ">
@@ -143,10 +143,13 @@
                             for (Product p : products) {
                     %>
                     <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
+                        <% if (p.getStockQuantity() <= 0) { %>
+                            <div class="product-badge out-of-stock">Hết hàng</div>
+                        <% } %>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-cart-plus"></i></button>
                                 <a href="ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -175,14 +178,22 @@
                                 <% } %>
                                 <span>(<%= reviewCount %>)</span>
                             </div>
-                            <div class="product-price"><fmt:formatNumber value="<%= p.getPrice() %>" type="number" pattern="#,###"/> đ / <%= p.getUnit() %></div>
+                            <div class="product-price"><div class="product-price">
+    <%
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+        out.print(formatter.format(p.getPrice()));
+    %> đ / <%= p.getUnit() %>
+</div>
+</div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>"><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn">Mua ngay</button> 
+                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
@@ -216,7 +227,7 @@
                     </div>
 
                     <div class="tips-list">
-                        <a href="meo-vat.html#lam-sach-rau-cu" class="tip-item">
+                        <a href="https://danavimart.vn/blogs/news/4-cach-rua-rau-cu-qua-sach-dung-cach-tai-nha-an-toan-cho-suc-khoe" class="tip-item">
                             <div class="tip-image">
                                 <img src="https://th.bing.com/th/id/OIP.z6N7VnK2aWx6YlRmR-gpCwHaEK?w=200&h=112&rs=1&qlt=80&o=6&dpr=1.3&pid=3.1"
                                      alt="Làm sạch rau củ">
@@ -228,7 +239,7 @@
                             </div>
                         </a>
 
-                        <a href="meo-vat.html#bao-quan-thit-ca" class="tip-item">
+                        <a href="https://eva.vn/tu-van-nha-cua/cach-de-thit-ca-tuan-khong-hoi-khong-hong-nhieu-nguoi-dung-tu-lanh-hon-20-nam-khong-biet-c172a455815.html" class="tip-item">
                             <div class="tip-image">
                                 <img src="https://th.bing.com/th/id/OIP.quVOFTDt4CAdc7VhwyocagHaEo?w=295&h=184&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
                                      alt="Bảo quản thịt cá">
@@ -240,7 +251,7 @@
                             </div>
                         </a>
 
-                        <a href="meo-vat.html#chong-lang-phi-thuc-pham" class="tip-item">
+                        <a href="https://afamily.vn/nhung-cach-thong-minh-de-giam-lang-phi-thuc-pham-20230411120935868.chn" class="tip-item">
                             <div class="tip-image">
                                 <img src="https://th.bing.com/th/id/OIP.-2dh96wDCZIaPp8k1q3b7gHaE8?w=269&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
                                      alt="Chống lãng phí">
@@ -252,7 +263,7 @@
                             </div>
                         </a>
 
-                        <a href="meo-vat.html#lam-nuoc-uong-tai-nha" class="tip-item">
+                        <a href="https://drinkocany.com/nuoc-uong-giai-nhiet-mua-he/" class="tip-item">
                             <div class="tip-image">
                                 <img src="https://th.bing.com/th/id/OIP.qtsxKJLVM8WZX27VbcEp3AHaE8?w=242&h=180&c=7&r=0&o=7&cb=iwp2&dpr=1.3&pid=1.7&rm=3"
                                      alt="Nước uống tại nhà">
