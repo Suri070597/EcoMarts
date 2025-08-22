@@ -65,7 +65,7 @@ public class CartItemDAO extends DBContext {
     public List<CartItem> getCartItems(int accountID, String status) {
         List<CartItem> cartItems = new ArrayList<>();
 
-        String sql = "SELECT ci.*, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.Status as ProductStatus "
+        String sql = "SELECT ci.*, p.ProductName, p.Price, p.ImageURL, p.Unit, p.BoxUnitName, p.ItemUnitName, p.UnitPerBox, p.StockQuantity, p.Status as ProductStatus "
                 +
                 "FROM CartItem ci " +
                 "JOIN Product p ON ci.ProductID = p.ProductID " +
@@ -94,6 +94,9 @@ public class CartItemDAO extends DBContext {
                 product.setPrice(rs.getDouble("Price"));
                 product.setImageURL(rs.getString("ImageURL"));
                 product.setUnit(rs.getString("Unit"));
+                product.setBoxUnitName(rs.getString("BoxUnitName"));
+                product.setItemUnitName(rs.getString("ItemUnitName"));
+                product.setUnitPerBox(rs.getInt("UnitPerBox"));
                 product.setStockQuantity(rs.getDouble("StockQuantity"));
                 product.setStatus(rs.getString("ProductStatus"));
 
@@ -118,7 +121,7 @@ public class CartItemDAO extends DBContext {
      * @return CartItem object or null if not found
      */
     public CartItem getCartItemById(int cartItemID) {
-        String sql = "SELECT ci.*, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.Status as ProductStatus "
+        String sql = "SELECT ci.*, p.ProductName, p.Price, p.ImageURL, p.Unit, p.BoxUnitName, p.ItemUnitName, p.UnitPerBox, p.StockQuantity, p.Status as ProductStatus "
                 +
                 "FROM CartItem ci " +
                 "JOIN Product p ON ci.ProductID = p.ProductID " +
@@ -145,6 +148,9 @@ public class CartItemDAO extends DBContext {
                 product.setPrice(rs.getDouble("Price"));
                 product.setImageURL(rs.getString("ImageURL"));
                 product.setUnit(rs.getString("Unit"));
+                product.setBoxUnitName(rs.getString("BoxUnitName"));
+                product.setItemUnitName(rs.getString("ItemUnitName"));
+                product.setUnitPerBox(rs.getInt("UnitPerBox"));
                 product.setStockQuantity(rs.getDouble("StockQuantity"));
                 product.setStatus(rs.getString("ProductStatus"));
 

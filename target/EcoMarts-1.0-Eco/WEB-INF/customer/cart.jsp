@@ -129,6 +129,11 @@
                 background-color: #4CAF50;
                 color: white;
             }
+            
+            .text-muted{
+                white-space: nowrap;
+            }
+            
         </style>
     </head>
     <body>
@@ -217,7 +222,7 @@
                                                         <a href="ProductDetail?id=${item.productID}" class="text-decoration-none">
                                                             <h5 class="product-name">${item.product.productName}</h5>
                                                         </a>
-                                                        <p class="text-muted small">${item.product.unit}</p>
+                                                        <p class="text-muted small">${item.product.boxUnitName}</p>
                                                         <c:if test="${item.product.stockQuantity < item.quantity}">
                                                             <p class="text-danger small">Chỉ còn ${item.product.stockQuantity} sản phẩm</p>
                                                         </c:if>
@@ -257,7 +262,7 @@
                                                             <fmt:formatNumber value="${price * quantity}" type="number" pattern="#,###"/> ₫
                                                         </div>
                                                         <div class="text-muted small">
-                                                            <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.unit}
+                                                            <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.boxUnitName}
                                                         </div>
                                                     </div>
 
@@ -303,7 +308,7 @@
                                                     <a href="ProductDetail?id=${item.productID}" class="text-decoration-none">
                                                         <h5 class="product-name">${item.product.productName}</h5>
                                                     </a>
-                                                    <p class="text-muted small">${item.product.unit}</p>
+                                                    <p class="text-muted small">${item.product.boxUnitName}</p>
                                                     <!-- Saved for later price -->
                                                     <c:set var="savedPrice" value="${item.product.price}" />
                                                     <div class="fw-bold text-success">

@@ -196,7 +196,7 @@
                                                     <img src="ImageServlet?name=${item.product.imageURL}" alt="${item.product.productName}" class="product-image me-3">
                                                     <div class="flex-grow-1">
                                                         <h5>${item.product.productName}</h5>
-                                                        <p class="text-muted mb-0">Đơn vị: ${item.product.unit}</p>
+                                                        <p class="text-muted mb-0">Đơn vị: ${item.product.boxUnitName}</p>
                                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                                             <div class="quantity-controls">
                                                                 <div class="input-group" style="width: 150px;">
@@ -224,11 +224,11 @@
                                                                         <i class="fas fa-plus"></i>
                                                                     </button>
                                                                 </div>
-                                                                <small class="text-muted">Còn lại: ${item.product.stockQuantity} ${item.product.unit}</small>
+                                                                <small class="text-muted">Còn lại: ${item.product.stockQuantity} ${item.product.boxUnitName}</small>
                                                             </div>
                                                         </div>
                                                         <p class="text-muted small mb-0">
-                                                            <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
+                                                            <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.boxUnitName}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -240,7 +240,7 @@
                                                 <img src="ImageServlet?name=${buyNowItem.product.imageURL}" alt="${buyNowItem.product.productName}" class="product-image me-3">
                                                 <div class="flex-grow-1">
                                                     <h5>${buyNowItem.product.productName}</h5>
-                                                    <p class="text-muted mb-0">Đơn vị: ${buyNowItem.product.unit}</p>
+                                                    <p class="text-muted mb-0">Đơn vị: ${buyNowItem.product.boxUnitName}</p>
                                                     <div class="quantity-controls mb-2">
                                                         <div class="input-group" style="width: 150px;">
                                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-decrease">
@@ -263,10 +263,10 @@
                                                                 <i class="fas fa-plus"></i>
                                                             </button>
                                                         </div>
-                                                        <small class="text-muted">Còn lại: ${buyNowItem.product.stockQuantity} ${buyNowItem.product.unit}</small>
+                                                        <small class="text-muted">Còn lại: ${buyNowItem.product.stockQuantity} ${buyNowItem.product.boxUnitName}</small>
                                                     </div>
                                                     <p class="text-success fw-bold mb-0">
-                                                        <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ / ${buyNowItem.product.unit}
+                                                        <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ / ${buyNowItem.product.boxUnitName}
                                                     </p>
                                                 </div>
                                             </div>
