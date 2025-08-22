@@ -21,18 +21,21 @@
                 <div class="category-header">
                     <h1><i class="fas fa-plus-circle"></i> Thêm danh mục con</h1>
                 </div>
-                <form action="createCategory" method="post">
+                <form action="createCategory" method="post" onsubmit="return validateForm(event)">
                     <div class="mb-3">
                         <label for="parentID" class="form-label">Chọn danh mục cha:</label>
                         <select name="parentID" id="parentID" class="form-control" required>
                             <c:forEach var="cat" items="${parents}">
-                                <option value="${cat.categoryID}">${cat.categoryName}</option>
+                                <option value="${cat.categoryID}" ${selectedParentID == cat.categoryID ? 'selected' : ''}>${cat.categoryName}</option>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="categoryName" class="form-label">Tên danh mục con:</label>
-                        <input type="text" name="categoryName" id="categoryName" class="form-control" required>
+                        <input type="text" name="categoryName" id="categoryName" class="form-control" value="${categoryName != null ? categoryName : ''}" required>
+                        <c:if test="${not empty errorMessage}">
+                            <div class="alert alert-danger" style="margin-top:8px;">${errorMessage}</div>
+                        </c:if>
                     </div>
                     <div class="btn-group">
                         <a href="${pageContext.request.contextPath}/admin/category" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
@@ -42,5 +45,23 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function validateForm(e) {
+            const name = document.getElementById('categoryName').value.trim();
+            // Regex: không bắt đầu bằng số, chỉ cho chữ cái (mọi ngôn ngữ), số và khoảng trắng
+            const re = /^(?!\d)[\p{L}\p{M}\d ]+$/u;
+            if (!re.test(name)) {
+                Swal.fire({
+                    title: 'Dữ liệu không hợp lệ',
+                    text: 'Tên danh mục không chứa kí tự đặc biệt và không bắt đầu bằng số.',
+                    icon: 'error'
+                });
+                e.preventDefault();
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>

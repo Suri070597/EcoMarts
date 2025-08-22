@@ -13,6 +13,8 @@ public class Category {
     private Integer parentID;
     private List<Category> children;
     private String imageURL;
+    private List<Product> products;
+
 
     public Category() {
     }
@@ -64,6 +66,13 @@ public Category(int categoryID, String categoryName, Integer parentID, String im
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
     }
+    public List<Product> getProducts() {
+    return products;
+}
+
+public void setProducts(List<Product> products) {
+    this.products = products;
+}
 
     @Override
     public String toString() {
@@ -72,5 +81,9 @@ public Category(int categoryID, String categoryName, Integer parentID, String im
                 + ", categoryName='" + categoryName + '\''
                 + ", parentID=" + parentID
                 + '}';
+    }
+
+    public void setDescription(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

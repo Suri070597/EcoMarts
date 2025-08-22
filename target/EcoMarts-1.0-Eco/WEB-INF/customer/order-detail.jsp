@@ -38,6 +38,16 @@
                 border: none;
             }
 
+            .order-card p {
+                margin-bottom: 10px;
+                line-height: 1.6;
+            }
+            
+            .fw-bold {
+                margin-bottom: 10px;
+                line-height: 1.6;
+            }
+
             .order-card-header {
                 background: linear-gradient(to right, #f5f5dc, #eae2d0);
                 border-bottom: 1px solid #e1d9c4;
@@ -129,7 +139,7 @@
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
-                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/customer/reorder">Đơn hàng của tôi</a></li>
+                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/reorder">Đơn hàng của tôi</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Chi tiết đơn hàng #${order.orderID}</li>
                             </ol>
                         </nav>
@@ -201,6 +211,7 @@
                                         <th>Sản phẩm</th>
                                         <th class="text-center">Đơn giá</th>
                                         <th class="text-center">Số lượng</th>
+                                        <th class="text-center">Đánh giá</th>
                                         <th class="text-end">Thành tiền</th>
                                     </tr>
                                 </thead>
@@ -209,11 +220,11 @@
                                         <tr>
                                             <td class="text-center">
                                                 <c:if test="${not empty od.product && not empty od.product.imageURL}">
-                                                    <img src="${pageContext.request.contextPath}/ImageServlet?name=${od.product.imageURL}" 
+                                                    <img style="display:block; margin:auto;" src="${pageContext.request.contextPath}/ImageServlet?name=${od.product.imageURL}" 
                                                          class="product-img" alt="${od.productName}">
                                                 </c:if>
                                                 <c:if test="${empty od.product || empty od.product.imageURL}">
-                                                    <div class="product-img bg-light d-flex align-items-center justify-content-center">
+                                                    <div style="display:block; margin:auto;" class="product-img bg-light d-flex align-items-center justify-content-center">
                                                         <i class="fas fa-image text-muted"></i>
                                                     </div>
                                                 </c:if>
@@ -242,6 +253,9 @@
                                                 </c:choose>
                                                 ${od.unit}
                                             </td>
+                                            <td class="text-center">
+                                                <a href="${pageContext.request.contextPath}/ProductDetail?id=${od.productID}" class="btn btn-sm btn-outline-primary">Đánh giá</a>
+                                            </td>
                                             <td class="text-end fw-bold"><fmt:formatNumber value="${od.subTotal}" type="number"/> đ</td>
                                         </tr>
                                     </c:forEach>
@@ -258,20 +272,29 @@
                             <span>Tổng tiền sản phẩm:</span>
                             <span class="text-end"><fmt:formatNumber value="${total}" type="number"/> đ</span>
                         </div>
+
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>Phí vận chuyển:</span>
                             <span class="text-success">Miễn phí</span>
                         </div>
-                        <c:if test="${not empty discount}">
+
+                        <c:if test="${not empty voucherUsage}">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>Giảm giá:</span>
+                                <span>Mã giảm giá (${voucherUsage.voucher.voucherCode}):</span>
                                 <span class="text-danger">-<fmt:formatNumber value="${discount}" type="number"/> đ</span>
                             </div>
                         </c:if>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Thuế VAT (8%):</span>
+                            <span><fmt:formatNumber value="${vat}" type="number"/> đ</span>
+                        </div>
+
                         <hr>
+
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="fw-bold fs-5">Tổng thanh toán:</span>
-                            <span class="fw-bold fs-5 text-success"><fmt:formatNumber value="${order.totalAmount}" type="number"/> đ</span>
+                            <span class="fw-bold fs-5 text-success"><fmt:formatNumber value="${finalTotal}" type="number"/> đ</span>
                         </div>
                     </div>
                 </div>
@@ -325,7 +348,7 @@
                                 // Submit form for order cancellation
                                 const form = document.createElement('form');
                                 form.method = 'post';
-                                form.action = '${pageContext.request.contextPath}/customer/orderDetail';
+                                form.action = '${pageContext.request.contextPath}/orderDetail';
 
                                 const orderId = document.createElement('input');
                                 orderId.type = 'hidden';
@@ -353,7 +376,7 @@
                         // Submit form for reordering
                         const form = document.createElement('form');
                         form.method = 'post';
-                        form.action = '${pageContext.request.contextPath}/customer/orderDetail';
+                        form.action = '${pageContext.request.contextPath}/orderDetail';
 
                         const orderId = document.createElement('input');
                         orderId.type = 'hidden';

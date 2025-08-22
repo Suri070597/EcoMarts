@@ -23,6 +23,7 @@ import model.Product;
 import model.Manufacturer;
 
 public class ProductDAO extends DBContext {
+    
 
     public List<Product> getAll() {
 
@@ -430,6 +431,52 @@ public class ProductDAO extends DBContext {
 
         } catch (Exception e) {
 
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
+    public List<Product> searchProductsByName1(String keyword) {
+        List<Product> list = new ArrayList<>();
+        String sql = """
+                SELECT p.*, c.CategoryName, c.ParentID, m.ManufacturerID, m.CompanyName
+                FROM Product p
+                JOIN Category c ON p.CategoryID = c.CategoryID
+                JOIN Manufacturer m ON p.ManufacturerID = m.ManufacturerID
+                WHERE p.ProductName LIKE ?
+            """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductID(rs.getInt("ProductID"));
+                p.setProductName(rs.getString("ProductName"));
+                p.setPrice(rs.getDouble("Price"));
+                p.setDescription(rs.getString("Description"));
+                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                p.setImageURL(rs.getString("ImageURL"));
+                p.setUnit(rs.getString("Unit"));
+                p.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                p.setStatus(rs.getString("Status"));
+                p.setBoxUnitName(rs.getString("BoxUnitName"));
+
+                // Set Category
+                Category c = new Category();
+                c.setCategoryID(rs.getInt("CategoryID"));
+                c.setCategoryName(rs.getString("CategoryName"));
+                c.setParentID(rs.getInt("ParentID"));
+                p.setCategory(c);
+
+                // Set Manufacturer
+                Manufacturer m = new Manufacturer();
+                m.setManufacturerID(rs.getInt("ManufacturerID"));
+                m.setCompanyName(rs.getString("CompanyName"));
+                p.setManufacturer(m);
+
+                list.add(p);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return list;

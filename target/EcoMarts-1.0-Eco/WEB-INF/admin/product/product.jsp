@@ -1,4 +1,4 @@
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="model.Product"%>
 <%@page import="java.util.List"%>
@@ -183,7 +183,7 @@
                                                 String buttonTitle = isFruit ? "Fruit cannot be converted" : (isOutOfStock ? "Out of stock - Cannot convert" : "Convert product units");
                                             %>
                                             <button type="button" class="btn btn-sm btn-warning" 
-                                                    onclick="showUnitConversion(<%= pro.getProductID()%>, '<%= pro.getProductName()%>', <%= pro.getStockQuantity()%>, <%= pro.getUnitPerBox()%>, '<%= pro.getBoxUnitName()%>', '<%= pro.getItemUnitName()%>', <%= pro.getPrice()%>)"
+                                                    onclick="showUnitConversion(<%= pro.getProductID()%>, '<%= pro.getProductName()%>', <%= pro.getStockQuantity()%>, <%= pro.getUnitPerBox()%>, '<%= pro.getBoxUnitName()%>', '<%= pro.getItemUnitName()%>', <%= pro.getPrice()%>, <%= pro.getCategory().getParentID()%>)"
                                                     <%= buttonDisabled %>
                                                     title="<%= buttonTitle %>">
                                                 <i class="fas fa-exchange-alt"></i>
@@ -239,19 +239,19 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Lựa chọn chuyển đổi:</label>
-                                        <div class="form-check">
+                                        <div class="form-check" id="convertToUnitDiv">
                                             <input class="form-check-input" type="radio" name="conversionType" id="convertToUnit" value="unit" checked>
                                             <label class="form-check-label" for="convertToUnit">
                                                 Chỉ chuyển sang <span id="dynamicItemUnit">đơn vị</span>
                                             </label>
                                         </div>
-                                        <div class="form-check">
+                                        <div class="form-check" id="convertToPackDiv">
                                             <input class="form-check-input" type="radio" name="conversionType" id="convertToPack" value="pack">
                                             <label class="form-check-label" for="convertToPack">
                                                 Chỉ chuyển sang lốc
                                             </label>
                                         </div>
-                                        <div class="form-check">
+                                        <div class="form-check" id="convertToBothDiv">
                                             <input class="form-check-input" type="radio" name="conversionType" id="convertToBoth" value="both">
                                             <label class="form-check-label" for="convertToBoth">
                                                 Chuyển sang cả <span id="dynamicItemUnit2">đơn vị</span> và lốc
@@ -330,7 +330,7 @@
                 calculateConversion();
             }
 
-            function showUnitConversion(productId, productName, stockQuantity, unitPerBox, boxUnitName, itemUnitName, boxPrice) {
+            function showUnitConversion(productId, productName, stockQuantity, unitPerBox, boxUnitName, itemUnitName, boxPrice, categoryParentId) {
                 // Check if out of stock
                 if (stockQuantity <= 0) {
                     alert('❌ This product is out of stock! Cannot perform conversion.');
@@ -397,6 +397,29 @@
                 document.getElementById('packSizeDiv').style.display = 'none';
                 document.getElementById('packCountRow').style.display = 'none';
                 document.getElementById('packPriceRow').style.display = 'none';
+
+                // Show/hide options by category
+                const convertToUnitDiv = document.getElementById('convertToUnitDiv');
+                const convertToPackDiv = document.getElementById('convertToPackDiv');
+                const convertToBothDiv = document.getElementById('convertToBothDiv');
+
+                // Drinks (1) and Milk (2): keep all options visible
+                if (categoryParentId === 1 || categoryParentId === 2) {
+                    convertToUnitDiv.style.display = 'block';
+                    convertToPackDiv.style.display = 'block';
+                    convertToBothDiv.style.display = 'block';
+                // Fruits (3): button already disabled; nothing to do
+                } else if (categoryParentId === 3) {
+                    convertToUnitDiv.style.display = 'none';
+                    convertToPackDiv.style.display = 'none';
+                    convertToBothDiv.style.display = 'none';
+                // Others: only show convert to smallest unit
+                } else {
+                    convertToUnitDiv.style.display = 'block';
+                    convertToPackDiv.style.display = 'none';
+                    convertToBothDiv.style.display = 'none';
+                    document.getElementById('convertToUnit').checked = true;
+                }
 
             // Hiển thị modal
             new bootstrap.Modal(document.getElementById('unitConversionModal')).show();

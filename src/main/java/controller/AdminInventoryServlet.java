@@ -21,7 +21,6 @@ import java.util.List;
 import model.Manufacturer;
 import model.StockIn;
 import model.StockInDetail;
-import model.Supplier;
 
 /**
  *
