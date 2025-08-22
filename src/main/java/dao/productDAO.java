@@ -143,7 +143,11 @@ public class ProductDAO extends DBContext {
                         return 1;
                     }
                     if (productId > 0) {
-                        boolean boxCreated = createInventoryBox(productId, quantity, price);
+                        if (isFruitCategory(categoryID)) {
+                            createInventoryUnit(productId, quantity, price);
+                        } else {
+                            createInventoryBox(productId, quantity, price);
+                        }
                     }
                 }
                 return productId > 0 ? 1 : 0;
@@ -281,7 +285,11 @@ public class ProductDAO extends DBContext {
             ps.setInt(15, product.getProductID());
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
-                updateInventoryBox(product.getProductID(), product.getStockQuantity(), price);
+                if (isFruitCategory(product.getCategory().getCategoryID())) {
+                    updateInventoryUnit(product.getProductID(), product.getStockQuantity(), price);
+                } else {
+                    updateInventoryBox(product.getProductID(), product.getStockQuantity(), price);
+                }
             }
             return affectedRows > 0;
         } catch (Exception e) {
@@ -757,7 +765,7 @@ public class ProductDAO extends DBContext {
 
     /**
      * Get conversion history for a product
-     *
+     * 
      * @param productId The product ID
      * @return List of conversion records
      */
@@ -790,12 +798,12 @@ public class ProductDAO extends DBContext {
 
     /**
      * Update Inventory table with converted units
-     *
-     * @param productId The product ID
+     * 
+     * @param productId    The product ID
      * @param unitQuantity Number of units (lon) converted
      * @param packQuantity Number of packs (lốc) converted (can be null)
-     * @param unitPrice Price per unit
-     * @param packPrice Price per pack (can be null)
+     * @param unitPrice    Price per unit
+     * @param packPrice    Price per pack (can be null)
      * @return true if update was successful, false otherwise
      */
     public boolean updateInventory(int productId, int unitQuantity, Integer packQuantity, double unitPrice,
@@ -864,11 +872,11 @@ public class ProductDAO extends DBContext {
 
     /**
      * Update Inventory table with new conversion logic
-     *
+     * 
      * @param productId The product ID
      * @param unitCount Number of units to create (can be null)
      * @param packCount Number of packs to create (can be null)
-     * @param packSize Size of each pack
+     * @param packSize  Size of each pack
      * @param unitPrice Price per unit
      * @param packPrice Price per pack (can be null)
      * @return true if update was successful, false otherwise
@@ -932,13 +940,13 @@ public class ProductDAO extends DBContext {
     /**
      * Cập nhật inventory khi chuyển đổi sản phẩm (bao gồm cả BOX)
      *
-     * @param productId The product ID
+     * @param productId      The product ID
      * @param boxesToConvert Số thùng được chuyển đổi
-     * @param unitCount Số đơn vị được tạo
-     * @param packCount Số lốc được tạo
-     * @param packSize Số đơn vị trong 1 lốc
-     * @param unitPrice Giá 1 đơn vị
-     * @param packPrice Giá 1 lốc
+     * @param unitCount      Số đơn vị được tạo
+     * @param packCount      Số lốc được tạo
+     * @param packSize       Số đơn vị trong 1 lốc
+     * @param unitPrice      Giá 1 đơn vị
+     * @param packPrice      Giá 1 lốc
      * @return true nếu thành công, false nếu thất bại
      */
     public boolean updateInventoryWithBox(int productId, int boxesToConvert, Integer unitCount, Integer packCount,
@@ -1032,13 +1040,13 @@ public class ProductDAO extends DBContext {
 
     /**
      * Lấy giá unit (lon) từ Inventory cho việc hiển thị trên trang home
-     *
+     * 
      * @param productId The product ID
      * @return Giá của 1 lon, null nếu không có
      */
     public Double getUnitPrice(int productId) {
         try {
-            String sql = "SELECT UnitPrice FROM Inventory WHERE ProductID = ? AND PackageType = 'UNIT'";
+            String sql = "SELECT TOP 1 UnitPrice FROM Inventory WHERE ProductID = ? AND PackageType IN ('KG','UNIT') ORDER BY CASE WHEN PackageType = 'KG' THEN 0 ELSE 1 END";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ResultSet rs = ps.executeQuery();
@@ -1054,8 +1062,65 @@ public class ProductDAO extends DBContext {
     }
 
     /**
-     * Get current inventory for a product
+     * Lấy giá theo loại đóng gói cụ thể từ Inventory
      *
+     * @param productId   ID sản phẩm
+     * @param packageType 'BOX' | 'UNIT' | 'PACK' | 'KG'
+     * @return UnitPrice hoặc null nếu không có
+     */
+    public Double getPriceByPackageType(int productId, String packageType) {
+        try {
+            String sql = "SELECT TOP 1 UnitPrice FROM Inventory WHERE ProductID = ? AND PackageType = ? ORDER BY LastUpdated DESC";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setString(2, packageType);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return rs.getDouble("UnitPrice");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Lấy giá thùng (BOX) từ Inventory
+     */
+    public Double getBoxPrice(int productId) {
+        return getPriceByPackageType(productId, "BOX");
+    }
+
+    /**
+     * Lấy giá đơn vị nhỏ nhất (UNIT) từ Inventory. KHÔNG bao gồm 'KG'.
+     */
+    public Double getUnitOnlyPrice(int productId) {
+        return getPriceByPackageType(productId, "UNIT");
+    }
+
+    /**
+     * Lấy tên đơn vị nhỏ nhất (ItemUnitName) từ bảng Product
+     */
+    public String getItemUnitName(int productId) {
+        try {
+            String sql = "SELECT ItemUnitName FROM Product WHERE ProductID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return rs.getString("ItemUnitName");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Get current inventory for a product
+     * 
      * @param productId The product ID
      * @return Map containing inventory information
      */
@@ -1087,8 +1152,12 @@ public class ProductDAO extends DBContext {
                     packList.add(p);
                     totalPackQty += qty;
                 } else {
-                    inventory.put(packageType + "_Quantity", qty);
-                    inventory.put(packageType + "_Price", price);
+                    String effectiveType = packageType;
+                    if ("KG".equalsIgnoreCase(packageType)) {
+                        effectiveType = "UNIT"; // Chuẩn hóa key để phía gọi không cần đổi
+                    }
+                    inventory.put(effectiveType + "_Quantity", qty);
+                    inventory.put(effectiveType + "_Price", price);
                 }
             }
             if (!packList.isEmpty()) {
@@ -1104,7 +1173,7 @@ public class ProductDAO extends DBContext {
 
     /**
      * Lấy ProductID của sản phẩm vừa được insert
-     *
+     * 
      * @return ProductID của sản phẩm vừa tạo, -1 nếu thất bại
      */
     private int getLastInsertedProductId() {
@@ -1130,6 +1199,25 @@ public class ProductDAO extends DBContext {
         try {
 
             String sql = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) VALUES (?, 'BOX', ?, ?, 0, GETDATE())";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setDouble(2, quantity);
+                ps.setDouble(3, price);
+                int result = ps.executeUpdate();
+
+                return result > 0;
+            }
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean createInventoryUnit(int productId, double quantity, double price) {
+        try {
+
+            String sql = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) VALUES (?, 'KG', ?, ?, 0, GETDATE())";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ps.setDouble(2, quantity);
@@ -1190,14 +1278,59 @@ public class ProductDAO extends DBContext {
         }
     }
 
+    private boolean updateInventoryUnit(int productId, double quantity, double price) {
+        try {
+
+            String sql = "MERGE Inventory AS target "
+                    + "USING (SELECT ? AS ProductID, 'KG' AS PackageType, 0 AS PackSize) AS source "
+                    + "ON (target.ProductID = source.ProductID AND target.PackageType = source.PackageType AND target.PackSize = source.PackSize) "
+                    + "WHEN MATCHED THEN "
+                    + "    UPDATE SET Quantity = ?, UnitPrice = ?, LastUpdated = GETDATE() "
+                    + "WHEN NOT MATCHED THEN "
+                    + "    INSERT (ProductID, PackageType, Quantity, UnitPrice, PackSize, LastUpdated) "
+                    + "    VALUES (?, 'KG', ?, ?, 0, GETDATE());";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setDouble(2, quantity);
+                ps.setDouble(3, price);
+                ps.setInt(4, productId);
+                ps.setDouble(5, quantity);
+                ps.setDouble(6, price);
+                int result = ps.executeUpdate();
+
+                return result > 0;
+            }
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean isFruitCategory(int categoryId) {
+        String sql = "SELECT CASE WHEN c.CategoryID = 3 OR c.ParentID = 3 THEN 1 ELSE 0 END AS IsFruit FROM Category c WHERE c.CategoryID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("IsFruit") == 1;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // ====================
     // đừng xóa tôi có sài
     // ==========================
+
     public List<Integer> getProductIdsByCategoryIdsExpanded(List<Integer> categoryIds) {
         List<Integer> result = new ArrayList<>();
-        if (categoryIds == null || categoryIds.isEmpty()) {
+        if (categoryIds == null || categoryIds.isEmpty())
             return result;
-        }
 
         // Chunk nếu cần (ví dụ 500 id mỗi lần)
         final int CHUNK = 500;
@@ -1206,13 +1339,11 @@ public class ProductDAO extends DBContext {
             String placeholders = String.join(",", Collections.nCopies(part.size(), "?"));
             String sql = "SELECT ProductID FROM Product WHERE CategoryID IN (" + placeholders + ")";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                for (int i = 0; i < part.size(); i++) {
+                for (int i = 0; i < part.size(); i++)
                     ps.setInt(i + 1, part.get(i));
-                }
                 try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
+                    while (rs.next())
                         result.add(rs.getInt(1));
-                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -1221,49 +1352,4 @@ public class ProductDAO extends DBContext {
         return result;
     }
 
-    public List<Product> searchProductsByName1(String keyword) {
-        List<Product> list = new ArrayList<>();
-        String sql = """
-                SELECT p.*, c.CategoryName, c.ParentID, m.ManufacturerID, m.CompanyName
-                FROM Product p
-                JOIN Category c ON p.CategoryID = c.CategoryID
-                JOIN Manufacturer m ON p.ManufacturerID = m.ManufacturerID
-                WHERE p.ProductName LIKE ?
-            """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "%" + keyword + "%");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Product p = new Product();
-                p.setProductID(rs.getInt("ProductID"));
-                p.setProductName(rs.getString("ProductName"));
-                p.setPrice(rs.getDouble("Price"));
-                p.setDescription(rs.getString("Description"));
-                p.setStockQuantity(rs.getDouble("StockQuantity"));
-                p.setImageURL(rs.getString("ImageURL"));
-                p.setUnit(rs.getString("Unit"));
-                p.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                p.setStatus(rs.getString("Status"));
-                p.setBoxUnitName(rs.getString("BoxUnitName"));
-
-                // Set Category
-                Category c = new Category();
-                c.setCategoryID(rs.getInt("CategoryID"));
-                c.setCategoryName(rs.getString("CategoryName"));
-                c.setParentID(rs.getInt("ParentID"));
-                p.setCategory(c);
-
-                // Set Manufacturer
-                Manufacturer m = new Manufacturer();
-                m.setManufacturerID(rs.getInt("ManufacturerID"));
-                m.setCompanyName(rs.getString("CompanyName"));
-                p.setManufacturer(m);
-
-                list.add(p);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
 }

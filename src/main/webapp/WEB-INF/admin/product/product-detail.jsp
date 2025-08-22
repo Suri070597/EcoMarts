@@ -86,44 +86,112 @@
                                             java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
                                         %>
                                         <tr>
-                                            <th>Giá lẻ:</th>
-                                            <td><%= formatter.format(product.getPrice())%> đ / <%= product.getUnit()%></td>
+                                            <th>Giá 1 <%= product.getBoxUnitName()%>:</th>
+                                            <td><%= formatter.format(product.getPrice())%> đ</td>
                                         </tr>
                                         <tr>
-                                            <th>Giá thùng:</th>
+                                            <th>Giá 1 <%= product.getItemUnitName()%>:</th>
                                             <td>
-                                                <%= product.getUnitPerBox() > 0 ? formatter.format(product.getPrice() * product.getUnitPerBox()) : "-"%> đ / <%= product.getBoxUnitName()%>
+                                                <%= product.getUnitPerBox() > 0 ? formatter.format(product.getPrice() / product.getUnitPerBox()) : "-"%> đ
                                             </td>
                                         </tr>
-                                        <tr><th>Số lượng tồn kho:</th><td>
-                                                <% double qty = product.getStockQuantity();
-                                                    int unitPerBox = product.getUnitPerBox();
-                                                    String boxUnit = product.getBoxUnitName();
-                                                    String itemUnit = product.getItemUnitName();
+                                        <%
+                                            java.util.Map<String, Object> inv = (java.util.Map<String, Object>) request.getAttribute("inventory");
+                                            Double boxQty = null, unitQty = null, packQty = null, packPrice = null;
+                                            if (inv != null) {
+                                                Object bq = inv.get("BOX_Quantity");
+                                                if (bq instanceof Number) boxQty = ((Number) bq).doubleValue();
+                                                Object uq = inv.get("UNIT_Quantity");
+                                                if (uq instanceof Number) unitQty = ((Number) uq).doubleValue();
+                                                Object pq = inv.get("PACK_Quantity");
+                                                if (pq instanceof Number) packQty = ((Number) pq).doubleValue();
+                                                Object pp = inv.get("PACK_Price");
+                                                if (pp instanceof Number) packPrice = ((Number) pp).doubleValue();
+                                            }
+                                            double qty = boxQty != null ? boxQty : product.getStockQuantity();
+                                        %>
+                                        <tr>
+                                            <th>Số lượng thùng:</th>
+                                            <td>
+                                                <%
                                                     if (qty == Math.floor(qty)) {
                                                         out.print((long) qty);
                                                     } else {
                                                         out.print(new java.text.DecimalFormat("#").format(qty));
                                                     }
-                                                    out.print(" " + (itemUnit != null ? itemUnit : product.getUnit()));
-                                                    if (unitPerBox > 1 && boxUnit != null && !boxUnit.isEmpty()) {
-                                                        double boxQty = qty / unitPerBox;
-                                                        out.print(" (");
-                                                        if (boxQty == Math.floor(boxQty)) {
-                                                            out.print((long) boxQty);
-                                                        } else {
-                                                            out.print(new java.text.DecimalFormat("#").format(boxQty));
+                                                    out.print(" " + product.getBoxUnitName());
+                                                %>
+                                            </td>
+                                        </tr>
+                                        <%
+                                            if (unitQty != null && unitQty > 0) {
+                                        %>
+                                        <tr>
+                                            <th>Số lượng <%= product.getItemUnitName() %>:</th>
+                                            <td>
+                                                <%
+                                                    double uqv = unitQty;
+                                                    if (uqv == Math.floor(uqv)) {
+                                                        out.print((long) uqv);
+                                                    } else {
+                                                        out.print(new java.text.DecimalFormat("#").format(uqv));
+                                                    }
+                                                    out.print(" " + product.getItemUnitName());
+                                                %>
+                                            </td>
+                                        </tr>
+                                        <%
+                                            }
+                                            java.util.List<java.util.Map<String, Object>> packList = inv != null ? (java.util.List<java.util.Map<String, Object>>) inv.get("PACK_LIST") : null;
+                                            if (packList != null && !packList.isEmpty()) {
+                                        %>
+                                        <tr>
+                                            <th>Lốc (nhiều quy cách):</th>
+                                            <td>
+                                                <%
+                                                    for (java.util.Map<String, Object> p : packList) {
+                                                        Object qs = p.get("quantity");
+                                                        Object ps = p.get("price");
+                                                        Object sz = p.get("packSize");
+                                                        double qdv = qs instanceof Number ? ((Number) qs).doubleValue() : 0d;
+                                                        double pdv = ps instanceof Number ? ((Number) ps).doubleValue() : 0d;
+                                                        int s = sz instanceof Number ? ((Number) sz).intValue() : 0;
+                                                        if (s > 0) {
+                                                            //  ví dụ: 6 lon/lốc: 10 lốc — 60.000 đ
+                                                            StringBuilder line = new StringBuilder();
+                                                            line.append(s).append(" ").append(product.getItemUnitName()).append("/lốc: ");
+                                                            if (qdv == Math.floor(qdv)) {
+                                                                line.append((long) qdv);
+                                                            } else {
+                                                                line.append(new java.text.DecimalFormat("#").format(qdv));
+                                                            }
+                                                            line.append(" lốc — ").append(formatter.format(pdv)).append(" đ");
+                                                            out.print(line.toString());
+                                                            out.print("<br/>");
                                                         }
-                                                        out.print(" " + boxUnit + ")");
                                                     }
                                                 %>
-                                            </td></tr>
+                                            </td>
+                                        </tr>
+                                        <%
+                                            }
+                                        %>
                                         <tr><th>Số lượng trong 1 thùng:</th><td><%= product.getUnitPerBox()%> <%= product.getItemUnitName()%> / <%= product.getBoxUnitName()%></td></tr>
-                                        <tr><th>Đơn vị thùng:</th><td><%= product.getBoxUnitName()%></td></tr>
                                         <tr><th>Đơn vị nhỏ nhất:</th><td><%= product.getItemUnitName()%></td></tr>
                                                 <% }%>
+                                        <tr><th>Trạng thái:</th>
+                                            <td>
+                                                <% if (product.getStockQuantity() <= 0) { %>
+                                                <span class="badge bg-danger">Hết hàng</span>
+                                                <% } else if (product.getStockQuantity() <= 10) { %>
+                                                <span class="badge bg-warning">Sắp hết</span>
+                                                <% } else { %>
+                                                <span class="badge bg-success">Còn hàng</span>
+                                                <% }%>
+                                            </td>
+                                        </tr>
                                         <tr><th>Danh mục:</th><td><%= product.getCategory() != null ? product.getCategory().getCategoryName() : ""%></td></tr>
-                                        <tr><th>Nhà sản xuất:</th><td><%= product.getSupplier() != null ? product.getSupplier().getCompanyName() : ""%></td></tr>
+                                        <tr><th>Nhà sản xuất:</th><td><%= product.getManufacturer() != null ? product.getManufacturer().getCompanyName() : ""%></td></tr>
                                         <tr>
                                             <% if (isFruit) { %>
                                             <th>Ngày nhập kho:</th>

@@ -1,11 +1,11 @@
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <%
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
-    List<Supplier> sup = (List<Supplier>) request.getAttribute("dataSup");
+    List<Manufacturer> sup = (List<Manufacturer>) request.getAttribute("dataSup");
 %>
 <html lang="en">
     <head>
@@ -75,27 +75,22 @@
                             <input type="number" min="1" step="1" class="form-control" name="fruitQuantity" id="fruitQuantity" placeholder="Nhập số lượng theo kg (chỉ số nguyên, ví dụ: 10, 20, 50...)" />
                         </div>
                         <div class="mb-3 box-related">
-                            <label class="form-label">Giá 1 thùng/hộp/kiện</label>
+                            <label class="form-label">Giá 1 thùng</label>
                             <input type="number" min="0" step="1" class="form-control" name="boxPrice" id="boxPrice" />
                         </div>
                         <div class="mb-3 box-related">
-                            <label class="form-label">Số lượng 1 thùng/hộp/kiện</label>
+                            <label class="form-label">Số lượng thùng</label>
                             <input type="number" min="0" class="form-control" name="boxQuantity" id="boxQuantity" oninput="updateBoxPreview()" />
                             <div id="box-preview" class="form-text text-primary"></div>
                         </div>
                         <div class="mb-3 box-related">
-                            <label class="form-label">Số lượng sản phẩm trong 1 thùng/hộp/kiện</label>
+                            <label class="form-label">Số lượng sản phẩm trong 1 thùng</label>
                             <input type="number" min="1" class="form-control" name="unitPerBox" id="unitPerBox" oninput="updateBoxPreview()" />
                         </div>
                         <div class="mb-3 box-related">
-                            <label class="form-label">Đơn vị 1 thùng/hộp/kiện</label>
-                            <select class="form-select" name="boxUnitName" id="boxUnitName">
-                                <option value="">-- Chọn đơn vị thùng/hộp/kiện --</option>
-                                <option value="thùng">thùng</option>
-                                <option value="hộp">hộp</option>
-                                <option value="kiện">kiện</option>
-                                <option value="lốc">lốc</option>
-                            </select>
+                            <label class="form-label">Đơn vị thùng</label>
+                            <input type="text" class="form-control" value="thùng" readonly>
+                            <input type="hidden" name="boxUnitName" id="boxUnitName" value="thùng">
                         </div>
                         <div class="mb-3" id="item-unit-group">
                             <label class="form-label">Đơn vị nhỏ nhất</label>
@@ -161,16 +156,16 @@
                         
                         <div class="mb-3">
                             <label class="form-label">Nhà sản xuất</label>
-                            <select name="supplierID" class="form-select" required>
+                            <select name="manufacturerID" class="form-select" required>
                                 <option value="">-- Chọn nhà sản xuất --</option>
                                 <% if (sup != null) {
-
-                                        for (Supplier s : sup) {
+                                        for (Manufacturer s : sup) {
+                                            if (s.getStatus() == 1) {
                                 %>
-                                <option value="<%= s.getSupplierId()%>"><%= s.getCompanyName()%></option>
-                                <%
-                                        }
+                                <option value="<%= s.getManufacturerId()%>"><%= s.getCompanyName()%></option>
+                                <%      }
                                     }
+                                }
                                 %>
                             </select>
                         </div>
@@ -206,7 +201,7 @@
                     var boxPriceInput = document.getElementById('boxPrice');
                     var boxQtyInput = document.getElementById('boxQuantity');
                     var unitPerBoxInput = document.getElementById('unitPerBox');
-                    var boxUnitNameInput = document.getElementById('boxUnitName');
+                    var boxUnitNameInput = document.getElementById('boxUnitName'); // Hidden input với value="thùng"
                     var fruitExpiryGroup = document.getElementById('fruit-expiry-group');
                     var expirySelectGroup = document.getElementById('expiry-select-group');
                     var expirySelect = document.getElementById('expirySelect');

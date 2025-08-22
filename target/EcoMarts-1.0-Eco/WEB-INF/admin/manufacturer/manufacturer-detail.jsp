@@ -1,5 +1,5 @@
 <%-- 
-    Tài liệu   : supplier-detail
+    Tài liệu   : manufacturer-detail
     Tạo ngày   : 17/06/2025, 21:53:18
     Tác giả    : ADMIN
 --%>
@@ -29,10 +29,10 @@
                         <div class="header-actions">
                             <h1 class="card-title">Chi Tiết Nhà Sản Xuất</h1>
                             <div class="d-flex gap-3">
-                                <a href="${pageContext.request.contextPath}/admin/supplier" class="btn btn-secondary">
+                                <a href="${pageContext.request.contextPath}/admin/manufacturer" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> Quay lại danh sách
                                 </a>
-                                <a href="${pageContext.request.contextPath}/admin/supplier?view=edit&id=${supplier.supplierID}" class="btn btn-primary">
+                                <a href="${pageContext.request.contextPath}/admin/manufacturer?view=edit&id=${manufacturer.manufacturerID}" class="btn btn-primary">
                                     <i class="fas fa-edit"></i> Chỉnh sửa
                                 </a>
                             </div>
@@ -41,50 +41,50 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="supplier-profile text-center">
+                                <div class="manufacturer-profile text-center">
                                     <div class="profile-image">
                                         <i class="fas fa-building fa-5x"></i>
                                     </div>
-                                    <h3 class="mt-3">${supplier.companyName}</h3>
-                                    <p class="text-muted">${supplier.brandName}</p>
-                                    <div class="supplier-status">
-                                        <span class="status-badge ${supplier.status == 1 ? 'status-active' : 'status-inactive'}">
-                                            ${supplier.status == 1 ? 'Đang hợp tác' : 'Ngừng hợp tác'}
+                                    <h3 class="mt-3">${manufacturer.companyName}</h3>
+                                    <p class="text-muted">${manufacturer.brandName}</p>
+                                    <div class="manufacturer-status">
+                                        <span class="status-badge ${manufacturer.status == 1 ? 'status-active' : 'status-inactive'}">
+                                            ${manufacturer.status == 1 ? 'Đang hợp tác' : 'Ngừng hợp tác'}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-8">
-                                <div class="supplier-details">
+                                <div class="manufacturer-details">
                                     <h4>Thông Tin Nhà Sản Xuất</h4>
                                     <table class="table table-striped">
                                         <tr>
                                             <th>ID nhà sản xuất:</th>
-                                            <td>${supplier.supplierID}</td>
+                                            <td>${manufacturer.manufacturerID}</td>
                                         </tr>
                                         <tr>
                                             <th>Tên thương hiệu:</th>
-                                            <td>${supplier.brandName}</td>
+                                            <td>${manufacturer.brandName}</td>
                                         </tr>
                                         <tr>
                                             <th>Tên công ty:</th>
-                                            <td>${supplier.companyName}</td>
+                                            <td>${manufacturer.companyName}</td>
                                         </tr>
                                         <tr>
                                             <th>Địa chỉ:</th>
-                                            <td>${supplier.address}</td>
+                                            <td>${manufacturer.address}</td>
                                         </tr>
                                         <tr>
                                             <th>Email:</th>
-                                            <td>${supplier.email}</td>
+                                            <td>${manufacturer.email}</td>
                                         </tr>
                                         <tr>
                                             <th>Số điện thoại:</th>
-                                            <td>${supplier.phone}</td>
+                                            <td>${manufacturer.phone}</td>
                                         </tr>
                                         <tr>
                                             <th>Trạng thái:</th>
-                                            <td>${supplier.status == 1 ? 'Đang hợp tác' : 'Ngừng hợp tác'}</td>
+                                            <td>${manufacturer.status == 1 ? 'Đang hợp tác' : 'Ngừng hợp tác'}</td>
                                         </tr>
                                     </table>
                                 </div>

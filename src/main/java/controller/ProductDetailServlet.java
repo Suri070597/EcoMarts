@@ -57,7 +57,84 @@ public class ProductDetailServlet extends HttpServlet {
             if (mo.getCategory() != null) {
                 int parentId = mo.getCategory().getParentID();
                 List<Product> relatedProducts = dao.getRelatedProductsByParentCategory(parentId, id);
-                request.setAttribute("relatedProducts", relatedProducts);
+
+                // Build display map and filter list per pricing rules
+                java.util.List<Product> filteredRelated = new java.util.ArrayList<>();
+                java.util.Map<Integer, String> relatedPriceDisplayMap = new java.util.HashMap<>();
+                java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+                symbols.setGroupingSeparator('.');
+                java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+
+                for (Product rp : relatedProducts) {
+                    int pParent = 0;
+                    try {
+                        if (rp.getCategory() != null && rp.getCategory().getParentID() != null) {
+                            pParent = rp.getCategory().getParentID();
+                        }
+                    } catch (Exception ignore) {
+                    }
+                    // Fallback: try to resolve parent from DB or current product's parent
+                    if (pParent == 0) {
+                        try {
+                            Product full = dao.getProductById(rp.getProductID());
+                            if (full != null && full.getCategory() != null
+                                    && full.getCategory().getParentID() != null) {
+                                pParent = full.getCategory().getParentID();
+                            }
+                        } catch (Exception ignore) {
+                        }
+                    }
+                    if (pParent == 0 && mo.getCategory() != null && mo.getCategory().getParentID() != null) {
+                        pParent = mo.getCategory().getParentID();
+                    }
+
+                    String display = null;
+                    if (pParent == 1 || pParent == 2) {
+                        // Drinks & Milk: price per box + append (UnitPerBox ItemUnitName)
+                        Double boxPrice = dao.getBoxPrice(rp.getProductID());
+                        if (boxPrice == null)
+                            boxPrice = rp.getPrice();
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(formatter.format(boxPrice)).append(" đ / thùng");
+                        try {
+                            Integer upb = rp.getUnitPerBox();
+                            String iun = rp.getItemUnitName();
+                            if (upb == null || upb <= 0 || iun == null || iun.trim().isEmpty()) {
+                                Product full = dao.getProductById(rp.getProductID());
+                                if (full != null) {
+                                    upb = full.getUnitPerBox();
+                                    iun = full.getItemUnitName();
+                                }
+                            }
+                            if (upb != null && upb > 0 && iun != null && !iun.trim().isEmpty()) {
+                                sb.append(" (").append(upb).append(" ").append(iun).append(")");
+                            }
+                        } catch (Exception ignore) {
+                        }
+                        display = sb.toString();
+                        filteredRelated.add(rp);
+                    } else if (pParent == 3) {
+                        // Fruits: keep original unit
+                        String unitLabel = (rp.getUnit() != null && !rp.getUnit().trim().isEmpty()) ? rp.getUnit()
+                                : "kg";
+                        display = formatter.format(rp.getPrice()) + " đ / " + unitLabel;
+                        filteredRelated.add(rp);
+                    } else {
+                        // Other categories: require UNIT
+                        Double unitPrice = dao.getUnitOnlyPrice(rp.getProductID());
+                        String itemUnit = dao.getItemUnitName(rp.getProductID());
+                        if (unitPrice != null && itemUnit != null && !itemUnit.trim().isEmpty()) {
+                            display = formatter.format(unitPrice) + " đ / " + itemUnit;
+                            filteredRelated.add(rp);
+                        }
+                    }
+                    if (display != null) {
+                        relatedPriceDisplayMap.put(rp.getProductID(), display);
+                    }
+                }
+
+                request.setAttribute("relatedProducts", filteredRelated);
+                request.setAttribute("relatedPriceDisplayMap", relatedPriceDisplayMap);
             }
 
             request.setAttribute("mo", mo);
@@ -65,22 +142,9 @@ public class ProductDetailServlet extends HttpServlet {
             request.setAttribute("dataSup", dao.getAllManufacturers());
 
             // Ưu tiên giá lẻ (UNIT) nếu tồn tại trong Inventory, nếu không thì dùng giá
-            // thùng
+            // thùng (giữ cho phần chính nếu JSP đang dùng)
             Double unitPrice = dao.getUnitPrice(mo.getProductID());
             request.setAttribute("unitPrice", unitPrice);
-
-            // Chuẩn bị giá lẻ cho danh sách sản phẩm liên quan
-            if (request.getAttribute("relatedProducts") != null) {
-                @SuppressWarnings("unchecked")
-                List<Product> related = (List<Product>) request.getAttribute("relatedProducts");
-                java.util.Map<Integer, Double> relatedUnitPriceMap = new java.util.HashMap<>();
-                for (Product rp : related) {
-                    Double up = dao.getUnitPrice(rp.getProductID());
-                    if (up != null)
-                        relatedUnitPriceMap.put(rp.getProductID(), up);
-                }
-                request.setAttribute("relatedUnitPriceMap", relatedUnitPriceMap);
-            }
 
             // Lấy reviewList và orderId nếu có account đăng nhập
             FeedBackDAO fbDao = new FeedBackDAO();
@@ -123,6 +187,18 @@ public class ProductDetailServlet extends HttpServlet {
                 request.setAttribute("orderId", orderId);
             }
 
+            // Flatten replies per root review for unlimited depth rendering in JSP
+            java.util.Map<Integer, java.util.List<Review>> flatRepliesMap = new java.util.HashMap<>();
+            try {
+                for (Review root : reviewList) {
+                    java.util.List<Review> flat = new java.util.ArrayList<>();
+                    flattenReplies(root.getReplies(), flat, 0);
+                    flatRepliesMap.put(root.getReviewID(), flat);
+                }
+            } catch (Exception ignore) {
+            }
+            request.setAttribute("flatRepliesMap", flatRepliesMap);
+
             // Lấy message từ session nếu có
             String message = (String) request.getSession().getAttribute("message");
             if (message != null) {
@@ -137,6 +213,16 @@ public class ProductDetailServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
         } catch (Exception e) {
             throw new ServletException(e);
+        }
+    }
+
+    private void flattenReplies(java.util.List<Review> replies, java.util.List<Review> out, int depth) {
+        if (replies == null)
+            return;
+        for (Review child : replies) {
+            child.setDepth(depth);
+            out.add(child);
+            flattenReplies(child.getReplies(), out, depth + 1);
         }
     }
 

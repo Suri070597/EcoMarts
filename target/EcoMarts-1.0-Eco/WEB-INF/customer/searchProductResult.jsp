@@ -97,7 +97,19 @@
                                         <span>(${reviewCount})</span>
                                     </div>
                                     <div class="product-price">
-                                        <fmt:formatNumber value="${p.price}" type="number" pattern="#,###" /> đ / ${p.unit}
+                                        <c:set var="productId" value="${p.productID}" />
+                                        <c:set var="unitPrice" value="${unitPriceMap[productId]}" />
+                                        
+                                        <c:choose>
+                                            <c:when test="${not empty unitPrice}">
+                                                <!-- Có giá lon → hiển thị giá lon -->
+                                                <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###" /> đ / lon
+                                            </c:when>
+                                            <c:otherwise>
+                                                <!-- Không có giá lon → hiển thị giá thùng -->
+                                                <fmt:formatNumber value="${p.price}" type="number" pattern="#,###" /> đ / thùng
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                     <div class="button-group">
                                         <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}" <c:if test="${p.stockQuantity <= 0}">disabled style='opacity:0.5;cursor:not-allowed;'</c:if>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>

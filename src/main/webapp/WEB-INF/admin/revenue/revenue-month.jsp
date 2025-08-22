@@ -48,6 +48,11 @@
                 background-color: #0d6efd;
                 color: white;
             }
+            
+            table td.number {
+                text-align: right;
+            }
+            
             .btn-primary, .btn-success {
                 border-radius: 10px;
             }
@@ -131,8 +136,8 @@
                             <c:forEach items="${productList}" var="item">
                                 <tr>
                                     <td>${item.productName}</td>
-                                    <td>${item.totalQuantity}</td>
-                                    <td><fmt:formatNumber value="${item.totalRevenue}" type="currency"/></td>
+                                    <td class="number">${item.totalQuantity}</td>
+                                    <td class="number"><fmt:formatNumber value="${item.totalRevenue}" type="currency"/></td>
                                 </tr>
                             </c:forEach>
                         </tbody>
