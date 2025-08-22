@@ -35,7 +35,6 @@
                                     <input type="hidden" name="action" value="search" />
                                     <i class="fas fa-search"></i>
                                     <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." value="${keyword != null ? keyword : ''}">
-                                    <button type="submit" class="btn btn-sm btn-primary">Tìm kiếm</button>
                                 </form>
                             </div>
                         </div>
@@ -45,6 +44,37 @@
                         List<Category> cate = (List<Category>) request.getAttribute("dataCate");
                         List<Product> product = (List<Product>) request.getAttribute("data");
                     %>
+
+                    <!-- Stock status cards (same style as admin dashboard) -->
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-success">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>${inStockCount}</h3>
+                                <p>Sản phẩm còn hàng</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>${lowStockCount}</h3>
+                                <p>Sản phẩm gần hết hàng</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-danger">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>${outOfStockCount}</h3>
+                                <p>Sản phẩm hết hàng</p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="table-container">
                         <% if (product != null && !product.isEmpty()) { %>
