@@ -187,6 +187,18 @@ public class ProductDetailServlet extends HttpServlet {
                 request.setAttribute("orderId", orderId);
             }
 
+            // Flatten replies per root review for unlimited depth rendering in JSP
+            java.util.Map<Integer, java.util.List<Review>> flatRepliesMap = new java.util.HashMap<>();
+            try {
+                for (Review root : reviewList) {
+                    java.util.List<Review> flat = new java.util.ArrayList<>();
+                    flattenReplies(root.getReplies(), flat, 0);
+                    flatRepliesMap.put(root.getReviewID(), flat);
+                }
+            } catch (Exception ignore) {
+            }
+            request.setAttribute("flatRepliesMap", flatRepliesMap);
+
             // Lấy message từ session nếu có
             String message = (String) request.getSession().getAttribute("message");
             if (message != null) {
@@ -201,6 +213,16 @@ public class ProductDetailServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/customer/productDetail.jsp").forward(request, response);
         } catch (Exception e) {
             throw new ServletException(e);
+        }
+    }
+
+    private void flattenReplies(java.util.List<Review> replies, java.util.List<Review> out, int depth) {
+        if (replies == null)
+            return;
+        for (Review child : replies) {
+            child.setDepth(depth);
+            out.add(child);
+            flattenReplies(child.getReplies(), out, depth + 1);
         }
     }
 

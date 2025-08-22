@@ -11,6 +11,7 @@ import java.io.IOException;
 
 @WebServlet(name = "MarkNotificationsReadServlet", urlPatterns = { "/mark-notifications-read" })
 public class MarkNotificationsReadServlet extends HttpServlet {
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
