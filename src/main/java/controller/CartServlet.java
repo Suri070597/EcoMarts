@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import dao.CartItemDAO;
 import dao.CategoryDAO;
 import dao.ProductDAO;
 import jakarta.servlet.ServletException;
@@ -16,7 +17,6 @@ import model.Account;
 import model.CartItem;
 import model.Category;
 import model.Product;
-import util.CartUtil;
 
 /**
  * Servlet for handling shopping cart operations
@@ -39,13 +39,13 @@ public class CartServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Account account = (Account) session.getAttribute("account");
 
-        // Initialize cart utility
-        CartUtil cartUtil = new CartUtil();
+        // Initialize DAO
+        CartItemDAO cartItemDAO = new CartItemDAO();
 
         // Check if this is a count request
         String action = request.getParameter("action");
         if ("count".equals(action)) {
-            getCartCount(request, response, account, cartUtil);
+            getCartCount(request, response, account, cartItemDAO);
             return;
         }
 
@@ -74,14 +74,19 @@ public class CartServlet extends HttpServlet {
         request.setAttribute("categories", categories);
 
         // Get cart items
-        List<CartItem> activeItems = cartUtil.getCartItems(account.getAccountID(), "Active");
-        List<CartItem> savedItems = cartUtil.getCartItems(account.getAccountID(), "Saved");
+        List<CartItem> activeItems = cartItemDAO.getCartItems(account.getAccountID(), "Active");
+        List<CartItem> savedItems = cartItemDAO.getCartItems(account.getAccountID(), "Saved");
 
         System.out.println(
                 "Cart page request: Found " + activeItems.size() + " active items for user " + account.getUsername());
 
         // Calculate cart total
-        double cartTotal = cartUtil.calculateCartTotal(account.getAccountID());
+        double cartTotal = 0;
+        for (CartItem item : activeItems) {
+            if (item.getProduct() != null) {
+                cartTotal += item.getProduct().getPrice() * item.getQuantity();
+            }
+        }
 
         // Set attributes for JSP
         request.setAttribute("activeItems", activeItems);
@@ -109,7 +114,7 @@ public class CartServlet extends HttpServlet {
      * Get cart item count for AJAX requests
      */
     private void getCartCount(HttpServletRequest request, HttpServletResponse response, Account account,
-            CartUtil cartUtil)
+            CartItemDAO cartItemDAO)
             throws IOException {
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
@@ -127,7 +132,7 @@ public class CartServlet extends HttpServlet {
         }
 
         // Get cart item count
-        int count = cartUtil.getCartItemCount(account.getAccountID());
+        int count = cartItemDAO.countCartItems(account.getAccountID(), "Active");
         response.getWriter().write(String.valueOf(count));
     }
 
@@ -148,7 +153,7 @@ public class CartServlet extends HttpServlet {
         System.out.println("Cart action: " + action);
         System.out.println("Request parameters: " + request.getParameterMap().keySet());
 
-        CartUtil cartUtil = new CartUtil();
+        CartItemDAO cartItemDAO = new CartItemDAO();
 
         // Check for AJAX requests
         String xRequestedWith = request.getHeader("X-Requested-With");
@@ -202,31 +207,31 @@ public class CartServlet extends HttpServlet {
         // Process based on action
         switch (action) {
             case "add":
-                addToCart(request, response, account, cartUtil);
+                addToCart(request, response, account, cartItemDAO);
                 break;
 
             case "update":
-                updateCartItem(request, response, isAjax, cartUtil);
+                updateCartItem(request, response, isAjax, cartItemDAO);
                 break;
 
             case "remove":
-                removeCartItem(request, response, cartUtil);
+                removeCartItem(request, response, cartItemDAO);
                 break;
                 
             case "removeSelected":
-                removeSelectedItems(request, response, account, cartUtil);
+                removeSelectedItems(request, response, account, cartItemDAO);
                 break;
 
             case "saveForLater":
-                saveForLater(request, response, cartUtil);
+                saveForLater(request, response, cartItemDAO);
                 break;
 
             case "moveToCart":
-                moveToCart(request, response, cartUtil);
+                moveToCart(request, response, cartItemDAO);
                 break;
 
             case "clear":
-                clearCart(request, response, account, cartUtil);
+                clearCart(request, response, account, cartItemDAO);
                 break;
 
             default:
@@ -245,7 +250,7 @@ public class CartServlet extends HttpServlet {
      * Add product to cart
      */
     private void addToCart(HttpServletRequest request, HttpServletResponse response,
-            Account account, CartUtil cartUtil) throws IOException {
+            Account account, CartItemDAO cartItemDAO) throws IOException {
         // Check if this is an AJAX request
         String xRequestedWith = request.getHeader("X-Requested-With");
         boolean isAjax = "XMLHttpRequest".equals(xRequestedWith);
@@ -316,12 +321,19 @@ public class CartServlet extends HttpServlet {
             }
 
             // Add to cart
-            boolean success = cartUtil.addToCart(account.getAccountID(), productID, quantity);
+            // Upsert: if exists increase quantity else insert
+            CartItem existingItem = cartItemDAO.getCartItemByProductId(account.getAccountID(), productID, "Active");
+            boolean success;
+            if (existingItem != null) {
+                success = cartItemDAO.updateCartItemQuantity(existingItem.getCartItemID(), existingItem.getQuantity() + quantity);
+            } else {
+                success = cartItemDAO.addToCart(account.getAccountID(), productID, quantity);
+            }
 
             if (isAjax) {
                 if (success) {
                     // Tính toán số lượng sản phẩm trong giỏ hàng
-                    int cartCount = cartUtil.getCartItemCount(account.getAccountID());
+                    int cartCount = cartItemDAO.countCartItems(account.getAccountID(), "Active");
 
                     // Trả về JSON với thông tin cập nhật
                     String json = String.format(
@@ -368,7 +380,7 @@ public class CartServlet extends HttpServlet {
     /**
      * Update cart item quantity
      */
-    private void updateCartItem(HttpServletRequest request, HttpServletResponse response, boolean isAjax, CartUtil cartUtil)
+    private void updateCartItem(HttpServletRequest request, HttpServletResponse response, boolean isAjax, CartItemDAO cartItemDAO)
             throws IOException {
         // Đảm bảo content-type được thiết lập ngay từ đầu
         response.setContentType("application/json");
@@ -408,7 +420,7 @@ public class CartServlet extends HttpServlet {
             }
 
             // Get the cart item
-            CartItem cartItem = cartUtil.getCartItemById(cartItemID);
+            CartItem cartItem = cartItemDAO.getCartItemById(cartItemID);
             if (cartItem == null) {
                 System.out.println("Cart item not found: " + cartItemID);
                 response.getWriter()
@@ -447,7 +459,7 @@ public class CartServlet extends HttpServlet {
             }
 
             // Update cart item quantity
-            boolean success = cartUtil.updateCartItemQuantity(cartItemID, quantity);
+            boolean success = cartItemDAO.updateCartItemQuantity(cartItemID, quantity);
             System.out.println("Update result: " + (success ? "success" : "failed"));
 
             double itemTotal = 0;
@@ -455,8 +467,15 @@ public class CartServlet extends HttpServlet {
 
             if (success) {
                 // Calculate new cart total
-                double cartTotal = cartUtil.calculateCartTotal(account.getAccountID());
-                int totalItems = cartUtil.getCartItemCount(account.getAccountID());
+                // Recalculate totals
+                List<CartItem> activeItems = cartItemDAO.getCartItems(account.getAccountID(), "Active");
+                double cartTotal = 0;
+                for (CartItem it : activeItems) {
+                    if (it.getProduct() != null) {
+                        cartTotal += it.getProduct().getPrice() * it.getQuantity();
+                    }
+                }
+                int totalItems = cartItemDAO.countCartItems(account.getAccountID(), "Active");
 
                 System.out.println(
                         "Cart update successful: Item total=" + itemTotal + ", Cart total=" + cartTotal
@@ -471,7 +490,6 @@ public class CartServlet extends HttpServlet {
                 }
 
                 // Get active cart items count
-                List<CartItem> activeItems = cartUtil.getCartItems(account.getAccountID(), "Active");
                 int activeItemsCount = activeItems.size();
                 System.out.println("isAjax: " + isAjax);
                 if (isAjax) {
@@ -519,7 +537,7 @@ public class CartServlet extends HttpServlet {
     /**
      * Remove item from cart
      */
-    private void removeCartItem(HttpServletRequest request, HttpServletResponse response, CartUtil cartUtil)
+    private void removeCartItem(HttpServletRequest request, HttpServletResponse response, CartItemDAO cartItemDAO)
             throws IOException {
         // Đảm bảo content-type được thiết lập ngay từ đầu
         response.setContentType("application/json");
@@ -546,7 +564,7 @@ public class CartServlet extends HttpServlet {
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
 
             // Get the cart item to check account ID for cart total calculation
-            CartItem item = cartUtil.getCartItemById(cartItemID);
+            CartItem item = cartItemDAO.getCartItemById(cartItemID);
             if (item == null) {
                 response.getWriter().write("{\"success\":false,\"message\":\"Không tìm thấy sản phẩm\"}");
                 return;
@@ -556,12 +574,18 @@ public class CartServlet extends HttpServlet {
             int accountID = item.getAccountID();
 
             // Remove item
-            boolean success = cartUtil.removeCartItem(cartItemID);
+            boolean success = cartItemDAO.removeCartItem(cartItemID);
 
             if (success) {
                 // Calculate new cart total
-                double cartTotal = cartUtil.calculateCartTotal(accountID);
-                int cartCount = cartUtil.getCartItemCount(accountID);
+                List<CartItem> activeItems = cartItemDAO.getCartItems(accountID, "Active");
+                double cartTotal = 0;
+                for (CartItem it : activeItems) {
+                    if (it.getProduct() != null) {
+                        cartTotal += it.getProduct().getPrice() * it.getQuantity();
+                    }
+                }
+                int cartCount = cartItemDAO.countCartItems(accountID, "Active");
 
                 // Ensure cartTotal is a valid number
                 if (Double.isNaN(cartTotal)) {
@@ -569,7 +593,6 @@ public class CartServlet extends HttpServlet {
                 }
 
                 // Get active cart items count
-                List<CartItem> activeItems = cartUtil.getCartItems(accountID, "Active");
                 int activeItemsCount = activeItems.size();
 
                 // Return JSON with updated info - use raw numeric value instead of formatted
@@ -601,7 +624,7 @@ public class CartServlet extends HttpServlet {
     /**
      * Save item for later
      */
-    private void saveForLater(HttpServletRequest request, HttpServletResponse response, CartUtil cartUtil)
+    private void saveForLater(HttpServletRequest request, HttpServletResponse response, CartItemDAO cartItemDAO)
             throws IOException {
         try {
             // Check if user is logged in
@@ -620,7 +643,7 @@ public class CartServlet extends HttpServlet {
             }
 
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
-            cartUtil.saveForLater(cartItemID);
+            cartItemDAO.updateCartItemStatus(cartItemID, "SavedForLater");
             response.sendRedirect("cart");
         } catch (NumberFormatException e) {
             response.sendRedirect("cart");
@@ -630,7 +653,7 @@ public class CartServlet extends HttpServlet {
     /**
      * Move saved item to active cart
      */
-    private void moveToCart(HttpServletRequest request, HttpServletResponse response, CartUtil cartUtil)
+    private void moveToCart(HttpServletRequest request, HttpServletResponse response, CartItemDAO cartItemDAO)
             throws IOException {
         // Check if this is an AJAX request
         String xRequestedWith = request.getHeader("X-Requested-With");
@@ -673,7 +696,7 @@ public class CartServlet extends HttpServlet {
             int cartItemID = Integer.parseInt(request.getParameter("cartItemID"));
 
             // Get the cart item to check product details
-            CartItem item = cartUtil.getCartItemById(cartItemID);
+            CartItem item = cartItemDAO.getCartItemById(cartItemID);
             if (item == null) {
                 if (isAjax) {
                     response.getWriter().write("{\"success\":false,\"message\":\"Không tìm thấy sản phẩm\"}");
@@ -700,13 +723,19 @@ public class CartServlet extends HttpServlet {
                 return;
             }
 
-            boolean success = cartUtil.moveToCart(cartItemID);
+            boolean success = cartItemDAO.updateCartItemStatus(cartItemID, "Active");
 
             if (isAjax) {
                 if (success) {
                     // Calculate new cart total
-                    double cartTotal = cartUtil.calculateCartTotal(account.getAccountID());
-                    int cartCount = cartUtil.getCartItemCount(account.getAccountID());
+                    List<CartItem> activeItems = cartItemDAO.getCartItems(account.getAccountID(), "Active");
+                    double cartTotal = 0;
+                    for (CartItem it : activeItems) {
+                        if (it.getProduct() != null) {
+                            cartTotal += it.getProduct().getPrice() * it.getQuantity();
+                        }
+                    }
+                    int cartCount = cartItemDAO.countCartItems(account.getAccountID(), "Active");
 
                     // Format cart total
                     java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
@@ -755,7 +784,7 @@ public class CartServlet extends HttpServlet {
     /**
      * Clear all items from cart
      */
-    private void clearCart(HttpServletRequest request, HttpServletResponse response, Account account, CartUtil cartUtil)
+    private void clearCart(HttpServletRequest request, HttpServletResponse response, Account account, CartItemDAO cartItemDAO)
             throws IOException {
         // Check if user is a customer
         if (account == null || account.getRole() != 0) {
@@ -764,14 +793,14 @@ public class CartServlet extends HttpServlet {
             return;
         }
 
-        cartUtil.clearCart(account.getAccountID(), "Active");
+        cartItemDAO.updateCartItemsStatus(account.getAccountID(), "Active", "Removed");
         response.sendRedirect("cart");
     }
 
     /**
      * Remove selected items from cart
      */
-    private void removeSelectedItems(HttpServletRequest request, HttpServletResponse response, Account account, CartUtil cartUtil)
+    private void removeSelectedItems(HttpServletRequest request, HttpServletResponse response, Account account, CartItemDAO cartItemDAO)
             throws IOException {
         try {
             // Get the selected item IDs
@@ -793,7 +822,7 @@ public class CartServlet extends HttpServlet {
                     int itemId = Integer.parseInt(itemIdStr.trim());
                     
                     // Get the cart item to check product details before removal
-                    CartItem item = cartUtil.getCartItemById(itemId);
+                    CartItem item = cartItemDAO.getCartItemById(itemId);
                     if (item == null) {
                         continue;
                     }
@@ -811,7 +840,7 @@ public class CartServlet extends HttpServlet {
                     }
                     
                     // Remove the item
-                    boolean removed = cartUtil.removeCartItem(itemId);
+                    boolean removed = cartItemDAO.removeCartItem(itemId);
                     if (removed && product != null) {
                         // Increment removed counter
                         removedCount++;

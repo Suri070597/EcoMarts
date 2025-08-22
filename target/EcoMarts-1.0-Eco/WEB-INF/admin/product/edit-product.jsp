@@ -1,12 +1,12 @@
 <%@page import="java.util.List"%>
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="model.Product"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     Product mo = (Product) request.getAttribute("mo");
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
-    List<Supplier> sup = (List<Supplier>) request.getAttribute("dataSup");
+    List<Manufacturer> sup = (List<Manufacturer>) request.getAttribute("dataSup");
 %>
 <%-- Thêm biến xác định sản phẩm là trái cây --%>
 <%
@@ -221,13 +221,16 @@
 
                         <div class="mb-3">
                             <label class="form-label">Nhà sản xuất</label>
-                            <select name="supplierID" class="form-select" required>
+                            <select name="manufacturerID" class="form-select" required>
                                 <option value="">-- Chọn nhà sản xuất --</option>
-                                <% for (Supplier s : sup) {%>
-                                <option value="<%= s.getSupplierId()%>" <%= (mo.getSupplier() != null && mo.getSupplier().getSupplierId() == s.getSupplierId()) ? "selected" : ""%>>
+                                <% for (Manufacturer s : sup) {
+                                       boolean isCurrent = (mo.getManufacturer() != null && mo.getManufacturer().getManufacturerId() == s.getManufacturerId());
+                                       if (s.getStatus() == 1 || isCurrent) { %>
+                                <option value="<%= s.getManufacturerId()%>" <%= isCurrent ? "selected" : ""%>>
                                     <%= s.getCompanyName()%>
                                 </option>
-                                <% } %>
+                                <%     }
+                                   } %>
                             </select>
                         </div>
 

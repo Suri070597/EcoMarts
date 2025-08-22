@@ -1,5 +1,7 @@
 package dao;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import db.DBContext;
-import java.math.BigDecimal;
-import java.sql.Connection;
 import model.Account;
 import model.CartItem;
 import model.Order;
@@ -992,9 +992,25 @@ public class OrderDAO extends DBContext {
                 }
             }
 
-            // If order creation succeeded, insert order details
+            // If order creation succeeded, reserve/decrement stock and insert order details atomically
             if (orderId > 0) {
-                // Insert order details
+                // 1) Decrement stock atomically per product
+                String updateStockSql = "UPDATE Product SET StockQuantity = StockQuantity - ? WHERE ProductID = ? AND StockQuantity >= ?";
+                try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSql)) {
+                    for (CartItem item : items) {
+                        stockStmt.setDouble(1, item.getQuantity());
+                        stockStmt.setInt(2, item.getProductID());
+                        stockStmt.setDouble(3, item.getQuantity());
+                        int affected = stockStmt.executeUpdate();
+                        if (affected == 0) {
+                            // Not enough stock; rollback and fail
+                            conn.rollback();
+                            return -1;
+                        }
+                    }
+                }
+
+                // 2) Insert order details
                 String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
                         "VALUES (?, ?, ?, ?)";
 
@@ -1080,29 +1096,38 @@ public class OrderDAO extends DBContext {
                 }
             }
 
-            // If order creation succeeded, insert order detail
+            // If order creation succeeded, decrement stock atomically then insert order detail
             if (orderId > 0) {
-                // Get product price
+                // 1) Re-validate and decrement stock atomically
+                String updateStockSql = "UPDATE Product SET StockQuantity = StockQuantity - ? WHERE ProductID = ? AND StockQuantity >= ?";
+                try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSql)) {
+                    stockStmt.setDouble(1, item.getQuantity());
+                    stockStmt.setInt(2, item.getProductID());
+                    stockStmt.setDouble(3, item.getQuantity());
+                    int affected = stockStmt.executeUpdate();
+                    if (affected == 0) {
+                        conn.rollback();
+                        return -1;
+                    }
+                }
+
+                // 2) Get product price for detail row
                 ProductDAO productDAO = new ProductDAO();
                 Product product = productDAO.getProductById(item.getProductID());
-
-                if (product != null) {
-                    String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
-                            "VALUES (?, ?, ?, ?)";
-
-                    try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
-                        ps.setInt(1, orderId);
-                        ps.setInt(2, item.getProductID());
-                        ps.setDouble(3, item.getQuantity());
-                        ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
-
-                        ps.executeUpdate();
-                    }
-                } else {
-                    // Product not found, rollback transaction
+                if (product == null) {
                     conn.rollback();
-                    orderId = -1;
-                    return orderId;
+                    return -1;
+                }
+
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
+                        "VALUES (?, ?, ?, ?)";
+
+                try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
+                    ps.setInt(1, orderId);
+                    ps.setInt(2, item.getProductID());
+                    ps.setDouble(3, item.getQuantity());
+                    ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
+                    ps.executeUpdate();
                 }
             }
 

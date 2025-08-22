@@ -70,22 +70,6 @@
                     </div>
                 </div>
 
-                <!-- Work Shift Information -->
-                <div class="work-shift-card">
-                    <div class="work-shift-title">
-                        <i class="fas fa-clock"></i>Ca làm việc hôm nay
-                    </div>
-                    <div class="work-shift-info">
-                        <div class="shift-time">
-                            <div class="shift-time-label">Giờ vào</div>
-                            <div class="shift-time-value">${workShift.checkIn}</div>
-                        </div>
-                        <div class="shift-time">
-                            <div class="shift-time-label">Giờ ra</div>
-                            <div class="shift-time-value">${workShift.checkOut}</div>
-                        </div>
-                    </div>
-                </div>
 
 
                 <script>

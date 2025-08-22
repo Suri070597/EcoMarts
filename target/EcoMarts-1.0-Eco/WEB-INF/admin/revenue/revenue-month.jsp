@@ -2,6 +2,7 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="vi_VN"/>
 
 <!DOCTYPE html>
 <html>
@@ -47,6 +48,11 @@
                 background-color: #0d6efd;
                 color: white;
             }
+            
+            table td.number {
+                text-align: right;
+            }
+            
             .btn-primary, .btn-success {
                 border-radius: 10px;
             }
@@ -92,8 +98,8 @@
                     <div class="row text-center mb-4">
                         <div class="col-md-4">
                             <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5><i class="fas fa-dollar-sign text-success"></i> Tổng doanh thu</h5>
-                                <p class="fw-bold text-success fs-5"><fmt:formatNumber value="${revenue}" type="currency"/></p>
+                                <h5><i class="fas fa-money-bill-wave text-success"></i> Tổng doanh thu</h5>
+                                <p class="fw-bold text-success"><fmt:formatNumber value="${revenue}" type="currency"/></p>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -122,7 +128,7 @@
                             <tr>
                                 <th><i class="fas fa-box"></i> Sản phẩm</th>
                                 <th><i class="fas fa-sort-amount-up-alt"></i> Số lượng đã bán</th>
-                                <th><i class="fas fa-sack-dollar"></i> Doanh thu</th>
+                                <th><i class="fas fa-money-bill-wave text-success"></i> Doanh thu</th>
                             </tr>
 
                         </thead>
@@ -130,8 +136,8 @@
                             <c:forEach items="${productList}" var="item">
                                 <tr>
                                     <td>${item.productName}</td>
-                                    <td>${item.totalQuantity}</td>
-                                    <td><fmt:formatNumber value="${item.totalRevenue}" type="currency"/></td>
+                                    <td class="number">${item.totalQuantity}</td>
+                                    <td class="number"><fmt:formatNumber value="${item.totalRevenue}" type="currency"/></td>
                                 </tr>
                             </c:forEach>
                         </tbody>
@@ -189,10 +195,15 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function (value) {
-                                    return new Intl.NumberFormat('vi-VN', {
+                                    let price = new Intl.NumberFormat('vi-VN', {
                                         style: 'currency',
-                                        currency: 'đ'
+                                        currency: 'VND'
                                     }).format(value);
+
+// Đổi ₫ thành đ
+                                    price = price.replace('₫', 'đ');
+                                    return price;
+
                                 }
                             }
                         }

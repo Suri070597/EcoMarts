@@ -92,6 +92,32 @@ public class BuyNowServlet extends HttpServlet {
                 return;
             }
 
+            // Refresh product info and validate latest stock before rendering page
+            ProductDAO productDAO = new ProductDAO();
+            boolean hasStockIssues = false;
+            for (CartItem item : cartItems) {
+                Product refreshed = productDAO.getProductById(item.getProductID());
+                if (refreshed == null) {
+                    session.setAttribute("cartError", "Sản phẩm trong giỏ không còn tồn tại. Vui lòng kiểm tra lại.");
+                    response.sendRedirect("cart");
+                    return;
+                }
+                item.setProduct(refreshed);
+                if (refreshed.getStockQuantity() < item.getQuantity()) {
+                    hasStockIssues = true;
+                    // Điều chỉnh số lượng tối đa theo tồn kho hiện tại
+                    if (refreshed.getStockQuantity() > 0) {
+                        item.setQuantity(refreshed.getStockQuantity());
+                    } else {
+                        // Nếu hết hàng, đặt số lượng về 0 để cảnh báo ở trang
+                        item.setQuantity(0);
+                    }
+                }
+            }
+            if (hasStockIssues) {
+                request.setAttribute("error", "Một số sản phẩm đã được điều chỉnh do kho không đủ hàng.");
+            }
+
             // Forward to checkout page with cart items
             request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
             return;
@@ -479,8 +505,7 @@ public class BuyNowServlet extends HttpServlet {
                     orderDAO.recordVoucherUsage(appliedVoucher.getVoucherID(), account.getAccountID(), orderId, discountAmount);
                 }
 
-                // Update product stock
-                productDAO.updateProductStock(product.getProductID(), product.getStockQuantity() - buyNowItem.getQuantity());
+                // Stock is decremented atomically within order creation transaction
 
                 // Order history will be created after successful redirect to avoid foreign key issues
                 // Handle payment redirection if needed
@@ -773,20 +798,19 @@ public class BuyNowServlet extends HttpServlet {
             double totalAmount = 0;
             ProductDAO productDAO = new ProductDAO();
 
-            // Validate products and calculate total
+            // Validate products and calculate total (always re-fetch latest from DB)
             for (CartItem item : cartItems) {
-                Product product = item.getProduct();
+                Product product = productDAO.getProductById(item.getProductID());
                 if (product == null) {
-                    product = productDAO.getProductById(item.getProductID());
-                    if (product == null) {
-                        continue; // Skip invalid products
-                    }
-                    item.setProduct(product);
+                    request.setAttribute("error", "Sản phẩm trong giỏ không còn tồn tại. Vui lòng kiểm tra lại.");
+                    request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
+                    return; // Skip invalid products
                 }
+                item.setProduct(product);
 
-                // Check stock again
+                // Check stock again against latest DB value
                 if (product.getStockQuantity() < item.getQuantity()) {
-                    request.setAttribute("error", "Sản phẩm " + product.getProductName() + " không đủ số lượng yêu cầu.");
+                    request.setAttribute("error", "Sản phẩm " + product.getProductName() + " không đủ số lượng yêu cầu. Hiện chỉ còn " + product.getStockQuantity() + " " + product.getUnit());
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
                 }
@@ -858,11 +882,7 @@ public class BuyNowServlet extends HttpServlet {
                     orderDAO.recordVoucherUsage(appliedVoucher.getVoucherID(), account.getAccountID(), orderId, discountAmount);
                 }
 
-                // Update product stock
-                for (CartItem item : cartItems) {
-                    Product product = item.getProduct();
-                    productDAO.updateProductStock(product.getProductID(), product.getStockQuantity() - item.getQuantity());
-                }
+                // Stock is decremented atomically within order creation transaction
 
                 // Clear cart items
                 CartItemDAO cartItemDAO = new CartItemDAO();

@@ -39,10 +39,10 @@
                         <table class="table table-bordered table-hover text-center align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Tên đăng nhập</th>
-                                    <th>Tổng đơn hàng</th>
-                                    <th>Tổng chi tiêu</th>
+                                    <th style="text-align: center;">ID</th>
+                                    <th style="text-align: center;">Tên đăng nhập</th>
+                                    <th style="text-align: center;">Tổng đơn hàng</th>
+                                    <th style="text-align: center;">Tổng chi tiêu</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -52,9 +52,9 @@
 
                                         <td>${customer.username}</td>
 
-                                        <td>${customer.orderCount}</td>
-                                        <td>
-                                            <fmt:formatNumber value="${customer.totalSpent}" type="number" />
+                                        <td style="text-align: right;">${customer.orderCount}</td>
+                                        <td style="text-align: right;">
+                                            <fmt:formatNumber value="${customer.totalSpent}" type="number" />đ
                                         </td>
                                     </tr>
                                 </c:forEach>
