@@ -778,6 +778,7 @@ public class BuyNowServlet extends HttpServlet {
                 request.setAttribute("notes", notes);
 
                 // Redirect back to checkout page
+                setCategories(request);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                 return;
             }
@@ -790,6 +791,7 @@ public class BuyNowServlet extends HttpServlet {
                 request.setAttribute("shippingPhone", shippingPhone);
                 request.setAttribute("notes", notes);
 
+                setCategories(request);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                 return;
             }
@@ -803,6 +805,7 @@ public class BuyNowServlet extends HttpServlet {
                 Product product = productDAO.getProductById(item.getProductID());
                 if (product == null) {
                     request.setAttribute("error", "Sản phẩm trong giỏ không còn tồn tại. Vui lòng kiểm tra lại.");
+                    setCategories(request);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return; // Skip invalid products
                 }
@@ -811,6 +814,7 @@ public class BuyNowServlet extends HttpServlet {
                 // Check stock again against latest DB value
                 if (product.getStockQuantity() < item.getQuantity()) {
                     request.setAttribute("error", "Sản phẩm " + product.getProductName() + " không đủ số lượng yêu cầu. Hiện chỉ còn " + product.getStockQuantity() + " " + product.getUnit());
+                    setCategories(request);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
                 }
@@ -845,12 +849,14 @@ public class BuyNowServlet extends HttpServlet {
                     } else {
                         // Voucher expired or not valid
                         request.setAttribute("error", "Mã giảm giá không hợp lệ hoặc đã hết hạn");
+                        setCategories(request);
                         request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                         return;
                     }
                 } else {
                     // Voucher not found
                     request.setAttribute("error", "Mã giảm giá không tồn tại");
+                    setCategories(request);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
                 }
@@ -915,11 +921,24 @@ public class BuyNowServlet extends HttpServlet {
             } else {
                 // Failed to create order
                 request.setAttribute("error", "Đã có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
+                setCategories(request);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
             }
         } catch (Exception e) {
             request.setAttribute("error", "Lỗi xử lý đơn hàng: " + e.getMessage());
+            setCategories(request);
             request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
+        }
+    }
+
+    // Ensure categories exist when forwarding from POST error paths on cart flow
+    private void setCategories(HttpServletRequest request) {
+        try {
+            CategoryDAO categoryDAO = new CategoryDAO();
+            List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
+            request.setAttribute("categories", categories);
+        } catch (Exception e) {
+            // no-op
         }
     }
 
