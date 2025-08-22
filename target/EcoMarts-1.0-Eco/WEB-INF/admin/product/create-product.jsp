@@ -1,11 +1,11 @@
-<%@page import="model.Supplier"%>
+<%@page import="model.Manufacturer"%>
 <%@page import="model.Category"%>
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <%
     List<Category> cate = (List<Category>) request.getAttribute("dataCate");
-    List<Supplier> sup = (List<Supplier>) request.getAttribute("dataSup");
+    List<Manufacturer> sup = (List<Manufacturer>) request.getAttribute("dataSup");
 %>
 <html lang="en">
     <head>
@@ -156,16 +156,16 @@
                         
                         <div class="mb-3">
                             <label class="form-label">Nhà sản xuất</label>
-                            <select name="supplierID" class="form-select" required>
+                            <select name="manufacturerID" class="form-select" required>
                                 <option value="">-- Chọn nhà sản xuất --</option>
                                 <% if (sup != null) {
-
-                                        for (Supplier s : sup) {
+                                        for (Manufacturer s : sup) {
+                                            if (s.getStatus() == 1) {
                                 %>
-                                <option value="<%= s.getSupplierId()%>"><%= s.getCompanyName()%></option>
-                                <%
-                                        }
+                                <option value="<%= s.getManufacturerId()%>"><%= s.getCompanyName()%></option>
+                                <%      }
                                     }
+                                }
                                 %>
                             </select>
                         </div>

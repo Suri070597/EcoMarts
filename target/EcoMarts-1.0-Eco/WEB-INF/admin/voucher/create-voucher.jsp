@@ -65,9 +65,8 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="usageCount">Số lần đã sử dụng</label>
-                    <input type="number" min='0' class="form-control" id="usageCount" name="usageCount" value="${param.usageCount}" required>
-                    <div class="invalid-feedback">Vui lòng nhập số lần đã sử dụng</div>
+                    <label class="form-label" for="claimLimit">Số lượt có thể nhận (để trống nếu không giới hạn)</label>
+                    <input type="number" min='0' class="form-control" id="claimLimit" name="claimLimit" value="${param.claimLimit}">
                 </div>
 
                 <div class="mb-3">
