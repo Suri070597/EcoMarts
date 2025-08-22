@@ -65,9 +65,8 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="usageCount">Số lần đã sử dụng</label>
-                    <input type="number" min='0' class="form-control" id="usageCount" name="usageCount" value="${param.usageCount}" required>
-                    <div class="invalid-feedback">Vui lòng nhập số lần đã sử dụng</div>
+                    <label class="form-label" for="claimLimit">Số lượt có thể nhận (để trống nếu không giới hạn)</label>
+                    <input type="number" min='0' class="form-control" id="claimLimit" name="claimLimit" value="${param.claimLimit}">
                 </div>
 
                 <div class="mb-3">
@@ -87,10 +86,7 @@
                     <label class="form-check-label" for="isActive">Hoạt động</label>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="categoryID">ID danh mục (tùy chọn)</label>
-                    <input type="number" class="form-control" id="categoryID" min='1' name="categoryID" value="${param.categoryID}">
-                </div>
+               
 
                 <div class="btn-group">
                     <a href="${pageContext.request.contextPath}/admin/voucher" class="btn btn-secondary">Quay lại</a>
@@ -101,7 +97,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // Form validation
     (function () {

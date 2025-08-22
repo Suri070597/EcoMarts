@@ -12,12 +12,12 @@ import java.sql.SQLException;
  */
 public class DBContext {
 
-    String url = "jdbc:sqlserver://localhost:1433;databaseName=EcoMart;encrypt=false";
+     String url = "jdbc:sqlserver://localhost:1433;databaseName=EcoMart;encrypt=false";
     String user = "sa";
     String password = "123456";
 
     protected Connection conn;
-
+    
     public DBContext() {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");

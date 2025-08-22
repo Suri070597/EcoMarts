@@ -2,6 +2,7 @@
 <%@ page import="java.util.Map" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="vi_VN"/>
 
 <!DOCTYPE html>
 <html>
@@ -58,7 +59,7 @@
                     <div class="row text-center mb-4">
                         <div class="col-md-4">
                             <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5><i class="fas fa-dollar-sign text-success"></i> Tổng doanh thu</h5>
+                                <h5><i class="fas fa-money-bill-wave text-success"></i> Tổng doanh thu</h5>
                                 <p class="fw-bold text-success fs-5"><fmt:formatNumber value="${revenue}" type="currency"/></p>
                             </div>
                         </div>
@@ -78,7 +79,7 @@
 
                     <!-- Biểu đồ doanh thu 5 năm -->
                     <div class="chart-container mt-5">
-                        <h4 class="text-center mb-4">Doanh thu 5 năm gần đây</h4>
+                        <h4 class="">Doanh thu 5 năm gần đây</h4>
                         <canvas id="yearlyRevenueChart" height="100"></canvas>
                     </div>
                 </div>
@@ -123,10 +124,15 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function (value) {
-                                    return new Intl.NumberFormat('vi-VN', {
+                                    let price = new Intl.NumberFormat('vi-VN', {
                                         style: 'currency',
-                                        currency: 'đ'
+                                        currency: 'VND'
                                     }).format(value);
+
+// Đổi ₫ thành đ
+                                    price = price.replace('₫', 'đ');
+                                    return price;
+
                                 }
                             }
                         }

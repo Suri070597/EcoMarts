@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import model.Category;
 import db.DBContext;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -180,4 +181,26 @@ public class CategoryDAO extends DBContext {
         }
         return new ArrayList<>(set);
     }
+
+    public List<Category> getAllCategories() {
+        List<Category> categories = new ArrayList<>();
+        String sql = "SELECT CategoryID, CategoryName, ParentID FROM Category ORDER BY CategoryID";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Category c = new Category();
+                c.setCategoryID(rs.getInt("CategoryID"));
+                c.setCategoryName(rs.getString("CategoryName"));
+                c.setParentID(rs.getInt("ParentID"));
+                categories.add(c);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return categories;
+    }
+
 }

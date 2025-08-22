@@ -99,7 +99,12 @@
                                                    onclick="return confirmDelete(event, '${v.voucherID}')">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
+                                                <a href="${pageContext.request.contextPath}/admin/voucher?view=owners&id=${v.voucherID}"
+                                                   class="btn btn-sm btn-secondary" title="Xem khách hàng sở hữu">
+                                                    <i class="fas fa-users"></i>
+                                                </a>
                                             </div>
+
                                         </td>
                                     </tr>
                                 </c:forEach>
