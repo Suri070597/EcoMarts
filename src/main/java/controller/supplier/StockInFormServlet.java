@@ -22,10 +22,12 @@ import model.Supplier;
 import com.google.gson.Gson;
 import dao.AccountDAO;
 import dao.InventoryDAO;
+import dao.ManufacturerDAO;
 import java.sql.Date;
 import java.util.ArrayList;
 import model.Account;
 import model.Inventory;
+import model.Manufacturer;
 import model.StockIn;
 import model.StockInDetail;
 
@@ -34,7 +36,7 @@ public class StockInFormServlet extends HttpServlet {
 
     // Khai báo các DAO làm thuộc tính của servlet
     private ProductDAO productDAO;
-    private SupplierDAO supplierDAO;
+    private ManufacturerDAO manufactureDAO;
     private AccountDAO accountDAO;
     private CategoryDAO categoryDAO;
     private InventoryDAO inventoryDAO;
@@ -44,7 +46,7 @@ public class StockInFormServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init(); // Đảm bảo servlet container khởi tạo đầy đủ
         productDAO = new ProductDAO();
-        supplierDAO = new SupplierDAO();
+        manufactureDAO = new ManufacturerDAO();
         accountDAO = new AccountDAO();
         categoryDAO = new CategoryDAO();
         inventoryDAO = new InventoryDAO();
@@ -69,7 +71,7 @@ public class StockInFormServlet extends HttpServlet {
         try {
             // ===== PHẦN 1: LẤY DỮ LIỆU TỪ DATABASE (Model Layer) =====
 // 1.3. Lấy danh sách nhà cung cấp
-            List<Supplier> supplierList = supplierDAO.getAllSuppliers();
+            List<Manufacturer> manufactureList = manufactureDAO.getManufacturersByStatus(1);
 
 // 1.4. Lấy danh sách admin
             List<Account> adminList = accountDAO.getAccountsByRole(1);
@@ -86,11 +88,11 @@ public class StockInFormServlet extends HttpServlet {
 
             // ===== PHẦN 2: GỬI DỮ LIỆU ĐẾN JSP (View Layer) =====
             // 2.3. Gửi dữ liệu nhà cung cấp và người nhận
-            request.setAttribute("suppliers", supplierList);
+            request.setAttribute("suppliers", manufactureList);
             request.setAttribute("receivers", adminList);
 
             // 2.3. Gửi thông tin bổ sung cho JSP
-            request.setAttribute("totalSuppliers", supplierList.size());
+            request.setAttribute("totalSuppliers", manufactureList.size());
             request.setAttribute("totalReceivers", adminList.size());
 
             // ===== PHẦN 3: FORWARD ĐẾN JSP =====
@@ -149,8 +151,10 @@ public class StockInFormServlet extends HttpServlet {
         try {
             int supplierID = Integer.parseInt(request.getParameter("supplierId"));
             int receiverID = Integer.parseInt(request.getParameter("receiverId"));
+            System.out.println("SupplierID: " + supplierID + ", ReceiverID: " + receiverID);
 
             StockIn stock = new StockIn(supplierID, receiverID, java.sql.Date.valueOf(dateStr), note);
+            System.out.println("Created StockIn: " + stock);
 
             List<Inventory> invList = new ArrayList<>();
             List<StockInDetail> detailList = new ArrayList<>();
@@ -162,7 +166,12 @@ public class StockInFormServlet extends HttpServlet {
                 String pkgType = packageTypes[i];
                 int pSize = Integer.parseInt(packSizes[i]);
 
-                // Constructor cho Inventory và StockInDetail
+                System.out.println("Processing productId=" + pid
+                        + ", qty=" + qty
+                        + ", price=" + price
+                        + ", pkgType=" + pkgType
+                        + ", packSize=" + pSize);
+
                 Inventory inv = new Inventory(pid, pkgType, qty, price, pSize, Date.valueOf(dateStr));
                 StockInDetail detail = new StockInDetail(qty, price);
 
@@ -170,18 +179,25 @@ public class StockInFormServlet extends HttpServlet {
                 detailList.add(detail);
             }
 
+            System.out.println("Inventory list size: " + invList.size());
+            System.out.println("Detail list size: " + detailList.size());
+
             StockDAO dao = new StockDAO();
             dao.createStockInFull(stock, invList, detailList);
+            System.out.println("StockIn transaction created successfully.");
 
             response.sendRedirect(request.getContextPath() + "/staff/stockin?success=1");
 
         } catch (NumberFormatException e) {
+            e.printStackTrace();
             request.setAttribute("errorMessage", "Dữ liệu không hợp lệ: " + e.getMessage());
             doGet(request, response);
         } catch (SQLException e) {
+            e.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi cơ sở dữ liệu: " + e.getMessage());
             doGet(request, response);
         } catch (Exception e) {
+            e.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi không xác định: " + e.getMessage());
             doGet(request, response);
         }

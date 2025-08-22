@@ -28,7 +28,7 @@
                                     <select name="supplierId" class="form-select form-select-sm" style="width:650px;" onchange="this.form.submit()">
                                         <option value="">-- Tất cả nhà cung cấp --</option>
                                         <c:forEach var="sup" items="${suppliers}">
-                                            <option value="${sup.supplierID}" <c:if test="${sup.supplierID == supplierId}">selected</c:if>>
+                                            <option value="${sup.manufacturerID}" <c:if test="${sup.manufacturerID == manufacturerID}">selected</c:if>>
                                                 ${sup.companyName}
                                             </option>
                                         </c:forEach>
@@ -56,7 +56,7 @@
                                     <!-- Xóa data-bs-toggle và data-bs-target -->
                                     <tr style="text-align:center; vertical-align:middle;">
                                         <td>${stock.stockInID}</td>
-                                        <td>${stock.supplierName}</td>
+                                        <td>${stock.manufacturerName}</td>
                                         <td>${stock.receiverName}</td>
                                         <td>${stock.dateIn}</td>
                                         <td style="font-weight:bold;

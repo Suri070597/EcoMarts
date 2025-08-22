@@ -78,7 +78,7 @@ public class StockDAO extends DBContext {
             List<Inventory> invList,
             List<StockInDetail> detailList) throws SQLException {
 
-        String sqlStockIn = "INSERT INTO StockIn (SupplierID, ReceiverID, DateIn, Note) VALUES (?, ?, ?, ?)";
+        String sqlStockIn = "INSERT INTO StockIn (ManufacturerID, ReceiverID, DateIn, Note) VALUES (?, ?, ?, ?)";
         String sqlInventory = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, PackSize) VALUES (?, ?, ?, ?, ?)";
         String sqlDetail = "INSERT INTO StockInDetail (StockInID, InventoryID, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
 
@@ -91,11 +91,12 @@ public class StockDAO extends DBContext {
 
             // 1. Insert StockIn
             psStock = conn.prepareStatement(sqlStockIn, Statement.RETURN_GENERATED_KEYS);
-            psStock.setInt(1, stockIn.getSupplierID());
+            psStock.setInt(1, stockIn.getManufacturerID());
             psStock.setInt(2, stockIn.getReceiverID());
             psStock.setDate(3, stockIn.getDateIn());
             psStock.setString(4, stockIn.getNote());
-            psStock.executeUpdate();
+            int rowsStock = psStock.executeUpdate();
+            System.out.println("Inserted StockIn rows: " + rowsStock);
 
             ResultSet rsStock = psStock.getGeneratedKeys();
             int stockInID = 0;
@@ -103,6 +104,7 @@ public class StockDAO extends DBContext {
                 stockInID = rsStock.getInt(1);
             }
             stockIn.setStockInID(stockInID);
+            System.out.println("Generated StockInID: " + stockInID);
 
             // 2. Prepare statements
             psInventory = conn.prepareStatement(sqlInventory, Statement.RETURN_GENERATED_KEYS);
@@ -117,7 +119,8 @@ public class StockDAO extends DBContext {
                 psInventory.setDouble(3, inv.getQuantity());
                 psInventory.setDouble(4, inv.getUnitPrice());
                 psInventory.setInt(5, inv.getPackSize());
-                psInventory.executeUpdate();
+                int rowsInv = psInventory.executeUpdate();
+                System.out.println("Inserted Inventory rows: " + rowsInv);
 
                 ResultSet rsInv = psInventory.getGeneratedKeys();
                 int inventoryID = 0;
@@ -125,33 +128,41 @@ public class StockDAO extends DBContext {
                     inventoryID = rsInv.getInt(1);
                 }
                 inv.setInventoryID(inventoryID);
+                System.out.println("Generated InventoryID: " + inventoryID);
 
                 StockInDetail detail = detailList.get(i);
                 psDetail.setInt(1, stockInID);
                 psDetail.setInt(2, inventoryID);
                 psDetail.setDouble(3, detail.getQuantity());
                 psDetail.setDouble(4, detail.getUnitPrice());
-                psDetail.executeUpdate();
+                int rowsDetail = psDetail.executeUpdate();
+                System.out.println("Inserted StockInDetail rows: " + rowsDetail
+                        + " | StockInID=" + stockInID
+                        + " | InventoryID=" + inventoryID);
             }
 
             conn.commit();
+            System.out.println("Transaction committed successfully!");
 
         } catch (SQLException e) {
             conn.rollback();
-            throw e; // ném ngược ra servlet
+            System.err.println("Transaction rolled back! Error: " + e.getMessage());
+            throw e;
         } finally {
             conn.setAutoCommit(true);
         }
     }
-
+    
     // Lấy tất cả StockIn
     public List<StockIn> getAllStockIns() throws SQLException {
         List<StockIn> list = new ArrayList<>();
-        String sql = "SELECT s.StockInID, s.DateIn, s.Status, sup.CompanyName AS SupplierName, r.FullName AS ReceiverName "
-                + "FROM StockIn s "
-                + "JOIN Supplier sup ON s.SupplierID = sup.SupplierID "
-                + "JOIN Account r ON s.ReceiverID = r.AccountID "
-                + "ORDER BY s.StockInID DESC";
+        String sql = """
+            SELECT s.StockInID, s.DateIn, s.Status, m.CompanyName AS ManufacturerName, r.FullName AS ReceiverName
+            FROM StockIn s
+            JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
+            JOIN Account r ON s.ReceiverID = r.AccountID
+            ORDER BY s.StockInID DESC
+        """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -159,36 +170,36 @@ public class StockDAO extends DBContext {
                 s.setStockInID(rs.getInt("StockInID"));
                 s.setDateIn(rs.getDate("DateIn"));
                 s.setStatus(rs.getString("Status"));
-                s.setSupplierName(rs.getString("SupplierName"));
+                s.setManufacturerName(rs.getString("ManufacturerName"));  // ✅
                 s.setReceiverName(rs.getString("ReceiverName"));
-                s.setDetails(new ArrayList<>()); // khởi tạo list rỗng
+                s.setDetails(new ArrayList<>());
                 list.add(s);
             }
         }
         return list;
     }
 
-    public List<StockIn> getStockInBySupplier(int supplierId) throws SQLException {
+    public List<StockIn> getStockInByManufacturer(int manufacturerId) throws SQLException {
         List<StockIn> list = new ArrayList<>();
         String sql = """
-        SELECT s.StockInID, s.DateIn, s.Status,
-               sup.CompanyName AS SupplierName,
-               r.FullName AS ReceiverName
-        FROM StockIn s
-        JOIN Supplier sup ON s.SupplierID = sup.SupplierID
-        JOIN Account r ON s.ReceiverID = r.AccountID
-        WHERE s.SupplierID = ?
-        ORDER BY s.DateIn DESC
-    """;
+            SELECT s.StockInID, s.DateIn, s.Status,
+                   m.CompanyName AS ManufacturerName,
+                   r.FullName AS ReceiverName
+            FROM StockIn s
+            JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
+            JOIN Account r ON s.ReceiverID = r.AccountID
+            WHERE s.ManufacturerID = ?
+            ORDER BY s.DateIn DESC
+        """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, supplierId);
+            ps.setInt(1, manufacturerId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     StockIn s = new StockIn();
                     s.setStockInID(rs.getInt("StockInID"));
                     s.setDateIn(rs.getDate("DateIn"));
                     s.setStatus(rs.getString("Status"));
-                    s.setSupplierName(rs.getString("SupplierName"));
+                    s.setManufacturerName(rs.getString("ManufacturerName"));  // ✅
                     s.setReceiverName(rs.getString("ReceiverName"));
                     list.add(s);
                 }
@@ -225,11 +236,13 @@ public class StockDAO extends DBContext {
     // 3. Lấy 1 StockIn theo ID (dùng cho trang chi tiết)
     public StockIn getStockInByID(int stockInID) throws SQLException {
         StockIn stock = null;
-        String sql = "SELECT s.StockInID, s.DateIn, s.Status, sup.CompanyName AS SupplierName, r.FullName AS ReceiverName "
-                + "FROM StockIn s "
-                + "JOIN Supplier sup ON s.SupplierID = sup.SupplierID "
-                + "JOIN Account r ON s.ReceiverID = r.AccountID "
-                + "WHERE s.StockInID = ?";
+        String sql = """
+            SELECT s.StockInID, s.DateIn, s.Status, m.CompanyName AS ManufacturerName, r.FullName AS ReceiverName
+            FROM StockIn s
+            JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
+            JOIN Account r ON s.ReceiverID = r.AccountID
+            WHERE s.StockInID = ?
+        """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, stockInID);
@@ -239,9 +252,9 @@ public class StockDAO extends DBContext {
                     stock.setStockInID(rs.getInt("StockInID"));
                     stock.setDateIn(rs.getDate("DateIn"));
                     stock.setStatus(rs.getString("Status"));
-                    stock.setSupplierName(rs.getString("SupplierName"));
+                    stock.setManufacturerName(rs.getString("ManufacturerName"));  // ✅
                     stock.setReceiverName(rs.getString("ReceiverName"));
-                    stock.setDetails(new ArrayList<>()); // khởi tạo list chi tiết rỗng
+                    stock.setDetails(new ArrayList<>());
                 }
             }
         }
@@ -269,10 +282,6 @@ public class StockDAO extends DBContext {
             // Cập nhật StockIn (Canceled)
             updateStockInStatus(stockInID, "Canceled");
 
-            for (StockInDetail detail : details) {
-                updateInventoryStatus(detail.getInventoryID(), "Không phê duyệt");
-            }
-
             conn.commit();
         } catch (SQLException e) {
             conn.rollback();
@@ -291,7 +300,7 @@ public class StockDAO extends DBContext {
 
             // Cập nhật từng Inventory và Product
             for (StockInDetail detail : details) {
-                updateInventoryStatus(detail.getInventoryID(), "Đã duyệt");
+                
                 int productId = getProductIdByInventoryId(detail.getInventoryID());
                 updateProductStock(productId, detail.getQuantity());
             }
@@ -315,14 +324,5 @@ public class StockDAO extends DBContext {
         }
     }
 
-// Cập nhật trạng thái Inventory
-    public void updateInventoryStatus(int inventoryID, String status) throws SQLException {
-        String sql = "UPDATE Inventory SET Status = ? WHERE InventoryID = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, status);
-            ps.setInt(2, inventoryID);
-            ps.executeUpdate();
-        }
-    }
 
 }

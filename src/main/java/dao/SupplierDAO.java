@@ -20,9 +20,9 @@ import javax.sound.midi.Receiver;
  */
 public class SupplierDAO extends DBContext {
 
-    public List<Supplier> getAllSuppliers() {
+     public List<Supplier> getAllSuppliers() {
         List<Supplier> list = new ArrayList<>();
-        String sql = "SELECT * FROM Supplier ORDER BY SupplierID";
+        String sql = "SELECT * FROM Manufacturer ORDER BY ManufacturerID";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -36,7 +36,7 @@ public class SupplierDAO extends DBContext {
             System.err.println("Error in getAllSuppliers: " + e.getMessage());
         }
         return list;
-    }
+     }
 
     public Supplier getSupplierById(int supplierId) {
         String sql = "SELECT * FROM Supplier WHERE SupplierID = ?";

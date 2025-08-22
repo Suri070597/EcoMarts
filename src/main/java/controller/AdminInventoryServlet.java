@@ -4,6 +4,7 @@
  */
 package controller;
 
+import dao.ManufacturerDAO;
 import dao.ProductDAO;
 import dao.StockDAO;
 import dao.SupplierDAO;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.List;
+import model.Manufacturer;
 import model.StockIn;
 import model.StockInDetail;
 import model.Supplier;
@@ -48,7 +50,7 @@ public class AdminInventoryServlet extends HttpServlet {
         if (service.equals("listInventory")) {
             String supplierIdStr = request.getParameter("supplierId");
             StockDAO stockDAO = new StockDAO();
-            SupplierDAO supplierDAO = new SupplierDAO();
+            ManufacturerDAO manufacturerDAO = new ManufacturerDAO();
 
             try {
                 //Lấy danh sách inventory            
@@ -56,7 +58,7 @@ public class AdminInventoryServlet extends HttpServlet {
 
                 if (supplierIdStr != null && !supplierIdStr.isEmpty()) {
                     int supplierId = Integer.parseInt(supplierIdStr);
-                    stockIns = stockDAO.getStockInBySupplier(supplierId);
+                    stockIns = stockDAO.getStockInByManufacturer(supplierId);
                     request.setAttribute("supplierId", supplierId);
                 } else {
                     stockIns = stockDAO.getAllStockIns();
@@ -68,7 +70,7 @@ public class AdminInventoryServlet extends HttpServlet {
                     s.setDetails(details); // StockIn có field List<StockInDetail> details
                 }
 
-                List<Supplier> supplierList = supplierDAO.getAllSuppliers();
+                List<Manufacturer> supplierList = manufacturerDAO.getAllManufacturers();
 
                 request.setAttribute("suppliers", supplierList);
                 request.setAttribute("stockIns", stockIns);

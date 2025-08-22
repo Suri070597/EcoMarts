@@ -31,7 +31,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <table class="table table-borderless">
-                                        <tr><th>Nhà cung cấp:</th><td>${stock.supplierName}</td></tr>
+                                        <tr><th>Nhà cung cấp:</th><td>${stock.manufacturerName}</td></tr>
                                         <tr><th>Người xử lý:</th><td>${stock.receiverName}</td></tr>
                                         <tr><th>Ngày nhập:</th><td><fmt:formatDate value="${stock.dateIn}" pattern="dd/MM/yyyy"/></td></tr>
                                         <tr>

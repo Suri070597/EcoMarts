@@ -60,6 +60,7 @@ D:\SwpR\EcoMarts\src\main\java\dao\CartItemDAO.java
 D:\SwpR\EcoMarts\src\main\java\dao\CategoryDAO.java
 D:\SwpR\EcoMarts\src\main\java\dao\FeedBackDAO.java
 D:\SwpR\EcoMarts\src\main\java\dao\InventoryDAO.java
+D:\SwpR\EcoMarts\src\main\java\dao\ManufacturerDAO.java
 D:\SwpR\EcoMarts\src\main\java\dao\OrderDAO.java
 D:\SwpR\EcoMarts\src\main\java\dao\OrderDetailDAO.java
 D:\SwpR\EcoMarts\src\main\java\dao\ProductDAO.java
@@ -87,6 +88,7 @@ D:\SwpR\EcoMarts\src\main\java\model\CartItem.java
 D:\SwpR\EcoMarts\src\main\java\model\Category.java
 D:\SwpR\EcoMarts\src\main\java\model\Inventory.java
 D:\SwpR\EcoMarts\src\main\java\model\InventoryTransaction.java
+D:\SwpR\EcoMarts\src\main\java\model\Manufacturer.java
 D:\SwpR\EcoMarts\src\main\java\model\Order.java
 D:\SwpR\EcoMarts\src\main\java\model\OrderDetail.java
 D:\SwpR\EcoMarts\src\main\java\model\Product.java

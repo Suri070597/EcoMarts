@@ -47,6 +47,7 @@ controller\dangky\RegisterRedirectServlet.class
 dao\FeedBackDAO.class
 controller\dangky\OtpVerificationServlet.class
 model\Account.class
+dao\ManufacturerDAO.class
 controller\ExportYearlyRevenueServlet.class
 model\RevenueStats.class
 controller\CategoryServlet.class
@@ -61,6 +62,7 @@ controller\google\LoginServlets.class
 db\Dotenv.class
 model\Product.class
 dao\AccountDAO1.class
+model\Manufacturer.class
 model\Voucher.class
 controller\staff\StaffServlet.class
 controller\register\LoginServlet.class

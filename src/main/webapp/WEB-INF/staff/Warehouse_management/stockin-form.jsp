@@ -44,7 +44,7 @@
                                 <select class="form-control" id="supplierId" name="supplierId" required>
                                     <option value="">-- Chọn nhà cung cấp --</option>
                                     <c:forEach var="s" items="${suppliers}">
-                                        <option value="${s.supplierID}" ${param.supplierId eq s.supplierID ? 'selected' : ''}>
+                                        <option value="${s.manufacturerID}" ${param.manufacturerID eq s.manufacturerID ? 'selected' : ''}>
                                             ${s.brandName} - ${s.companyName}
                                         </option>
                                     </c:forEach>
@@ -145,7 +145,7 @@
                 </div>
                 <div class="container d-flex justify-content-center mb-5">
                     <div class="card w-100" style="max-width: 900px; background-color: #ffffff; padding: 20px;">
-                         <h1>Danh sách Phiếu Nhập Kho</h1>
+                        <h1>Danh sách Phiếu Nhập Kho</h1>
                         <table class="table table-bordered table-striped" style="width:100%; border-collapse:collapse;">
                             <thead>
                                 <tr style="text-align:center; vertical-align:middle; background-color:#e9ecef;">
@@ -163,7 +163,7 @@
                                         onmouseover="this.style.backgroundColor = '#f2f7ff';" 
                                         onmouseout="this.style.backgroundColor = '';">
                                         <td style="padding:0.5rem;">${stock.stockInID}</td>
-                                        <td style="padding:0.5rem;">${stock.supplierName}</td>
+                                        <td style="padding:0.5rem;">${stock.manufacturerName}</td>
                                         <td style="padding:0.5rem;">${stock.receiverName}</td>
                                         <td style="white-space: nowrap; padding:0.5rem;">${stock.dateIn}</td>
                                         <td style="padding:0.5rem; font-weight:bold;
@@ -409,19 +409,64 @@
             <script>
                 document.getElementById("exportExcelBtn").addEventListener("click", async function () {
                     const form = document.querySelector("#stockInForm form");
+                    const supplierSelect = form.querySelector("#supplierId");
+                    const receiverSelect = form.querySelector("#receiverId");
+                    const dateInput = form.querySelector("#date");
                     const supplier = form.querySelector("#supplierId").selectedOptions[0]?.text || '';
                     const receiver = form.querySelector("#receiverId").selectedOptions[0]?.text || '';
                     const date = form.querySelector("#date").value || '';
-                    const note = form.querySelector("#note").value || '';
+                    // Check supplier
+                    if (!supplierSelect.value) {
+                        alert("Vui lòng chọn Nhà cung cấp!");
+                        supplierSelect.focus();
+                        return;
+                    }
+
+// Check receiver
+                    if (!receiverSelect.value) {
+                        alert("Vui lòng chọn Người nhận!");
+                        receiverSelect.focus();
+                        return;
+                    }
+
+                    if (!date) {
+                        alert("Vui lòng nhập Ngày nhập!");
+                        dateInput.focus();
+                        return;
+                    }
 
                     const rows = Array.from(document.querySelectorAll("#productTableBody tr.product-row"));
-                    const products = rows.map(row => ({
-                            Category: row.querySelector(".category-select").selectedOptions[0]?.text || '',
-                            Product: row.querySelector(".product-select").selectedOptions[0]?.text || '',
-                            Unit: row.querySelector(".unit-select").selectedOptions[0]?.text || '',
-                            Quantity: parseInt(row.querySelector(".quantity-input").value || '0'),
-                            Price: parseFloat(row.querySelector("input[name='price']").value || '0')
-                        }));
+                    if (rows.length === 0) {
+                        alert("Vui lòng thêm ít nhất 1 sản phẩm!");
+                        return;
+                    }
+                    const note = form.querySelector("#note").value || '';
+
+                    // Validate sản phẩm
+                    const products = [];
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        const category = row.querySelector(".category-select").value;
+                        const product = row.querySelector(".product-select").value;
+                        const unit = row.querySelector(".unit-select").value;
+                        const quantity = parseInt(row.querySelector(".quantity-input").value || '0');
+                        const price = parseFloat(row.querySelector("input[name='price']").value || '0');
+
+                        if (!category || !product || !unit) {
+                            alert(`Dòng ${i + 1}: Vui lòng chọn đầy đủ thông tin sản phẩm!`);
+                            return;
+                        }
+                        if (quantity <= 0) {
+                            alert(`Dòng ${i + 1}: Số lượng phải lớn hơn 0!`);
+                            return;
+                        }
+                        if (price <= 0) {
+                            alert(`Dòng ${i + 1}: Giá nhập phải lớn hơn 0!`);
+                            return;
+                        }
+
+                        products.push({Category: category, Product: product, Unit: unit, Quantity: quantity, Price: price});
+                    }
 
                     const wb = new ExcelJS.Workbook();
                     const ws = wb.addWorksheet('Phiếu Nhập');
