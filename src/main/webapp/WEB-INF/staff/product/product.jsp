@@ -135,7 +135,7 @@
                                     <td>
                                         <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= pro.getImageURL()%>" alt="Product Image" style="width: 80px; height: auto;">
                                     </td>
-                                    <td><%= pro.getCreatedAt()%></td>
+                                    <td><fmt:formatDate value="<%= pro.getCreatedAt()%>" pattern="dd/MM/yyyy" /></td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
                                              <a href="${pageContext.request.contextPath}/staff/product?action=detail&id=<%= pro.getProductID()%>" class="btn btn-sm btn-info">
