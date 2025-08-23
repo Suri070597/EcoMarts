@@ -222,7 +222,13 @@
                                                         <a href="ProductDetail?id=${item.productID}" class="text-decoration-none">
                                                             <h5 class="product-name">${item.product.productName}</h5>
                                                         </a>
-                                                        <p class="text-muted small">${item.product.boxUnitName}</p>
+                                                        <p class="text-muted small">
+                                                            <c:choose>
+                                                                <c:when test="${not empty item.displayUnitName}">${item.displayUnitName}</c:when>
+                                                                <c:when test="${not empty item.product.boxUnitName}">${item.product.boxUnitName}</c:when>
+                                                                <c:otherwise>${item.product.unit}</c:otherwise>
+                                                            </c:choose>
+                                                        </p>
                                                         <c:if test="${item.product.stockQuantity < item.quantity}">
                                                             <p class="text-danger small">Chỉ còn ${item.product.stockQuantity} sản phẩm</p>
                                                         </c:if>
@@ -255,14 +261,19 @@
                                                     </div>
 
                                                     <!-- Price (thành tiền) -->
-                                                    <c:set var="price" value="${item.product.price}" />
+                                                    <c:set var="price" value="${empty item.unitPrice ? item.product.price : item.unitPrice}" />
                                                     <c:set var="quantity" value="${item.quantity}" />
                                                     <div class="col-md-2 mb-2 mb-md-0 text-md-end">
                                                         <div class="fw-bold text-success item-total">
                                                             <fmt:formatNumber value="${price * quantity}" type="number" pattern="#,###"/> ₫
                                                         </div>
                                                         <div class="text-muted small">
-                                                            <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.boxUnitName}
+                                                            <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ /
+                                                            <c:choose>
+                                                                <c:when test="${not empty item.displayUnitName}">${item.displayUnitName}</c:when>
+                                                                <c:when test="${not empty item.product.boxUnitName}">${item.product.boxUnitName}</c:when>
+                                                                <c:otherwise>${item.product.unit}</c:otherwise>
+                                                            </c:choose>
                                                         </div>
                                                     </div>
 

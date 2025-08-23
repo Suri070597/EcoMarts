@@ -1,26 +1,22 @@
 package dao;
 
 import java.sql.PreparedStatement;
-
 import java.sql.ResultSet;
-
+import java.sql.SQLException;
 import java.sql.Timestamp;
-
 import java.text.ParseException;
-
 import java.util.ArrayList;
-
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
 import db.DBContext;
-import java.sql.SQLException;
-import java.util.Collections;
 import model.Category;
 import model.InventoryTransaction;
-import model.Product;
 import model.Manufacturer;
+import model.Product;
 
 public class ProductDAO extends DBContext {
 
@@ -1074,6 +1070,26 @@ public class ProductDAO extends DBContext {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ps.setString(2, packageType);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return rs.getDouble("UnitPrice");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Lấy giá PACK theo packSize cụ thể
+     */
+    public Double getPackPrice(int productId, int packSize) {
+        try {
+            String sql = "SELECT TOP 1 UnitPrice FROM Inventory WHERE ProductID = ? AND PackageType = 'PACK' AND PackSize = ? ORDER BY LastUpdated DESC";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setInt(2, packSize);
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     return rs.getDouble("UnitPrice");

@@ -196,7 +196,14 @@
                                                     <img src="ImageServlet?name=${item.product.imageURL}" alt="${item.product.productName}" class="product-image me-3">
                                                     <div class="flex-grow-1">
                                                         <h5>${item.product.productName}</h5>
-                                                        <p class="text-muted mb-0">Đơn vị: ${item.product.boxUnitName}</p>
+                                                        <p class="text-muted mb-0">
+                                                            Đơn vị:
+                                                            <c:choose>
+                                                                <c:when test="${not empty item.displayUnitName}">${item.displayUnitName}</c:when>
+                                                                <c:when test="${not empty item.product.boxUnitName}">${item.product.boxUnitName}</c:when>
+                                                                <c:otherwise>${item.product.unit}</c:otherwise>
+                                                            </c:choose>
+                                                        </p>
                                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                                             <div class="quantity-controls">
                                                                 <div class="input-group" style="width: 150px;">
@@ -208,7 +215,7 @@
                                                                             <input type="number" class="form-control form-control-sm text-center cart-quantity-input"
                                                                                    name="cartQuantity_${item.cartItemID}" 
                                                                                    value="${item.quantity}" min="0.1" step="0.1" max="${item.product.stockQuantity}"
-                                                                                   data-price="${item.product.price}" data-id="${item.cartItemID}" 
+                                                                                   data-price="${empty item.unitPrice ? item.product.price : item.unitPrice}" data-id="${item.cartItemID}" 
                                                                                    data-max="${item.product.stockQuantity}" data-unit="${item.product.unit}">
                                                                         </c:when>
                                                                         <c:otherwise>
@@ -216,7 +223,7 @@
                                                                                    name="cartQuantity_${item.cartItemID}" 
                                                                                    value="${fn:endsWith(item.quantity, '.0') ? fn:substringBefore(item.quantity, '.0') : item.quantity}"
                                                                                    min="1" step="1" max="${item.product.stockQuantity}" 
-                                                                                   data-price="${item.product.price}" data-id="${item.cartItemID}" 
+                                                                                   data-price="${empty item.unitPrice ? item.product.price : item.unitPrice}" data-id="${item.cartItemID}" 
                                                                                    data-max="${item.product.stockQuantity}" data-unit="${item.product.unit}" pattern="\d*">
                                                                         </c:otherwise>
                                                                     </c:choose>
@@ -228,7 +235,12 @@
                                                             </div>
                                                         </div>
                                                         <p class="text-muted small mb-0">
-                                                            <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.boxUnitName}
+                                                            <fmt:formatNumber value="${empty item.unitPrice ? item.product.price : item.unitPrice}" type="number" pattern="#,###"/> đ /
+                                                            <c:choose>
+                                                                <c:when test="${not empty item.displayUnitName}">${item.displayUnitName}</c:when>
+                                                                <c:when test="${not empty item.product.boxUnitName}">${item.product.boxUnitName}</c:when>
+                                                                <c:otherwise>${item.product.unit}</c:otherwise>
+                                                            </c:choose>
                                                         </p>
                                                     </div>
                                                 </div>
@@ -240,7 +252,7 @@
                                                 <img src="ImageServlet?name=${buyNowItem.product.imageURL}" alt="${buyNowItem.product.productName}" class="product-image me-3">
                                                 <div class="flex-grow-1">
                                                     <h5>${buyNowItem.product.productName}</h5>
-                                                    <p class="text-muted mb-0">Đơn vị: ${buyNowItem.product.boxUnitName}</p>
+                                                    <p class="text-muted mb-0">Đơn vị: ${empty buyNowItem.displayUnitName ? (empty buyNowItem.product.boxUnitName ? buyNowItem.product.unit : buyNowItem.product.boxUnitName) : buyNowItem.displayUnitName}</p>
                                                     <div class="quantity-controls mb-2">
                                                         <div class="input-group" style="width: 150px;">
                                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-decrease">
@@ -266,7 +278,8 @@
                                                         <small class="text-muted">Còn lại: ${buyNowItem.product.stockQuantity} ${buyNowItem.product.boxUnitName}</small>
                                                     </div>
                                                     <p class="text-success fw-bold mb-0">
-                                                        <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ / ${buyNowItem.product.boxUnitName}
+                                                        <fmt:formatNumber value="${empty buyNowItem.unitPrice ? buyNowItem.product.price : buyNowItem.unitPrice}" type="number" pattern="#,###"/> đ /
+                                                        ${empty buyNowItem.displayUnitName ? (empty buyNowItem.product.boxUnitName ? buyNowItem.product.unit : buyNowItem.product.boxUnitName) : buyNowItem.displayUnitName}
                                                     </p>
                                                 </div>
                                             </div>

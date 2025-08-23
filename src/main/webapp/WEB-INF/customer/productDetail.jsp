@@ -356,6 +356,47 @@
                                     String value = isFruit ? "0.1" : "1";
                                 %>
 
+                                <div class="mb-3">
+                                    <strong>Chọn đơn vị:</strong>
+                                    <div class="mt-2">
+                                        <c:set var="unitQty" value="${inventory.UNIT_Quantity}"/>
+                                        <c:set var="unitPriceVal" value="${inventory.UNIT_Price}"/>
+                                        <c:set var="boxQty" value="${inventory.BOX_Quantity}"/>
+                                        <c:set var="boxPriceVal" value="${inventory.BOX_Price}"/>
+                                        <c:set var="itemName" value="${empty mo.itemUnitName ? 'đơn vị' : mo.itemUnitName}"/>
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="packageType" id="pkgUnit" value="UNIT"  checked <c:if test="${unitQty <= 0}">disabled</c:if>>
+                                            <label class="form-check-label" for="pkgUnit">
+                                                ${itemName}
+                                                <c:if test="${not empty unitPriceVal}"> - <fmt:formatNumber value="${unitPriceVal}" type="number" pattern="#,###"/> đ</c:if>
+                                            </label>
+                                        </div>
+
+                                        <c:if test="${not empty inventory.PACK_LIST}">
+                                            <c:forEach var="pk" items="${inventory.PACK_LIST}">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="packageType" id="pkgPack_${pk.packSize}" value="PACK" data-pack-size="${pk.packSize}">
+                                                    <label class="form-check-label" for="pkgPack_${pk.packSize}">
+                                                        Lốc (${pk.packSize} ${mo.itemUnitName}) - <fmt:formatNumber value="${pk.price}" type="number" pattern="#,###"/> đ
+                                                    </label>
+                                                </div>
+                                            </c:forEach>
+                                        </c:if>
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="packageType" id="pkgBox" value="BOX" <c:if test="${boxQty <= 0}">disabled</c:if>>
+                                            <label class="form-check-label" for="pkgBox">
+                                                <c:out value="${empty mo.boxUnitName ? 'Thùng' : mo.boxUnitName}"/>
+                                                <c:if test="${mo.unitPerBox > 0}">( <c:out value="${mo.unitPerBox}"/> ${mo.itemUnitName})</c:if>
+                                                <c:if test="${not empty boxPriceVal}"> - <fmt:formatNumber value="${boxPriceVal}" type="number" pattern="#,###"/> đ</c:if>
+                                            </label>
+                                        </div>
+
+                                        <input type="hidden" name="packSize" id="selectedPackSize">
+                                    </div>
+                                </div>
+
                                 <div class="d-flex gap-2 mb-3">
                                     <strong>Số Lượng: </strong>
                                     <input type="number" id="product-quantity" name="quantity" class="form-control w-25" value="<%= value%>" min="<%= min%>" max="<%= mo.getAvailableQuantity()%>" step="<%= step%>">
@@ -379,9 +420,9 @@
 
                                         // Validate quantity when changed
                                         quantityInput.addEventListener('input', function () {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(this.value) : parseInt(this.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const isFruitInput = <%= isFruit%>;
+                                            const quantity = isFruitInput ? parseFloat(this.value) : parseInt(this.value);
+                                            const minValue = isFruitInput ? 0.1 : 1;
 
                                             if (isNaN(quantity) || quantity < minValue) {
                                                 this.value = minValue;
@@ -400,12 +441,24 @@
                                             }
                                         });
 
+                                        // Capture selected pack size when choosing PACK
+                                        document.querySelectorAll('input[name="packageType"]').forEach(function(r) {
+                                            r.addEventListener('change', function() {
+                                                if (this.value === 'PACK') {
+                                                    const packSize = this.getAttribute('data-pack-size');
+                                                    document.getElementById('selectedPackSize').value = packSize || '';
+                                                } else {
+                                                    document.getElementById('selectedPackSize').value = '';
+                                                }
+                                            });
+                                        });
+
                                         // Prevent form submission if quantity is invalid
                                         const form = quantityInput.closest('form');
                                         form.addEventListener('submit', function (event) {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const isFruitSubmit = <%= isFruit%>;
+                                            const quantity = isFruitSubmit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
+                                            const minValue = isFruitSubmit ? 0.1 : 1;
 
                                             if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
                                                 event.preventDefault();
@@ -418,9 +471,9 @@
 
                                         // Add Buy Now functionality
                                         buyNowBtn.addEventListener('click', function () {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const isFruitClick = <%= isFruit%>;
+                                            const quantity = isFruitClick ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
+                                            const minValue = isFruitClick ? 0.1 : 1;
 
                                             // Validate quantity
                                             if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
@@ -431,7 +484,7 @@
                                                 return;
                                             }
 
-                                            // Use the built-in form instead of creating a new one
+                                            // Use a dynamic form to include selected package
                                             const buyNowForm = document.createElement('form');
                                             buyNowForm.method = 'post';
                                             buyNowForm.action = 'buy-now';
@@ -456,6 +509,23 @@
                                             quantityInputHidden.name = 'quantity';
                                             quantityInputHidden.value = quantity;
                                             buyNowForm.appendChild(quantityInputHidden);
+
+                                            // Add packageType and packSize
+                                            const selectedPkg = document.querySelector('input[name="packageType"]:checked');
+                                            if (selectedPkg) {
+                                                const pkgInput = document.createElement('input');
+                                                pkgInput.type = 'hidden';
+                                                pkgInput.name = 'packageType';
+                                                pkgInput.value = selectedPkg.value;
+                                                buyNowForm.appendChild(pkgInput);
+                                                if (selectedPkg.value === 'PACK') {
+                                                    const psInput = document.createElement('input');
+                                                    psInput.type = 'hidden';
+                                                    psInput.name = 'packSize';
+                                                    psInput.value = selectedPkg.getAttribute('data-pack-size') || '';
+                                                    buyNowForm.appendChild(psInput);
+                                                }
+                                            }
 
                                             // Append form to body and submit
                                             document.body.appendChild(buyNowForm);

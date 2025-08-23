@@ -1,6 +1,5 @@
 package dao;
 
-import db.DBContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import db.DBContext;
 import model.CartItem;
 import model.OrderDetail;
 import model.Product;
@@ -26,6 +27,7 @@ public class OrderDetailDAO extends DBContext {
                 + "    od.Quantity,\n"
                 + "    od.UnitPrice,\n"
                 + "    od.SubTotal,\n"
+                + "    od.DisplayUnitName, od.PackageType, od.PackSize,\n"
                 + "    o.OrderStatus\n"
                 + "FROM OrderDetail od\n"
                 + "JOIN Product p ON od.ProductID = p.ProductID\n"
@@ -48,7 +50,13 @@ public class OrderDetailDAO extends DBContext {
 
                 // Set thêm thông tin phụ
                 orderDetail.setProductName(rs.getString("ProductName"));
-                orderDetail.setUnit(rs.getString("Unit"));  // Lưu đơn vị để hiển thị đúng
+                String displayUnit = null;
+                try { displayUnit = rs.getString("DisplayUnitName"); } catch (Exception ignore) {}
+                if (displayUnit != null && !displayUnit.trim().isEmpty()) {
+                    orderDetail.setUnit(displayUnit);
+                } else {
+                    orderDetail.setUnit(rs.getString("Unit"));
+                }
                 orderDetail.setOrderStatus(rs.getString("OrderStatus"));
                 orderDetail.setSubTotal(rs.getDouble("SubTotal")); // nếu không tính trong constructor
 

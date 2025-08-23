@@ -55,6 +55,54 @@ public class CartItemDAO extends DBContext {
     }
 
     /**
+     * Add product to cart with package selection
+     */
+    public boolean addToCartWithPackage(int accountID, int productID, double quantity,
+                                        String packageType, Integer packSize,
+                                        Double unitPrice, String displayUnitName) {
+        String sql = "INSERT INTO CartItem (AccountID, ProductID, Quantity, PackageType, PackSize, UnitPrice, DisplayUnitName, AddedAt, Status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), 'Active')";
+
+        try {
+            if (conn == null || conn.isClosed()) {
+                System.err.println("Connection is closed or null in addToCartWithPackage");
+                return false;
+            }
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, accountID);
+            ps.setInt(2, productID);
+            ps.setDouble(3, quantity);
+            if (packageType != null) {
+                ps.setString(4, packageType);
+            } else {
+                ps.setNull(4, java.sql.Types.NVARCHAR);
+            }
+            if (packSize != null) {
+                ps.setInt(5, packSize);
+            } else {
+                ps.setNull(5, java.sql.Types.INTEGER);
+            }
+            if (unitPrice != null) {
+                ps.setDouble(6, unitPrice);
+            } else {
+                ps.setNull(6, java.sql.Types.DECIMAL);
+            }
+            if (displayUnitName != null) {
+                ps.setString(7, displayUnitName);
+            } else {
+                ps.setNull(7, java.sql.Types.NVARCHAR);
+            }
+            int affectedRows = ps.executeUpdate();
+            ps.close();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("Error adding item to cart with package: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Get all cart items for a specific user with a specific status
      * 
      * @param accountID The ID of the account
@@ -86,6 +134,14 @@ public class CartItemDAO extends DBContext {
                 item.setQuantity(rs.getDouble("Quantity"));
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
+                try {
+                    item.setPackageType(rs.getString("PackageType"));
+                    int psVal = rs.getInt("PackSize");
+                    if (!rs.wasNull()) item.setPackSize(psVal);
+                    double up = rs.getDouble("UnitPrice");
+                    if (!rs.wasNull()) item.setUnitPrice(up);
+                    item.setDisplayUnitName(rs.getString("DisplayUnitName"));
+                } catch (Exception ignore) {}
 
                 // Create product object with essential information
                 Product product = new Product();
@@ -140,6 +196,14 @@ public class CartItemDAO extends DBContext {
                 item.setQuantity(rs.getDouble("Quantity"));
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
+                try {
+                    item.setPackageType(rs.getString("PackageType"));
+                    int psVal = rs.getInt("PackSize");
+                    if (!rs.wasNull()) item.setPackSize(psVal);
+                    double up = rs.getDouble("UnitPrice");
+                    if (!rs.wasNull()) item.setUnitPrice(up);
+                    item.setDisplayUnitName(rs.getString("DisplayUnitName"));
+                } catch (Exception ignore) {}
 
                 // Create product object with essential information
                 Product product = new Product();

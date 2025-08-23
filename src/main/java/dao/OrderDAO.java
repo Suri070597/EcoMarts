@@ -1011,8 +1011,8 @@ public class OrderDAO extends DBContext {
                 }
 
                 // 2) Insert order details
-                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
-                        "VALUES (?, ?, ?, ?)";
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize, DisplayUnitName) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     for (CartItem item : items) {
@@ -1020,7 +1020,11 @@ public class OrderDAO extends DBContext {
                             ps.setInt(1, orderId);
                             ps.setInt(2, item.getProductID());
                             ps.setDouble(3, item.getQuantity());
-                            ps.setDouble(4, item.getProduct().getPrice());
+                            double priceEach = item.getUnitPrice() != null ? item.getUnitPrice() : item.getProduct().getPrice();
+                            ps.setDouble(4, priceEach);
+                            ps.setString(5, item.getPackageType());
+                            if (item.getPackSize() != null) ps.setInt(6, item.getPackSize()); else ps.setNull(6, java.sql.Types.INTEGER);
+                            ps.setString(7, item.getDisplayUnitName());
                             ps.addBatch();
                         }
                     }
@@ -1119,14 +1123,18 @@ public class OrderDAO extends DBContext {
                     return -1;
                 }
 
-                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
-                        "VALUES (?, ?, ?, ?)";
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize, DisplayUnitName) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     ps.setInt(1, orderId);
                     ps.setInt(2, item.getProductID());
                     ps.setDouble(3, item.getQuantity());
-                    ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
+                    double priceEach = item.getUnitPrice() != null ? item.getUnitPrice() : (item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
+                    ps.setDouble(4, priceEach);
+                    ps.setString(5, item.getPackageType());
+                    if (item.getPackSize() != null) ps.setInt(6, item.getPackSize()); else ps.setNull(6, java.sql.Types.INTEGER);
+                    ps.setString(7, item.getDisplayUnitName());
                     ps.executeUpdate();
                 }
             }

@@ -13,6 +13,12 @@ public class CartItem {
     // For joining with Product table
     private Product product;
 
+    // Selected packaging info
+    private String packageType; // 'UNIT' | 'PACK' | 'BOX' | 'KG'
+    private Integer packSize;   // only for PACK
+    private String displayUnitName; // e.g., "lon", "lốc (8 lon)", "thùng (24 lon)"
+    private Double unitPrice;   // price per selected package (what user pays)
+
     public CartItem() {
     }
 
@@ -81,6 +87,38 @@ public class CartItem {
         this.product = product;
     }
 
+    public String getPackageType() {
+        return packageType;
+    }
+
+    public void setPackageType(String packageType) {
+        this.packageType = packageType;
+    }
+
+    public Integer getPackSize() {
+        return packSize;
+    }
+
+    public void setPackSize(Integer packSize) {
+        this.packSize = packSize;
+    }
+
+    public String getDisplayUnitName() {
+        return displayUnitName;
+    }
+
+    public void setDisplayUnitName(String displayUnitName) {
+        this.displayUnitName = displayUnitName;
+    }
+
+    public Double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(Double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
     @Override
     public String toString() {
         return "CartItem{" +
@@ -90,6 +128,10 @@ public class CartItem {
                 ", quantity=" + quantity +
                 ", addedAt=" + addedAt +
                 ", status='" + status + '\'' +
+                ", packageType='" + packageType + '\'' +
+                ", packSize=" + packSize +
+                ", displayUnitName='" + displayUnitName + '\'' +
+                ", unitPrice=" + unitPrice +
                 '}';
     }
 }

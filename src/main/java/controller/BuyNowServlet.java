@@ -260,6 +260,12 @@ public class BuyNowServlet extends HttpServlet {
             // Get product ID and quantity from request
             int productID = Integer.parseInt(request.getParameter("productID"));
             double quantity = Double.parseDouble(request.getParameter("quantity"));
+            String packageType = request.getParameter("packageType");
+            Integer packSize = null;
+            try {
+                String ps = request.getParameter("packSize");
+                if (ps != null && !ps.trim().isEmpty()) packSize = Integer.parseInt(ps);
+            } catch (Exception ignore) {}
 
             // Validate quantity
             if (quantity <= 0) {
@@ -282,6 +288,8 @@ public class BuyNowServlet extends HttpServlet {
             buyNowItem.setProductID(productID);
             buyNowItem.setQuantity(quantity);
             buyNowItem.setAccountID(account.getAccountID());
+            if (packageType != null) buyNowItem.setPackageType(packageType);
+            if (packSize != null) buyNowItem.setPackSize(packSize);
             buyNowItem.setAddedAt(new Timestamp(new Date().getTime()));
             buyNowItem.setStatus("BuyNow");
 

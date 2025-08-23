@@ -1,20 +1,20 @@
 package controller;
 
-import dao.CategoryDAO;
-import dao.ProductDAO;
-import dao.FeedBackDAO;
-import dao.PromotionDAO;
 import java.io.IOException;
+import java.util.List;
+
+import dao.CategoryDAO;
+import dao.FeedBackDAO;
+import dao.ProductDAO;
+import dao.PromotionDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.List;
+import model.Account;
 import model.Category;
 import model.Product;
-import model.Account;
 import model.Promotion;
 import model.Review;
 
@@ -145,6 +145,10 @@ public class ProductDetailServlet extends HttpServlet {
             // thùng (giữ cho phần chính nếu JSP đang dùng)
             Double unitPrice = dao.getUnitPrice(mo.getProductID());
             request.setAttribute("unitPrice", unitPrice);
+
+            // Inventory options for units/packs/box
+            java.util.Map<String, Object> inventory = dao.getProductInventory(mo.getProductID());
+            request.setAttribute("inventory", inventory);
 
             // Lấy reviewList và orderId nếu có account đăng nhập
             FeedBackDAO fbDao = new FeedBackDAO();

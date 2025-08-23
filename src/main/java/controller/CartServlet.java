@@ -84,7 +84,8 @@ public class CartServlet extends HttpServlet {
         double cartTotal = 0;
         for (CartItem item : activeItems) {
             if (item.getProduct() != null) {
-                cartTotal += item.getProduct().getPrice() * item.getQuantity();
+                double priceEach = item.getUnitPrice() != null ? item.getUnitPrice() : item.getProduct().getPrice();
+                cartTotal += priceEach * item.getQuantity();
             }
         }
 
@@ -295,6 +296,14 @@ public class CartServlet extends HttpServlet {
 
             int productID = Integer.parseInt(request.getParameter("productID"));
             double quantity = Double.parseDouble(request.getParameter("quantity"));
+            String packageType = request.getParameter("packageType"); // UNIT | PACK | BOX | KG
+            Integer packSize = null;
+            try {
+                String ps = request.getParameter("packSize");
+                if (ps != null && !ps.trim().isEmpty()) {
+                    packSize = Integer.parseInt(ps);
+                }
+            } catch (Exception ignore) {}
 
             // Validate quantity
             if (quantity <= 0) {
@@ -320,12 +329,63 @@ public class CartServlet extends HttpServlet {
                 return;
             }
 
-            // Add to cart
-            // Upsert: if exists increase quantity else insert
+            // Determine selected unit price and display name if provided
+            Double selectedPrice = null;
+            String displayUnitName = null;
+            if (packageType != null && !packageType.trim().isEmpty()) {
+                Product product = new ProductDAO().getProductById(productID);
+                if ("UNIT".equalsIgnoreCase(packageType) || "KG".equalsIgnoreCase(packageType)) {
+                    selectedPrice = new ProductDAO().getUnitPrice(productID);
+                    if (selectedPrice == null) selectedPrice = new ProductDAO().getUnitOnlyPrice(productID);
+                    String itemName = product != null ? product.getItemUnitName() : "đơn vị";
+                    displayUnitName = itemName != null ? itemName : "đơn vị";
+                    packageType = "UNIT"; // normalize KG to UNIT for display logic
+                } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    if (packSize != null) {
+                        selectedPrice = new ProductDAO().getPackPrice(productID, packSize);
+                        String itemName = product != null ? product.getItemUnitName() : "lon";
+                        displayUnitName = "lốc (" + packSize + " " + (itemName != null ? itemName : "đv") + ")";
+                    }
+                } else if ("BOX".equalsIgnoreCase(packageType)) {
+                    selectedPrice = new ProductDAO().getBoxPrice(productID);
+                    String itemName = product != null ? product.getBoxUnitName() : "thùng";
+                    if (product != null && product.getUnitPerBox() > 0 && product.getItemUnitName() != null) {
+                        displayUnitName = (itemName != null ? itemName : "thùng") + " (" + product.getUnitPerBox() + " " + product.getItemUnitName() + ")";
+                    } else {
+                        displayUnitName = itemName != null ? itemName : "thùng";
+                    }
+                }
+            } else {
+                // If no packageType provided, default logic: for non beverages/milk, force UNIT
+                Product product = new ProductDAO().getProductById(productID);
+                boolean isDrinkOrMilk = false;
+                try {
+                    if (product != null && product.getCategory() != null) {
+                        Integer parent = product.getCategory().getParentID();
+                        int catId = product.getCategory().getCategoryID();
+                        isDrinkOrMilk = (parent != null && (parent == 1 || parent == 2)) || (catId == 1 || catId == 2);
+                    }
+                } catch (Exception ignore) {}
+                if (!isDrinkOrMilk) {
+                    packageType = "UNIT";
+                    selectedPrice = new ProductDAO().getUnitPrice(productID);
+                    if (selectedPrice == null) selectedPrice = new ProductDAO().getUnitOnlyPrice(productID);
+                    String itemName = product != null ? product.getItemUnitName() : null;
+                    displayUnitName = (itemName != null && !itemName.isEmpty()) ? itemName : (product != null ? product.getUnit() : "đơn vị");
+                }
+            }
+
+            // Add to cart (upsert). If package selection present, store it.
             CartItem existingItem = cartItemDAO.getCartItemByProductId(account.getAccountID(), productID, "Active");
             boolean success;
-            if (existingItem != null) {
+            if (existingItem != null
+                    && ((packageType == null && existingItem.getPackageType() == null)
+                        || (packageType != null && packageType.equalsIgnoreCase(existingItem.getPackageType())
+                            && ((packSize == null && existingItem.getPackSize() == null)
+                                || (packSize != null && packSize.equals(existingItem.getPackSize())))))) {
                 success = cartItemDAO.updateCartItemQuantity(existingItem.getCartItemID(), existingItem.getQuantity() + quantity);
+            } else if (packageType != null) {
+                success = cartItemDAO.addToCartWithPackage(account.getAccountID(), productID, quantity, packageType, packSize, selectedPrice, displayUnitName);
             } else {
                 success = cartItemDAO.addToCart(account.getAccountID(), productID, quantity);
             }
@@ -463,7 +523,8 @@ public class CartServlet extends HttpServlet {
             System.out.println("Update result: " + (success ? "success" : "failed"));
 
             double itemTotal = 0;
-            itemTotal = cartItem.getProduct().getPrice() * quantity;
+            double priceEach = cartItem.getUnitPrice() != null ? cartItem.getUnitPrice() : (cartItem.getProduct() != null ? cartItem.getProduct().getPrice() : 0);
+            itemTotal = priceEach * quantity;
 
             if (success) {
                 // Calculate new cart total
@@ -472,7 +533,8 @@ public class CartServlet extends HttpServlet {
                 double cartTotal = 0;
                 for (CartItem it : activeItems) {
                     if (it.getProduct() != null) {
-                        cartTotal += it.getProduct().getPrice() * it.getQuantity();
+                        double priceEachIt = it.getUnitPrice() != null ? it.getUnitPrice() : it.getProduct().getPrice();
+                        cartTotal += priceEachIt * it.getQuantity();
                     }
                 }
                 int totalItems = cartItemDAO.countCartItems(account.getAccountID(), "Active");
@@ -582,7 +644,8 @@ public class CartServlet extends HttpServlet {
                 double cartTotal = 0;
                 for (CartItem it : activeItems) {
                     if (it.getProduct() != null) {
-                        cartTotal += it.getProduct().getPrice() * it.getQuantity();
+                        double priceEachIt = it.getUnitPrice() != null ? it.getUnitPrice() : it.getProduct().getPrice();
+                        cartTotal += priceEachIt * it.getQuantity();
                     }
                 }
                 int cartCount = cartItemDAO.countCartItems(accountID, "Active");
