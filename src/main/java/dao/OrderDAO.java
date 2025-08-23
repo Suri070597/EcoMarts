@@ -530,9 +530,9 @@ public class OrderDAO extends DBContext {
 
     /**
      * Cập nhật trạng thái thanh toán của đơn hàng
-     * 
+     *
      * @param orderId ID của đơn hàng
-     * @param status  Trạng thái thanh toán mới
+     * @param status Trạng thái thanh toán mới
      * @return true nếu cập nhật thành công, false nếu thất bại
      */
     public boolean updatePaymentStatus(int orderId, String status) {
@@ -864,7 +864,9 @@ public class OrderDAO extends DBContext {
 
     public List<CartItem> getCartItemsFromOrder(int orderId) {
         List<CartItem> items = new ArrayList<>();
-        String sql = "SELECT ProductID, Quantity FROM OrderDetail WHERE OrderID = ?";
+        String sql
+                = "SELECT ProductID, Quantity, PackageType, PackSize, DisplayUnitName, UnitPrice "
+                + "FROM OrderDetail WHERE OrderID = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, orderId);
@@ -874,13 +876,35 @@ public class OrderDAO extends DBContext {
                 CartItem item = new CartItem();
                 item.setProductID(rs.getInt("ProductID"));
                 item.setQuantity(rs.getDouble("Quantity"));
+
+                try {
+                    item.setPackageType(rs.getString("PackageType"));
+                } catch (Exception ignore) {
+                }
+                try {
+                    int psz = rs.getInt("PackSize");
+                    if (!rs.wasNull()) {
+                        item.setPackSize(psz);
+                    }
+                } catch (Exception ignore) {
+                }
+                try {
+                    item.setDisplayUnitName(rs.getString("DisplayUnitName"));
+                } catch (Exception ignore) {
+                }
+                try {
+                    double up = rs.getDouble("UnitPrice");
+                    if (!rs.wasNull()) {
+                        item.setUnitPrice(up);
+                    }
+                } catch (Exception ignore) {
+                }
+
                 items.add(item);
             }
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
         return items;
     }
 
@@ -921,10 +945,10 @@ public class OrderDAO extends DBContext {
 
     public Map<Integer, Double> getLast5YearsRevenue() {
         Map<Integer, Double> revenueMap = new LinkedHashMap<>();
-        String sql = "SELECT YEAR(OrderDate) AS Year, SUM(TotalAmount) AS Revenue " +
-                "FROM [Order] " +
-                "WHERE OrderStatus = N'Đã giao' AND YEAR(OrderDate) BETWEEN ? AND ? " +
-                "GROUP BY YEAR(OrderDate) ORDER BY YEAR(OrderDate)";
+        String sql = "SELECT YEAR(OrderDate) AS Year, SUM(TotalAmount) AS Revenue "
+                + "FROM [Order] "
+                + "WHERE OrderStatus = N'Đã giao' AND YEAR(OrderDate) BETWEEN ? AND ? "
+                + "GROUP BY YEAR(OrderDate) ORDER BY YEAR(OrderDate)";
 
         int currentYear = java.time.Year.now().getValue();
         int startYear = currentYear - 4;
@@ -952,7 +976,7 @@ public class OrderDAO extends DBContext {
 
     /**
      * Creates a new order from cart items
-     * 
+     *
      * @param order The order to create
      * @param items The list of cart items to add to the order
      * @return The ID of the created order, or -1 if creation failed
@@ -965,9 +989,9 @@ public class OrderDAO extends DBContext {
             conn.setAutoCommit(false);
 
             // Insert order
-            String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
-                    "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, "
+                    + "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement ps = conn.prepareStatement(insertOrderSql,
                     PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -1011,8 +1035,8 @@ public class OrderDAO extends DBContext {
                 }
 
                 // 2) Insert order details
-                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize, DisplayUnitName) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize, DisplayUnitName) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     for (CartItem item : items) {
@@ -1023,7 +1047,11 @@ public class OrderDAO extends DBContext {
                             double priceEach = item.getUnitPrice() != null ? item.getUnitPrice() : item.getProduct().getPrice();
                             ps.setDouble(4, priceEach);
                             ps.setString(5, item.getPackageType());
-                            if (item.getPackSize() != null) ps.setInt(6, item.getPackSize()); else ps.setNull(6, java.sql.Types.INTEGER);
+                            if (item.getPackSize() != null) {
+                                ps.setInt(6, item.getPackSize());
+                            } else {
+                                ps.setNull(6, java.sql.Types.INTEGER);
+                            }
                             ps.setString(7, item.getDisplayUnitName());
                             ps.addBatch();
                         }
@@ -1060,9 +1088,9 @@ public class OrderDAO extends DBContext {
 
     /**
      * Creates a new order with a single item
-     * 
+     *
      * @param order The order to create
-     * @param item  The cart item to add to the order
+     * @param item The cart item to add to the order
      * @return The ID of the created order, or -1 if creation failed
      */
     public int createOrder(Order order, CartItem item) {
@@ -1073,9 +1101,9 @@ public class OrderDAO extends DBContext {
             conn.setAutoCommit(false);
 
             // Insert order
-            String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
-                    "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, "
+                    + "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement ps = conn.prepareStatement(insertOrderSql,
                     PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -1123,8 +1151,8 @@ public class OrderDAO extends DBContext {
                     return -1;
                 }
 
-                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize, DisplayUnitName) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize, DisplayUnitName) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     ps.setInt(1, orderId);
@@ -1133,7 +1161,11 @@ public class OrderDAO extends DBContext {
                     double priceEach = item.getUnitPrice() != null ? item.getUnitPrice() : (item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
                     ps.setDouble(4, priceEach);
                     ps.setString(5, item.getPackageType());
-                    if (item.getPackSize() != null) ps.setInt(6, item.getPackSize()); else ps.setNull(6, java.sql.Types.INTEGER);
+                    if (item.getPackSize() != null) {
+                        ps.setInt(6, item.getPackSize());
+                    } else {
+                        ps.setNull(6, java.sql.Types.INTEGER);
+                    }
                     ps.setString(7, item.getDisplayUnitName());
                     ps.executeUpdate();
                 }
@@ -1163,16 +1195,15 @@ public class OrderDAO extends DBContext {
 
     /**
      * Record voucher usage for an order
-     * 
-     * @param voucherId      The voucher ID
-     * @param accountId      The account ID
-     * @param orderId        The order ID
+     *
+     * @param voucherId The voucher ID
+     * @param accountId The account ID
+     * @param orderId The order ID
      * @param discountAmount The discount amount applied
      */
     public void recordVoucherUsage(int voucherId, int accountId, int orderId, double discountAmount) {
         String insertVoucherUsageSql = "INSERT INTO VoucherUsage (VoucherID, AccountID, OrderID, UsedDate, DiscountAmount) "
-                +
-                "VALUES (?, ?, ?, GETDATE(), ?)";
+                + "VALUES (?, ?, ?, GETDATE(), ?)";
 
         String updateVoucherSql = "UPDATE Voucher SET UsageCount = UsageCount + 1 WHERE VoucherID = ?";
 

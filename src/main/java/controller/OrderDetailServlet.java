@@ -211,8 +211,15 @@ public class OrderDetailServlet extends HttpServlet {
 
                         // Only add to cart if stock is available
                         if (stockQuantity > 0) {
-                            cartItemDAO.upsertCartItem(account.getAccountID(), item.getProductID(),
-                                    Math.min(item.getQuantity(), stockQuantity));
+                            cartItemDAO.upsertCartItemWithPackage(
+                                    account.getAccountID(),
+                                    item.getProductID(),
+                                    Math.min(item.getQuantity(), stockQuantity),
+                                    item.getPackageType(),
+                                    item.getPackSize(),
+                                    item.getUnitPrice(),
+                                    item.getDisplayUnitName()
+                            );
                         }
                     }
 
