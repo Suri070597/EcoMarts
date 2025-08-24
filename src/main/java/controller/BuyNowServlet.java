@@ -103,13 +103,28 @@ public class BuyNowServlet extends HttpServlet {
                     return;
                 }
                 item.setProduct(refreshed);
-                if (refreshed.getStockQuantity() < item.getQuantity()) {
+                // Lấy tồn kho đúng theo đơn vị đặt hàng (chuẩn hóa đơn vị cho trái cây KG)
+                String effectivePkg = (item.getPackageType() == null || item.getPackageType().trim().isEmpty())
+                        ? "UNIT" : item.getPackageType().trim().toUpperCase();
+                int pz = (item.getPackSize() == null ? 0 : item.getPackSize());
+                if ("UNIT".equals(effectivePkg)) {
+                    String unitName = refreshed.getUnit();
+                    if (unitName != null && unitName.trim().equalsIgnoreCase("kg")) {
+                        effectivePkg = "KG";
+                        pz = 0;
+                    }
+                }
+
+                int availableQty = productDAO.getInventoryQuantity(
+                        item.getProductID(),
+                        effectivePkg,
+                        pz
+                );
+if (availableQty < item.getQuantity()) {
                     hasStockIssues = true;
-                    // Điều chỉnh số lượng tối đa theo tồn kho hiện tại
-                    if (refreshed.getStockQuantity() > 0) {
-                        item.setQuantity(refreshed.getStockQuantity());
+                    if (availableQty > 0) {
+                        item.setQuantity(availableQty);
                     } else {
-                        // Nếu hết hàng, đặt số lượng về 0 để cảnh báo ở trang
                         item.setQuantity(0);
                     }
                 }
@@ -142,13 +157,30 @@ public class BuyNowServlet extends HttpServlet {
         }
 
         // Check product availability
-        if (product.getStockQuantity() < buyNowItem.getQuantity()) {
+        // Kiểm tra tồn kho theo đúng đơn vị người dùng đã chọn (Inventory)
+        int availableQty = productDAO.getInventoryQuantity(
+                buyNowItem.getProductID(),
+                buyNowItem.getPackageType(),
+                buyNowItem.getPackSize() == null ? 0 : buyNowItem.getPackSize()
+        );
+
+        String pkg = (buyNowItem.getPackageType() == null ? "UNIT" : buyNowItem.getPackageType().trim().toUpperCase());
+        int pack = (buyNowItem.getPackSize() == null ? 0 : buyNowItem.getPackSize());
+        String unitLabel;
+        if ("PACK".equals(pkg)) {
+            unitLabel = "lốc " + pack;
+        } else if ("BOX".equals(pkg)) {
+            unitLabel = "thùng";
+        } else {
+            unitLabel = (product.getUnit() != null && product.getUnit().equalsIgnoreCase("kg")) ? "kg" : "lon";
+        }
+
+        if (availableQty < buyNowItem.getQuantity()) {
             session.setAttribute("cartError",
-                    "Số lượng sản phẩm không đủ. Hiện chỉ còn " + product.getStockQuantity() + " " + product.getUnit());
+                    "Số lượng không đủ. Hiện chỉ còn " + availableQty + " " + unitLabel);
             response.sendRedirect("ProductDetail?id=" + product.getProductID());
             return;
         }
-
         // Set product for the buy now item
         buyNowItem.setProduct(product);
 
@@ -264,8 +296,11 @@ public class BuyNowServlet extends HttpServlet {
             Integer packSize = null;
             try {
                 String ps = request.getParameter("packSize");
-                if (ps != null && !ps.trim().isEmpty()) packSize = Integer.parseInt(ps);
-            } catch (Exception ignore) {}
+                if (ps != null && !ps.trim().isEmpty()) {
+                    packSize = Integer.parseInt(ps);
+                }
+            } catch (Exception ignore) {
+            }
 
             // Validate quantity
             if (quantity <= 0) {
@@ -288,8 +323,12 @@ public class BuyNowServlet extends HttpServlet {
             buyNowItem.setProductID(productID);
             buyNowItem.setQuantity(quantity);
             buyNowItem.setAccountID(account.getAccountID());
-            if (packageType != null) buyNowItem.setPackageType(packageType);
-            if (packSize != null) buyNowItem.setPackSize(packSize);
+            if (packageType != null) {
+                buyNowItem.setPackageType(packageType);
+            }
+            if (packSize != null) {
+                buyNowItem.setPackSize(packSize);
+            }
             buyNowItem.setAddedAt(new Timestamp(new Date().getTime()));
             buyNowItem.setStatus("BuyNow");
 
@@ -514,7 +553,6 @@ public class BuyNowServlet extends HttpServlet {
                 }
 
                 // Stock is decremented atomically within order creation transaction
-
                 // Order history will be created after successful redirect to avoid foreign key issues
                 // Handle payment redirection if needed
                 if ("VNPay".equals(paymentMethod)) {
@@ -897,7 +935,6 @@ public class BuyNowServlet extends HttpServlet {
                 }
 
                 // Stock is decremented atomically within order creation transaction
-
                 // Clear cart items
                 CartItemDAO cartItemDAO = new CartItemDAO();
                 for (CartItem item : cartItems) {
@@ -959,7 +996,7 @@ public class BuyNowServlet extends HttpServlet {
             // Check if we have selected items
             String selectedItemsStr = request.getParameter("selectedItems");
             List<Integer> selectedItemIds = new ArrayList<>();
-            
+
             if (selectedItemsStr != null && !selectedItemsStr.trim().isEmpty()) {
                 String[] itemIds = selectedItemsStr.split(",");
                 for (String itemId : itemIds) {
@@ -970,12 +1007,12 @@ public class BuyNowServlet extends HttpServlet {
                     }
                 }
             }
-            
+
             // Get cart items for this user
             CartItemDAO cartItemDAO = new CartItemDAO();
             List<CartItem> allCartItems = cartItemDAO.getCartByAccountId(account.getAccountID(), false);
             List<CartItem> cartItems = new ArrayList<>();
-            
+
             // Filter cart items based on selected IDs if any, otherwise use all items
             if (!selectedItemIds.isEmpty()) {
                 for (CartItem item : allCartItems) {

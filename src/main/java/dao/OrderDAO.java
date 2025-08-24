@@ -811,51 +811,94 @@ public class OrderDAO extends DBContext {
 
     public void cancelOrder(int orderId) {
         String cancelOrderSQL = "UPDATE [Order] SET OrderStatus = N'Đã hủy' WHERE OrderID = ?";
-        String getOrderDetailsSQL = "SELECT ProductID, Quantity FROM OrderDetail WHERE OrderID = ?";
-        String updateStockSQL = "UPDATE Product SET StockQuantity = StockQuantity + ? WHERE ProductID = ?";
+        String getOrderDetailsSQL = "SELECT ProductID, Quantity, PackageType, PackSize FROM OrderDetail WHERE OrderID = ?";
+        String restoreInvSQL = "UPDATE Inventory SET Quantity = Quantity + ? WHERE ProductID = ? AND PackageType = ? AND ISNULL(PackSize, 0) = ?";
+        String restoreProdSQL = "UPDATE Product SET StockQuantity = StockQuantity + ? WHERE ProductID = ?";
 
         try {
-            conn.setAutoCommit(false); // Bắt đầu transaction
+            conn.setAutoCommit(false); // begin transaction
 
-            // 1. Hủy đơn hàng
+            // 1) Update order status to canceled
             try (PreparedStatement cancelStmt = conn.prepareStatement(cancelOrderSQL)) {
                 cancelStmt.setInt(1, orderId);
                 cancelStmt.executeUpdate();
             }
 
-            // 2. Lấy chi tiết đơn hàng
-            List<OrderDetail> orderDetails = new ArrayList<>();
+            // 2) Load order details
+            class _ODRow {
+
+                int pid;
+                double qty;
+                String pkg;
+                Integer pack;
+            }
+            java.util.List<_ODRow> rows = new java.util.ArrayList<>();
             try (PreparedStatement detailStmt = conn.prepareStatement(getOrderDetailsSQL)) {
                 detailStmt.setInt(1, orderId);
                 ResultSet rs = detailStmt.executeQuery();
                 while (rs.next()) {
-                    int productId = rs.getInt("ProductID");
-                    double quantity = rs.getDouble("Quantity");
-                    orderDetails.add(new OrderDetail(productId, quantity)); // ✅ sửa chỗ này
+                    _ODRow r = new _ODRow();
+                    r.pid = rs.getInt("ProductID");
+                    r.qty = rs.getDouble("Quantity");
+                    r.pkg = rs.getString("PackageType");
+                    int pz = rs.getInt("PackSize");
+                    r.pack = rs.wasNull() ? 0 : pz;
+                    rows.add(r);
                 }
+                rs.close();
             }
 
-            // 3. Cập nhật tồn kho
-            try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSQL)) {
-                for (OrderDetail od : orderDetails) {
-                    stockStmt.setDouble(1, od.getQuantity());
-                    stockStmt.setInt(2, od.getProductID());
-                    stockStmt.addBatch();
+            // 3) Restore inventory and, when appropriate, product stock
+            try (PreparedStatement invStmt = conn.prepareStatement(restoreInvSQL); PreparedStatement prodStmt = conn.prepareStatement(restoreProdSQL)) {
+
+                ProductDAO _pdaoTmp = new ProductDAO();
+
+                for (_ODRow r : rows) {
+                    String effectivePkg = (r.pkg == null || r.pkg.trim().isEmpty()) ? "UNIT" : r.pkg.trim().toUpperCase();
+                    int packSize = (r.pack == null ? 0 : r.pack);
+
+                    if ("UNIT".equals(effectivePkg)) {
+                        String itemUnit = _pdaoTmp.getItemUnitName(r.pid);
+                        if (itemUnit != null && itemUnit.trim().equalsIgnoreCase("kg")) {
+                            effectivePkg = "KG";
+                        } else {
+                            effectivePkg = "UNIT";
+                        }
+                        packSize = 0;
+                    } else if ("BOX".equals(effectivePkg)) {
+                        packSize = 0;
+                    }
+
+                    // restore inventory
+                    invStmt.setDouble(1, r.qty);
+                    invStmt.setInt(2, r.pid);
+                    invStmt.setString(3, effectivePkg);
+                    invStmt.setInt(4, packSize);
+                    invStmt.addBatch();
+
+                    // restore product only for BOX or fruits (KG)
+                    if ("BOX".equals(effectivePkg) || "KG".equals(effectivePkg)) {
+                        prodStmt.setDouble(1, r.qty);
+                        prodStmt.setInt(2, r.pid);
+                        prodStmt.addBatch();
+                    }
                 }
-                stockStmt.executeBatch();
+
+                invStmt.executeBatch();
+                prodStmt.executeBatch();
             }
 
-            conn.commit(); // Ghi nhận thay đổi
+            conn.commit();
         } catch (SQLException e) {
             try {
-                conn.rollback(); // Nếu lỗi, rollback toàn bộ
+                conn.rollback();
             } catch (SQLException rollbackEx) {
                 rollbackEx.printStackTrace();
             }
             e.printStackTrace();
         } finally {
             try {
-                conn.setAutoCommit(true); // Trả lại trạng thái ban đầu
+                conn.setAutoCommit(true);
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -1018,18 +1061,64 @@ public class OrderDAO extends DBContext {
 
             // If order creation succeeded, reserve/decrement stock and insert order details atomically
             if (orderId > 0) {
-                // 1) Decrement stock atomically per product
-                String updateStockSql = "UPDATE Product SET StockQuantity = StockQuantity - ? WHERE ProductID = ? AND StockQuantity >= ?";
-                try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSql)) {
+                // 1) Decrement inventory per selected unit and (when BOX or fruit/KG) also Product stock
+                String updateInvSql = "UPDATE Inventory SET Quantity = Quantity - ? "
+                        + "WHERE ProductID = ? AND PackageType = ? AND ISNULL(PackSize, 0) = ? AND Quantity >= ?";
+                String updateProdSql = "UPDATE Product SET StockQuantity = StockQuantity - ? "
+                        + "WHERE ProductID = ? AND StockQuantity >= ?";
+
+                try (PreparedStatement invStmt = conn.prepareStatement(updateInvSql); PreparedStatement prodStmt = conn.prepareStatement(updateProdSql)) {
+
+                    ProductDAO _pdaoTmp = new ProductDAO();
+
                     for (CartItem item : items) {
-                        stockStmt.setDouble(1, item.getQuantity());
-                        stockStmt.setInt(2, item.getProductID());
-                        stockStmt.setDouble(3, item.getQuantity());
-                        int affected = stockStmt.executeUpdate();
-                        if (affected == 0) {
-                            // Not enough stock; rollback and fail
+                        String pkg = item.getPackageType();
+                        Integer packSize = item.getPackSize();
+                        if (packSize == null) {
+                            packSize = 0;
+                        }
+
+                        // Derive effective package type to hit the right Inventory row
+                        String effectivePkg = (pkg == null || pkg.trim().isEmpty()) ? "UNIT" : pkg.trim().toUpperCase();
+                        if ("UNIT".equals(effectivePkg)) {
+                            String itemUnit = _pdaoTmp.getItemUnitName(item.getProductID());
+                            if (itemUnit != null && itemUnit.trim().equalsIgnoreCase("kg")) {
+                                effectivePkg = "KG"; // fruits measured by KG live in Inventory as KG
+                            } else {
+                                effectivePkg = "UNIT";
+                            }
+                            packSize = 0;
+                        } else if ("BOX".equals(effectivePkg)) {
+                            packSize = 0;
+                        } else if ("PACK".equals(effectivePkg)) {
+                            if (packSize == null || packSize == 0) {
+                                conn.rollback();
+                                return -1;
+                            }
+                        }
+
+                        // Update Inventory
+                        invStmt.setDouble(1, item.getQuantity());
+                        invStmt.setInt(2, item.getProductID());
+                        invStmt.setString(3, effectivePkg);
+                        invStmt.setInt(4, packSize);
+                        invStmt.setDouble(5, item.getQuantity());
+                        int affectedInv = invStmt.executeUpdate();
+                        if (affectedInv == 0) {
                             conn.rollback();
-                            return -1;
+                            return -1; // not enough inventory in the selected unit
+                        }
+
+                        // Update Product only for BOX or fruits (KG)
+                        if ("BOX".equals(effectivePkg) || "KG".equals(effectivePkg)) {
+                            prodStmt.setDouble(1, item.getQuantity());
+                            prodStmt.setInt(2, item.getProductID());
+                            prodStmt.setDouble(3, item.getQuantity());
+                            int affectedProd = prodStmt.executeUpdate();
+                            if (affectedProd == 0) {
+                                conn.rollback();
+                                return -1;
+                            }
                         }
                     }
                 }
@@ -1130,16 +1219,62 @@ public class OrderDAO extends DBContext {
 
             // If order creation succeeded, decrement stock atomically then insert order detail
             if (orderId > 0) {
-                // 1) Re-validate and decrement stock atomically
-                String updateStockSql = "UPDATE Product SET StockQuantity = StockQuantity - ? WHERE ProductID = ? AND StockQuantity >= ?";
-                try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSql)) {
-                    stockStmt.setDouble(1, item.getQuantity());
-                    stockStmt.setInt(2, item.getProductID());
-                    stockStmt.setDouble(3, item.getQuantity());
-                    int affected = stockStmt.executeUpdate();
-                    if (affected == 0) {
+                // 1) Decrement inventory per selected unit and (when BOX or fruit/KG) also Product stock
+                String updateInvSql = "UPDATE Inventory SET Quantity = Quantity - ? "
+                        + "WHERE ProductID = ? AND PackageType = ? AND ISNULL(PackSize, 0) = ? AND Quantity >= ?";
+                String updateProdSql = "UPDATE Product SET StockQuantity = StockQuantity - ? "
+                        + "WHERE ProductID = ? AND StockQuantity >= ?";
+
+                try (PreparedStatement invStmt = conn.prepareStatement(updateInvSql); PreparedStatement prodStmt = conn.prepareStatement(updateProdSql)) {
+
+                    String pkg = item.getPackageType();
+                    Integer packSize = item.getPackSize();
+                    if (packSize == null) {
+                        packSize = 0;
+                    }
+
+                    // Derive effective package type
+                    String effectivePkg = (pkg == null || pkg.trim().isEmpty()) ? "UNIT" : pkg.trim().toUpperCase();
+                    if ("UNIT".equals(effectivePkg)) {
+                        ProductDAO _pdaoTmp = new ProductDAO();
+                        String itemUnit = _pdaoTmp.getItemUnitName(item.getProductID());
+                        if (itemUnit != null && itemUnit.trim().equalsIgnoreCase("kg")) {
+                            effectivePkg = "KG";
+                        } else {
+                            effectivePkg = "UNIT";
+                        }
+                        packSize = 0;
+                    } else if ("BOX".equals(effectivePkg)) {
+                        packSize = 0;
+                    } else if ("PACK".equals(effectivePkg)) {
+                        if (packSize == null || packSize == 0) {
+                            conn.rollback();
+                            return -1;
+                        }
+                    }
+
+                    // Update Inventory
+                    invStmt.setDouble(1, item.getQuantity());
+                    invStmt.setInt(2, item.getProductID());
+                    invStmt.setString(3, effectivePkg);
+                    invStmt.setInt(4, packSize);
+                    invStmt.setDouble(5, item.getQuantity());
+                    int affectedInv = invStmt.executeUpdate();
+                    if (affectedInv == 0) {
                         conn.rollback();
                         return -1;
+                    }
+
+                    // Update Product only for BOX or fruits (KG)
+                    if ("BOX".equals(effectivePkg) || "KG".equals(effectivePkg)) {
+                        prodStmt.setDouble(1, item.getQuantity());
+                        prodStmt.setInt(2, item.getProductID());
+                        prodStmt.setDouble(3, item.getQuantity());
+                        int affectedProd = prodStmt.executeUpdate();
+                        if (affectedProd == 0) {
+                            conn.rollback();
+                            return -1;
+                        }
                     }
                 }
 

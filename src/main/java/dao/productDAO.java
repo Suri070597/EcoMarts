@@ -761,7 +761,7 @@ public class ProductDAO extends DBContext {
 
     /**
      * Get conversion history for a product
-     * 
+     *
      * @param productId The product ID
      * @return List of conversion records
      */
@@ -794,12 +794,12 @@ public class ProductDAO extends DBContext {
 
     /**
      * Update Inventory table with converted units
-     * 
-     * @param productId    The product ID
+     *
+     * @param productId The product ID
      * @param unitQuantity Number of units (lon) converted
      * @param packQuantity Number of packs (lốc) converted (can be null)
-     * @param unitPrice    Price per unit
-     * @param packPrice    Price per pack (can be null)
+     * @param unitPrice Price per unit
+     * @param packPrice Price per pack (can be null)
      * @return true if update was successful, false otherwise
      */
     public boolean updateInventory(int productId, int unitQuantity, Integer packQuantity, double unitPrice,
@@ -868,11 +868,11 @@ public class ProductDAO extends DBContext {
 
     /**
      * Update Inventory table with new conversion logic
-     * 
+     *
      * @param productId The product ID
      * @param unitCount Number of units to create (can be null)
      * @param packCount Number of packs to create (can be null)
-     * @param packSize  Size of each pack
+     * @param packSize Size of each pack
      * @param unitPrice Price per unit
      * @param packPrice Price per pack (can be null)
      * @return true if update was successful, false otherwise
@@ -936,13 +936,13 @@ public class ProductDAO extends DBContext {
     /**
      * Cập nhật inventory khi chuyển đổi sản phẩm (bao gồm cả BOX)
      *
-     * @param productId      The product ID
+     * @param productId The product ID
      * @param boxesToConvert Số thùng được chuyển đổi
-     * @param unitCount      Số đơn vị được tạo
-     * @param packCount      Số lốc được tạo
-     * @param packSize       Số đơn vị trong 1 lốc
-     * @param unitPrice      Giá 1 đơn vị
-     * @param packPrice      Giá 1 lốc
+     * @param unitCount Số đơn vị được tạo
+     * @param packCount Số lốc được tạo
+     * @param packSize Số đơn vị trong 1 lốc
+     * @param unitPrice Giá 1 đơn vị
+     * @param packPrice Giá 1 lốc
      * @return true nếu thành công, false nếu thất bại
      */
     public boolean updateInventoryWithBox(int productId, int boxesToConvert, Integer unitCount, Integer packCount,
@@ -1036,7 +1036,7 @@ public class ProductDAO extends DBContext {
 
     /**
      * Lấy giá unit (lon) từ Inventory cho việc hiển thị trên trang home
-     * 
+     *
      * @param productId The product ID
      * @return Giá của 1 lon, null nếu không có
      */
@@ -1060,7 +1060,7 @@ public class ProductDAO extends DBContext {
     /**
      * Lấy giá theo loại đóng gói cụ thể từ Inventory
      *
-     * @param productId   ID sản phẩm
+     * @param productId ID sản phẩm
      * @param packageType 'BOX' | 'UNIT' | 'PACK' | 'KG'
      * @return UnitPrice hoặc null nếu không có
      */
@@ -1136,7 +1136,7 @@ public class ProductDAO extends DBContext {
 
     /**
      * Get current inventory for a product
-     * 
+     *
      * @param productId The product ID
      * @return Map containing inventory information
      */
@@ -1189,7 +1189,7 @@ public class ProductDAO extends DBContext {
 
     /**
      * Lấy ProductID của sản phẩm vừa được insert
-     * 
+     *
      * @return ProductID của sản phẩm vừa tạo, -1 nếu thất bại
      */
     private int getLastInsertedProductId() {
@@ -1342,11 +1342,11 @@ public class ProductDAO extends DBContext {
     // ====================
     // đừng xóa tôi có sài
     // ==========================
-
     public List<Integer> getProductIdsByCategoryIdsExpanded(List<Integer> categoryIds) {
         List<Integer> result = new ArrayList<>();
-        if (categoryIds == null || categoryIds.isEmpty())
+        if (categoryIds == null || categoryIds.isEmpty()) {
             return result;
+        }
 
         // Chunk nếu cần (ví dụ 500 id mỗi lần)
         final int CHUNK = 500;
@@ -1355,17 +1355,35 @@ public class ProductDAO extends DBContext {
             String placeholders = String.join(",", Collections.nCopies(part.size(), "?"));
             String sql = "SELECT ProductID FROM Product WHERE CategoryID IN (" + placeholders + ")";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                for (int i = 0; i < part.size(); i++)
+                for (int i = 0; i < part.size(); i++) {
                     ps.setInt(i + 1, part.get(i));
+                }
                 try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next())
+                    while (rs.next()) {
                         result.add(rs.getInt(1));
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
         return result;
+    }
+
+    public int getInventoryQuantity(int productId, String packageType, Integer packSize) {
+        String sql = "SELECT Quantity FROM Inventory WHERE ProductID = ? AND PackageType = ? AND ISNULL(PackSize,0) = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, productId);
+            stmt.setString(2, packageType);
+            stmt.setInt(3, (packSize == null ? 0 : packSize));
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("Quantity");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
 }
