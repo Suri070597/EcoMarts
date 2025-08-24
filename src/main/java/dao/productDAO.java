@@ -1370,20 +1370,29 @@ public class ProductDAO extends DBContext {
         return result;
     }
 
-    public int getInventoryQuantity(int productId, String packageType, Integer packSize) {
-        String sql = "SELECT Quantity FROM Inventory WHERE ProductID = ? AND PackageType = ? AND ISNULL(PackSize,0) = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, productId);
-            stmt.setString(2, packageType);
-            stmt.setInt(3, (packSize == null ? 0 : packSize));
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("Quantity");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
+public int getInventoryQuantity(int productId, String packageType, Integer packSize) {
+    String sql;
+    if ("PACK".equalsIgnoreCase(packageType)) {
+        sql = "SELECT Quantity FROM Inventory WHERE ProductID = ? AND PackageType = 'PACK' AND PackSize = ?";
+    } else if ("BOX".equalsIgnoreCase(packageType)) {
+        sql = "SELECT Quantity FROM Inventory WHERE ProductID = ? AND PackageType = 'BOX'";
+    } else {
+        sql = "SELECT Quantity FROM Inventory WHERE ProductID = ? AND PackageType = 'UNIT'";
     }
+
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, productId);
+        if ("PACK".equalsIgnoreCase(packageType)) {
+            stmt.setInt(2, (packSize == null ? 0 : packSize));
+        }
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt("Quantity");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 
 }
