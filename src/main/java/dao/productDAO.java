@@ -69,6 +69,63 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
+    // ====================
+    // Stock status counters for admin product dashboard
+    // ====================
+
+    /**
+     * Đếm số sản phẩm còn hàng (số lượng > lowStockThreshold)
+     */
+    public int countInStock(int lowStockThreshold) {
+        String sql = "SELECT COUNT(*) AS cnt FROM Product WHERE StockQuantity > ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lowStockThreshold);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("cnt");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Đếm số sản phẩm gần hết hàng (1..lowStockThreshold)
+     */
+    public int countLowStock(int lowStockThreshold) {
+        String sql = "SELECT COUNT(*) AS cnt FROM Product WHERE StockQuantity > 0 AND StockQuantity <= ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lowStockThreshold);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("cnt");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Đếm số sản phẩm hết hàng (số lượng = 0)
+     */
+    public int countOutOfStock() {
+        String sql = "SELECT COUNT(*) AS cnt FROM Product WHERE StockQuantity <= 0";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("cnt");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public List<Product> getAllIncludingOutOfStock() {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.*, c.categoryName, c.parentID, s.CompanyName FROM Product p \n"
@@ -396,7 +453,7 @@ public class ProductDAO extends DBContext {
                     FROM Product p
                     JOIN Category c ON p.CategoryID = c.CategoryID
                     JOIN Manufacturer s ON p.ManufacturerID = s.ManufacturerID
-                    WHERE p.ProductName LIKE ? AND p.StockQuantity > 0
+                    WHERE p.ProductName LIKE ?
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");

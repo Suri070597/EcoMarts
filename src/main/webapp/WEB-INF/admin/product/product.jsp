@@ -74,7 +74,6 @@
                                     <input type="hidden" name="action" value="search" />
                                     <i class="fas fa-search"></i>
                                     <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." value="${keyword != null ? keyword : ''}">
-                                    <button type="submit" class="btn btn-sm btn-primary">Tìm kiếm</button>
                                 </form>
 
                                 <a href="${pageContext.request.contextPath}/admin/product?action=create" class="btn btn-success">
@@ -88,6 +87,37 @@
                         List<Category> cate = (List<Category>) request.getAttribute("dataCate");
                         List<Product> product = (List<Product>) request.getAttribute("data");
                     %>
+
+                    <!-- Stock status cards (same style as account dashboard) -->
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-success">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>${inStockCount}</h3>
+                                <p>Sản phẩm còn hàng</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>${lowStockCount}</h3>
+                                <p>Sản phẩm gần hết hàng</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-danger">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>${outOfStockCount}</h3>
+                                <p>Sản phẩm hết hàng</p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="table-container">
                         <% if (product != null && !product.isEmpty()) { %>
@@ -166,7 +196,7 @@
                                     <td>
                                         <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= pro.getImageURL()%>" alt="Product Image" style="width: 80px; height: auto;">
                                     </td>
-                                    <td><%= pro.getCreatedAt()%></td>
+                                    <td><fmt:formatDate value="<%= pro.getCreatedAt()%>" pattern="dd/MM/yyyy" /></td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
                                             <a href="${pageContext.request.contextPath}/admin/product?action=detail&id=<%= pro.getProductID()%>" class="btn btn-sm btn-info">

@@ -74,6 +74,15 @@ public class StaffProductServlet extends HttpServlet {
                 request.setAttribute("dataCate", listCategory);
                 request.setAttribute("data", list);
 
+                // Counters for stock status cards
+                final int LOW_STOCK_THRESHOLD = 10;
+                int inStock = dao.countInStock(LOW_STOCK_THRESHOLD);
+                int lowStock = dao.countLowStock(LOW_STOCK_THRESHOLD);
+                int outOfStock = dao.countOutOfStock();
+                request.setAttribute("inStockCount", inStock);
+                request.setAttribute("lowStockCount", lowStock);
+                request.setAttribute("outOfStockCount", outOfStock);
+
                 request.getRequestDispatcher("/WEB-INF/staff/product/product.jsp").forward(request, response);
                 break;
             case "search":
@@ -82,6 +91,26 @@ public class StaffProductServlet extends HttpServlet {
                 request.setAttribute("dataCate", listCategory);
                 request.setAttribute("data", searchResults);
                 request.setAttribute("keyword", keyword);
+
+                // Counters for stock status cards based on search results
+                final int SEARCH_LOW_STOCK_THRESHOLD = 10;
+                int searchInStock = 0, searchLowStock = 0, searchOutOfStock = 0;
+
+                for (Product p : searchResults) {
+                    double stock = p.getStockQuantity();
+                    if (stock > SEARCH_LOW_STOCK_THRESHOLD) {
+                        searchInStock++;
+                    } else if (stock > 0) {
+                        searchLowStock++;
+                    } else {
+                        searchOutOfStock++;
+                    }
+                }
+
+                request.setAttribute("inStockCount", searchInStock);
+                request.setAttribute("lowStockCount", searchLowStock);
+                request.setAttribute("outOfStockCount", searchOutOfStock);
+
                 request.getRequestDispatcher("/WEB-INF/staff/product/product.jsp").forward(request, response);
                 break;
             case "detail":
