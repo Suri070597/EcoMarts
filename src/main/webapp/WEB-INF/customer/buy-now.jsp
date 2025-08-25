@@ -216,22 +216,28 @@
                                                                                    name="cartQuantity_${item.cartItemID}" 
                                                                                    value="${item.quantity}" min="0.1" step="0.1" max="${item.product.stockQuantity}"
                                                                                    data-price="${empty item.unitPrice ? item.product.price : item.unitPrice}" data-id="${item.cartItemID}" 
-                                                                                   data-max="${item.product.stockQuantity}" data-unit="${item.product.unit}">
+                                                                                   data-max="${empty item.availableQuantity ? 0 : item.availableQuantity}" data-unit="${item.product.unit}">
                                                                         </c:when>
                                                                         <c:otherwise>
                                                                             <input type="number" class="form-control form-control-sm text-center cart-quantity-input"
                                                                                    name="cartQuantity_${item.cartItemID}" 
                                                                                    value="${fn:endsWith(item.quantity, '.0') ? fn:substringBefore(item.quantity, '.0') : item.quantity}"
-                                                                                   min="1" step="1" max="${item.product.stockQuantity}" 
+                                                                                   min="1" step="1" max="${empty item.availableQuantity ? 0 : item.availableQuantity}" 
                                                                                    data-price="${empty item.unitPrice ? item.product.price : item.unitPrice}" data-id="${item.cartItemID}" 
-                                                                                   data-max="${item.product.stockQuantity}" data-unit="${item.product.unit}" pattern="\d*">
+                                                                                   data-max="${empty item.availableQuantity ? 0 : item.availableQuantity}" data-unit="${item.product.unit}" pattern="\d*">
                                                                         </c:otherwise>
                                                                     </c:choose>
                                                                     <button type="button" class="btn btn-outline-secondary btn-sm cart-quantity-increase" data-id="${item.cartItemID}">
                                                                         <i class="fas fa-plus"></i>
                                                                     </button>
                                                                 </div>
-                                                                <small class="text-muted">Còn lại: ${item.product.stockQuantity} ${item.product.boxUnitName}</small>
+                                                                <small class="text-muted">Còn lại: ${empty item.availableQuantity ? 0 : item.availableQuantity} 
+                                                                    <c:choose>
+                                                                        <c:when test="${not empty item.displayUnitName}">${item.displayUnitName}</c:when>
+                                                                        <c:when test="${not empty item.product.boxUnitName}">${item.product.boxUnitName}</c:when>
+                                                                        <c:otherwise>${item.product.unit}</c:otherwise>
+                                                                    </c:choose>
+                                                                </small>
                                                             </div>
                                                         </div>
                                                         <p class="text-muted small mb-0">
@@ -261,21 +267,27 @@
                                                             <c:choose>
                                                                 <c:when test="${buyNowItem.product.unit eq 'kg'}">
                                                                     <input type="number" id="product-quantity" name="quantity" class="form-control form-control-sm text-center" 
-                                                                           value="${buyNowItem.quantity}" min="0.1" step="0.1" max="${buyNowItem.product.stockQuantity}" 
-                                                                           data-price="${buyNowItem.product.price}" data-max="${buyNowItem.product.stockQuantity}">
+                                                                           value="${buyNowItem.quantity}" min="0.1" step="0.1" max="${empty buyNowItem.availableQuantity ? 0 : buyNowItem.availableQuantity}" 
+                                                                           data-price="${buyNowItem.product.price}" data-max="${empty buyNowItem.availableQuantity ? 0 : buyNowItem.availableQuantity}">
                                                                 </c:when>
                                                                 <c:otherwise>
                                                                     <input type="number" id="product-quantity" name="quantity" class="form-control form-control-sm text-center" 
                                                                            value="${fn:endsWith(buyNowItem.quantity, '.0') ? fn:substringBefore(buyNowItem.quantity, '.0') : buyNowItem.quantity}" 
-                                                                           min="1" step="1" max="${buyNowItem.product.stockQuantity}" 
-                                                                           data-price="${buyNowItem.product.price}" data-max="${buyNowItem.product.stockQuantity}" pattern="\d*">
+                                                                           min="1" step="1" max="${empty buyNowItem.availableQuantity ? 0 : buyNowItem.availableQuantity}" 
+                                                                           data-price="${buyNowItem.product.price}" data-max="${empty buyNowItem.availableQuantity ? 0 : buyNowItem.availableQuantity}" pattern="\d*">
                                                                 </c:otherwise>
                                                             </c:choose>
                                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-increase">
                                                                 <i class="fas fa-plus"></i>
                                                             </button>
                                                         </div>
-                                                        <small class="text-muted">Còn lại: ${buyNowItem.product.stockQuantity} ${buyNowItem.product.boxUnitName}</small>
+                                                        <small class="text-muted">Còn lại: ${empty buyNowItem.availableQuantity ? 0 : buyNowItem.availableQuantity} 
+                                                            <c:choose>
+                                                                <c:when test="${not empty buyNowItem.displayUnitName}">${buyNowItem.displayUnitName}</c:when>
+                                                                <c:when test="${not empty buyNowItem.product.boxUnitName}">${buyNowItem.product.boxUnitName}</c:when>
+                                                                <c:otherwise>${buyNowItem.product.unit}</c:otherwise>
+                                                            </c:choose>
+                                                        </small>
                                                     </div>
                                                     <p class="text-success fw-bold mb-0">
                                                         <fmt:formatNumber value="${empty buyNowItem.unitPrice ? buyNowItem.product.price : buyNowItem.unitPrice}" type="number" pattern="#,###"/> đ /

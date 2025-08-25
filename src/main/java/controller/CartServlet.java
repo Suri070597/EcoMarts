@@ -77,6 +77,26 @@ public class CartServlet extends HttpServlet {
         List<CartItem> activeItems = cartItemDAO.getCartItems(account.getAccountID(), "Active");
         List<CartItem> savedItems = cartItemDAO.getCartItems(account.getAccountID(), "Saved");
 
+        // Populate available inventory quantity per selected package for active items
+        try {
+            ProductDAO productDAO = new ProductDAO();
+            for (CartItem item : activeItems) {
+                if (item.getProduct() == null) continue;
+                String effectivePkg = (item.getPackageType() == null || item.getPackageType().trim().isEmpty())
+                        ? "UNIT" : item.getPackageType().trim().toUpperCase();
+                int pz = (item.getPackSize() == null ? 0 : item.getPackSize());
+                if ("UNIT".equals(effectivePkg)) {
+                    String unitName = item.getProduct().getUnit();
+                    if (unitName != null && unitName.trim().equalsIgnoreCase("kg")) {
+                        effectivePkg = "KG";
+                        pz = 0;
+                    }
+                }
+                int availableQty = productDAO.getInventoryQuantity(item.getProductID(), effectivePkg, pz);
+                item.setAvailableQuantity(availableQty);
+            }
+        } catch (Exception ignore) {}
+
         System.out.println(
                 "Cart page request: Found " + activeItems.size() + " active items for user " + account.getUsername());
 
@@ -310,21 +330,31 @@ public class CartServlet extends HttpServlet {
                 quantity = 1;
             }
 
-            // Get the actual stock quantity
+            // Validate against Inventory by selected package type/size
             ProductDAO productDAO = new ProductDAO();
-            double stockQuantity = productDAO.getStockQuantityById(productID);
+            String effectivePkg = (packageType == null || packageType.trim().isEmpty()) ? "UNIT" : packageType.trim().toUpperCase();
+            Product productForUnit = new ProductDAO().getProductById(productID);
+            int effectivePackSize = (packSize == null ? 0 : packSize);
+            if ("UNIT".equals(effectivePkg)) {
+                String unitName = productForUnit != null ? productForUnit.getUnit() : null;
+                if (unitName != null && unitName.trim().equalsIgnoreCase("kg")) {
+                    effectivePkg = "KG";
+                    effectivePackSize = 0;
+                }
+            }
+            int inventoryQty = productDAO.getInventoryQuantity(productID, effectivePkg, effectivePackSize);
 
-            // Check if stock is sufficient
-            if (stockQuantity < quantity) {
+            // Check if stock is sufficient per Inventory
+            if (inventoryQty < quantity) {
                 if (isAjax) {
-                    String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity
+                    String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + inventoryQty
                             + " sản phẩm.";
                     response.getWriter().write("{\"success\":false,\"message\":\"" + errorMessage + "\"}");
                     return;
                 }
 
                 request.getSession().setAttribute("cartError",
-                        "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.");
+                        "Không đủ số lượng trong kho. Hiện tại chỉ còn " + inventoryQty + " sản phẩm.");
                 response.sendRedirect("ProductDetail?id=" + productID);
                 return;
             }
@@ -491,16 +521,27 @@ public class CartServlet extends HttpServlet {
             // Get current quantity in cart
             double currentQuantity = cartItem.getQuantity();
 
-            // Check if stock is sufficient using ProductDAO directly
+            // Check if stock is sufficient using Inventory by selected package
             ProductDAO productDAO = new ProductDAO();
-            double stockQuantity = productDAO.getStockQuantityById(cartItem.getProductID());
+            String effectivePkg = (cartItem.getPackageType() == null || cartItem.getPackageType().trim().isEmpty())
+                    ? "UNIT" : cartItem.getPackageType().trim().toUpperCase();
+            Product productForUnit = cartItem.getProduct() != null ? cartItem.getProduct() : new ProductDAO().getProductById(cartItem.getProductID());
+            int effectivePackSize = (cartItem.getPackSize() == null ? 0 : cartItem.getPackSize());
+            if ("UNIT".equals(effectivePkg)) {
+                String unitName = productForUnit != null ? productForUnit.getUnit() : null;
+                if (unitName != null && unitName.trim().equalsIgnoreCase("kg")) {
+                    effectivePkg = "KG";
+                    effectivePackSize = 0;
+                }
+            }
+            int inventoryQty = productDAO.getInventoryQuantity(cartItem.getProductID(), effectivePkg, effectivePackSize);
             System.out.println("Updating cart item: ID=" + cartItemID + ", Current quantity=" + currentQuantity
-                    + ", New quantity=" + quantity + ", Stock quantity=" + stockQuantity);
+                    + ", New quantity=" + quantity + ", Inventory quantity=" + inventoryQty);
 
             // Only validate stock if increasing quantity
             // Always allow decreasing quantity even if current quantity exceeds stock
-            if (quantity > currentQuantity && stockQuantity < quantity) {
-                String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.";
+            if (quantity > currentQuantity && inventoryQty < quantity) {
+                String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + inventoryQty + " sản phẩm.";
                 System.out.println("Stock insufficient: " + errorMessage);
                 if (isAjax) {
                     String json = String.format(
@@ -508,7 +549,7 @@ public class CartServlet extends HttpServlet {
                             + "\"message\":\"%s\","
                             + "\"validQuantity\":%d}",
                             errorMessage,
-                            Math.min(currentQuantity, stockQuantity) // Ensure valid quantity doesn't exceed stock
+                            Math.min(currentQuantity, inventoryQty) // Ensure valid quantity doesn't exceed stock
                     );
                     response.getWriter().write(json);
                 } else {

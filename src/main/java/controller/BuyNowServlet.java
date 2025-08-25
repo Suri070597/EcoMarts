@@ -120,6 +120,7 @@ public class BuyNowServlet extends HttpServlet {
                         effectivePkg,
                         pz
                 );
+                item.setAvailableQuantity(availableQty);
 if (availableQty < item.getQuantity()) {
                     hasStockIssues = true;
                     if (availableQty > 0) {
@@ -163,6 +164,7 @@ if (availableQty < item.getQuantity()) {
                 buyNowItem.getPackageType(),
                 buyNowItem.getPackSize() == null ? 0 : buyNowItem.getPackSize()
         );
+        buyNowItem.setAvailableQuantity(availableQty);
 
         String pkg = (buyNowItem.getPackageType() == null ? "UNIT" : buyNowItem.getPackageType().trim().toUpperCase());
         int pack = (buyNowItem.getPackSize() == null ? 0 : buyNowItem.getPackSize());
@@ -389,13 +391,30 @@ if (availableQty < item.getQuantity()) {
                 return;
             }
 
-            // Check stock availability again
-            if (product.getStockQuantity() < buyNowItem.getQuantity()) {
+            // Check stock availability again against Inventory (by selected package)
+            int availableQty = new ProductDAO().getInventoryQuantity(
+                    buyNowItem.getProductID(),
+                    buyNowItem.getPackageType(),
+                    buyNowItem.getPackSize() == null ? 0 : buyNowItem.getPackSize()
+            );
+            buyNowItem.setAvailableQuantity(availableQty);
+
+            if (availableQty < buyNowItem.getQuantity()) {
+                String pkg = (buyNowItem.getPackageType() == null ? "UNIT" : buyNowItem.getPackageType().trim().toUpperCase());
+                int pack = (buyNowItem.getPackSize() == null ? 0 : buyNowItem.getPackSize());
+                String unitLabel;
+                if ("PACK".equals(pkg)) {
+                    unitLabel = "lốc " + pack;
+                } else if ("BOX".equals(pkg)) {
+                    unitLabel = "thùng";
+                } else {
+                    unitLabel = (product.getUnit() != null && product.getUnit().equalsIgnoreCase("kg")) ? "kg" : "lon";
+                }
                 request.setAttribute("error", "Sản phẩm đã hết hàng hoặc không đủ số lượng yêu cầu. Hiện chỉ còn "
-                        + product.getStockQuantity() + " " + product.getUnit());
+                        + availableQty + " " + unitLabel);
 
                 // Adjust quantity to maximum available
-                buyNowItem.setQuantity(product.getStockQuantity());
+                buyNowItem.setQuantity(availableQty);
 
                 // Re-populate the form with corrected quantity
                 prepareCheckoutPage(request, account, buyNowItem, product);
@@ -857,9 +876,21 @@ if (availableQty < item.getQuantity()) {
                 }
                 item.setProduct(product);
 
-                // Check stock again against latest DB value
-                if (product.getStockQuantity() < item.getQuantity()) {
-                    request.setAttribute("error", "Sản phẩm " + product.getProductName() + " không đủ số lượng yêu cầu. Hiện chỉ còn " + product.getStockQuantity() + " " + product.getUnit());
+                // Check stock again against Inventory by selected unit
+                String effectivePkg = (item.getPackageType() == null || item.getPackageType().trim().isEmpty())
+                        ? "UNIT" : item.getPackageType().trim().toUpperCase();
+                int pz = (item.getPackSize() == null ? 0 : item.getPackSize());
+                if ("UNIT".equals(effectivePkg)) {
+                    String unitName = product.getUnit();
+                    if (unitName != null && unitName.trim().equalsIgnoreCase("kg")) {
+                        effectivePkg = "KG";
+                        pz = 0;
+                    }
+                }
+                int availableQty = productDAO.getInventoryQuantity(item.getProductID(), effectivePkg, pz);
+                item.setAvailableQuantity(availableQty);
+                if (availableQty < item.getQuantity()) {
+                    request.setAttribute("error", "Sản phẩm " + product.getProductName() + " không đủ số lượng yêu cầu. Hiện chỉ còn " + availableQty + ".");
                     setCategories(request);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;

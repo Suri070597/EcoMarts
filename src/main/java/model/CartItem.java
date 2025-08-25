@@ -18,6 +18,8 @@ public class CartItem {
     private Integer packSize;   // only for PACK
     private String displayUnitName; // e.g., "lon", "lốc (8 lon)", "thùng (24 lon)"
     private Double unitPrice;   // price per selected package (what user pays)
+    // Available quantity in Inventory corresponding to selected packageType/packSize
+    private Integer availableQuantity;
 
     public CartItem() {
     }
@@ -117,6 +119,14 @@ public class CartItem {
 
     public void setUnitPrice(Double unitPrice) {
         this.unitPrice = unitPrice;
+    }
+
+    public Integer getAvailableQuantity() {
+        return availableQuantity;
+    }
+
+    public void setAvailableQuantity(Integer availableQuantity) {
+        this.availableQuantity = availableQuantity;
     }
 
     @Override

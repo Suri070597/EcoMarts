@@ -229,8 +229,8 @@
                                                                 <c:otherwise>${item.product.unit}</c:otherwise>
                                                             </c:choose>
                                                         </p>
-                                                        <c:if test="${item.product.stockQuantity < item.quantity}">
-                                                            <p class="text-danger small">Chỉ còn ${item.product.stockQuantity} sản phẩm</p>
+                                                        <c:if test="${item.availableQuantity < item.quantity}">
+                                                            <p class="text-danger small">Chỉ còn ${item.availableQuantity} sản phẩm</p>
                                                         </c:if>
                                                     </div>
 
@@ -244,18 +244,18 @@
                                                                 <%-- Hiển thị số lượng không có .0 nếu không phải sầu riêng (kg) --%>
                                                                 <c:choose>
                                                                     <c:when test="${item.product.unit eq 'kg'}">
-                                                                        <input type="number" name="quantity" value="${item.quantity}" min="0.1" step="0.1" class="form-control form-control-sm quantity-input text-center" data-max-stock="${item.product.stockQuantity}">
+                                                                        <input type="number" name="quantity" value="${item.quantity}" min="0.1" step="0.1" class="form-control form-control-sm quantity-input text-center" data-max-stock="${empty item.availableQuantity ? 0 : item.availableQuantity}">
                                                                     </c:when>
                                                                     <c:otherwise>
                                                                         <input type="number" name="quantity"
                                                                                value="${fn:endsWith(item.quantity, '.0') ? fn:substringBefore(item.quantity, '.0') : item.quantity}"
-                                                                               min="1" step="1" class="form-control form-control-sm quantity-input text-center" data-max-stock="${item.product.stockQuantity}" pattern="\d*">
+                                                                               min="1" step="1" class="form-control form-control-sm quantity-input text-center" data-max-stock="${empty item.availableQuantity ? 0 : item.availableQuantity}" pattern="\d*">
                                                                     </c:otherwise>
                                                                 </c:choose>
                                                                 <button type="button" class="btn btn-outline-secondary btn-sm quantity-increase">+</button>
                                                             </div>
                                                             <div class="invalid-feedback stock-warning" style="display: none;">
-                                                                Chỉ còn ${item.product.stockQuantity} sản phẩm trong kho
+                                                                Chỉ còn ${item.availableQuantity} sản phẩm trong kho
                                                             </div>
                                                         </form>
                                                     </div>
