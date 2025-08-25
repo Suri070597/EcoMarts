@@ -15,17 +15,13 @@ public class Product {
 
     private int productID;
     private String productName;
-    private double price;
+    private Double price; // Có thể NULL ban đầu
     private String description;
-    private double stockQuantity;
     private String imageURL;
-    private String unit;
     private Timestamp createdAt;
     private int categoryID;
     private int manufacturerID;
     private String status;
-    private Date manufactureDate;
-    private Date expirationDate;
     private Category category;
     private Manufacturer manufacturer;
     private InventoryTransaction inventory;
@@ -78,50 +74,46 @@ public class Product {
     public Product() {
     }
 
-    public Product(int productID, String productName, double price, String description, double stockQuantity,
-            String imageURL, String unit, Timestamp createdAt) {
+    public Product(int productID, String productName, Double price, String description,
+            String imageURL, Timestamp createdAt) {
         this.productID = productID;
         this.productName = productName;
         this.price = price;
         this.description = description;
-        this.stockQuantity = stockQuantity;
         this.imageURL = imageURL;
-        this.unit = unit;
         this.createdAt = createdAt;
-        // this.categoryID = categoryID;
-        // this.manufacturerID = manufacturerID;
-        // this.status = status;
     }
 
-    public Product(int productID, String productName, double price, String description, double stockQuantity,
-            String imageURL, String unit, Timestamp createdAt,
-            Date manufactureDate, Date expirationDate) {
+    public Product(int productID, String productName, Double price, String description,
+            String imageURL, Timestamp createdAt, int categoryID, int manufacturerID, String status,
+            int unitPerBox, String boxUnitName, String itemUnitName) {
         this.productID = productID;
         this.productName = productName;
         this.price = price;
         this.description = description;
-        this.stockQuantity = stockQuantity;
         this.imageURL = imageURL;
-        this.unit = unit;
         this.createdAt = createdAt;
-        this.manufactureDate = manufactureDate;
-        this.expirationDate = expirationDate;
+        this.categoryID = categoryID;
+        this.manufacturerID = manufacturerID;
+        this.status = status;
+        this.unitPerBox = unitPerBox;
+        this.boxUnitName = boxUnitName;
+        this.itemUnitName = itemUnitName;
     }
 
-    public Date getManufactureDate() {
-        return manufactureDate;
-    }
-
-    public void setManufactureDate(Date manufactureDate) {
-        this.manufactureDate = manufactureDate;
-    }
-
-    public Date getExpirationDate() {
-        return expirationDate;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
+    public Product(String productName, Double price, String description, String imageURL,
+            int categoryID, int manufacturerID, String status,
+            int unitPerBox, String boxUnitName, String itemUnitName) {
+        this.productName = productName;
+        this.price = price;
+        this.description = description;
+        this.imageURL = imageURL;
+        this.categoryID = categoryID;
+        this.manufacturerID = manufacturerID;
+        this.status = status;
+        this.unitPerBox = unitPerBox;
+        this.boxUnitName = boxUnitName;
+        this.itemUnitName = itemUnitName;
     }
 
     // Getters and Setters
@@ -141,11 +133,11 @@ public class Product {
         this.productName = productName;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -157,28 +149,12 @@ public class Product {
         this.description = description;
     }
 
-    public double getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public void setStockQuantity(double stockQuantity) {
-        this.stockQuantity = stockQuantity;
-    }
-
     public String getImageURL() {
         return imageURL;
     }
 
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
     }
 
     public Timestamp getCreatedAt() {
@@ -229,21 +205,12 @@ public class Product {
         this.itemUnitName = itemUnitName;
     }
 
-    /**
-     * Gets the quantity from stockQuantity field
-     *
-     * @return The stock quantity
-     */
-    public double getAvailableQuantity() {
-        return this.stockQuantity;
-    }
-
     @Override
     public String toString() {
         return "Product{" + "productID=" + productID + ", productName=" + productName + ", price=" + price
-                + ", description=" + description + ", stockQuantity=" + stockQuantity + ", imageURL=" + imageURL
-                + ", unit=" + unit + ", createdAt=" + createdAt + ", categoryID=" + categoryID + ", manufacturerID="
-                + manufacturerID + ", status=" + status + ", manufactureDate=" + manufactureDate + ", expirationDate="
-                + expirationDate + ", category=" + category + ", manufacturer=" + manufacturer + '}';
+                + ", description=" + description + ", imageURL=" + imageURL + ", createdAt=" + createdAt
+                + ", categoryID=" + categoryID + ", manufacturerID=" + manufacturerID + ", status=" + status
+                + ", unitPerBox=" + unitPerBox + ", boxUnitName=" + boxUnitName + ", itemUnitName=" + itemUnitName
+                + '}';
     }
 }

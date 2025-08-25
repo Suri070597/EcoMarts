@@ -114,7 +114,7 @@
                                     <td><%= pro.getProductName()%></td>
                                     <td><fmt:formatNumber value="<%= pro.getPrice()%>" type="number" pattern="#,###" /> đ</td>
                                     <td>
-                                    <% double qty = pro.getStockQuantity();
+                                    <% double qty = 0;
                                        if (qty == Math.floor(qty)) {
                                            out.print((long)qty);
                                        } else {
@@ -124,9 +124,9 @@
                                     </td>
                                     <td><%= pro.getBoxUnitName()%></td>
                                     <td>
-                                        <% if (pro.getStockQuantity() <= 0) { %>
+                                        <% if (0 <= 0) { %>
                                             <span class="badge bg-danger">Hết hàng</span>
-                                        <% } else if (pro.getStockQuantity() <= 10) { %>
+                                        <% } else if (0 <= 10) { %>
                                             <span class="badge bg-warning">Sắp hết</span>
                                         <% } else { %>
                                             <span class="badge bg-success">Còn hàng</span>

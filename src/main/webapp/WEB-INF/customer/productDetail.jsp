@@ -320,7 +320,7 @@
                             </p>
                             <p><strong>Số Lượng Tồn Kho:</strong> 
                                 <%
-                                    double stockQty = mo.getStockQuantity();
+                                    double stockQty = 0;
                                     if (stockQty % 1 == 0) {
                                         out.print((int) stockQty);
                                     } else {

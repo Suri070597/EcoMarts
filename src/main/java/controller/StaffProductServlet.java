@@ -97,7 +97,7 @@ public class StaffProductServlet extends HttpServlet {
                 int searchInStock = 0, searchLowStock = 0, searchOutOfStock = 0;
 
                 for (Product p : searchResults) {
-                    double stock = p.getStockQuantity();
+                    double stock = 0;
                     if (stock > SEARCH_LOW_STOCK_THRESHOLD) {
                         searchInStock++;
                     } else if (stock > 0) {

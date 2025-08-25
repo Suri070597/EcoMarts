@@ -127,7 +127,7 @@ public class ViewAllProductServlet extends HttpServlet {
                     } else if (parentId == 3) {
                         // Fruits: keep original product price/unit (e.g., per kg)
                         feats.add(p);
-                        String unitLabel = (p.getUnit() != null && !p.getUnit().trim().isEmpty()) ? p.getUnit() : "kg";
+                        String unitLabel = (p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) ? p.getItemUnitName() : "kg";
                         priceDisplayMap.put(p.getProductID(), formatter.format(p.getPrice()) + " đ / " + unitLabel);
                     } else {
                         // Other categories: require UNIT price
@@ -194,7 +194,7 @@ public class ViewAllProductServlet extends HttpServlet {
                         filtered.add(p);
                     } else if (parentId == 3) {
                         // Fruits: giữ nguyên như cũ (giá gốc + đơn vị từ Product)
-                        String unitLabel = (p.getUnit() != null && !p.getUnit().trim().isEmpty()) ? p.getUnit() : "kg";
+                        String unitLabel = (p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) ? p.getItemUnitName() : "kg";
                         display = formatter.format(p.getPrice()) + " đ / " + unitLabel;
                         filtered.add(p);
                     } else {

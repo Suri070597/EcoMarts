@@ -116,9 +116,9 @@ public class BuyNowServlet extends HttpServlet {
         }
 
         // Check product availability
-        if (product.getStockQuantity() < buyNowItem.getQuantity()) {
+        if (0 < buyNowItem.getQuantity()) {
             session.setAttribute("cartError",
-                    "Số lượng sản phẩm không đủ. Hiện chỉ còn " + product.getStockQuantity() + " " + product.getUnit());
+                    "Số lượng sản phẩm không đủ. Hiện chỉ còn " + 0 + " " + product.getItemUnitName());
             response.sendRedirect("ProductDetail?id=" + product.getProductID());
             return;
         }
@@ -317,12 +317,12 @@ public class BuyNowServlet extends HttpServlet {
             }
 
             // Check stock availability again
-            if (product.getStockQuantity() < buyNowItem.getQuantity()) {
+            if (0 < buyNowItem.getQuantity()) {
                 request.setAttribute("error", "Sản phẩm đã hết hàng hoặc không đủ số lượng yêu cầu. Hiện chỉ còn "
-                        + product.getStockQuantity() + " " + product.getUnit());
+                        + 0 + " " + product.getItemUnitName());
 
                 // Adjust quantity to maximum available
-                buyNowItem.setQuantity(product.getStockQuantity());
+                buyNowItem.setQuantity(0);
 
                 // Re-populate the form with corrected quantity
                 prepareCheckoutPage(request, account, buyNowItem, product);
@@ -480,7 +480,7 @@ public class BuyNowServlet extends HttpServlet {
                 }
 
                 // Update product stock
-                productDAO.updateProductStock(product.getProductID(), product.getStockQuantity() - buyNowItem.getQuantity());
+                productDAO.updateProductStock(product.getProductID(), 0 - buyNowItem.getQuantity());
 
                 // Order history will be created after successful redirect to avoid foreign key issues
                 // Handle payment redirection if needed
@@ -785,7 +785,7 @@ public class BuyNowServlet extends HttpServlet {
                 }
 
                 // Check stock again
-                if (product.getStockQuantity() < item.getQuantity()) {
+                if (0 < item.getQuantity()) {
                     request.setAttribute("error", "Sản phẩm " + product.getProductName() + " không đủ số lượng yêu cầu.");
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
@@ -861,7 +861,7 @@ public class BuyNowServlet extends HttpServlet {
                 // Update product stock
                 for (CartItem item : cartItems) {
                     Product product = item.getProduct();
-                    productDAO.updateProductStock(product.getProductID(), product.getStockQuantity() - item.getQuantity());
+                    productDAO.updateProductStock(product.getProductID(), 0 - item.getQuantity());
                 }
 
                 // Clear cart items
@@ -965,12 +965,12 @@ public class BuyNowServlet extends HttpServlet {
                 item.setProduct(product);
 
                 // Check stock availability
-                if (product.getStockQuantity() < item.getQuantity()) {
+                if (0 < item.getQuantity()) {
                     hasStockIssues = true;
                     // Adjust quantity to available stock
-                    if (product.getStockQuantity() > 0) {
-                        item.setQuantity(product.getStockQuantity());
-                        cartItemDAO.updateCartItemQuantity(item.getCartItemID(), product.getStockQuantity());
+                    if (0 > 0) {
+                        item.setQuantity(0);
+                        cartItemDAO.updateCartItemQuantity(item.getCartItemID(), 0);
                     } else {
                         // Remove item if no stock available
                         cartItemDAO.removeCartItem(item.getCartItemID());
@@ -1038,3 +1038,4 @@ public class BuyNowServlet extends HttpServlet {
         }
     }
 }
+

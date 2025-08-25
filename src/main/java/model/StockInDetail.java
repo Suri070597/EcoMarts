@@ -4,6 +4,8 @@
  */
 package model;
 
+import java.sql.Date;
+
 /**
  *
  * @author ADMIN
@@ -16,6 +18,13 @@ public class StockInDetail {
     private String productName;
     private double quantity;
     private double unitPrice;
+
+    // Thêm các trường mới cho FIFO
+    private int productID;
+    private String packageType;
+    private String lotNumber;
+    private Date manufactureDate; // Ngày sản xuất
+    private Date expiryDate; // Ngày hết hạn
 
     public StockInDetail() {
     }
@@ -115,6 +124,76 @@ public class StockInDetail {
      */
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    /**
+     * @return the productID
+     */
+    public int getProductID() {
+        return productID;
+    }
+
+    /**
+     * @param productID the productID to set
+     */
+    public void setProductID(int productID) {
+        this.productID = productID;
+    }
+
+    /**
+     * @return the packageType
+     */
+    public String getPackageType() {
+        return packageType;
+    }
+
+    /**
+     * @param packageType the packageType to set
+     */
+    public void setPackageType(String packageType) {
+        this.packageType = packageType;
+    }
+
+    /**
+     * @return the lotNumber
+     */
+    public String getLotNumber() {
+        return lotNumber;
+    }
+
+    /**
+     * @param lotNumber the lotNumber to set
+     */
+    public void setLotNumber(String lotNumber) {
+        this.lotNumber = lotNumber;
+    }
+
+    /**
+     * @return the manufactureDate
+     */
+    public Date getManufactureDate() {
+        return manufactureDate;
+    }
+
+    /**
+     * @param manufactureDate the manufactureDate to set
+     */
+    public void setManufactureDate(Date manufactureDate) {
+        this.manufactureDate = manufactureDate;
+    }
+
+    /**
+     * @return the expiryDate
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * @param expiryDate the expiryDate to set
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
 }

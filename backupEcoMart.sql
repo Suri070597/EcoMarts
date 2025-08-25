@@ -169,8 +169,6 @@ CREATE TABLE Product (
     ProductID INT PRIMARY KEY IDENTITY(1,1),
     ProductName NVARCHAR(255) NOT NULL,
     Price DECIMAL(10,2) NULL, -- giá bán (có thể NULL khi tạo sản phẩm)
-    UnitReferencePrice DECIMAL(10,2) NULL, -- giá tham khảo cho đơn vị lon (UNIT)
-    PackReferencePrice DECIMAL(10,2) NULL, -- giá tham khảo cho lốc (PACK)
     [Description] NVARCHAR(MAX),
     ImageURL NVARCHAR(255),
     CreatedAt DATETIME DEFAULT GETDATE(),

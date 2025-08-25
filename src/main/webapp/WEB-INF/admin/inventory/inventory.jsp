@@ -96,22 +96,28 @@
         <!-- 2: Check message and show alert -->
         <c:if test="${param.message eq 'approved'}">
             <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Approve thành công',
-            showConfirmButton: false,
-            timer: 1000
-        });
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Approve thành công!',
+                        text: 'Phiếu nhập kho đã được duyệt.',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                });
             </script>
         </c:if>
 
         <c:if test="${param.message eq 'rejected'}">
             <script>
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Phiếu nhập đã bị hủy!',
-                    showConfirmButton: false,
-                    timer: 1000
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Phiếu nhập đã bị hủy!',
+                        text: 'Phiếu nhập kho đã được từ chối.',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
                 });
             </script>
         </c:if>

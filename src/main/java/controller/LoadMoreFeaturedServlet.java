@@ -117,7 +117,7 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                         priceDisplay = sb.toString();
                                 } else if (effectiveParentId == 3) {
                                         // Trái cây: giữ nguyên
-                                        priceDisplay = formatter.format(p.getPrice()) + " đ / " + p.getUnit();
+                                        priceDisplay = formatter.format(p.getPrice()) + " đ / " + p.getItemUnitName();
                                 } else {
                                         // Loại khác: phải có UNIT, nếu không có thì ẩn (skip)
                                         Double unitPrice = productDao.getUnitOnlyPrice(p.getProductID());
@@ -132,9 +132,9 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 }
 
                                 html.append("<div class=\"product-card\" data-product-id=\"").append(p.getProductID())
-                                                .append("\" data-stock-quantity=\"").append(p.getStockQuantity())
+                                                .append("\" data-stock-quantity=\"").append(0)
                                                 .append("\">");
-                                if (p.getStockQuantity() <= 0) {
+                                if (0 <= 0) {
                                         html.append("<div class=\"product-badge out-of-stock\">Hết hàng</div>");
                                 }
                                 html.append("    <div class=\"product-image-container\">");
@@ -145,9 +145,9 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 html.append("        <div class=\"product-actions\">");
                                 html.append("            <button class=\"action-btn add-to-cart-action\" data-product-id=\"")
                                                 .append(p.getProductID())
-                                                .append("\" data-stock-quantity=\"").append(p.getStockQuantity())
+                                                .append("\" data-stock-quantity=\"").append(0)
                                                 .append("\" ")
-                                                .append(p.getStockQuantity() <= 0
+                                                .append(0 <= 0
                                                                 ? "disabled style='opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append("><i class=\"fas fa-cart-plus\"></i></button>");
@@ -174,9 +174,9 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 html.append("        <div class=\"button-group\">");
                                 html.append("            <button class=\"add-to-cart-btn\" data-product-id=\"")
                                                 .append(p.getProductID())
-                                                .append("\" data-stock-quantity=\"").append(p.getStockQuantity())
+                                                .append("\" data-stock-quantity=\"").append(0)
                                                 .append("\" ")
-                                                .append(p.getStockQuantity() <= 0
+                                                .append(0 <= 0
                                                                 ? "disabled style='opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append("><i class=\"fas fa-shopping-cart\"></i> Giỏ hàng</button>");
@@ -184,7 +184,7 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                                 .append("/ProductDetail?id=")
                                                 .append(p.getProductID())
                                                 .append("\" class=\"buy-now-btn\" ")
-                                                .append(p.getStockQuantity() <= 0
+                                                .append(0 <= 0
                                                                 ? "style='pointer-events:none;opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append(">Mua ngay</a>");

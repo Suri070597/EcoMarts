@@ -26,17 +26,17 @@ import model.StockInDetail;
  *
  * @author ADMIN
  */
-@WebServlet(name = "AdminInventoryServlet", urlPatterns = {"/admin/inventory"})
+@WebServlet(name = "AdminInventoryServlet", urlPatterns = { "/admin/inventory" })
 public class AdminInventoryServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -52,8 +52,8 @@ public class AdminInventoryServlet extends HttpServlet {
             ManufacturerDAO manufacturerDAO = new ManufacturerDAO();
 
             try {
-                //Lấy danh sách inventory            
-                List<StockIn> stockIns ;
+                // Lấy danh sách inventory
+                List<StockIn> stockIns;
 
                 if (supplierIdStr != null && !supplierIdStr.isEmpty()) {
                     int supplierId = Integer.parseInt(supplierIdStr);
@@ -74,8 +74,7 @@ public class AdminInventoryServlet extends HttpServlet {
                 request.setAttribute("suppliers", supplierList);
                 request.setAttribute("stockIns", stockIns);
                 RequestDispatcher dispatcher = request.getRequestDispatcher(
-                        "/WEB-INF/admin/inventory/inventory.jsp"
-                );
+                        "/WEB-INF/admin/inventory/inventory.jsp");
                 dispatcher.forward(request, response);
             } catch (Exception e) {
                 // Xử lý lỗi theo MVC pattern
@@ -84,8 +83,7 @@ public class AdminInventoryServlet extends HttpServlet {
 
                 // Forward đến trang lỗi hoặc trang hiện tại với thông báo lỗi
                 RequestDispatcher dispatcher = request.getRequestDispatcher(
-                        "/WEB-INF/admin/inventory/inventory.jsp"
-                );
+                        "/WEB-INF/admin/inventory/inventory.jsp");
                 dispatcher.forward(request, response);
             }
         }
@@ -129,7 +127,8 @@ public class AdminInventoryServlet extends HttpServlet {
             }
 
             // Forward đến trang chi tiết
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/admin/inventory/inventory-detail.jsp");
+            RequestDispatcher dispatcher = request
+                    .getRequestDispatcher("/WEB-INF/admin/inventory/inventory-detail.jsp");
             dispatcher.forward(request, response);
         }
 
@@ -147,7 +146,10 @@ public class AdminInventoryServlet extends HttpServlet {
                 stockDAO.approveStockIn(stockInID, details);
 
                 // Redirect về danh sách với thông báo thành công
-                response.sendRedirect(request.getContextPath() + "/admin/inventory?message=approved");
+                System.out.println("Redirecting to: " + request.getContextPath() + "/admin/inventory?message=approved");
+                // Thêm timestamp để tránh cache
+                response.sendRedirect(
+                        request.getContextPath() + "/admin/inventory?message=approved&t=" + System.currentTimeMillis());
             } catch (SQLException e) {
                 e.printStackTrace();
                 // Forward tới trang lỗi hoặc hiển thị thông báo
@@ -171,7 +173,8 @@ public class AdminInventoryServlet extends HttpServlet {
                 stockDAO.rejectStockIn(stockInID, details);
 
                 // Redirect về danh sách với thông báo thành công
-                response.sendRedirect(request.getContextPath() + "/admin/inventory?message=rejected");
+                response.sendRedirect(
+                        request.getContextPath() + "/admin/inventory?message=rejected&t=" + System.currentTimeMillis());
             } catch (SQLException e) {
                 e.printStackTrace();
                 // Forward tới trang lỗi hoặc hiển thị thông báo
@@ -182,14 +185,15 @@ public class AdminInventoryServlet extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
+    // + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -200,10 +204,10 @@ public class AdminInventoryServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

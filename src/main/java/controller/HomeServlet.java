@@ -64,7 +64,7 @@ public class HomeServlet extends HttpServlet {
                 priceDisplayMap.put(pid, formatter.format(priceVal) + " đ / thùng");
         };
         java.util.function.Consumer<Product> putTraiCay = (p) -> {
-            priceDisplayMap.put(p.getProductID(), formatter.format(p.getPrice()) + " đ / " + p.getUnit());
+            priceDisplayMap.put(p.getProductID(), formatter.format(p.getPrice()) + " đ / " + p.getItemUnitName());
         };
         java.util.function.BiConsumer<Integer, String> putUnit = (pid, unitLabel) -> {
             Double up = dao.getUnitOnlyPrice(pid);
@@ -268,9 +268,25 @@ public class HomeServlet extends HttpServlet {
                     }
                 }
             }
-            request.setAttribute("avgRatingMap", avgRatingMap);
-            request.setAttribute("reviewCountMap", reviewCountMap);
-            request.setAttribute("unitPriceMap", unitPriceMap);
+                    // Tạo map chứa số lượng tồn kho cho mỗi sản phẩm
+        java.util.Map<Integer, Double> stockQuantityMap = new java.util.HashMap<>();
+        for (List<Product> plist : allProductLists) {
+            if (plist != null) {
+                for (Product p : plist) {
+                    int pid = p.getProductID();
+                    if (!stockQuantityMap.containsKey(pid)) {
+                        // Lấy số lượng tồn kho từ Inventory table
+                        Double stockQuantity = dao.getProductStockQuantity(pid);
+                        stockQuantityMap.put(pid, stockQuantity != null ? stockQuantity : 0.0);
+                    }
+                }
+            }
+        }
+        
+        request.setAttribute("avgRatingMap", avgRatingMap);
+        request.setAttribute("reviewCountMap", reviewCountMap);
+        request.setAttribute("unitPriceMap", unitPriceMap);
+        request.setAttribute("stockQuantityMap", stockQuantityMap);
         } catch (Exception e) {
             e.printStackTrace();
         }

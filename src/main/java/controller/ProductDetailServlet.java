@@ -115,7 +115,7 @@ public class ProductDetailServlet extends HttpServlet {
                         filteredRelated.add(rp);
                     } else if (pParent == 3) {
                         // Fruits: keep original unit
-                        String unitLabel = (rp.getUnit() != null && !rp.getUnit().trim().isEmpty()) ? rp.getUnit()
+                        String unitLabel = (rp.getItemUnitName() != null && !rp.getItemUnitName().trim().isEmpty()) ? rp.getItemUnitName()
                                 : "kg";
                         display = formatter.format(rp.getPrice()) + " đ / " + unitLabel;
                         filteredRelated.add(rp);

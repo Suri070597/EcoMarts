@@ -66,7 +66,7 @@
                         <td><%= new java.text.DecimalFormat("#,###").format(pro.getPrice()) %> đ</td>
                         <td>
                             <%
-                                double stockQty = pro.getStockQuantity();
+                                double stockQty = 0;
                                 if (stockQty % 1 == 0) {
                                     out.print((int) stockQty);
                                 } else {

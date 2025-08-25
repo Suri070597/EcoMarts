@@ -59,11 +59,10 @@ public class SearchProductsDAO extends DBContext {
                 p.setProductName(rs.getString("ProductName"));
                 p.setDescription(rs.getString("Description"));
                 p.setPrice(rs.getDouble("Price"));
-                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                // StockQuantity is now handled in Inventory table
                 p.setImageURL(rs.getString("ImageURL"));
-                p.setUnit(rs.getString("Unit"));
-                p.setManufactureDate(rs.getDate("ManufactureDate"));
-                p.setExpirationDate(rs.getDate("ExpirationDate"));
+                // Unit is now handled by ItemUnitName/BoxUnitName
+                // ManufactureDate and ExpirationDate are now handled in Inventory table per lot
                 p.setCategoryID(rs.getInt("CategoryID"));
                 p.setManufacturerID(rs.getInt("ManufacturerID"));
                 // Bổ sung các trường đơn vị

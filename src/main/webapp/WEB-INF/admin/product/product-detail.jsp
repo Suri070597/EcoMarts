@@ -59,7 +59,7 @@
                                         </tr>
                                         <tr><th>Số lượng tồn kho:</th>
                                             <td>
-                                                <% double kg = product.getStockQuantity();
+                                                <% double kg = 0;
                                                     String display;
                                                     if (kg == Math.floor(kg)) {
                                                         // Nếu là số nguyên thì không hiển thị .0
@@ -108,7 +108,7 @@
                                                 Object pp = inv.get("PACK_Price");
                                                 if (pp instanceof Number) packPrice = ((Number) pp).doubleValue();
                                             }
-                                            double qty = boxQty != null ? boxQty : product.getStockQuantity();
+                                            double qty = boxQty != null ? boxQty : 0;
                                         %>
                                         <tr>
                                             <th>Số lượng thùng:</th>
@@ -181,9 +181,9 @@
                                                 <% }%>
                                         <tr><th>Trạng thái:</th>
                                             <td>
-                                                <% if (product.getStockQuantity() <= 0) { %>
+                                                <% if (0 <= 0) { %>
                                                 <span class="badge bg-danger">Hết hàng</span>
-                                                <% } else if (product.getStockQuantity() <= 10) { %>
+                                                <% } else if (0 <= 10) { %>
                                                 <span class="badge bg-warning">Sắp hết</span>
                                                 <% } else { %>
                                                 <span class="badge bg-success">Còn hàng</span>

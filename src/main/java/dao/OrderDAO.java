@@ -812,7 +812,7 @@ public class OrderDAO extends DBContext {
     public void cancelOrder(int orderId) {
         String cancelOrderSQL = "UPDATE [Order] SET OrderStatus = N'Đã hủy' WHERE OrderID = ?";
         String getOrderDetailsSQL = "SELECT ProductID, Quantity FROM OrderDetail WHERE OrderID = ?";
-        String updateStockSQL = "UPDATE Product SET StockQuantity = StockQuantity + ? WHERE ProductID = ?";
+        String updateStockSQL = "UPDATE Inventory SET Quantity = Quantity + ? WHERE ProductID = ? AND PackageType = 'BOX'";
 
         try {
             conn.setAutoCommit(false); // Bắt đầu transaction

@@ -38,6 +38,8 @@
                         <form method="POST" action="${pageContext.request.contextPath}/staff/stockin" class="needs-validation" novalidate>
                             <input type="hidden" name="action" value="create">
 
+                            
+
                             <!-- Nhà cung cấp -->
                             <div class="mb-3">
                                 <label class="form-label" for="supplierId">Nhà cung cấp</label>
@@ -105,6 +107,9 @@
                                             <th>Đơn vị</th>
                                             <th style="white-space: nowrap;">Số lượng</th>
                                             <th style="white-space: nowrap;">Giá nhập</th>
+                                            <th style="white-space: nowrap;">Số lô</th>
+                                            <th style="white-space: nowrap;">Ngày SX</th>
+                                            <th style="white-space: nowrap;">Hạn SD</th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -180,6 +185,9 @@
                                                         <th style="padding:0.35rem; text-align: center;">Sản phẩm</th>
                                                         <th style="padding:0.35rem; text-align: center;">Số lượng</th>
                                                         <th style="padding:0.35rem; text-align: center;">Giá nhập</th>
+                                                        <th style="padding:0.35rem; text-align: center;">Số lô</th>
+                                                        <th style="padding:0.35rem; text-align: center;">Ngày SX</th>
+                                                        <th style="padding:0.35rem; text-align: center;">Hạn SD</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -195,6 +203,9 @@
                                                             <td style="padding:0.35rem;">
                                                                 <fmt:formatNumber value="${detail.unitPrice}" type="number" groupingUsed="true"/>
                                                             </td>
+                                                            <td style="padding:0.35rem;">${detail.lotNumber}</td>
+                                                            <td style="padding:0.35rem;">${detail.manufactureDate}</td>
+                                                            <td style="padding:0.35rem;">${detail.expiryDate}</td>
                                                         </tr>
                                                     </c:forEach>
                                                 </tbody>
@@ -384,12 +395,15 @@
                                     <option value="\${item.boxUnitName}" selected>\${item.boxUnitName}</option>
                                 </select>
                                 <input type="hidden" name="unitSelectedName" value="\${item.boxUnitName}" class="unit-selected-name">
-                                <input type="hidden" name="packageType" value="\${item.boxUnitName}">
-                                <input type="hidden" name="packSize" value="\${item.unitPerBox}">
+                                <input type="hidden" name="packageType" value="BOX">
+                                <!-- Bỏ PackSize - không cần thiết -->
                             </td>
                             <td><input type="number" name="quantity" class="form-control quantity-input" min="1" required 
                                 style="white-space: nowrap; width:80px;"></td>
                             <td><input type="number" name="price" step="0.01" min="1" class="form-control" required style="white-space: nowrap; width:120px;"></td>
+                            <td><input type="text" name="lotNumber" class="form-control" placeholder="Số lô" style="white-space: nowrap; width:100px;"></td>
+                            <td><input type="date" name="manufactureDate" class="form-control" style="white-space: nowrap; width:130px;"></td>
+                            <td><input type="date" name="expiryDate" class="form-control" style="white-space: nowrap; width:130px;"></td>
                             <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fas fa-trash"></i></button></td>
                         `;
                         tableBody.appendChild(row);

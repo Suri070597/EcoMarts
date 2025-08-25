@@ -18,33 +18,33 @@ public class AdminVoucherServlet extends HttpServlet {
     // =========================
     // ĐƯỜNG DẪN
     // =========================
-    private static final String JSP_BASE              = "/WEB-INF/admin/voucher/";
-    private static final String JSP_MANAGE            = JSP_BASE + "manage-voucher.jsp";
-    private static final String JSP_CREATE            = JSP_BASE + "create-voucher.jsp";
-    private static final String JSP_EDIT              = JSP_BASE + "edit-voucher.jsp";
-    private static final String JSP_DETAIL            = JSP_BASE + "voucher-detail.jsp";
-    private static final String JSP_OWNERS            = JSP_BASE + "voucher-owner.jsp";
+    private static final String JSP_BASE = "/WEB-INF/admin/voucher/";
+    private static final String JSP_MANAGE = JSP_BASE + "manage-voucher.jsp";
+    private static final String JSP_CREATE = JSP_BASE + "create-voucher.jsp";
+    private static final String JSP_EDIT = JSP_BASE + "edit-voucher.jsp";
+    private static final String JSP_DETAIL = JSP_BASE + "voucher-detail.jsp";
+    private static final String JSP_OWNERS = JSP_BASE + "voucher-owner.jsp";
 
     // =========================
     // PARAM & ACTION/VIEW KEYS
     // =========================
-    private static final String PARAM_VIEW            = "view";
-    private static final String PARAM_ACTION          = "action";
-    private static final String PARAM_ID              = "id";
-    private static final String PARAM_SEARCH          = "search";
-    private static final String PARAM_STATUS          = "status";
-    private static final String PARAM_ACCOUNT_ID      = "accountId";
+    private static final String PARAM_VIEW = "view";
+    private static final String PARAM_ACTION = "action";
+    private static final String PARAM_ID = "id";
+    private static final String PARAM_SEARCH = "search";
+    private static final String PARAM_STATUS = "status";
+    private static final String PARAM_ACCOUNT_ID = "accountId";
 
-    private static final String VIEW_CREATE           = "create";
-    private static final String VIEW_EDIT             = "edit";
-    private static final String VIEW_DETAIL           = "detail";
-    private static final String VIEW_OWNERS           = "owners";
+    private static final String VIEW_CREATE = "create";
+    private static final String VIEW_EDIT = "edit";
+    private static final String VIEW_DETAIL = "detail";
+    private static final String VIEW_OWNERS = "owners";
 
-    private static final String ACTION_DELETE         = "delete";
-    private static final String ACTION_STATUS         = "status";
-    private static final String ACTION_CREATE         = "create";
-    private static final String ACTION_EDIT           = "edit";
-    private static final String ACTION_ASSIGN_BY_ID   = "assignOwnerById";
+    private static final String ACTION_DELETE = "delete";
+    private static final String ACTION_STATUS = "status";
+    private static final String ACTION_CREATE = "create";
+    private static final String ACTION_EDIT = "edit";
+    private static final String ACTION_ASSIGN_BY_ID = "assignOwnerById";
 
     // =========================
     // LIFECYCLE
@@ -71,11 +71,16 @@ public class AdminVoucherServlet extends HttpServlet {
         }
 
         switch (view) {
-            case VIEW_CREATE -> forward(req, resp, JSP_CREATE);
-            case VIEW_EDIT   -> handleEditView(req, resp, voucherDAO);
-            case VIEW_DETAIL -> handleDetailView(req, resp, voucherDAO);
-            case VIEW_OWNERS -> handleOwnersView(req, resp, voucherDAO);
-            default          -> handleList(req, resp, voucherDAO);
+            case VIEW_CREATE ->
+                forward(req, resp, JSP_CREATE);
+            case VIEW_EDIT ->
+                handleEditView(req, resp, voucherDAO);
+            case VIEW_DETAIL ->
+                handleDetailView(req, resp, voucherDAO);
+            case VIEW_OWNERS ->
+                handleOwnersView(req, resp, voucherDAO);
+            default ->
+                handleList(req, resp, voucherDAO);
         }
     }
 
@@ -105,7 +110,6 @@ public class AdminVoucherServlet extends HttpServlet {
     // =========================
     // HANDLERS – VIEW
     // =========================
-
     private void handleList(HttpServletRequest req, HttpServletResponse resp, VoucherDAO dao) throws ServletException, IOException {
         String keyword = str(req, PARAM_SEARCH);
         List<Voucher> vouchers = (notBlank(keyword))
@@ -115,17 +119,25 @@ public class AdminVoucherServlet extends HttpServlet {
         int total = dao.countVouchers();
         req.setAttribute("vouchers", vouchers);
         req.setAttribute("totalVouchers", total);
-        if (notBlank(keyword)) req.setAttribute("keyword", keyword);
+        if (notBlank(keyword)) {
+            req.setAttribute("keyword", keyword);
+        }
 
         forward(req, resp, JSP_MANAGE);
     }
 
     private void handleEditView(HttpServletRequest req, HttpServletResponse resp, VoucherDAO dao) throws IOException, ServletException {
         Integer id = intOrNull(req, PARAM_ID);
-        if (id == null) { redirect(resp, base(req)); return; }
+        if (id == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         Voucher voucher = dao.getVoucherById(id);
-        if (voucher == null) { redirect(resp, base(req)); return; }
+        if (voucher == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         req.setAttribute("voucher", voucher);
         forward(req, resp, JSP_EDIT);
@@ -133,10 +145,16 @@ public class AdminVoucherServlet extends HttpServlet {
 
     private void handleDetailView(HttpServletRequest req, HttpServletResponse resp, VoucherDAO dao) throws IOException, ServletException {
         Integer id = intOrNull(req, PARAM_ID);
-        if (id == null) { redirect(resp, base(req)); return; }
+        if (id == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         Voucher voucher = dao.getVoucherById(id);
-        if (voucher == null) { redirect(resp, base(req)); return; }
+        if (voucher == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         req.setAttribute("voucher", voucher);
         forward(req, resp, JSP_DETAIL);
@@ -144,10 +162,16 @@ public class AdminVoucherServlet extends HttpServlet {
 
     private void handleOwnersView(HttpServletRequest req, HttpServletResponse resp, VoucherDAO dao) throws IOException, ServletException {
         Integer id = intOrNull(req, PARAM_ID);
-        if (id == null) { redirect(resp, base(req)); return; }
+        if (id == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         Voucher voucher = dao.getVoucherById(id);
-        if (voucher == null) { redirect(resp, base(req)); return; }
+        if (voucher == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         List<Account> owners = dao.getAcountByVoucherId(id);
         req.setAttribute("voucher", voucher);
@@ -158,10 +182,12 @@ public class AdminVoucherServlet extends HttpServlet {
     // =========================
     // HANDLERS – ACTION (GET)
     // =========================
-
     private void handleDelete(HttpServletRequest req, HttpServletResponse resp, VoucherDAO dao) throws IOException, ServletException {
         Integer id = intOrNull(req, PARAM_ID);
-        if (id == null) { redirect(resp, base(req)); return; }
+        if (id == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         boolean ok = dao.deleteVoucher(id);
         if (!ok) {
@@ -174,7 +200,10 @@ public class AdminVoucherServlet extends HttpServlet {
 
     private void handleToggleStatus(HttpServletRequest req, HttpServletResponse resp, VoucherDAO dao) throws IOException {
         Integer id = intOrNull(req, PARAM_ID);
-        if (id == null) { redirect(resp, base(req)); return; }
+        if (id == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         boolean current = Boolean.parseBoolean(str(req, PARAM_STATUS));
         dao.updateVoucherStatus(id, !current);
@@ -184,12 +213,14 @@ public class AdminVoucherServlet extends HttpServlet {
     // =========================
     // HANDLERS – ACTION (POST)
     // =========================
-
     private void handleCreatePost(HttpServletRequest req, HttpServletResponse resp, VoucherDAO dao) throws IOException, ServletException {
         try {
             Voucher v = extractVoucherFromRequest(req);
             boolean ok = dao.insertVoucher(v);
-            if (ok) { redirect(resp, base(req)); return; }
+            if (ok) {
+                redirect(resp, base(req));
+                return;
+            }
 
             req.setAttribute("errorMessage", "Tạo mã giảm giá thất bại. Vui lòng thử lại.");
             req.setAttribute("voucher", v);
@@ -202,13 +233,19 @@ public class AdminVoucherServlet extends HttpServlet {
 
     private void handleEditPost(HttpServletRequest req, HttpServletResponse resp, VoucherDAO dao) throws IOException, ServletException {
         Integer id = intOrNull(req, PARAM_ID);
-        if (id == null) { redirect(resp, base(req)); return; }
+        if (id == null) {
+            redirect(resp, base(req));
+            return;
+        }
 
         try {
             Voucher v = extractVoucherFromRequest(req);
             v.setVoucherID(id);
             boolean ok = dao.updateVoucher(v);
-            if (ok) { redirect(resp, base(req)); return; }
+            if (ok) {
+                redirect(resp, base(req));
+                return;
+            }
 
             req.setAttribute("errorMessage", "Cập nhật mã giảm giá thất bại. Vui lòng thử lại.");
             req.setAttribute("voucher", v);
@@ -224,25 +261,37 @@ public class AdminVoucherServlet extends HttpServlet {
         String accIdRaw = str(req, PARAM_ACCOUNT_ID);
         String redirectBase = ownersUrl(req, voucherId);
 
-        if (voucherId == null) { redirect(resp, base(req)); return; }
-        if (!notBlank(accIdRaw)) { redirect(resp, redirectBase + "&err=empty"); return; }
+        if (voucherId == null) {
+            redirect(resp, base(req));
+            return;
+        }
+        if (!notBlank(accIdRaw)) {
+            redirect(resp, redirectBase + "&err=empty");
+            return;
+        }
 
         Integer accountId = parseIntOrNull(accIdRaw.trim());
-        if (accountId == null) { redirect(resp, redirectBase + "&err=badid"); return; }
+        if (accountId == null) {
+            redirect(resp, redirectBase + "&err=badid");
+            return;
+        }
 
         VoucherDAO.AssignResult res = dao.assignVoucherToAccountId(voucherId, accountId);
         switch (res) {
-            case SUCCESS     -> redirect(resp, redirectBase + "&msg=assigned");
-            case USER_NOT_FOUND -> redirect(resp, redirectBase + "&err=notfound");
-            case DUPLICATE   -> redirect(resp, redirectBase + "&err=duplicate");
-            default          -> redirect(resp, redirectBase + "&err=unknown");
+            case SUCCESS ->
+                redirect(resp, redirectBase + "&msg=assigned");
+            case USER_NOT_FOUND ->
+                redirect(resp, redirectBase + "&err=notfound");
+            case DUPLICATE ->
+                redirect(resp, redirectBase + "&err=duplicate");
+            default ->
+                redirect(resp, redirectBase + "&err=unknown");
         }
     }
 
     // =========================
     // UTILITIES
     // =========================
-
     private static void prepareEncoding(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
@@ -261,7 +310,9 @@ public class AdminVoucherServlet extends HttpServlet {
     }
 
     private static String ownersUrl(HttpServletRequest req, Integer voucherId) {
-        if (voucherId == null) return base(req);
+        if (voucherId == null) {
+            return base(req);
+        }
         return base(req) + "?view=owners&id=" + voucherId;
     }
 
@@ -278,8 +329,14 @@ public class AdminVoucherServlet extends HttpServlet {
     }
 
     private static Integer parseIntOrNull(String raw) {
-        if (!notBlank(raw)) return null;
-        try { return Integer.parseInt(raw.trim()); } catch (NumberFormatException e) { return null; }
+        if (!notBlank(raw)) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(raw.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     // Map form -> entity (dùng thống nhất cho create & edit)

@@ -86,7 +86,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Số lượng tồn kho (kg)</label>
-                            <input type="number" min="0" step="0.01" class="form-control" name="fruitQuantity" value="<%= mo.getStockQuantity()%>" required />
+                            <input type="number" min="0" step="0.01" class="form-control" name="fruitQuantity" value="<%= 0%>" required />
                         </div>
                         <% } else {%>
                         <div class="mb-3">
@@ -95,7 +95,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Số lượng thùng</label>
-                            <input type="number" min="0" step="1" class="form-control" name="boxQuantity" required value="<%= (long) mo.getStockQuantity()%>" id="boxQuantity" />
+                            <input type="number" min="0" step="1" class="form-control" name="boxQuantity" required value="<%= (long) 0%>" id="boxQuantity" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Số lượng sản phẩm trong 1 thùng</label>

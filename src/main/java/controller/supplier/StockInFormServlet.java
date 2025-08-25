@@ -25,7 +25,7 @@ import model.Manufacturer;
 import model.StockIn;
 import model.StockInDetail;
 
-@WebServlet(name = "StockInFormServlet", urlPatterns = {"/staff/stockin"})
+@WebServlet(name = "StockInFormServlet", urlPatterns = { "/staff/stockin" })
 public class StockInFormServlet extends HttpServlet {
 
     // Khai báo các DAO làm thuộc tính của servlet
@@ -64,24 +64,14 @@ public class StockInFormServlet extends HttpServlet {
 
         try {
             // ===== PHẦN 1: LẤY DỮ LIỆU TỪ DATABASE (Model Layer) =====
-// 1.3. Lấy danh sách nhà cung cấp
+            // 1.3. Lấy danh sách nhà cung cấp
             List<Manufacturer> manufactureList = manufactureDAO.getManufacturersByStatus(1);
 
-// 1.4. Lấy danh sách admin
+            // 1.4. Lấy danh sách admin
             List<Account> adminList = accountDAO.getAccountsByRole(1);
-// 1.4. Lấy danh sách inventory            
-            List<StockIn> stockIns = stockDAO.getAllStockIns();
-
-            // Với mỗi StockIn, load chi tiết
-            for (StockIn s : stockIns) {
-                List<StockInDetail> details = stockDAO.getDetailsByStockInID(s.getStockInID());
-                s.setDetails(details); // StockIn có field List<StockInDetail> details
-            }
-
-            request.setAttribute("stockIns", stockIns);
 
             // ===== PHẦN 2: GỬI DỮ LIỆU ĐẾN JSP (View Layer) =====
-            // 2.3. Gửi dữ liệu nhà cung cấp và người nhận
+            // 2.3. Gửi dữ liệu nhà cung cấp và người nhận TRƯỚC
             request.setAttribute("suppliers", manufactureList);
             request.setAttribute("receivers", adminList);
 
@@ -89,10 +79,29 @@ public class StockInFormServlet extends HttpServlet {
             request.setAttribute("totalSuppliers", manufactureList.size());
             request.setAttribute("totalReceivers", adminList.size());
 
+            // 1.4. Lấy danh sách inventory (SAU KHI ĐÃ SET SUPPLIERS/RECEIVERS)
+            try {
+                List<StockIn> stockIns = stockDAO.getAllStockIns();
+                if (stockIns != null) {
+                    for (StockIn s : stockIns) {
+                        try {
+                            List<StockInDetail> details = stockDAO.getDetailsByStockInID(s.getStockInID());
+                            s.setDetails(details);
+                        } catch (Exception e) {
+                            s.setDetails(new ArrayList<>());
+                        }
+                    }
+                    request.setAttribute("stockIns", stockIns);
+                } else {
+                    request.setAttribute("stockIns", new ArrayList<>());
+                }
+            } catch (Exception e) {
+                request.setAttribute("stockIns", new ArrayList<>());
+            }
+
             // ===== PHẦN 3: FORWARD ĐẾN JSP =====
             RequestDispatcher dispatcher = request.getRequestDispatcher(
-                    "/WEB-INF/staff/Warehouse_management/stockin-form.jsp"
-            );
+                    "/WEB-INF/staff/Warehouse_management/stockin-form.jsp");
             dispatcher.forward(request, response);
 
         } catch (Exception e) {
@@ -102,8 +111,7 @@ public class StockInFormServlet extends HttpServlet {
 
             // Forward đến trang lỗi hoặc trang hiện tại với thông báo lỗi
             RequestDispatcher dispatcher = request.getRequestDispatcher(
-                    "/WEB-INF/staff/Warehouse_management/stockin-form.jsp"
-            );
+                    "/WEB-INF/staff/Warehouse_management/stockin-form.jsp");
             dispatcher.forward(request, response);
         }
     }
@@ -112,16 +120,23 @@ public class StockInFormServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Xử lý submit phiếu nhập
+
         // Đọc dạng mảng nhiều dòng
         String[] productIds = request.getParameterValues("productId");
         String[] quantities = request.getParameterValues("quantity");
         String[] prices = request.getParameterValues("price");
         String[] packageTypes = request.getParameterValues("packageType");
-        String[] packSizes = request.getParameterValues("packSize");
+        // Bỏ packSizes - không cần thiết
+        String[] lotNumbers = request.getParameterValues("lotNumber");
+        String[] manufactureDates = request.getParameterValues("manufactureDate");
+        String[] expiryDates = request.getParameterValues("expiryDate");
         String supplierIdStr = request.getParameter("supplierId");
         String receiverIdStr = request.getParameter("receiverId");
         String dateStr = request.getParameter("date");
         String note = request.getParameter("note");
+
+        //
 
         // Kiểm tra dữ liệu đầu vào
         if (productIds == null || productIds.length == 0) {
@@ -145,53 +160,73 @@ public class StockInFormServlet extends HttpServlet {
         try {
             int supplierID = Integer.parseInt(request.getParameter("supplierId"));
             int receiverID = Integer.parseInt(request.getParameter("receiverId"));
-            System.out.println("SupplierID: " + supplierID + ", ReceiverID: " + receiverID);
 
             StockIn stock = new StockIn(supplierID, receiverID, java.sql.Date.valueOf(dateStr), note);
-            System.out.println("Created StockIn: " + stock);
+            stock.setStatus("Pending");
 
             List<Inventory> invList = new ArrayList<>();
             List<StockInDetail> detailList = new ArrayList<>();
 
             for (int i = 0; i < productIds.length; i++) {
+                // Kiểm tra bảo vệ để tránh ArrayIndexOutOfBoundsException
+                if (i >= quantities.length || i >= prices.length || i >= packageTypes.length) {
+                    System.err.println("Array length mismatch at index " + i);
+                    System.err.println("productIds: " + productIds.length + ", quantities: " + quantities.length +
+                            ", prices: " + prices.length + ", packageTypes: " + packageTypes.length);
+                    throw new IllegalArgumentException("Array length mismatch");
+                }
+
                 int pid = Integer.parseInt(productIds[i]);
                 double qty = Double.parseDouble(quantities[i]);
                 double price = Double.parseDouble(prices[i]);
                 String pkgType = packageTypes[i];
-                int pSize = Integer.parseInt(packSizes[i]);
+                // Bỏ packSize - không cần thiết
+                String lotNumber = lotNumbers != null && i < lotNumbers.length ? lotNumbers[i] : null;
+                Date manufactureDate = manufactureDates != null && i < manufactureDates.length
+                        && !manufactureDates[i].trim().isEmpty()
+                                ? Date.valueOf(manufactureDates[i])
+                                : null;
+                Date expiryDate = expiryDates != null && i < expiryDates.length && !expiryDates[i].trim().isEmpty()
+                        ? Date.valueOf(expiryDates[i])
+                        : null;
 
-                System.out.println("Processing productId=" + pid
-                        + ", qty=" + qty
-                        + ", price=" + price
-                        + ", pkgType=" + pkgType
-                        + ", packSize=" + pSize);
+                //
 
-                Inventory inv = new Inventory(pid, pkgType, qty, price, pSize, Date.valueOf(dateStr));
+                // Sử dụng constructor đúng: (productID, packageType, quantity, unitPrice,
+                // costPrice)
+                Inventory inv = new Inventory(pid, pkgType, qty, null, price);
                 StockInDetail detail = new StockInDetail(qty, price);
+
+                // Set các field cần thiết cho StockInDetail
+                detail.setProductID(pid);
+                detail.setPackageType(pkgType);
+                // Bỏ PackSize - không cần thiết
+                detail.setLotNumber(lotNumber);
+                detail.setManufactureDate(manufactureDate);
+                detail.setExpiryDate(expiryDate);
 
                 invList.add(inv);
                 detailList.add(detail);
             }
 
-            System.out.println("Inventory list size: " + invList.size());
-            System.out.println("Detail list size: " + detailList.size());
+            if (!stockDAO.testConnection()) {
+                throw new SQLException("Database connection test failed");
+            }
 
-            StockDAO dao = new StockDAO();
-            dao.createStockInFull(stock, invList, detailList);
-            System.out.println("StockIn transaction created successfully.");
+            // Sử dụng stockDAO đã được khởi tạo trong init() thay vì tạo mới
+            stockDAO.createStockInFull(stock, invList, detailList);
 
             response.sendRedirect(request.getContextPath() + "/staff/stockin?success=1");
 
         } catch (NumberFormatException e) {
-            e.printStackTrace();
             request.setAttribute("errorMessage", "Dữ liệu không hợp lệ: " + e.getMessage());
             doGet(request, response);
         } catch (SQLException e) {
-            e.printStackTrace();
+            request.setAttribute("errorMessage", "Lỗi cơ sở dữ liệu: " + e.getMessage());
             request.setAttribute("errorMessage", "Lỗi cơ sở dữ liệu: " + e.getMessage());
             doGet(request, response);
         } catch (Exception e) {
-            e.printStackTrace();
+            request.setAttribute("errorMessage", "Lỗi không xác định: " + e.getMessage());
             request.setAttribute("errorMessage", "Lỗi không xác định: " + e.getMessage());
             doGet(request, response);
         }

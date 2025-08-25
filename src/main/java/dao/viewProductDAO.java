@@ -21,7 +21,7 @@ public class ViewProductDAO extends DBContext {
     public List<Product> getProductsByCategory(int parentCategoryId) {
         List<Product> list = new ArrayList<>();
         String sql = """
-                    SELECT p.ProductID, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.CategoryID,
+                    SELECT p.ProductID, p.ProductName, p.Price, p.ImageURL, p.Unit, 0 -- StockQuantity removed, p.CategoryID,
                            p.UnitPerBox, p.BoxUnitName, p.ItemUnitName
                                 FROM Product p
                                 JOIN Category c ON p.CategoryID = c.CategoryID
@@ -36,8 +36,8 @@ public class ViewProductDAO extends DBContext {
                 p.setProductName(rs.getString("ProductName"));
                 p.setPrice(rs.getDouble("Price"));
                 p.setImageURL(rs.getString("ImageURL"));
-                p.setUnit(rs.getString("Unit"));
-                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                // Unit is now handled by ItemUnitName/BoxUnitName
+                // StockQuantity is now handled in Inventory table
                 p.setCategoryID(rs.getInt("CategoryID"));
                 try {
                     p.setUnitPerBox(rs.getInt("UnitPerBox"));
@@ -110,7 +110,7 @@ public class ViewProductDAO extends DBContext {
     public List<Product> getFeaturedProductsByPage(int parentCategoryId, int offset, int limit) {
         List<Product> list = new ArrayList<>();
         String sql = """
-                    SELECT p.ProductID, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.CategoryID,
+                    SELECT p.ProductID, p.ProductName, p.Price, p.ImageURL, p.Unit, 0 -- StockQuantity removed, p.CategoryID,
                            p.UnitPerBox, p.BoxUnitName, p.ItemUnitName
                     FROM Product p
                     JOIN Category c ON p.CategoryID = c.CategoryID
@@ -130,8 +130,8 @@ public class ViewProductDAO extends DBContext {
                 p.setProductName(rs.getString("ProductName"));
                 p.setPrice(rs.getDouble("Price"));
                 p.setImageURL(rs.getString("ImageURL"));
-                p.setUnit(rs.getString("Unit"));
-                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                // Unit is now handled by ItemUnitName/BoxUnitName
+                // StockQuantity is now handled in Inventory table
                 p.setCategoryID(rs.getInt("CategoryID"));
                 try {
                     p.setUnitPerBox(rs.getInt("UnitPerBox"));
@@ -154,10 +154,11 @@ public class ViewProductDAO extends DBContext {
         } else {
             for (Product p : list) {
                 System.out.println("Tên: " + p.getProductName());
-                System.out.println("Giá: " + p.getPrice() + " VNĐ / " + p.getUnit());
+                System.out.println("Giá: " + p.getPrice() + " VNĐ / " + p.getItemUnitName());
                 System.out.println("Hình ảnh: " + p.getImageURL());
                 System.out.println("---------------------------");
             }
         }
     }
 }
+

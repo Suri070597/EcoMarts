@@ -14,14 +14,20 @@ public class Inventory {
     private int inventoryID;
     private int productID;
     private String productName;
-    private String packageType;   
+    private String packageType;
     private double quantity;
-    private double unitPrice;
+    private Double unitPrice; // Giá bán dựa theo Product.Price
+    private Double costPrice; // Giá nhập kho thực tế (chỉ cho BOX)
     private int packSize;
     private Date lastUpdated;
     private String status;
 
-    
+    // Thêm các trường mới cho FIFO
+    private String lotNumber; // Số lô hàng
+    private Date expiryDate; // Hạn sử dụng
+    // Bỏ RemainingQuantity - không cần thiết
+    private Date lotDate; // Ngày tạo lô
+
     public Inventory() {
     }
 
@@ -32,27 +38,29 @@ public class Inventory {
         this.quantity = quantity;
         this.status = status;
     }
-    
-    public Inventory(int productID, String packageType, double quantity, double unitPrice, int packSize, Date lastUpdated) {
+
+    public Inventory(int productID, String packageType, double quantity, Double unitPrice, Double costPrice) {
         this.productID = productID;
         this.packageType = packageType;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-        this.packSize = packSize;
-        this.lastUpdated = lastUpdated;
-    }  
+        this.costPrice = costPrice;
+        this.lotDate = new Date(System.currentTimeMillis()); // Set LotDate mặc định
+    }
 
-    public Inventory(int inventoryID, int productID, String productName, String packageType, double quantity, double unitPrice, int packSize, Date lastUpdated, String status) {
+    public Inventory(int inventoryID, int productID, String productName, String packageType, double quantity,
+            Double unitPrice, Double costPrice, int packSize, Date lastUpdated, String status) {
         this.inventoryID = inventoryID;
         this.productID = productID;
         this.productName = productName;
         this.packageType = packageType;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
+        this.costPrice = costPrice;
         this.packSize = packSize;
         this.lastUpdated = lastUpdated;
         this.status = status;
-    }  
+    }
 
     /**
      * @return the inventoryID
@@ -111,6 +119,48 @@ public class Inventory {
     }
 
     /**
+     * @return the unitPrice
+     */
+    public Double getUnitPrice() {
+        return unitPrice;
+    }
+
+    /**
+     * @param unitPrice the unitPrice to set
+     */
+    public void setUnitPrice(Double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    /**
+     * @return the costPrice
+     */
+    public Double getCostPrice() {
+        return costPrice;
+    }
+
+    /**
+     * @param costPrice the costPrice to set
+     */
+    public void setCostPrice(Double costPrice) {
+        this.costPrice = costPrice;
+    }
+
+    /**
+     * @return the lastUpdated
+     */
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
+
+    /**
+     * @param lastUpdated the lastUpdated to set
+     */
+    public void setLastUpdated(Date lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    /**
      * @return the status
      */
     public String getStatus() {
@@ -139,46 +189,53 @@ public class Inventory {
     }
 
     /**
-     * @return the unitPrice
+     * @return the lotNumber
      */
-    public double getUnitPrice() {
-        return unitPrice;
+    public String getLotNumber() {
+        return lotNumber;
     }
 
     /**
-     * @param unitPrice the unitPrice to set
+     * @param lotNumber the lotNumber to set
      */
-    public void setUnitPrice(double unitPrice) {
-        this.unitPrice = unitPrice;
+    public void setLotNumber(String lotNumber) {
+        this.lotNumber = lotNumber;
     }
 
     /**
-     * @return the packSize
+     * @return the expiryDate
      */
-    public int getPackSize() {
-        return packSize;
+    public Date getExpiryDate() {
+        return expiryDate;
     }
 
     /**
-     * @param packSize the packSize to set
+     * @param expiryDate the expiryDate to set
      */
-    public void setPackSize(int packSize) {
-        this.packSize = packSize;
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     /**
-     * @return the lastUpdated
+     * @return the lotDate
      */
-    public Date getLastUpdated() {
-        return lastUpdated;
+    public Date getLotDate() {
+        return lotDate;
     }
 
     /**
-     * @param lastUpdated the lastUpdated to set
+     * @param lotDate the lotDate to set
      */
-    public void setLastUpdated(Date lastUpdated) {
-        this.lastUpdated = lastUpdated;
+    public void setLotDate(Date lotDate) {
+        this.lotDate = lotDate;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return "Inventory{" + "inventoryID=" + inventoryID + ", productID=" + productID + ", productName=" + productName
+                + ", packageType=" + packageType + ", quantity=" + quantity + ", unitPrice=" + unitPrice
+                + ", costPrice=" + costPrice + ", packSize="
+                + packSize + ", lastUpdated=" + lastUpdated + ", status=" + status + ", lotNumber=" + lotNumber
+                + ", lotDate=" + lotDate + '}';
+    }
 }
