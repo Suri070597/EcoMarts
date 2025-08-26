@@ -23,7 +23,7 @@ import model.Category;
 import model.Product;
 import model.Manufacturer;
 
-@WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
+@WebServlet(name = "ProductServlet", urlPatterns = {"/admin/product"})
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
@@ -94,14 +94,19 @@ public class ProductServlet extends HttpServlet {
                 request.setAttribute("keyword", keyword);
 
                 // Counters for stock status cards based on search results
-                final int SEARCH_LOW_STOCK_THRESHOLD = 5;
-                int searchInStock = 0, searchLowStock = 0, searchOutOfStock = 0;
+                final int SEARCH_LOW_STOCK_THRESHOLD = 10;
+                int searchInStock = 0,
+                 searchLowStock = 0,
+                 searchOutOfStock = 0;
 
                 for (Product p : searchResults) {
-                    double stock = p.getStockQuantity();
-                    if (stock > SEARCH_LOW_STOCK_THRESHOLD) {
+                    double boxQuantity = dao.getQuantityByPackageType(p.getProductID(), "BOX");
+                    double kgQuantity = dao.getQuantityByPackageType(p.getProductID(), "KG");
+                    double totalStock = boxQuantity + kgQuantity;
+
+                    if (totalStock > SEARCH_LOW_STOCK_THRESHOLD) {
                         searchInStock++;
-                    } else if (stock > 0) {
+                    } else if (totalStock > 0) {
                         searchLowStock++;
                     } else {
                         searchOutOfStock++;
@@ -304,8 +309,9 @@ public class ProductServlet extends HttpServlet {
                     String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
                     if (!fileName.isEmpty()) {
                         File uploadDir = new File(IMAGE_UPLOAD_DIR);
-                        if (!uploadDir.exists())
+                        if (!uploadDir.exists()) {
                             uploadDir.mkdirs();
+                        }
                         filePart.write(IMAGE_UPLOAD_DIR + File.separator + fileName);
                     }
                     String pImage = fileName;
@@ -504,14 +510,6 @@ public class ProductServlet extends HttpServlet {
                         return;
                     }
 
-                    if (boxesToConvert > currentProduct.getStockQuantity()) {
-                        request.setAttribute("error", "Số lượng thùng chuyển đổi vượt quá số lượng hiện có");
-                        request.setAttribute("product", currentProduct);
-                        request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
-                                response);
-                        return;
-                    }
-
                     // Validate pack size for pack conversion
                     if (conversionType.equals("pack") || conversionType.equals("both")) {
                         if (packSize <= 0) {
@@ -533,8 +531,8 @@ public class ProductServlet extends HttpServlet {
                         // Kiểm tra số lon trong 1 thùng phải chia hết cho packSize
                         if (currentProduct.getUnitPerBox() % packSize != 0) {
                             request.setAttribute("error",
-                                    "Số lon trong 1 thùng (" + currentProduct.getUnitPerBox() +
-                                            ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
+                                    "Số lon trong 1 thùng (" + currentProduct.getUnitPerBox()
+                                    + ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
                             request.setAttribute("product", currentProduct);
                             request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
                                     response);

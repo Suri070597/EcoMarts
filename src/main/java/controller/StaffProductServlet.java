@@ -22,17 +22,17 @@ import model.Product;
  *
  * @author LNQB
  */
-@WebServlet(name = "StaffProduct", urlPatterns = { "/staff/product" })
+@WebServlet(name = "StaffProduct", urlPatterns = {"/staff/product"})
 public class StaffProductServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -56,10 +56,10 @@ public class StaffProductServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -96,13 +96,18 @@ public class StaffProductServlet extends HttpServlet {
 
                 // Counters for stock status cards based on search results
                 final int SEARCH_LOW_STOCK_THRESHOLD = 10;
-                int searchInStock = 0, searchLowStock = 0, searchOutOfStock = 0;
+                int searchInStock = 0,
+                 searchLowStock = 0,
+                 searchOutOfStock = 0;
 
                 for (Product p : searchResults) {
-                    double stock = p.getStockQuantity();
-                    if (stock > SEARCH_LOW_STOCK_THRESHOLD) {
+                    double boxQuantity = dao.getQuantityByPackageType(p.getProductID(), "BOX");
+                    double kgQuantity = dao.getQuantityByPackageType(p.getProductID(), "KG");
+                    double totalStock = boxQuantity + kgQuantity;
+
+                    if (totalStock > SEARCH_LOW_STOCK_THRESHOLD) {
                         searchInStock++;
-                    } else if (stock > 0) {
+                    } else if (totalStock > 0) {
                         searchLowStock++;
                     } else {
                         searchOutOfStock++;
@@ -158,10 +163,10 @@ public class StaffProductServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
