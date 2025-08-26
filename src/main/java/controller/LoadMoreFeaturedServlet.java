@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Product;
+import db.DBContext;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -70,71 +71,65 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 return;
                         }
 
-                        // Tạo HTML cho các sản phẩm theo quy tắc hiển thị giá
+                        // Tạo HTML cho các sản phẩm theo logic ViewProductDAO:
+                        // - Trái cây (ParentID=3): kiểm tra tồn kho KG > 0
+                        // - Danh mục khác: kiểm tra tồn kho UNIT > 0
+                        // - Giá: UnitPrice / ItemUnitName
                         StringBuilder html = new StringBuilder();
                         for (Product p : products) {
-                                // Định dạng tiền tệ: 240.000 đ
                                 java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
                                 symbols.setGroupingSeparator('.');
                                 java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
 
-                                // Xác định chuỗi giá theo quy tắc
-                                String priceDisplay = null;
-                                Integer effectiveParentId = parentId;
-                                if ("featured".equalsIgnoreCase(type)) {
+                                // Xác định parentId thực tế cho từng sản phẩm
+                                Integer effectiveParentId = null;
+                                try {
+                                        if (p.getCategory() != null) {
+                                                effectiveParentId = p.getCategory().getParentID();
+                                        }
+                                } catch (Exception ignore) {
+                                }
+                                if (effectiveParentId == null) {
                                         try {
-                                                if (p.getCategory() != null) {
-                                                        effectiveParentId = p.getCategory().getParentID();
-                                                } else {
-                                                        effectiveParentId = 0;
+                                                Product fullTmp = productDao.getProductById(p.getProductID());
+                                                if (fullTmp != null && fullTmp.getCategory() != null) {
+                                                        effectiveParentId = fullTmp.getCategory().getParentID();
                                                 }
                                         } catch (Exception ignore) {
                                         }
+                                }
+                                if (effectiveParentId == null) {
+                                        effectiveParentId = parentId; // fallback theo tham số
                                 }
 
-                                if (effectiveParentId == 1 || effectiveParentId == 2) {
-                                        // Nước giải khát & Sữa: giá theo thùng (BOX)
-                                        Double boxPrice = productDao.getBoxPrice(p.getProductID());
-                                        if (boxPrice == null)
-                                                boxPrice = p.getPrice();
-                                        StringBuilder sb = new StringBuilder();
-                                        sb.append(formatter.format(boxPrice)).append(" đ / thùng");
-                                        try {
-                                                Integer upb = p.getUnitPerBox();
-                                                String iun = p.getItemUnitName();
-                                                if (upb == null || upb <= 0 || iun == null || iun.trim().isEmpty()) {
-                                                        Product full = productDao.getProductById(p.getProductID());
-                                                        if (full != null) {
-                                                                upb = full.getUnitPerBox();
-                                                                iun = full.getItemUnitName();
-                                                        }
-                                                }
-                                                if (upb != null && upb > 0 && iun != null && !iun.trim().isEmpty()) {
-                                                        sb.append(" (").append(upb).append(" ").append(iun).append(")");
-                                                }
-                                        } catch (Exception ignore) {
-                                        }
-                                        priceDisplay = sb.toString();
-                                } else if (effectiveParentId == 3) {
-                                        // Trái cây: giữ nguyên
-                                        priceDisplay = formatter.format(p.getPrice()) + " đ / " + p.getUnit();
-                                } else {
-                                        // Loại khác: phải có UNIT, nếu không có thì ẩn (skip)
-                                        Double unitPrice = productDao.getUnitOnlyPrice(p.getProductID());
-                                        if (unitPrice == null) {
-                                                continue; // ẩn card
-                                        }
-                                        String unitLabel = productDao.getItemUnitName(p.getProductID());
-                                        if (unitLabel == null || unitLabel.trim().isEmpty()) {
-                                                continue; // an toàn: phải có unit label
-                                        }
-                                        priceDisplay = formatter.format(unitPrice) + " đ / " + unitLabel;
+                                String packageType = (effectiveParentId != null && effectiveParentId == 3) ? "KG"
+                                                : "UNIT";
+                                double pkgQty = productDao.getQuantityByPackageType(p.getProductID(), packageType);
+                                if (pkgQty <= 0) {
+                                        continue; // không hiển thị nếu không có tồn đúng loại
                                 }
+
+                                // Lấy giá từ Product.PriceUnit thay vì Inventory.UnitPrice
+                                Double unitPrice = p.getPriceUnit();
+                                if (unitPrice == null) {
+                                        // Fallback lấy từ DB Product
+                                        Product full = productDao.getProductById(p.getProductID());
+                                        if (full != null)
+                                                unitPrice = full.getPriceUnit();
+                                }
+                                if (unitPrice == null) {
+                                        continue;
+                                }
+                                String unitLabel = productDao.getItemUnitName(p.getProductID());
+                                if (unitLabel == null || unitLabel.trim().isEmpty()) {
+                                        continue;
+                                }
+                                String priceDisplay = formatter.format(unitPrice) + " đ / " + unitLabel;
 
                                 html.append("<div class=\"product-card\" data-product-id=\"").append(p.getProductID())
-                                                .append("\" data-stock-quantity=\"").append(p.getStockQuantity())
+                                                .append("\" data-stock-quantity=\"").append(pkgQty)
                                                 .append("\">");
-                                if (p.getStockQuantity() <= 0) {
+                                if (pkgQty <= 0) {
                                         html.append("<div class=\"product-badge out-of-stock\">Hết hàng</div>");
                                 }
                                 html.append("    <div class=\"product-image-container\">");
@@ -145,9 +140,9 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 html.append("        <div class=\"product-actions\">");
                                 html.append("            <button class=\"action-btn add-to-cart-action\" data-product-id=\"")
                                                 .append(p.getProductID())
-                                                .append("\" data-stock-quantity=\"").append(p.getStockQuantity())
+                                                .append("\" data-stock-quantity=\"").append(pkgQty)
                                                 .append("\" ")
-                                                .append(p.getStockQuantity() <= 0
+                                                .append(pkgQty <= 0
                                                                 ? "disabled style='opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append("><i class=\"fas fa-cart-plus\"></i></button>");
@@ -174,9 +169,9 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 html.append("        <div class=\"button-group\">");
                                 html.append("            <button class=\"add-to-cart-btn\" data-product-id=\"")
                                                 .append(p.getProductID())
-                                                .append("\" data-stock-quantity=\"").append(p.getStockQuantity())
+                                                .append("\" data-stock-quantity=\"").append(pkgQty)
                                                 .append("\" ")
-                                                .append(p.getStockQuantity() <= 0
+                                                .append(pkgQty <= 0
                                                                 ? "disabled style='opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append("><i class=\"fas fa-shopping-cart\"></i> Giỏ hàng</button>");
@@ -184,7 +179,7 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                                 .append("/ProductDetail?id=")
                                                 .append(p.getProductID())
                                                 .append("\" class=\"buy-now-btn\" ")
-                                                .append(p.getStockQuantity() <= 0
+                                                .append(pkgQty <= 0
                                                                 ? "style='pointer-events:none;opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append(">Mua ngay</a>");
@@ -205,5 +200,33 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                         e.printStackTrace();
                         out.print("error: " + e.getMessage());
                 }
+        }
+
+        // Chỉ dùng trong servlet này để lấy số lượng UNIT, tránh sửa DAO khác
+        private double getUnitQuantity(int productId) {
+                double qty = 0.0;
+                String sql = "SELECT COALESCE(Quantity, 0) AS Q FROM Inventory WHERE ProductID = ? AND PackageType = 'UNIT'";
+                DBContext db = new DBContext();
+                java.sql.ResultSet rs = null;
+                try {
+                        rs = db.execSelectQuery(sql, new Object[] { productId });
+                        if (rs.next()) {
+                                qty = rs.getDouble("Q");
+                        }
+                } catch (Exception e) {
+                        // log và trả 0 để ẩn sản phẩm nếu lỗi
+                        e.printStackTrace();
+                } finally {
+                        try {
+                                if (rs != null)
+                                        rs.getStatement().close();
+                        } catch (Exception ignore) {
+                        }
+                        try {
+                                db.closeConnection();
+                        } catch (Exception ignore) {
+                        }
+                }
+                return qty;
         }
 }

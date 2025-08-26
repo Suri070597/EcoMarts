@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.HashMap;
 import model.Category;
 import model.Product;
+import db.DBContext;
 
 /**
  *
@@ -149,17 +150,8 @@ public class ViewAllProductServlet extends HttpServlet {
             } else {
                 int parsedCategoryId = Integer.parseInt(categoryIdRaw);
 
-                // Sử dụng ViewProductDAO để lấy sản phẩm theo điều kiện giống homepage
-                dao.ViewProductDAO viewDao = new dao.ViewProductDAO();
-                List<Product> originalList;
-
-                if (parsedCategoryId == 3) {
-                    // Fruits: lấy theo PackageType = 'KG' và quantity > 0
-                    originalList = viewDao.getProductsByCategory(parsedCategoryId);
-                } else {
-                    // Other categories: lấy theo PackageType = 'UNIT' và quantity > 0
-                    originalList = viewDao.getProductsByCategory(parsedCategoryId);
-                }
+                // Lấy sản phẩm theo logic ViewProductDAO nhưng hỗ trợ cả danh mục cha và con
+                List<Product> originalList = dao.getProductsByCategoryExpandedFiltered(parsedCategoryId);
 
                 categoryName = dao.getCategoryNameById(parsedCategoryId);
                 productList = originalList;
@@ -174,7 +166,6 @@ public class ViewAllProductServlet extends HttpServlet {
                 FeedBackDAO fbDao = new FeedBackDAO();
                 Map<Integer, Double> avgRatingMap = new HashMap<>();
                 Map<Integer, Integer> reviewCountMap = new HashMap<>();
-                Map<Integer, Double> unitPriceMap = new HashMap<>();
 
                 for (Product p : (List<Product>) request.getAttribute("productList")) {
                     int pid = p.getProductID();
@@ -182,14 +173,10 @@ public class ViewAllProductServlet extends HttpServlet {
                     int count = fbDao.countReviewsByProductId(pid);
                     avgRatingMap.put(pid, avg);
                     reviewCountMap.put(pid, count);
-                    // Keep providing unit price map for existing JSP logic
-                    Double unitPrice = dao.getUnitPrice(pid);
-                    unitPriceMap.put(pid, unitPrice);
                 }
 
                 request.setAttribute("avgRatingMap", avgRatingMap);
                 request.setAttribute("reviewCountMap", reviewCountMap);
-                request.setAttribute("unitPriceMap", unitPriceMap);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -225,4 +212,5 @@ public class ViewAllProductServlet extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+    // Đã chuyển lấy và lọc sản phẩm theo danh mục sang ProductDAO
 }

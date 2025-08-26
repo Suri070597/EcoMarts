@@ -242,14 +242,14 @@ public class ProductDAO extends DBContext {
 
     public Product getProductById(int id) {
         Product product = null;
-        String sql = "SELECT p.*, c.categoryName, c.parentID, " +
-                "COALESCE(box_inv.Quantity, 0) as BoxQuantity, " +
-                "COALESCE(kg_inv.Quantity, 0) as KgQuantity " +
-                "FROM Product p " +
-                "JOIN Category c ON p.categoryID = c.categoryID " +
-                "LEFT JOIN Inventory box_inv ON p.ProductID = box_inv.ProductID AND box_inv.PackageType = 'BOX' " +
-                "LEFT JOIN Inventory kg_inv ON p.ProductID = kg_inv.ProductID AND kg_inv.PackageType = 'KG' " +
-                "WHERE p.ProductID = ?";
+        String sql = "SELECT p.*, c.categoryName, c.parentID, "
+                + "COALESCE(box_inv.Quantity, 0) as BoxQuantity, "
+                + "COALESCE(kg_inv.Quantity, 0) as KgQuantity "
+                + "FROM Product p "
+                + "JOIN Category c ON p.categoryID = c.categoryID "
+                + "LEFT JOIN Inventory box_inv ON p.ProductID = box_inv.ProductID AND box_inv.PackageType = 'BOX' "
+                + "LEFT JOIN Inventory kg_inv ON p.ProductID = kg_inv.ProductID AND kg_inv.PackageType = 'KG' "
+                + "WHERE p.ProductID = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
@@ -405,8 +405,8 @@ public class ProductDAO extends DBContext {
         try {
             // Xác định có phải trái cây không
             boolean isFruit = false;
-            String sqlCheckFruit = "SELECT CASE WHEN c.CategoryID = 3 OR c.ParentID = 3 THEN 1 ELSE 0 END AS IsFruit " +
-                    "FROM Category c WHERE c.CategoryID = ?";
+            String sqlCheckFruit = "SELECT CASE WHEN c.CategoryID = 3 OR c.ParentID = 3 THEN 1 ELSE 0 END AS IsFruit "
+                    + "FROM Category c WHERE c.CategoryID = ?";
             try (PreparedStatement ps = conn.prepareStatement(sqlCheckFruit)) {
                 ps.setInt(1, categoryId);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -432,15 +432,15 @@ public class ProductDAO extends DBContext {
             }
 
             // SQL update - không cập nhật giá
-            String sql = "UPDATE Product SET " +
-                    "ProductName = ?, " +
-                    "CategoryID = ?, " +
-                    "UnitPerBox = ?, " +
-                    "BoxUnitName = ?, " +
-                    "ItemUnitName = ?, " +
-                    "Description = ?, " +
-                    "ImageURL = ? " +
-                    "WHERE ProductID = ?";
+            String sql = "UPDATE Product SET "
+                    + "ProductName = ?, "
+                    + "CategoryID = ?, "
+                    + "UnitPerBox = ?, "
+                    + "BoxUnitName = ?, "
+                    + "ItemUnitName = ?, "
+                    + "Description = ?, "
+                    + "ImageURL = ? "
+                    + "WHERE ProductID = ?";
 
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, productName);
@@ -1019,11 +1019,11 @@ public class ProductDAO extends DBContext {
     /**
      * Update Inventory table with converted units
      *
-     * @param productId    The product ID
+     * @param productId The product ID
      * @param unitQuantity Number of units (lon) converted
      * @param packQuantity Number of packs (lốc) converted (can be null)
-     * @param unitPrice    Price per unit
-     * @param packPrice    Price per pack (can be null)
+     * @param unitPrice Price per unit
+     * @param packPrice Price per pack (can be null)
      * @return true if update was successful, false otherwise
      */
     public boolean updateInventory(int productId, int unitQuantity, Integer packQuantity, double unitPrice,
@@ -1092,7 +1092,7 @@ public class ProductDAO extends DBContext {
      * @param productId The product ID
      * @param unitCount Number of units to create (can be null)
      * @param packCount Number of packs to create (can be null)
-     * @param packSize  Size of each pack
+     * @param packSize Size of each pack
      * @param unitPrice Price per unit
      * @param packPrice Price per pack (can be null)
      * @return true if update was successful, false otherwise
@@ -1154,13 +1154,13 @@ public class ProductDAO extends DBContext {
     /**
      * Cập nhật inventory khi chuyển đổi sản phẩm (bao gồm cả BOX)
      *
-     * @param productId      The product ID
+     * @param productId The product ID
      * @param boxesToConvert Số thùng được chuyển đổi
-     * @param unitCount      Số đơn vị được tạo
-     * @param packCount      Số lốc được tạo
-     * @param packSize       Số đơn vị trong 1 lốc
-     * @param unitPrice      Giá 1 đơn vị
-     * @param packPrice      Giá 1 lốc
+     * @param unitCount Số đơn vị được tạo
+     * @param packCount Số lốc được tạo
+     * @param packSize Số đơn vị trong 1 lốc
+     * @param unitPrice Giá 1 đơn vị
+     * @param packPrice Giá 1 lốc
      * @return true nếu thành công, false nếu thất bại
      */
     public boolean updateInventoryWithBox(int productId, int boxesToConvert, Integer unitCount, Integer packCount,
@@ -1276,7 +1276,7 @@ public class ProductDAO extends DBContext {
     /**
      * Lấy giá theo loại đóng gói cụ thể từ Inventory
      *
-     * @param productId   ID sản phẩm
+     * @param productId ID sản phẩm
      * @param packageType 'BOX' | 'UNIT' | 'PACK' | 'KG'
      * @return UnitPrice hoặc null nếu không có
      */
@@ -1607,4 +1607,72 @@ public class ProductDAO extends DBContext {
         }
     }
 
+    public double getQuantityByPackageType(int productId, String packageType) {
+        double qty = 0.0;
+        try {
+            String sql = "SELECT COALESCE(Quantity, 0) AS Q FROM Inventory WHERE ProductID = ? AND PackageType = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setString(2, packageType);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        qty = rs.getDouble("Q");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return qty;
+    }
+    
+     public List<Product> getProductsByCategoryExpandedFiltered(int categoryId) {
+        List<Product> list = new ArrayList<>();
+        boolean isFruitCategory = false;
+        try {
+            String catSql = "SELECT CASE WHEN c.CategoryID = 3 OR c.ParentID = 3 THEN 1 ELSE 0 END AS IsFruit FROM Category c WHERE c.CategoryID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(catSql)) {
+                ps.setInt(1, categoryId);
+                try (ResultSet crs = ps.executeQuery()) {
+                    if (crs.next()) {
+                        isFruitCategory = crs.getInt("IsFruit") == 1;
+                    }
+                }
+            }
+
+            String sql = "SELECT p.ProductID FROM Product p WHERE p.CategoryID IN (SELECT c.CategoryID FROM Category c WHERE c.ParentID = ? OR c.CategoryID = ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, categoryId);
+                ps.setInt(2, categoryId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int pid = rs.getInt(1);
+                        Product p = getProductById(pid);
+                        if (p == null) continue;
+
+                        String packageType = isFruitCategory ? "KG" : "UNIT";
+                        double qty = getQuantityByPackageType(pid, packageType);
+                        if (qty <= 0) continue;
+
+                        Double priceUnit = p.getPriceUnit();
+                        if (priceUnit == null) {
+                            Product full = getProductById(pid);
+                            if (full != null) priceUnit = full.getPriceUnit();
+                        }
+                        String itemUnit = p.getItemUnitName();
+                        if (itemUnit == null || itemUnit.trim().isEmpty()) {
+                            itemUnit = getItemUnitName(pid);
+                        }
+                        if (priceUnit == null || itemUnit == null || itemUnit.trim().isEmpty()) continue;
+
+                        p.setStockQuantity(qty);
+                        list.add(p);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

@@ -4,6 +4,7 @@ import dao.CategoryDAO;
 import dao.ProductDAO;
 import dao.FeedBackDAO;
 import dao.PromotionDAO;
+import db.DBContext;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -56,80 +57,62 @@ public class ProductDetailServlet extends HttpServlet {
 
             if (mo.getCategory() != null) {
                 int parentId = mo.getCategory().getParentID();
-                List<Product> relatedProducts = dao.getRelatedProductsByParentCategory(parentId, id);
 
-                // Build display map and filter list per pricing rules
+                // Tự xây danh sách liên quan theo ParentID, không phụ thuộc StockQuantity cũ
                 java.util.List<Product> filteredRelated = new java.util.ArrayList<>();
                 java.util.Map<Integer, String> relatedPriceDisplayMap = new java.util.HashMap<>();
                 java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
                 symbols.setGroupingSeparator('.');
                 java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
 
-                for (Product rp : relatedProducts) {
-                    int pParent = 0;
-                    try {
-                        if (rp.getCategory() != null && rp.getCategory().getParentID() != null) {
-                            pParent = rp.getCategory().getParentID();
+                String sql = "SELECT p.ProductID FROM Product p JOIN Category c ON p.CategoryID = c.CategoryID "
+                        + "WHERE c.ParentID = ? AND p.ProductID <> ?";
+                DBContext db = new DBContext();
+                java.sql.ResultSet rs = null;
+                try {
+                    rs = db.execSelectQuery(sql, new Object[] { parentId, id });
+                    while (rs.next()) {
+                        int pid = rs.getInt(1);
+                        Product rp = dao.getProductById(pid);
+                        if (rp == null)
+                            continue;
+
+                        // Lấy tồn kho qua DAO (getProductById đã tính theo KG nếu trái cây, BOX nếu
+                        // khác)
+                        double qty = rp.getStockQuantity();
+                        if (qty <= 0)
+                            continue;
+
+                        // Yêu cầu có PriceUnit và ItemUnitName
+                        Double priceUnit = rp.getPriceUnit();
+                        if (priceUnit == null) {
+                            Product full = dao.getProductById(pid);
+                            if (full != null)
+                                priceUnit = full.getPriceUnit();
                         }
+                        String itemUnit = rp.getItemUnitName();
+                        if (itemUnit == null || itemUnit.trim().isEmpty()) {
+                            itemUnit = dao.getItemUnitName(pid);
+                        }
+                        if (priceUnit == null || itemUnit == null || itemUnit.trim().isEmpty())
+                            continue;
+
+                        // Cập nhật tồn kho để hiển thị, chuỗi giá theo Unit
+                        rp.setStockQuantity(qty);
+                        filteredRelated.add(rp);
+                        relatedPriceDisplayMap.put(pid, formatter.format(priceUnit) + " đ / " + itemUnit);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (rs != null)
+                            rs.getStatement().close();
                     } catch (Exception ignore) {
                     }
-                    // Fallback: try to resolve parent from DB or current product's parent
-                    if (pParent == 0) {
-                        try {
-                            Product full = dao.getProductById(rp.getProductID());
-                            if (full != null && full.getCategory() != null
-                                    && full.getCategory().getParentID() != null) {
-                                pParent = full.getCategory().getParentID();
-                            }
-                        } catch (Exception ignore) {
-                        }
-                    }
-                    if (pParent == 0 && mo.getCategory() != null && mo.getCategory().getParentID() != null) {
-                        pParent = mo.getCategory().getParentID();
-                    }
-
-                    String display = null;
-                    if (pParent == 1 || pParent == 2) {
-                        // Drinks & Milk: price per box + append (UnitPerBox ItemUnitName)
-                        Double boxPrice = dao.getBoxPrice(rp.getProductID());
-                        if (boxPrice == null)
-                            boxPrice = rp.getPrice();
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(formatter.format(boxPrice)).append(" đ / thùng");
-                        try {
-                            Integer upb = rp.getUnitPerBox();
-                            String iun = rp.getItemUnitName();
-                            if (upb == null || upb <= 0 || iun == null || iun.trim().isEmpty()) {
-                                Product full = dao.getProductById(rp.getProductID());
-                                if (full != null) {
-                                    upb = full.getUnitPerBox();
-                                    iun = full.getItemUnitName();
-                                }
-                            }
-                            if (upb != null && upb > 0 && iun != null && !iun.trim().isEmpty()) {
-                                sb.append(" (").append(upb).append(" ").append(iun).append(")");
-                            }
-                        } catch (Exception ignore) {
-                        }
-                        display = sb.toString();
-                        filteredRelated.add(rp);
-                    } else if (pParent == 3) {
-                        // Fruits: keep original unit
-                        String unitLabel = (rp.getUnit() != null && !rp.getUnit().trim().isEmpty()) ? rp.getUnit()
-                                : "kg";
-                        display = formatter.format(rp.getPrice()) + " đ / " + unitLabel;
-                        filteredRelated.add(rp);
-                    } else {
-                        // Other categories: require UNIT
-                        Double unitPrice = dao.getUnitOnlyPrice(rp.getProductID());
-                        String itemUnit = dao.getItemUnitName(rp.getProductID());
-                        if (unitPrice != null && itemUnit != null && !itemUnit.trim().isEmpty()) {
-                            display = formatter.format(unitPrice) + " đ / " + itemUnit;
-                            filteredRelated.add(rp);
-                        }
-                    }
-                    if (display != null) {
-                        relatedPriceDisplayMap.put(rp.getProductID(), display);
+                    try {
+                        db.closeConnection();
+                    } catch (Exception ignore) {
                     }
                 }
 
@@ -236,4 +219,7 @@ public class ProductDetailServlet extends HttpServlet {
     public String getServletInfo() {
         return "Product detail page";
     }
+
+    // (Không cần hàm lấy tồn kho riêng; dùng DAO.getProductById để đọc tồn kho phù
+    // hợp)
 }
