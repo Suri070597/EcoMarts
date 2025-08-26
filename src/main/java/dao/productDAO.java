@@ -1339,7 +1339,7 @@ public class ProductDAO extends DBContext {
     public Map<String, Object> getProductInventory(int productId) {
         Map<String, Object> inventory = new HashMap<>();
         List<Map<String, Object>> packList = new ArrayList<>();
-        String sql = "SELECT PackageType, Quantity, UnitPrice, PackSize FROM Inventory WHERE ProductID = ?";
+        String sql = "SELECT PackageType, Quantity, PackSize FROM Inventory WHERE ProductID = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
@@ -1349,7 +1349,6 @@ public class ProductDAO extends DBContext {
             while (rs.next()) {
                 String packageType = rs.getString("PackageType");
                 double qty = rs.getDouble("Quantity");
-                double price = rs.getDouble("UnitPrice");
                 int packSize = 0;
                 try {
                     packSize = rs.getInt("PackSize");
@@ -1360,7 +1359,6 @@ public class ProductDAO extends DBContext {
                     Map<String, Object> p = new HashMap<>();
                     p.put("packSize", packSize);
                     p.put("quantity", qty);
-                    p.put("price", price);
                     packList.add(p);
                     totalPackQty += qty;
                 } else {
@@ -1369,7 +1367,6 @@ public class ProductDAO extends DBContext {
                         effectiveType = "UNIT"; // Chuẩn hóa key để phía gọi không cần đổi
                     }
                     inventory.put(effectiveType + "_Quantity", qty);
-                    inventory.put(effectiveType + "_Price", price);
                 }
             }
             if (!packList.isEmpty()) {
@@ -1607,24 +1604,24 @@ public class ProductDAO extends DBContext {
         }
     }
 
-    public double getQuantityByPackageType(int productId, String packageType) {
-        double qty = 0.0;
-        try {
-            String sql = "SELECT COALESCE(Quantity, 0) AS Q FROM Inventory WHERE ProductID = ? AND PackageType = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, productId);
-                ps.setString(2, packageType);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        qty = rs.getDouble("Q");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return qty;
-    }
+//    public double getQuantityByPackageType(int productId, String packageType) {
+//        double qty = 0.0;
+//        try {
+//            String sql = "SELECT COALESCE(Quantity, 0) AS Q FROM Inventory WHERE ProductID = ? AND PackageType = ?";
+//            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+//                ps.setInt(1, productId);
+//                ps.setString(2, packageType);
+//                try (ResultSet rs = ps.executeQuery()) {
+//                    if (rs.next()) {
+//                        qty = rs.getDouble("Q");
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return qty;
+//    }
     
      public List<Product> getProductsByCategoryExpandedFiltered(int categoryId) {
         List<Product> list = new ArrayList<>();
@@ -1674,5 +1671,210 @@ public class ProductDAO extends DBContext {
             e.printStackTrace();
         }
         return list;
+    }
+      /**
+     * Get latest manufacturer that supplied this product based on latest StockIn.DateIn
+     */
+    public Manufacturer getLatestManufacturerForProduct(int productId) {
+        String sql = "SELECT TOP 1 m.ManufacturerID, m.CompanyName, si.DateIn\n"
+                + "FROM Inventory i\n"
+                + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID\n"
+                + "JOIN StockIn si ON si.StockInID = sid.StockInID\n"
+                + "JOIN Manufacturer m ON m.ManufacturerID = si.ManufacturerID\n"
+                + "WHERE i.ProductID = ?\n"
+                + "ORDER BY si.DateIn DESC, si.StockInID DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Manufacturer m = new Manufacturer();
+                    m.setManufacturerID(rs.getInt("ManufacturerID"));
+                    m.setCompanyName(rs.getString("CompanyName"));
+                    return m;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Get latest StockIn date for the product (used as manufacture/import date on detail)
+     */
+    public Date getLatestStockInDateForProduct(int productId) {
+        String sql = "SELECT TOP 1 si.DateIn\n"
+                + "FROM Inventory i\n"
+                + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID\n"
+                + "JOIN StockIn si ON si.StockInID = sid.StockInID\n"
+                + "WHERE i.ProductID = ?\n"
+                + "ORDER BY si.DateIn DESC, si.StockInID DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Timestamp t = rs.getTimestamp(1);
+                    return t != null ? new Date(t.getTime()) : null;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Get latest ExpiryDate for the product, if ExpiryDate column exists in StockIn or StockInDetail.
+     * Returns null if not available.
+     */
+    public Date getLatestExpiryDateForProduct(int productId) {
+        try {
+            // Check if ExpiryDate exists in StockInDetail
+            String checkDetail = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'StockInDetail' AND COLUMN_NAME = 'ExpiryDate'";
+            try (PreparedStatement ps = conn.prepareStatement(checkDetail)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        String q = "SELECT TOP 1 sid.ExpiryDate\n"
+                                + "FROM Inventory i\n"
+                                + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID\n"
+                                + "JOIN StockIn si ON si.StockInID = sid.StockInID\n"
+                                + "WHERE i.ProductID = ? AND sid.ExpiryDate IS NOT NULL\n"
+                                + "ORDER BY si.DateIn DESC, si.StockInID DESC";
+                        try (PreparedStatement ps2 = conn.prepareStatement(q)) {
+                            ps2.setInt(1, productId);
+                            try (ResultSet rs2 = ps2.executeQuery()) {
+                                if (rs2.next()) {
+                                    Timestamp t = rs2.getTimestamp(1);
+                                    return t != null ? new Date(t.getTime()) : null;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Check if ExpiryDate exists in StockIn
+            String checkHeader = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'StockIn' AND COLUMN_NAME = 'ExpiryDate'";
+            try (PreparedStatement ps = conn.prepareStatement(checkHeader)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        String q = "SELECT TOP 1 si.ExpiryDate\n"
+                                + "FROM Inventory i\n"
+                                + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID\n"
+                                + "JOIN StockIn si ON si.StockInID = sid.StockInID\n"
+                                + "WHERE i.ProductID = ? AND si.ExpiryDate IS NOT NULL\n"
+                                + "ORDER BY si.DateIn DESC, si.StockInID DESC";
+                        try (PreparedStatement ps2 = conn.prepareStatement(q)) {
+                            ps2.setInt(1, productId);
+                            try (ResultSet rs2 = ps2.executeQuery()) {
+                                if (rs2.next()) {
+                                    Timestamp t = rs2.getTimestamp(1);
+                                    return t != null ? new Date(t.getTime()) : null;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+     /**
+     * Lấy thông tin nhà sản xuất của lần nhập gần nhất
+     */
+    public Map<String, Object> getLatestManufacturerInfo(int productId) {
+        Map<String, Object> result = new HashMap<>();
+        String sql = "SELECT TOP 1 m.ManufacturerID, m.BrandName, m.CompanyName, si.DateIn, si.StockInID "
+                + "FROM Product p "
+                + "JOIN Inventory i ON i.ProductID = p.ProductID "
+                + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID "
+                + "JOIN StockIn si ON si.StockInID = sid.StockInID "
+                + "JOIN Manufacturer m ON m.ManufacturerID = si.ManufacturerID "
+                + "WHERE p.ProductID = ? "
+                + "ORDER BY si.DateIn DESC, si.StockInID DESC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    result.put("manufacturerID", rs.getInt("ManufacturerID"));
+                    result.put("brandName", rs.getString("BrandName"));
+                    result.put("companyName", rs.getString("CompanyName"));
+                    result.put("dateIn", rs.getTimestamp("DateIn"));
+                    result.put("stockInID", rs.getInt("StockInID"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * Lấy ngày hết hạn của lô nhập gần nhất
+     */
+    public Date getLatestExpiryDate(int productId) {
+        String sql = "SELECT TOP 1 si.ExpiryDate "
+                + "FROM Product p "
+                + "JOIN Inventory i ON i.ProductID = p.ProductID "
+                + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID "
+                + "JOIN StockIn si ON si.StockInID = sid.StockInID "
+                + "WHERE p.ProductID = ? AND si.ExpiryDate IS NOT NULL "
+                + "ORDER BY si.DateIn DESC, si.StockInID DESC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDate("ExpiryDate");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Lấy số lượng theo package type cụ thể
+     */
+    public double getQuantityByPackageType(int productId, String packageType) {
+        String sql = "SELECT COALESCE(Quantity, 0) as Quantity FROM Inventory WHERE ProductID = ? AND PackageType = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ps.setString(2, packageType);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("Quantity");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    /**
+     * Kiểm tra xem sản phẩm có thuộc danh mục nước giải khát hoặc sữa không
+     */
+    public boolean isBeverageOrMilkCategory(int productId) {
+        String sql = "SELECT CASE WHEN c.CategoryID IN (1, 2) OR c.ParentID IN (1, 2) THEN 1 ELSE 0 END as IsBeverageOrMilk "
+                + "FROM Product p "
+                + "JOIN Category c ON p.CategoryID = c.CategoryID "
+                + "WHERE p.ProductID = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("IsBeverageOrMilk") == 1;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

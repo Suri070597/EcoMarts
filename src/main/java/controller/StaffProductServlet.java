@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
+import java.util.Date;
 import model.Category;
 import model.Product;
 
@@ -119,8 +121,30 @@ public class StaffProductServlet extends HttpServlet {
                     int idDetail = Integer.parseInt(idDetailRaw);
                     Product productDetail = dao.getProductById(idDetail);
                     java.util.Map<String, Object> inventory = dao.getProductInventory(idDetail);
+
+                    // Lấy thông tin nhà sản xuất và ngày nhập kho
+                    java.util.Map<String, Object> manufacturerInfo = dao.getLatestManufacturerInfo(idDetail);
+                    java.util.Date expiryDate = dao.getLatestExpiryDate(idDetail);
+
+                    // Lấy số lượng theo package type
+                    double boxQty = dao.getQuantityByPackageType(idDetail, "BOX");
+                    double unitQty = dao.getQuantityByPackageType(idDetail, "UNIT");
+                    double packQty = dao.getQuantityByPackageType(idDetail, "PACK");
+                    double kgQty = dao.getQuantityByPackageType(idDetail, "KG");
+
+                    // Kiểm tra xem có phải sản phẩm nước giải khát hoặc sữa không
+                    boolean isBeverageOrMilk = dao.isBeverageOrMilkCategory(idDetail);
+
                     request.setAttribute("productDetail", productDetail);
                     request.setAttribute("inventory", inventory);
+                    request.setAttribute("manufacturerInfo", manufacturerInfo);
+                    request.setAttribute("expiryDate", expiryDate);
+                    request.setAttribute("boxQty", boxQty);
+                    request.setAttribute("unitQty", unitQty);
+                    request.setAttribute("packQty", packQty);
+                    request.setAttribute("kgQty", kgQty);
+                    request.setAttribute("isBeverageOrMilk", isBeverageOrMilk);
+
                     request.getRequestDispatcher("/WEB-INF/staff/product/product-detail.jsp").forward(request,
                             response);
                 } catch (Exception e) {

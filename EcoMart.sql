@@ -366,7 +366,7 @@ CREATE TABLE StockIn (
     DateIn DATETIME NOT NULL DEFAULT GETDATE(),
     Note NVARCHAR(255),
     Status NVARCHAR(20) NOT NULL DEFAULT 'Pending', -- Pending / Completed / Canceled
-
+	ExpiryDate DATE,
     CONSTRAINT FK_StockIn_Manufacturer FOREIGN KEY (ManufacturerID) REFERENCES Manufacturer(ManufacturerID),
     CONSTRAINT FK_StockIn_Receiver FOREIGN KEY (ReceiverID) REFERENCES Account(AccountID)
 );

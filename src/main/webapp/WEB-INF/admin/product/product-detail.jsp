@@ -1,9 +1,29 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page import="model.Product" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Date" %>
 <%
     Product product = (Product) request.getAttribute("productDetail");
+    Map<String, Object> manufacturerInfo = (Map<String, Object>) request.getAttribute("manufacturerInfo");
+    Date expiryDate = (Date) request.getAttribute("expiryDate");
+    Double boxQty = (Double) request.getAttribute("boxQty");
+    Double unitQty = (Double) request.getAttribute("unitQty");
+    Double kgQty = (Double) request.getAttribute("kgQty");
+    
+    // Format số
+    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+    symbols.setGroupingSeparator('.');
+    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+    
+    // Chỉ dựa theo ParentID
+    boolean isFruit = false;
+    boolean isBeverageOrMilk = false;
+    if (product.getCategory() != null) {
+        Integer parentId = product.getCategory().getParentID();
+        isFruit = (parentId != null && parentId == 3);
+        isBeverageOrMilk = (parentId != null && (parentId == 1 || parentId == 2));
+    }
 %>
 <!DOCTYPE html>
 <html>
@@ -30,156 +50,174 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <!-- áº¢nh bÃªn trÃ¡i -->
+                                <!-- Ảnh bên trái -->
                                 <div class="col-md-5 text-center">
-                                    <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= product.getImageURL()%>" alt="áº¢nh sáº£n pháº©m" class="img-fluid rounded shadow" style="max-height:350px;">
+                                    <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= product.getImageURL()%>" alt="Ảnh sản phẩm" class="img-fluid rounded shadow" style="max-height:350px;">
                                 </div>
-                                <!-- ThÃ´ng tin bÃªn pháº£i -->
+                                <!-- Thông tin bên phải -->
                                 <div class="col-md-7">
                                     <h3 class="mb-3"><%= product.getProductName()%></h3>
                                     <table class="table table-borderless">
                                         <tr><th>Mã sản phẩm:</th><td><%= product.getProductID()%></td></tr>
-                                                <%
-                                                    boolean isFruit = false;
-                                                    if (product.getCategory() != null) {
-                                                        int cateId = product.getCategory().getCategoryID();
-                                                        Integer parentId = product.getCategory().getParentID();
-                                                        isFruit = (cateId == 3) || (parentId != null && parentId == 3);
-                                                    }
-                                                %>
-                                                <% if (isFruit) { %>
-                                                <%
-                                                    java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                                    symbols.setGroupingSeparator('.');
-                                                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                                %>
+                                        
+                                        <% if (isFruit) { %>
+                                        <!-- Form cho trái cây -->
                                         <tr>
                                             <th>Giá bán:</th>
-                                            <td><%= formatter.format(product.getPrice())%> đ / kg</td>
-                                        </tr>
-                                        <tr><th>Số lượng tồn kho:</th>
                                             <td>
-                                                <% double kg = product.getStockQuantity();
-                                                    String display;
-                                                    if (kg == Math.floor(kg)) {
-                                                        // Nếu là số nguyên thì không hiển thị .0
-                                                        display = new java.text.DecimalFormat("#,##0").format(kg) + "kg";
-                                                    } else {
-                                                        // Nếu có phần thập phân thì hiển thị .0
-                                                        display = new java.text.DecimalFormat("#,##0.0").format(kg) + "kg";
-                                                    }
-                                                    if (kg >= 1000) {
-                                                        double ton = kg / 1000.0;
-                                                        display += " (" + new java.text.DecimalFormat("#.#").format(ton) + " tấn)";
-                                                    } else if (kg >= 100) {
-                                                        double ta = kg / 100.0;
-                                                        display += " (" + new java.text.DecimalFormat("#.#").format(ta) + " tạ)";
-                                                    }
-                                                    out.print(display);
-                                                %>
+                                                <% if (product.getPriceUnit() != null) { %>
+                                                    <%= formatter.format(product.getPriceUnit())%> đ / kg
+                                                <% } else { %>
+                                                    - đ
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Số lượng:</th>
+                                            <td>
+                                                <% if (kgQty != null && kgQty > 0) { %>
+                                                    <% if (kgQty == Math.floor(kgQty)) { %>
+                                                        <%= ((Double)kgQty).longValue() %> kg
+                                                    <% } else { %>
+                                                        <%= new java.text.DecimalFormat("#,##0.0").format(kgQty) %> kg
+                                                    <% } %>
+                                                <% } else { %>
+                                                    - kg
+                                                <% } %>
                                             </td>
                                         </tr>
                                         <% } else { %>
-                                        <%
-                                            java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                            symbols.setGroupingSeparator('.');
-                                            java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                        %>
+                                        <!-- Form cho sản phẩm khác -->
                                         <tr>
-                                            <th>Giá 1 <%= product.getBoxUnitName()%>:</th>
-                                            <td><%= formatter.format(product.getPrice())%> đ</td>
+                                            <th>Giá 1 thùng:</th>
+                                            <td>
+                                                <% if (product.getPrice() != null) { %>
+                                                    <%= formatter.format(product.getPrice())%> đ
+                                                <% } else { %>
+                                                    - đ
+                                                <% } %>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <th>Giá 1 <%= product.getItemUnitName()%>:</th>
                                             <td>
-                                                <%= product.getUnitPerBox() > 0 ? formatter.format(product.getPrice() / product.getUnitPerBox()) : "-"%> đ
+                                                <% if (product.getPriceUnit() != null) { %>
+                                                    <%= formatter.format(product.getPriceUnit())%> đ
+                                                <% } else { %>
+                                                    - đ
+                                                <% } %>
                                             </td>
                                         </tr>
-                                        <%
-                                            java.util.Map<String, Object> inv = (java.util.Map<String, Object>) request.getAttribute("inventory");
-                                            Double boxQty = null, unitQty = null, packQty = null, packPrice = null;
-                                            if (inv != null) {
-                                                Object bq = inv.get("BOX_Quantity");
-                                                if (bq instanceof Number) boxQty = ((Number) bq).doubleValue();
-                                                Object uq = inv.get("UNIT_Quantity");
-                                                if (uq instanceof Number) unitQty = ((Number) uq).doubleValue();
-                                                Object pq = inv.get("PACK_Quantity");
-                                                if (pq instanceof Number) packQty = ((Number) pq).doubleValue();
-                                                Object pp = inv.get("PACK_Price");
-                                                if (pp instanceof Number) packPrice = ((Number) pp).doubleValue();
-                                            }
-                                            double qty = boxQty != null ? boxQty : product.getStockQuantity();
-                                        %>
+                                        <tr>
+                                            <th>Giá 1 lốc:</th>
+                                            <td>
+                                                <% if (isBeverageOrMilk) { %>
+                                                    <% if (product.getPricePack() != null) { %>
+                                                        <%= formatter.format(product.getPricePack())%> đ
+                                                    <% } else { %>
+                                                        - đ
+                                                    <% } %>
+                                                <% } else { %>
+                                                    không được thiết lập
+                                                <% } %>
+                                            </td>
+                                        </tr>
                                         <tr>
                                             <th>Số lượng thùng:</th>
                                             <td>
-                                                <%
-                                                    if (qty == Math.floor(qty)) {
-                                                        out.print((long) qty);
-                                                    } else {
-                                                        out.print(new java.text.DecimalFormat("#").format(qty));
-                                                    }
-                                                    out.print(" " + product.getBoxUnitName());
-                                                %>
+                                                <% if (boxQty != null && boxQty > 0) { %>
+                                                    <% if (boxQty == Math.floor(boxQty)) { %>
+                                                        <%= ((Double)boxQty).longValue() %>
+                                                    <% } else { %>
+                                                        <%= new java.text.DecimalFormat("#").format(boxQty) %>
+                                                    <% } %>
+                                                    <%= product.getBoxUnitName() %>
+                                                <% } else { %>
+                                                    - <%= product.getBoxUnitName() %>
+                                                <% } %>
                                             </td>
                                         </tr>
-                                        <%
-                                            if (unitQty != null && unitQty > 0) {
-                                        %>
                                         <tr>
                                             <th>Số lượng <%= product.getItemUnitName() %>:</th>
                                             <td>
-                                                <%
-                                                    double uqv = unitQty;
-                                                    if (uqv == Math.floor(uqv)) {
-                                                        out.print((long) uqv);
-                                                    } else {
-                                                        out.print(new java.text.DecimalFormat("#").format(uqv));
-                                                    }
-                                                    out.print(" " + product.getItemUnitName());
-                                                %>
+                                                <% if (unitQty != null && unitQty > 0) { %>
+                                                    <% if (unitQty == Math.floor(unitQty)) { %>
+                                                        <%= ((Double)unitQty).longValue() %>
+                                                    <% } else { %>
+                                                        <%= new java.text.DecimalFormat("#").format(unitQty) %>
+                                                    <% } %>
+                                                    <%= product.getItemUnitName() %>
+                                                <% } else { %>
+                                                    - <%= product.getItemUnitName() %>
+                                                <% } %>
                                             </td>
                                         </tr>
-                                        <%
-                                            }
-                                            java.util.List<java.util.Map<String, Object>> packList = inv != null ? (java.util.List<java.util.Map<String, Object>>) inv.get("PACK_LIST") : null;
-                                            if (packList != null && !packList.isEmpty()) {
-                                        %>
                                         <tr>
-                                            <th>Lốc (nhiều quy cách):</th>
+                                            <th>Số lượng lốc:</th>
                                             <td>
                                                 <%
-                                                    for (java.util.Map<String, Object> p : packList) {
-                                                        Object qs = p.get("quantity");
-                                                        Object ps = p.get("price");
-                                                        Object sz = p.get("packSize");
-                                                        double qdv = qs instanceof Number ? ((Number) qs).doubleValue() : 0d;
-                                                        double pdv = ps instanceof Number ? ((Number) ps).doubleValue() : 0d;
-                                                        int s = sz instanceof Number ? ((Number) sz).intValue() : 0;
-                                                        if (s > 0) {
-                                                            //  ví dụ: 6 lon/lốc: 10 lốc — 60.000 đ
-                                                            StringBuilder line = new StringBuilder();
-                                                            line.append(s).append(" ").append(product.getItemUnitName()).append("/lốc: ");
+                                                    java.util.Map<String, Object> invMap = (java.util.Map<String, Object>) request.getAttribute("inventory");
+                                                    java.util.List<java.util.Map<String, Object>> packList = invMap != null ? (java.util.List<java.util.Map<String, Object>>) invMap.get("PACK_LIST") : null;
+                                                    if (packList == null || packList.isEmpty()) {
+                                                        if (isBeverageOrMilk) {
+                                                %>
+                                                    - lốc
+                                                <%
+                                                        } else {
+                                                %>
+                                                    không được thiết lập
+                                                <%
+                                                        }
+                                                    } else {
+                                                        int showLimit = 2;
+                                                        for (int i = 0; i < packList.size(); i++) {
+                                                            java.util.Map<String, Object> p = packList.get(i);
+                                                            Object qs = p.get("quantity");
+                                                            Object sz = p.get("packSize");
+                                                            double qdv = qs instanceof Number ? ((Number) qs).doubleValue() : 0d;
+                                                            int s = sz instanceof Number ? ((Number) sz).intValue() : 0;
+                                                            String line;
                                                             if (qdv == Math.floor(qdv)) {
-                                                                line.append((long) qdv);
+                                                                line = ((long) qdv) + " lốc / " + s + " " + product.getItemUnitName();
                                                             } else {
-                                                                line.append(new java.text.DecimalFormat("#").format(qdv));
+                                                                line = new java.text.DecimalFormat("#").format(qdv) + " lốc / " + s + " " + product.getItemUnitName();
                                                             }
-                                                            line.append(" lốc — ").append(formatter.format(pdv)).append(" đ");
-                                                            out.print(line.toString());
-                                                            out.print("<br/>");
+                                                            if (i < showLimit) {
+                                                %>
+                                                                <div><%= line %></div>
+                                                <%
+                                                            } else if (i == showLimit) {
+                                                %>
+                                                                <div id="more-packs" style="display:none;">
+                                                                    <div><%= line %></div>
+                                                <%
+                                                            } else if (i > showLimit) {
+                                                %>
+                                                                    <div><%= line %></div>
+                                                <%
+                                                            }
+                                                        }
+                                                        if (packList.size() > showLimit) {
+                                                %>
+                                                                </div>
+                                                                <button type="button" class="btn btn-link p-0" onclick="
+                                                                    (function(btn){
+                                                                        var more = document.getElementById('more-packs');
+                                                                        if(more.style.display==='none'){ more.style.display='block'; btn.innerText='Thu gọn'; }
+                                                                        else { more.style.display='none'; btn.innerText='Xem thêm'; }
+                                                                    })(this)
+                                                                ">Xem thêm</button>
+                                                <%
                                                         }
                                                     }
                                                 %>
                                             </td>
                                         </tr>
-                                        <%
-                                            }
-                                        %>
-                                        <tr><th>Số lượng trong 1 thùng:</th><td><%= product.getUnitPerBox()%> <%= product.getItemUnitName()%> / <%= product.getBoxUnitName()%></td></tr>
+                                        <% } %>
+                                        
                                         <tr><th>Đơn vị nhỏ nhất:</th><td><%= product.getItemUnitName()%></td></tr>
-                                                <% }%>
-                                        <tr><th>Trạng thái:</th>
+                                        <tr>
+                                            <th>Trạng thái:</th>
                                             <td>
                                                 <% if (product.getStockQuantity() <= 0) { %>
                                                 <span class="badge bg-danger">Hết hàng</span>
@@ -191,20 +229,34 @@
                                             </td>
                                         </tr>
                                         <tr><th>Danh mục:</th><td><%= product.getCategory() != null ? product.getCategory().getCategoryName() : ""%></td></tr>
-                                        <tr><th>Nhà sản xuất:</th><td><%= product.getManufacturer() != null ? product.getManufacturer().getCompanyName() : ""%></td></tr>
                                         <tr>
-                                            <% if (isFruit) { %>
-                                            <th>Ngày nhập kho:</th>
-                                                <% } else { %>
-                                            <th>Ngày sản xuất:</th>
-                                                <% }%>
+                                            <th>Nhà sản xuất:</th>
                                             <td>
-                                                <%= product.getManufactureDate() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(product.getManufactureDate()) : ""%>
+                                                <% if (manufacturerInfo != null && manufacturerInfo.get("companyName") != null) { %>
+                                                    <%= manufacturerInfo.get("companyName") %>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
                                             </td>
                                         </tr>
-                                        <tr><th>Hạn sử dụng:</th>
+                                        <tr>
+                                            <th>Ngày nhập kho:</th>
                                             <td>
-                                                <%= product.getExpirationDate() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(product.getExpirationDate()) : ""%>
+                                                <% if (manufacturerInfo != null && manufacturerInfo.get("dateIn") != null) { %>
+                                                    <%= new java.text.SimpleDateFormat("dd/MM/yyyy").format(manufacturerInfo.get("dateIn")) %>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Hạn sử dụng:</th>
+                                            <td>
+                                                <% if (expiryDate != null) { %>
+                                                    <%= new java.text.SimpleDateFormat("dd/MM/yyyy").format(expiryDate) %>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
                                             </td>
                                         </tr>
                                         <tr><th>Mô tả:</th>

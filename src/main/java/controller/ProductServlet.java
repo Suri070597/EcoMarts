@@ -120,8 +120,30 @@ public class ProductServlet extends HttpServlet {
                     int idDetail = Integer.parseInt(idDetailRaw);
                     Product productDetail = dao.getProductById(idDetail);
                     Map<String, Object> inventory = dao.getProductInventory(idDetail);
+
+                    // Lấy thông tin nhà sản xuất và ngày nhập kho
+                    Map<String, Object> manufacturerInfo = dao.getLatestManufacturerInfo(idDetail);
+                    Date expiryDate = dao.getLatestExpiryDate(idDetail);
+
+                    // Lấy số lượng theo package type
+                    double boxQty = dao.getQuantityByPackageType(idDetail, "BOX");
+                    double unitQty = dao.getQuantityByPackageType(idDetail, "UNIT");
+                    double packQty = dao.getQuantityByPackageType(idDetail, "PACK");
+                    double kgQty = dao.getQuantityByPackageType(idDetail, "KG");
+
+                    // Kiểm tra xem có phải sản phẩm nước giải khát hoặc sữa không
+                    boolean isBeverageOrMilk = dao.isBeverageOrMilkCategory(idDetail);
+
                     request.setAttribute("productDetail", productDetail);
                     request.setAttribute("inventory", inventory);
+                    request.setAttribute("manufacturerInfo", manufacturerInfo);
+                    request.setAttribute("expiryDate", expiryDate);
+                    request.setAttribute("boxQty", boxQty);
+                    request.setAttribute("unitQty", unitQty);
+                    request.setAttribute("packQty", packQty);
+                    request.setAttribute("kgQty", kgQty);
+                    request.setAttribute("isBeverageOrMilk", isBeverageOrMilk);
+
                     request.getRequestDispatcher("/WEB-INF/admin/product/product-detail.jsp").forward(request,
                             response);
                 } catch (Exception e) {
@@ -334,9 +356,7 @@ public class ProductServlet extends HttpServlet {
                     boolean deleteSuccess = dao.delete(id);
 
                     if (deleteSuccess) {
-                        response.sendRedirect(
-                                request.getContextPath() + "/admin/product?success=delete_success&product_name=" +
-                                        java.net.URLEncoder.encode(productToDelete.getProductName(), "UTF-8"));
+                        response.sendRedirect(request.getContextPath() + "/admin/product");
                     } else {
                         response.sendRedirect(request.getContextPath() + "/admin/product?error=delete_failed&id=" + id);
                     }
@@ -640,7 +660,9 @@ public class ProductServlet extends HttpServlet {
                     boolean success = dao.updateProductPrice(productId, priceBox, priceUnit, pricePack);
 
                     if (success) {
-                        response.sendRedirect(request.getContextPath() + "/admin/product?success=price_updated");
+                        request.setAttribute("success", "Cập nhật giá thành công");
+                        request.setAttribute("product", currentProduct);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request, response);
                     } else {
                         request.setAttribute("error", "Cập nhật giá thất bại");
                         request.setAttribute("product", currentProduct);
