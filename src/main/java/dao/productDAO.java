@@ -339,62 +339,6 @@ public class ProductDAO extends DBContext {
         }
     }
 
-    public boolean update(Product product) {
-        String sql = "UPDATE Product SET "
-                + "ProductName = ?, "
-                + "Price = ?, "
-                + "Description = ?, "
-                + "StockQuantity = ?, "
-                + "ImageURL = ?, "
-                + "Unit = ?, "
-                + "CreatedAt = ?, "
-                + "ManufactureDate = ?, "
-                + "ExpirationDate = ?, "
-                + "CategoryID = ?, "
-                + "ManufacturerID = ?, "
-                + "UnitPerBox = ?, "
-                + "BoxUnitName = ?, "
-                + "ItemUnitName = ? "
-                + "WHERE ProductID = ?";
-        Double price = product.getPrice();
-        if (price == null) {
-            price = 0.0;
-        }
-        if (price < 1000) {
-            price *= 1000;
-        }
-        try {
-
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, product.getProductName());
-            ps.setDouble(2, price);
-            ps.setString(3, product.getDescription());
-            ps.setDouble(4, product.getStockQuantity());
-            ps.setString(5, product.getImageURL());
-            ps.setString(6, product.getUnit());
-            ps.setTimestamp(7, product.getCreatedAt());
-            ps.setDate(8, new java.sql.Date(product.getManufactureDate().getTime()));
-            ps.setDate(9, new java.sql.Date(product.getExpirationDate().getTime()));
-            ps.setInt(10, product.getCategory().getCategoryID());
-            ps.setInt(11, product.getManufacturer().getManufacturerId());
-            ps.setInt(12, product.getUnitPerBox());
-            ps.setString(13, product.getBoxUnitName());
-            ps.setString(14, product.getItemUnitName());
-            ps.setInt(15, product.getProductID());
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
-                if (isFruitCategory(product.getCategory().getCategoryID())) {
-                    updateInventoryUnit(product.getProductID(), product.getStockQuantity(), price);
-                } else {
-                    updateInventoryBox(product.getProductID(), product.getStockQuantity(), price);
-                }
-            }
-            return affectedRows > 0;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     /**
      * Cập nhật sản phẩm với thông tin mới
      */

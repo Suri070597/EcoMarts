@@ -656,6 +656,74 @@ public class ProductServlet extends HttpServlet {
                         }
                     }
 
+                    // Kiểm tra validation đặc biệt cho nước giải khát, sữa và các loại khác
+                    if (currentProduct.getCategory() != null) {
+                        int parentId = currentProduct.getCategory().getParentID();
+                        boolean isFruit = parentId == 3;
+                        boolean isBeverageOrMilk = parentId == 1 || parentId == 2;
+
+                        // Kiểm tra xem có thể nhập giá cho unit không (cho tất cả các loại trừ trái
+                        // cây)
+                        if (!isFruit && priceUnit != null && priceUnit > 0) {
+                            double unitQuantity = dao.getQuantityByPackageType(productId, "UNIT");
+                            if (unitQuantity <= 0) {
+                                request.setAttribute("error",
+                                        "Không thể nhập giá cho đơn vị khi chưa có số lượng sau chuyển đổi. Vui lòng thực hiện chuyển đổi đơn vị trước.");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        }
+
+                        // Kiểm tra xem có thể nhập giá cho pack không (chỉ cho nước giải khát và sữa)
+                        if (isBeverageOrMilk && pricePack != null && pricePack > 0) {
+                            double packQuantity = dao.getQuantityByPackageType(productId, "PACK");
+                            if (packQuantity <= 0) {
+                                request.setAttribute("error",
+                                        "Không thể nhập giá cho lốc khi chưa có số lượng sau chuyển đổi. Vui lòng thực hiện chuyển đổi đơn vị trước.");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        }
+                    }
+
+                    // Kiểm tra logic giá: UNIT ≤ PACK ≤ BOX
+                    if (priceBox != null && priceUnit != null && priceBox > 0 && priceUnit > 0) {
+                        if (priceUnit > priceBox) {
+                            request.setAttribute("error", "❌ Lỗi logic giá: Giá đơn vị (" + priceUnit
+                                    + "đ) không được lớn hơn giá thùng (" + priceBox + "đ)!");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
+                    if (pricePack != null && priceUnit != null && pricePack > 0 && priceUnit > 0) {
+                        if (priceUnit > pricePack) {
+                            request.setAttribute("error", "❌ Lỗi logic giá: Giá đơn vị (" + priceUnit
+                                    + "đ) không được lớn hơn giá lốc (" + pricePack + "đ)!");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
+                    if (pricePack != null && priceBox != null && pricePack > 0 && priceBox > 0) {
+                        if (pricePack > priceBox) {
+                            request.setAttribute("error", "❌ Lỗi logic giá: Giá lốc (" + pricePack
+                                    + "đ) không được lớn hơn giá thùng (" + priceBox + "đ)!");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
                     // Update product prices
                     boolean success = dao.updateProductPrice(productId, priceBox, priceUnit, pricePack);
 

@@ -13,13 +13,9 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
     </head>
     <style>
-        .form-control.is-invalid {
-            border-color: #dc3545;
-            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
-        }
-        .form-control.is-valid {
-            border-color: #198754;
-            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+        .form-control:disabled {
+            background-color: #e9ecef;
+            opacity: 0.6;
         }
     </style>
     <body>
@@ -48,12 +44,43 @@
                                 boolean isFruit = product.getCategory() != null && product.getCategory().getParentID() == 3;
                                 boolean isBeverageOrMilk = product.getCategory() != null && 
                                     (product.getCategory().getParentID() == 1 || product.getCategory().getParentID() == 2);
+                                
+                                                                 // Lấy thông tin inventory để kiểm tra số lượng
+                                 dao.ProductDAO productDAO = new dao.ProductDAO();
+                                 double unitQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "UNIT");
+                                 double packQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "PACK");
+                                 double boxQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "BOX");
+                                 
+                                 // Kiểm tra xem có thể nhập giá cho unit và pack không
+                                 boolean canSetUnitPrice = unitQuantity > 0;
+                                 boolean canSetPackPrice = packQuantity > 0;
+                                 
+                                 // Đối với các loại khác (không phải trái cây, nước giải khát, sữa)
+                                 // cũng cần kiểm tra số lượng UNIT trước khi cho phép nhập giá
+                                 boolean isOtherCategory = !isFruit && !isBeverageOrMilk;
+                                 if (isOtherCategory) {
+                                     canSetUnitPrice = unitQuantity > 0;
+                                 }
                         %>
                         
                         <% if (error != null) { %>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Lỗi!</strong> <%= error %>
+                            <strong>Lỗi!</strong> 
+                            <% if (error.contains("Lỗi logic giá")) { %>
+                                <div class="mt-2">
+                                    <strong>Quy tắc giá:</strong>
+                                    <ul class="mb-0 mt-1">
+                                        <li>Giá đơn vị ≤ Giá thùng</li>
+                                        <% if (isBeverageOrMilk) { %>
+                                        <li>Giá đơn vị ≤ Giá lốc</li>
+                                        <li>Giá lốc ≤ Giá thùng</li>
+                                        <% } %>
+                                    </ul>
+                                </div>
+                            <% } else { %>
+                                <%= error %>
+                            <% } %>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                         <% } %>
@@ -117,7 +144,11 @@
                             </div>
                         </div>
 
+
+
                         <hr>
+
+
 
                         <form action="${pageContext.request.contextPath}/admin/product" method="post" id="priceForm">
                             <input type="hidden" name="action" value="updatePrice">
@@ -160,29 +191,39 @@
                                 
                                 <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="priceUnit" class="form-label">Giá bán lẻ cho <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %> (đ)</label>
+                                        <label for="priceUnit" class="form-label">
+                                            Giá bán lẻ cho <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %> (đ)
+                                        </label>
                                         <input type="number" 
                                                class="form-control" 
                                                id="priceUnit" 
                                                name="priceUnit" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : "" %>">
-                                        <div class="form-text">Giá bán lẻ cho 1 <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %></div>
+                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : "" %>"
+                                               <%= !canSetUnitPrice ? "disabled" : "" %>>
+                                        <div class="form-text">
+                                            Giá bán lẻ cho 1 <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %>
+                                        </div>
                                     </div>
                                 </div>
                                 
                                 <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="pricePack" class="form-label">Giá bán lẻ cho lốc (đ)</label>
+                                        <label for="pricePack" class="form-label">
+                                            Giá bán lẻ cho lốc (đ)
+                                        </label>
                                         <input type="number" 
                                                class="form-control" 
                                                id="pricePack" 
                                                name="pricePack" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPricePack() != null ? product.getPricePack().intValue() : "" %>">
-                                        <div class="form-text">Giá bán lẻ cho 1 lốc</div>
+                                               value="<%= product.getPricePack() != null ? product.getPricePack().intValue() : "" %>"
+                                               <%= !canSetPackPrice ? "disabled" : "" %>>
+                                        <div class="form-text">
+                                            Giá bán lẻ cho 1 lốc
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -212,15 +253,23 @@
                                                name="priceUnit" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : "" %>">
-                                        <div class="form-text">Giá bán lẻ cho 1 <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %></div>
+                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : "" %>"
+                                               <%= !canSetUnitPrice ? "disabled" : "" %>>
+                                        <div class="form-text">
+                                            <% if (canSetUnitPrice) { %>
+                                                Giá bán lẻ cho 1 <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %>
+
+                                            <% } else { %>
+                                                <span class="text-danger">Chưa có số lượng sau chuyển đổi. Vui lòng thực hiện chuyển đổi đơn vị trước.</span>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
                                 <% } %>
                             </div>
 
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
                                     <i class="fas fa-save"></i> Lưu giá bán lẻ
                                 </button>
                                 <a href="${pageContext.request.contextPath}/admin/product" class="btn btn-secondary">
@@ -242,27 +291,6 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // Validation form
-            document.getElementById('priceForm').addEventListener('submit', function(e) {
-                const inputs = this.querySelectorAll('input[type="number"]');
-                let isValid = true;
-                
-                inputs.forEach(input => {
-                    if (input.value !== '' && parseInt(input.value) < 0) {
-                        input.classList.add('is-invalid');
-                        isValid = false;
-                    } else {
-                        input.classList.remove('is-invalid');
-                        input.classList.add('is-valid');
-                    }
-                });
-                
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Vui lòng nhập giá hợp lệ (không được âm)!');
-                }
-            });
-            
             // Auto-hide alerts
             document.addEventListener('DOMContentLoaded', function() {
                 const alerts = document.querySelectorAll('.alert');
