@@ -31,15 +31,14 @@ public class SearchProductsDAO extends DBContext {
                     FROM Product p
                     JOIN Category c ON p.CategoryID = c.CategoryID
                     LEFT JOIN Category pc ON c.ParentID = pc.CategoryID
-                    JOIN Manufacturer s ON p.ManufacturerID = s.ManufacturerID
                     WHERE 1=1 AND
                 """);
 
-        // Tạo điều kiện cho mỗi từ khóa với OR logic
+        // Tạo điều kiện cho mỗi từ khóa với OR logic (product/category only)
         List<String> conditions = new ArrayList<>();
         for (int i = 0; i < words.length; i++) {
             conditions.add(
-                    "(p.ProductName LIKE ? OR c.CategoryName LIKE ? OR pc.CategoryName LIKE ? OR s.CompanyName LIKE ?)");
+                    "(p.ProductName LIKE ? OR c.CategoryName LIKE ? OR pc.CategoryName LIKE ?)");
         }
         sql.append(String.join(" OR ", conditions)); // Sử dụng OR cho các từ
 
@@ -47,7 +46,7 @@ public class SearchProductsDAO extends DBContext {
             int index = 1;
             for (String word : words) {
                 String like = "%" + word + "%";
-                for (int j = 0; j < 4; j++) { // 4 cột mỗi từ
+                for (int j = 0; j < 3; j++) { // 3 cột mỗi từ
                     stmt.setString(index++, like);
                 }
             }
@@ -58,14 +57,21 @@ public class SearchProductsDAO extends DBContext {
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
                 p.setDescription(rs.getString("Description"));
-                p.setPrice(rs.getDouble("Price"));
-                p.setStockQuantity(rs.getDouble("StockQuantity"));
+                // Dùng schema mới: lấy PriceUnit và ItemUnitName để hiển thị về sau
+                try {
+                    p.setPriceUnit(rs.getObject("PriceUnit", Double.class));
+                } catch (Exception ignore) {
+                }
+                try {
+                    p.setPrice(rs.getObject("PriceBox", Double.class));
+                } catch (Exception ignore) {
+                }
+                try {
+                    p.setPricePack(rs.getObject("PricePack", Double.class));
+                } catch (Exception ignore) {
+                }
                 p.setImageURL(rs.getString("ImageURL"));
-                p.setUnit(rs.getString("Unit"));
-                p.setManufactureDate(rs.getDate("ManufactureDate"));
-                p.setExpirationDate(rs.getDate("ExpirationDate"));
                 p.setCategoryID(rs.getInt("CategoryID"));
-                p.setManufacturerID(rs.getInt("ManufacturerID"));
                 // Bổ sung các trường đơn vị
                 try {
                     p.setUnitPerBox(rs.getInt("UnitPerBox"));
@@ -89,14 +95,14 @@ public class SearchProductsDAO extends DBContext {
     public static void main(String[] args) {
         SearchProductsDAO dao = new SearchProductsDAO();
         try {
-            String keyword = "ngon"; // ví dụ: tìm sản phẩm có chứa "sữa" trong tên, mô tả, loại, hoặc nhà cung cấp
+            String keyword = "ngon"; // ví dụ
             List<Product> products = dao.searchProductsByKeyword(keyword);
 
             for (Product p : products) {
                 System.out.println("ID: " + p.getProductID());
                 System.out.println("Tên: " + p.getProductName());
                 System.out.println("Mô tả: " + p.getDescription());
-                System.out.println("Giá: " + p.getPrice());
+                System.out.println("Giá Unit: " + p.getPriceUnit());
                 System.out.println("Ảnh: " + p.getImageURL());
                 System.out.println("-----------------------------");
             }
