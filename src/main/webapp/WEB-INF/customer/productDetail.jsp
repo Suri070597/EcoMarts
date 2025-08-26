@@ -20,11 +20,11 @@
     List<Category> dataCate = (List<Category>) request.getAttribute("dataCate");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-    String nsx = "", hsd = "";
-    if (mo != null) {
-        nsx = sdf.format(mo.getManufactureDate());
-        hsd = sdf.format(mo.getExpirationDate());
-    }
+//    String nsx = "", hsd = "";
+//    if (mo != null) {
+//        nsx = sdf.format(mo.getManufactureDate());
+//        hsd = sdf.format(mo.getExpirationDate());
+//    }
 %>
 <c:set var="isDrinkOrMilk" value="false"/>
 <c:if test="${mo ne null}">
@@ -182,102 +182,73 @@
                             --%>
 
                             <c:choose>
-                                <c:when test="${isDrinkOrMilk}">
-                                    <c:choose>
-                                        <c:when test="${not empty appliedPromotion}">
-                                            <div class="flash-sale-banner mt-3">
-                                                <div class="flash-sale-header">
-                                                    <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
-                                                    <div class="countdown-text">
-                                                        <i class="bi bi-clock"></i> KẾT THÚC TRONG 
-                                                        <span class="countdown-box" id="timer-dd">--</span> :
-                                                        <span class="countdown-box" id="timer-hh">--</span> :
-                                                        <span class="countdown-box" id="timer-mm">--</span> :
-                                                        <span class="countdown-box" id="timer-ss">--</span>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <span class="flash-sale-price">
-                                                        <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                    </span>
-                                                    <span class="original-price">
-                                                        <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
-                                                    </span>
-                                                    <span class="discount-percent">
-                                                        -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
-                                                    </span>
-                                                </div>
+                                <c:when test="${not empty appliedPromotion}">
+                                    <div class="flash-sale-banner mt-3">
+                                        <div class="flash-sale-header">
+                                            <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
+                                            <div class="countdown-text">
+                                                <i class="bi bi-clock"></i> KẾT THÚC TRONG 
+                                                <span class="countdown-box" id="timer-dd">--</span> :
+                                                <span class="countdown-box" id="timer-hh">--</span> :
+                                                <span class="countdown-box" id="timer-mm">--</span> :
+                                                <span class="countdown-box" id="timer-ss">--</span>
                                             </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="flash-sale-banner mt-3">
-                                                <div class="flash-sale-header">
-                                                    <span class="flash-sale-price">
-                                                        <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span class="flash-sale-price">
+                                                <%
+                                                    Double priceUnit = mo.getPriceUnit();
+                                                    Double discountPercent = (Double) request.getAttribute("appliedPromotion.discountPercent");
+                                                    if (priceUnit != null && discountPercent != null) {
+                                                        double discountedPrice = priceUnit * (1 - discountPercent / 100);
+                                                %>
+                                                <fmt:formatNumber value="<%= discountedPrice%>" type="number" pattern="#,###"/> đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
+                                                <%
+                                                } else {
+                                                %>
+                                                0 đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
+                                                <%
+                                                    }
+                                                %>
+                                            </span>
+                                            <span class="original-price">
+                                                <%
+                                                    if (priceUnit != null) {
+                                                %>
+                                                <fmt:formatNumber value="<%= priceUnit%>" type="number" pattern="#,###"/> đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
+                                                <%
+                                                } else {
+                                                %>
+                                                0 đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
+                                                <%
+                                                    }
+                                                %>
+                                            </span>
+                                            <span class="discount-percent">
+                                                -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
+                                            </span>
+                                        </div>
+                                    </div>
                                 </c:when>
                                 <c:otherwise>
-                                    <c:choose>
-                                        <c:when test="${not empty appliedPromotion}">
-                                            <div class="flash-sale-banner mt-3">
-                                                <div class="flash-sale-header">
-                                                    <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
-                                                    <div class="countdown-text">
-                                                        <i class="bi bi-clock"></i> KẾT THÚC TRONG 
-                                                        <span class="countdown-box" id="timer-dd">--</span> :
-                                                        <span class="countdown-box" id="timer-hh">--</span> :
-                                                        <span class="countdown-box" id="timer-mm">--</span> :
-                                                        <span class="countdown-box" id="timer-ss">--</span>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <span class="flash-sale-price">
-                                                        <c:choose>
-                                                            <c:when test="${unitPrice != null}">
-                                                                <fmt:formatNumber value="${unitPrice * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </span>
-                                                    <span class="original-price">
-                                                        <c:choose>
-                                                            <c:when test="${unitPrice != null}">
-                                                                <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </span>
-                                                    <span class="discount-percent">
-                                                        -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="flash-sale-banner mt-3">
-                                                <div class="flash-sale-header">
-                                                    <span class="flash-sale-price">
-                                                        <c:choose>
-                                                            <c:when test="${unitPrice != null}">
-                                                                <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
+                                    <div class="flash-sale-banner mt-3">
+                                        <div class="flash-sale-header">
+                                            <span class="flash-sale-price">
+                                                <%
+                                                    Double priceUnit2 = mo.getPriceUnit();
+                                                    if (priceUnit2 != null) {
+                                                %>
+                                                <fmt:formatNumber value="<%= priceUnit2%>" type="number" pattern="#,###"/> đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
+                                                <%
+                                                } else {
+                                                %>
+                                                0 đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
+                                                <%
+                                                    }
+                                                %>
+                                            </span>
+                                        </div>
+                                    </div>
                                 </c:otherwise>
                             </c:choose>
                         </div>
@@ -328,8 +299,9 @@
                                     }
                                 %>
                             </p>
-                            <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p>
-                            <p><strong>Nhà Sản Xuất:</strong> <%=mo.getManufacturer().getCompanyName()%></p>
+                            <%-- sửa ngay phần này --%>
+                            <%-- <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p> --%>
+                            <%-- <p><strong>Nhà Sản Xuất:</strong> <%=mo.getManufacturer().getCompanyName()%></p> --%>
 
                             <form action="cart" method="post">
                                 <input type="hidden" name="action" value="add">
@@ -465,7 +437,7 @@
                                 </script>
                             </form>
 
-                          
+
                         </div>
                     </div>
 
@@ -659,30 +631,23 @@
                                             <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>">
                                                 <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= p.getImageURL()%>"
                                                      class="card-img-top img-fluid product-image1" style="height: 350px; object-fit: cover;" alt="<%= p.getProductName()%>">
-                                                    <div class="card-body">
-                                                        <p class="card-title mb-1"><%= p.getProductName()%></p>
-                                                        <p class="text-danger fw-bold">
-                                                            <%
-                                                                java.util.Map<Integer, String> relatedPriceDisplayMap = (java.util.Map<Integer, String>) request.getAttribute("relatedPriceDisplayMap");
-                                                                if (relatedPriceDisplayMap != null) {
-                                                                    String display = relatedPriceDisplayMap.get(p.getProductID());
-                                                                    if (display != null && !display.trim().isEmpty()) {
-                                                                        out.print(display);
-                                                                    } else {
-                                                                        // Fallback: giữ cách cũ nếu thiếu map
-                                                                        java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
-                                                                        java.util.Map<Integer, Double> relatedUnitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("relatedUnitPriceMap");
-                                                                        Double rup = relatedUnitPriceMap != null ? relatedUnitPriceMap.get(p.getProductID()) : null;
-                                                                        if (rup != null) {
-                                                                            out.print(df.format(rup) + "đ / " + p.getItemUnitName());
-                                                                        } else {
-                                                                            out.print(df.format(p.getPrice()) + "đ / " + (p.getBoxUnitName() != null ? p.getBoxUnitName() : "thùng"));
-                                                                        }
-                                                                    }
-                                                                }
-                                                            %>
-                                                        </p>
-                                                    </div>
+                                                <div class="card-body">
+                                                    <p class="card-title mb-1"><%= p.getProductName()%></p>
+                                                    <p class="text-danger fw-bold">
+                                                        <%
+                                                            // Sử dụng PriceUnit và ItemUnitName trực tiếp từ Product
+                                                            Double priceUnit1 = p.getPriceUnit();
+                                                            String itemUnitName = p.getItemUnitName();
+
+                                                            if (priceUnit1 != null && itemUnitName != null) {
+                                                                java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+                                                                out.print(df.format(priceUnit1) + " đ / " + itemUnitName);
+                                                            } else {
+                                                                out.print("Chưa có giá");
+                                                            }
+                                                        %>
+                                                    </p>
+                                                </div>
                                             </a>
                                         </div>
                                     </div>
@@ -719,51 +684,51 @@
         <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
 
         <script>
-                                                                        function setReply(parentId, orderId, productId) {
-                                                                            document.getElementById('parentReviewId').value = parentId;
-                                                                            document.getElementsByName('orderId')[0].value = orderId;
-                                                                            document.getElementsByName('productId')[0].value = productId;
-                                                                            document.getElementById('action').value = 'add';
-                                                                            document.getElementById('reviewId').value = '';
-                                                                            document.getElementById('comment').focus();
-                                                                            document.getElementById('comment').value = '';
+                                                                                function setReply(parentId, orderId, productId) {
+                                                                                    document.getElementById('parentReviewId').value = parentId;
+                                                                                    document.getElementsByName('orderId')[0].value = orderId;
+                                                                                    document.getElementsByName('productId')[0].value = productId;
+                                                                                    document.getElementById('action').value = 'add';
+                                                                                    document.getElementById('reviewId').value = '';
+                                                                                    document.getElementById('comment').focus();
+                                                                                    document.getElementById('comment').value = '';
 
-                                                                            // Reset rating
-                                                                            var stars = document.getElementsByName('rating');
-                                                                            for (var i = 0; i < stars.length; i++) {
-                                                                                stars[i].checked = false;
-                                                                            }
-
-                                                                            // Ẩn/hiện rating
-                                                                            var ratingSection = document.getElementById('ratingSection');
-                                                                            if (ratingSection) {
-                                                                                if (parentId) {
-                                                                                    ratingSection.style.display = 'none';
-                                                                                    // Bỏ required cho rating khi reply
+                                                                                    // Reset rating
+                                                                                    var stars = document.getElementsByName('rating');
                                                                                     for (var i = 0; i < stars.length; i++) {
-                                                                                        stars[i].required = false;
+                                                                                        stars[i].checked = false;
                                                                                     }
-                                                                                } else {
-                                                                                    ratingSection.style.display = 'block';
-                                                                                    // Bắt buộc required khi review gốc
-                                                                                    for (var i = 0; i < stars.length; i++) {
-                                                                                        stars[i].required = true;
+
+                                                                                    // Ẩn/hiện rating
+                                                                                    var ratingSection = document.getElementById('ratingSection');
+                                                                                    if (ratingSection) {
+                                                                                        if (parentId) {
+                                                                                            ratingSection.style.display = 'none';
+                                                                                            // Bỏ required cho rating khi reply
+                                                                                            for (var i = 0; i < stars.length; i++) {
+                                                                                                stars[i].required = false;
+                                                                                            }
+                                                                                        } else {
+                                                                                            ratingSection.style.display = 'block';
+                                                                                            // Bắt buộc required khi review gốc
+                                                                                            for (var i = 0; i < stars.length; i++) {
+                                                                                                stars[i].required = true;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+
+                                                                                    // Reset file input
+                                                                                    document.getElementById('image').value = '';
+
+                                                                                    // Đổi text button
+                                                                                    document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
+                                                                                }
+
+                                                                                function deleteReview(reviewId) {
+                                                                                    if (confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
+                                                                                        window.location.href = 'Review?action=delete&reviewId=' + reviewId;
                                                                                     }
                                                                                 }
-                                                                            }
-
-                                                                            // Reset file input
-                                                                            document.getElementById('image').value = '';
-
-                                                                            // Đổi text button
-                                                                            document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
-                                                                        }
-
-                                                                        function deleteReview(reviewId) {
-                                                                            if (confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
-                                                                                window.location.href = 'Review?action=delete&reviewId=' + reviewId;
-                                                                            }
-                                                                        }
         </script>
 
         <script>
@@ -806,13 +771,56 @@
                 padding: 10px 8px;
                 margin-top: 6px;
             }
-            .reply-item { position: relative; margin: 8px 0; }
-            .reply-item:before { content: ""; position: absolute; left: -16px; top: 0; bottom: 0; border-left: 2px dashed #e0cba4; }
-            .bubble { background: #fffdf7; border: 1px solid #e8d7bc; border-radius: 8px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(139,108,66,0.06); width: 100%; box-sizing: border-box; }
-            .bubble:before { content: ""; position: absolute; left: -8px; top: 12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-right:8px solid #e8d7bc; }
-            .bubble:after { content: ""; position: absolute; left: -7px; top: 12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-right:8px solid #fffdf7; }
-            .bubble-staff { background:#f7fbff; border-color:#c8def2; }
-            .bubble-staff:after { border-right-color:#f7fbff; }
+            .reply-item {
+                position: relative;
+                margin: 8px 0;
+            }
+            .reply-item:before {
+                content: "";
+                position: absolute;
+                left: -16px;
+                top: 0;
+                bottom: 0;
+                border-left: 2px dashed #e0cba4;
+            }
+            .bubble {
+                background: #fffdf7;
+                border: 1px solid #e8d7bc;
+                border-radius: 8px;
+                padding: 10px 12px;
+                box-shadow: 0 1px 3px rgba(139,108,66,0.06);
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .bubble:before {
+                content: "";
+                position: absolute;
+                left: -8px;
+                top: 12px;
+                width:0;
+                height:0;
+                border-top:8px solid transparent;
+                border-bottom:8px solid transparent;
+                border-right:8px solid #e8d7bc;
+            }
+            .bubble:after {
+                content: "";
+                position: absolute;
+                left: -7px;
+                top: 12px;
+                width:0;
+                height:0;
+                border-top:8px solid transparent;
+                border-bottom:8px solid transparent;
+                border-right:8px solid #fffdf7;
+            }
+            .bubble-staff {
+                background:#f7fbff;
+                border-color:#c8def2;
+            }
+            .bubble-staff:after {
+                border-right-color:#f7fbff;
+            }
             .badge-staff {
                 background: #0d6efd;
                 color: #fff;
@@ -824,7 +832,10 @@
                 font-size: .75rem;
             }
             .reply-image {
-                max-width: 140px; max-height: 140px; border-radius: 6px; border: 1px solid #e1e1e1;
+                max-width: 140px;
+                max-height: 140px;
+                border-radius: 6px;
+                border: 1px solid #e1e1e1;
             }
             .toggle-reply-box button {
                 transition: all 0.3s ease;

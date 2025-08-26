@@ -70,12 +70,12 @@ public class StaffProductServlet extends HttpServlet {
         List<Category> listCategory = dao.getCategory();
         switch (action) {
             case "list":
-                List<Product> list = dao.getAllIncludingOutOfStock();
+                List<Product> list = dao.getAll();
                 request.setAttribute("dataCate", listCategory);
                 request.setAttribute("data", list);
 
                 // Counters for stock status cards
-                final int LOW_STOCK_THRESHOLD = 10;
+                final int LOW_STOCK_THRESHOLD = 5;
                 int inStock = dao.countInStock(LOW_STOCK_THRESHOLD);
                 int lowStock = dao.countLowStock(LOW_STOCK_THRESHOLD);
                 int outOfStock = dao.countOutOfStock();

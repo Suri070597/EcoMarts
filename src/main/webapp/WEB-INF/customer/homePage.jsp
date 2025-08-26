@@ -202,15 +202,6 @@
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
                                     if (display != null) out.print(display);
-                                    // Only append unit info here for Drinks/Milk; skip for Fruits to avoid (1 kg)
-                                    if (display == null || (display != null && display.indexOf("(") == -1)) {
-                                        Integer parentId = p.getCategory() != null ? p.getCategory().getParentID() : null;
-                                        int cid = p.getCategory() != null ? p.getCategory().getCategoryID() : p.getCategoryID();
-                                        boolean isDrinkMilk = (cid == 1) || (cid == 2) || (parentId != null && (parentId == 1 || parentId == 2));
-                                        if (isDrinkMilk && p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
-                                            out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
-                                        }
-                                    }
                                 %>
                             </div>
                             <div class="button-group">
@@ -300,12 +291,6 @@
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
                                     if (display != null) out.print(display);
-                                    // Avoid duplicate unit info if already in display
-                                    if (display == null || (display != null && display.indexOf("(") == -1)) {
-                                        if (p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
-                                            out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
-                                        }
-                                    }
                                 %>
                             </div>
                             <div class="button-group">
@@ -395,13 +380,6 @@
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
                                     if (display != null) out.print(display);
-                                    // Append unit info for Drinks (1) and Milk (2)
-                                    Integer parentId = p.getCategory() != null ? p.getCategory().getParentID() : null;
-                                    int cid = p.getCategory() != null ? p.getCategory().getCategoryID() : p.getCategoryID();
-                                    boolean isDrinkMilk = (cid == 1) || (cid == 2) || (parentId != null && (parentId == 1 || parentId == 2));
-                                    if (isDrinkMilk && p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
-                                        out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
-                                    }
                                 %>
                             </div>
 
