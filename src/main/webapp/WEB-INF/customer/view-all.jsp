@@ -206,43 +206,17 @@
 
                             <div class="product-price">
                                 <%
-                                    // Ưu tiên hiển thị chuỗi giá đã được format sẵn từ Controller (chuẩn MVC)
-                                    java.util.Map<Integer, String> priceDisplayMap = (java.util.Map<Integer, String>) request.getAttribute("priceDisplayMap");
-                                    if (priceDisplayMap != null) {
-                                        String display = priceDisplayMap.get(p.getProductID());
-                                        if (display != null && !display.trim().isEmpty()) {
-                                            out.print(display);
-                                        } else {
-                                            // Fallback cũ nếu map chưa được cung cấp
-                                            java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
-                                            Double unitPrice = null;
-                                            if (unitPriceMap != null) {
-                                                unitPrice = unitPriceMap.get(p.getProductID());
-                                            }
-                                            java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                            symbols.setGroupingSeparator('.');
-                                            java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                            if (unitPrice != null) {
-                                                out.print(formatter.format(unitPrice) + " đ / lon");
-                                            } else {
-                                                out.print(formatter.format(p.getPrice()) + " đ / thùng");
-                                            }
-                                        }
-                                    } else {
-                                        // Fallback khi không có priceDisplayMap (trường hợp xem tất cả theo danh mục cũ)
-                                        java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
-                                        Double unitPrice = null;
-                                        if (unitPriceMap != null) {
-                                            unitPrice = unitPriceMap.get(p.getProductID());
-                                        }
+                                    // Sử dụng PriceUnit và ItemUnitName trực tiếp từ Product
+                                    Double priceUnit = p.getPriceUnit();
+                                    String itemUnitName = p.getItemUnitName();
+                                    
+                                    if (priceUnit != null && itemUnitName != null) {
                                         java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
                                         symbols.setGroupingSeparator('.');
                                         java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-                                        if (unitPrice != null) {
-                                            out.print(formatter.format(unitPrice) + " đ / lon");
-                                        } else {
-                                            out.print(formatter.format(p.getPrice()) + " đ / thùng");
-                                        }
+                                        out.print(formatter.format(priceUnit) + " đ / " + itemUnitName);
+                                    } else {
+                                        out.print("Chưa có giá");
                                     }
                                 %>
                             </div>

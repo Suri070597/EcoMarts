@@ -8,6 +8,7 @@ import dao.CategoryDAO;
 import dao.ProductDAO;
 import dao.OrderDAO;
 import dao.FeedBackDAO;
+import dao.ViewProductDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -147,75 +148,25 @@ public class ViewAllProductServlet extends HttpServlet {
                 request.setAttribute("priceDisplayMap", priceDisplayMap);
             } else {
                 int parsedCategoryId = Integer.parseInt(categoryIdRaw);
-                List<Product> originalList = dao.getProductsByCategoryAndSub(parsedCategoryId);
-                categoryName = dao.getCategoryNameById(parsedCategoryId);
 
-                // Build priceDisplayMap and filter list according to rules
-                java.util.List<Product> filtered = new java.util.ArrayList<>();
-                java.util.Map<Integer, String> priceDisplayMap = new java.util.HashMap<>();
-                // formatter
-                java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                symbols.setGroupingSeparator('.');
-                java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+                // Sử dụng ViewProductDAO để lấy sản phẩm theo điều kiện giống homepage
+                dao.ViewProductDAO viewDao = new dao.ViewProductDAO();
+                List<Product> originalList;
 
-                for (Product p : originalList) {
-                    int parentId = 0;
-                    try {
-                        if (p.getCategory() != null) {
-                            parentId = p.getCategory().getParentID();
-                        }
-                    } catch (Exception ignore) {
-                    }
-
-                    String display = null;
-                    if (parentId == 1 || parentId == 2) {
-                        // Drinks & Milk: show BOX price and append (UnitPerBox ItemUnitName)
-                        Double boxPrice = dao.getBoxPrice(p.getProductID());
-                        if (boxPrice == null)
-                            boxPrice = p.getPrice();
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(formatter.format(boxPrice)).append(" đ / thùng");
-                        try {
-                            Integer upb = p.getUnitPerBox();
-                            String iun = p.getItemUnitName();
-                            if (upb == null || upb <= 0 || iun == null || iun.trim().isEmpty()) {
-                                Product full = dao.getProductById(p.getProductID());
-                                if (full != null) {
-                                    upb = full.getUnitPerBox();
-                                    iun = full.getItemUnitName();
-                                }
-                            }
-                            if (upb != null && upb > 0 && iun != null && !iun.trim().isEmpty()) {
-                                sb.append(" (").append(upb).append(" ").append(iun).append(")");
-                            }
-                        } catch (Exception ignore) {
-                        }
-                        display = sb.toString();
-                        filtered.add(p);
-                    } else if (parentId == 3) {
-                        // Fruits: giữ nguyên như cũ (giá gốc + đơn vị từ Product)
-                        String unitLabel = (p.getUnit() != null && !p.getUnit().trim().isEmpty()) ? p.getUnit() : "kg";
-                        display = formatter.format(p.getPrice()) + " đ / " + unitLabel;
-                        filtered.add(p);
-                    } else {
-                        // Other categories: require UNIT; hide if missing
-                        Double unitPrice = dao.getUnitOnlyPrice(p.getProductID());
-                        String itemUnit = dao.getItemUnitName(p.getProductID());
-                        if (unitPrice != null && itemUnit != null && !itemUnit.trim().isEmpty()) {
-                            display = formatter.format(unitPrice) + " đ / " + itemUnit;
-                            filtered.add(p);
-                        }
-                    }
-                    if (display != null) {
-                        priceDisplayMap.put(p.getProductID(), display);
-                    }
+                if (parsedCategoryId == 3) {
+                    // Fruits: lấy theo PackageType = 'KG' và quantity > 0
+                    originalList = viewDao.getProductsByCategory(parsedCategoryId);
+                } else {
+                    // Other categories: lấy theo PackageType = 'UNIT' và quantity > 0
+                    originalList = viewDao.getProductsByCategory(parsedCategoryId);
                 }
 
-                productList = filtered;
+                categoryName = dao.getCategoryNameById(parsedCategoryId);
+                productList = originalList;
+
                 request.setAttribute("productList", productList);
                 request.setAttribute("categoryId", parsedCategoryId);
                 request.setAttribute("categoryName", categoryName);
-                request.setAttribute("priceDisplayMap", priceDisplayMap);
             }
 
             // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm

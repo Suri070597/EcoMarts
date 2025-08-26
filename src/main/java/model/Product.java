@@ -15,7 +15,9 @@ public class Product {
 
     private int productID;
     private String productName;
-    private double price;
+    private Double price;
+    private Double priceUnit;
+    private Double pricePack;
     private String description;
     private double stockQuantity;
     private String imageURL;
@@ -78,7 +80,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(int productID, String productName, double price, String description, double stockQuantity,
+    public Product(int productID, String productName, Double price, String description, double stockQuantity,
             String imageURL, String unit, Timestamp createdAt) {
         this.productID = productID;
         this.productName = productName;
@@ -93,7 +95,7 @@ public class Product {
         // this.status = status;
     }
 
-    public Product(int productID, String productName, double price, String description, double stockQuantity,
+    public Product(int productID, String productName, Double price, String description, double stockQuantity,
             String imageURL, String unit, Timestamp createdAt,
             Date manufactureDate, Date expirationDate) {
         this.productID = productID;
@@ -141,12 +143,28 @@ public class Product {
         this.productName = productName;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Double getPriceUnit() {
+        return priceUnit;
+    }
+
+    public void setPriceUnit(Double priceUnit) {
+        this.priceUnit = priceUnit;
+    }
+
+    public Double getPricePack() {
+        return pricePack;
+    }
+
+    public void setPricePack(Double pricePack) {
+        this.pricePack = pricePack;
     }
 
     public String getDescription() {

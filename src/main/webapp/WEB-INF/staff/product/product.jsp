@@ -97,40 +97,60 @@
                                 <%
                                     for (Product pro : product) {
                                         Category child = pro.getCategory();
-                                        String parentName = "N/A";
+                                        String categoryDisplay = "N/A";
                                         if (child != null) {
-                                            int parentId = child.getParentID();
-                                            for (Category c : cate) {
-                                                if (c.getCategoryID() == parentId) {
-                                                    parentName = c.getCategoryName();
-                                                    break;
-                                                }
-                                            }
+                                            // Hiển thị tên danh mục con
+                                            categoryDisplay = child.getCategoryName();
                                         }
                                 %>
                                 <tr>
                                     <td><%= pro.getProductID()%></td>
-                                    <td><%= parentName%></td>
+                                    <td><%= categoryDisplay%></td>
                                     <td><%= pro.getProductName()%></td>
-                                    <td><fmt:formatNumber value="<%= pro.getPrice()%>" type="number" pattern="#,###" /> đ</td>
                                     <td>
-                                    <% double qty = pro.getStockQuantity();
-                                       if (qty == Math.floor(qty)) {
-                                           out.print((long)qty);
-                                       } else {
-                                           out.print(qty);
-                                       }
-                                    %>
+                                        <% 
+                                            // Kiểm tra xem có phải trái cây không (parentID = 3)
+                                            boolean isFruit = pro.getCategory() != null && pro.getCategory().getParentID() == 3;
+                                            Double displayPrice = null;
+                                            
+                                            if (isFruit) {
+                                                // Nếu là trái cây, hiển thị giá từ PriceUnit
+                                                displayPrice = pro.getPriceUnit();
+                                            } else {
+                                                // Nếu không phải trái cây, hiển thị giá từ PriceBox
+                                                displayPrice = pro.getPrice();
+                                            }
+                                            
+                                            if (displayPrice != null && displayPrice > 0) {
+                                                out.print(new java.text.DecimalFormat("#,###").format(displayPrice));
+                                            } else {
+                                                out.print("Chưa có giá");
+                                            }
+                                        %> đ
                                     </td>
-                                    <td><%= pro.getBoxUnitName()%></td>
                                     <td>
-                                        <% if (pro.getStockQuantity() <= 0) { %>
-                                            <span class="badge bg-danger">Hết hàng</span>
-                                        <% } else if (pro.getStockQuantity() <= 10) { %>
-                                            <span class="badge bg-warning">Sắp hết</span>
+                                        <%
+                                            double qty = pro.getStockQuantity();
+                                            // Hiển thị số lượng thùng (luôn là số nguyên)
+                                            if (qty == Math.floor(qty)) {
+                                                out.print((long) qty);
+                                            } else {
+                                                out.print(qty);
+                                            }
+                                        %>
+                                    </td>
+                                    <td><%= pro.getBoxUnitName() != null ? pro.getBoxUnitName() : "N/A"%></td>
+                                    <td>
+                                        <% 
+                                            double stockQty = pro.getStockQuantity();
+                                            if (stockQty <= 0) { 
+                                        %>
+                                        <span class="badge bg-danger">Hết hàng</span>
+                                        <% } else if (stockQty <= 5) { %>
+                                        <span class="badge bg-warning">Sắp hết</span>
                                         <% } else { %>
-                                            <span class="badge bg-success">Còn hàng</span>
-                                        <% } %>
+                                        <span class="badge bg-success">Còn hàng</span>
+                                        <% }%>
                                     </td>
                                     <td>
                                         <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= pro.getImageURL()%>" alt="Product Image" style="width: 80px; height: auto;">
@@ -138,7 +158,7 @@
                                     <td><fmt:formatDate value="<%= pro.getCreatedAt()%>" pattern="dd/MM/yyyy" /></td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
-                                             <a href="${pageContext.request.contextPath}/staff/product?action=detail&id=<%= pro.getProductID()%>" class="btn btn-sm btn-info">
+                                            <a href="${pageContext.request.contextPath}/staff/product?action=detail&id=<%= pro.getProductID()%>" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         </div>

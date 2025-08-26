@@ -40,12 +40,12 @@ public class ProductServlet extends HttpServlet {
         List<Category> listCategory = dao.getCategory();
         switch (action) {
             case "list":
-                List<Product> list = dao.getAllIncludingOutOfStock();
+                List<Product> list = dao.getAll();
                 request.setAttribute("dataCate", listCategory);
                 request.setAttribute("data", list);
 
                 // Counters for stock status cards
-                final int LOW_STOCK_THRESHOLD = 10;
+                final int LOW_STOCK_THRESHOLD = 5;
                 int inStock = dao.countInStock(LOW_STOCK_THRESHOLD);
                 int lowStock = dao.countLowStock(LOW_STOCK_THRESHOLD);
                 int outOfStock = dao.countOutOfStock();
@@ -57,7 +57,6 @@ public class ProductServlet extends HttpServlet {
                 break;
             case "create":
                 request.setAttribute("dataCate", dao.getCategory());
-                request.setAttribute("dataSup", dao.getActiveManufacturers());
                 request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request, response);
                 break;
             case "delete":
@@ -81,23 +80,7 @@ public class ProductServlet extends HttpServlet {
                     id1 = Integer.parseInt(idRaw1);
                     mo = dao.getProductById(id1);
                     request.setAttribute("mo", mo);
-
                     request.setAttribute("dataCate", dao.getCategory());
-                    java.util.List<Manufacturer> activeSuppliers = dao.getActiveManufacturers();
-                    if (mo != null && mo.getManufacturer() != null) {
-                        Manufacturer currentSup = mo.getManufacturer();
-                        boolean exists = false;
-                        for (Manufacturer m : activeSuppliers) {
-                            if (m.getManufacturerId() == currentSup.getManufacturerId()) {
-                                exists = true;
-                                break;
-                            }
-                        }
-                        if (!exists) {
-                            activeSuppliers.add(currentSup);
-                        }
-                    }
-                    request.setAttribute("dataSup", activeSuppliers);
                     request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -111,7 +94,7 @@ public class ProductServlet extends HttpServlet {
                 request.setAttribute("keyword", keyword);
 
                 // Counters for stock status cards based on search results
-                final int SEARCH_LOW_STOCK_THRESHOLD = 10;
+                final int SEARCH_LOW_STOCK_THRESHOLD = 5;
                 int searchInStock = 0, searchLowStock = 0, searchOutOfStock = 0;
 
                 for (Product p : searchResults) {
@@ -146,6 +129,80 @@ public class ProductServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/admin/product");
                 }
                 break;
+            case "convert":
+                try {
+                    String productIdStr = request.getParameter("id");
+                    System.out.println("Convert action - Product ID: " + productIdStr);
+
+                    if (productIdStr == null || productIdStr.trim().isEmpty()) {
+                        System.out.println("Product ID is null or empty");
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=invalid_product_id");
+                        return;
+                    }
+
+                    int productId = Integer.parseInt(productIdStr);
+                    System.out.println("Parsed Product ID: " + productId);
+
+                    Product product = dao.getProductById(productId);
+                    System.out.println("Retrieved product: " + (product != null ? product.getProductName() : "NULL"));
+
+                    if (product == null) {
+                        System.out.println("Product not found");
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=product_not_found");
+                        return;
+                    }
+
+                    request.setAttribute("product", product);
+                    System.out.println("Forwarding to convert-product.jsp");
+                    request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                            response);
+
+                } catch (NumberFormatException e) {
+                    System.err.println("NumberFormatException: " + e.getMessage());
+                    response.sendRedirect(request.getContextPath() + "/admin/product?error=invalid_product_id_format");
+                } catch (Exception e) {
+                    System.err.println("Exception in convert: " + e.getMessage());
+                    e.printStackTrace();
+                    response.sendRedirect(request.getContextPath() + "/admin/product?error=convert_exception");
+                }
+                break;
+            case "setPrice":
+                try {
+                    String productIdStr = request.getParameter("id");
+                    System.out.println("SetPrice action - Product ID: " + productIdStr);
+
+                    if (productIdStr == null || productIdStr.trim().isEmpty()) {
+                        System.out.println("Product ID is null or empty");
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=invalid_product_id");
+                        return;
+                    }
+
+                    int productId = Integer.parseInt(productIdStr);
+                    System.out.println("Parsed Product ID: " + productId);
+
+                    Product product = dao.getProductById(productId);
+                    System.out.println("Retrieved product: " + (product != null ? product.getProductName() : "NULL"));
+
+                    if (product == null) {
+                        System.out.println("Product not found");
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=product_not_found");
+                        return;
+                    }
+
+                    request.setAttribute("product", product);
+                    System.out.println("Forwarding to set-price.jsp");
+                    request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                            response);
+
+                } catch (NumberFormatException e) {
+                    System.err.println("NumberFormatException: " + e.getMessage());
+                    response.sendRedirect(request.getContextPath() + "/admin/product?error=invalid_product_id_format");
+                } catch (Exception e) {
+                    System.err.println("Exception in setPrice: " + e.getMessage());
+                    e.printStackTrace();
+                    response.sendRedirect(request.getContextPath() + "/admin/product?error=setprice_exception");
+                }
+                break;
         }
     }
 
@@ -167,15 +224,13 @@ public class ProductServlet extends HttpServlet {
                     String pName = request.getParameter("pName");
                     String pDescription = request.getParameter("pDescription");
                     String categoryIDStr = request.getParameter("categoryID");
-                    String manufacturerIDStr = request.getParameter("manufacturerID");
-                    String manufactureDateStr = request.getParameter("manufactureDate");
-                    String expiryMonthsStr = request.getParameter("expirySelect");
+                    String itemUnitName = request.getParameter("itemUnitName");
+                    String unitPerBoxStr = request.getParameter("unitPerBox");
+                    String boxUnitName = request.getParameter("boxUnitName");
 
-                    // Validate required fields
                     if (pName == null || pName.trim().isEmpty()) {
                         request.setAttribute("error", "Vui lòng nhập tên sản phẩm.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
@@ -183,31 +238,19 @@ public class ProductServlet extends HttpServlet {
                     if (categoryIDStr == null || categoryIDStr.trim().isEmpty()) {
                         request.setAttribute("error", "Vui lòng chọn danh mục sản phẩm.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
                     }
-                    if (manufacturerIDStr == null || manufacturerIDStr.trim().isEmpty()) {
-                        request.setAttribute("error", "Vui lòng chọn nhà cung cấp.");
+                    if (itemUnitName == null || itemUnitName.trim().isEmpty()) {
+                        request.setAttribute("error", "Vui lòng chọn đơn vị nhỏ nhất.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                response);
-                        return;
-                    }
-                    if (manufactureDateStr == null || manufactureDateStr.trim().isEmpty()) {
-                        request.setAttribute("error", "Vui lòng nhập ngày sản xuất.");
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                         return;
                     }
 
                     int categoryID = Integer.parseInt(categoryIDStr);
-                    int manufacturerID = Integer.parseInt(manufacturerIDStr);
-                    // Lấy danh sách category để xác định trái cây
                     List<Category> allCate = dao.getCategory();
                     boolean isFruit = (categoryID == 3);
                     for (Category c : allCate) {
@@ -216,164 +259,42 @@ public class ProductServlet extends HttpServlet {
                             break;
                         }
                     }
-                    // Chỉ kiểm tra hạn sử dụng nếu không phải trái cây
-                    if (!isFruit && (expiryMonthsStr == null || expiryMonthsStr.trim().isEmpty())) {
-                        request.setAttribute("error", "Vui lòng chọn hạn sử dụng.");
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                response);
-                        return;
+
+                    Integer unitPerBox = null;
+                    String boxUnit = null;
+                    if (!isFruit) {
+                        if (unitPerBoxStr == null || unitPerBoxStr.trim().isEmpty()) {
+                            request.setAttribute("error", "Vui lòng nhập số lượng sản phẩm trong 1 thùng.");
+                            request.setAttribute("dataCate", dao.getCategory());
+                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                        unitPerBox = Integer.parseInt(unitPerBoxStr);
+                        boxUnit = (boxUnitName == null || boxUnitName.trim().isEmpty()) ? "thùng" : boxUnitName.trim();
+                    } else {
+                        unitPerBox = 1;
+                        boxUnit = itemUnitName; // không có thùng cho trái cây
                     }
 
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    Date manufactureDate = sdf.parse(manufactureDateStr);
-                    int months = 0;
-                    if (!isFruit) {
-                        months = Integer.parseInt(expiryMonthsStr);
-                    }
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(manufactureDate);
-                    if (!isFruit) {
-                        cal.add(Calendar.MONTH, months);
-                    }
-                    Date expirationDate = cal.getTime();
-                    Date today = new Date();
-                    // Chuẩn hóa ngày về 00:00:00 để so sánh
-                    Date todayTrunc = truncateTime(today);
-                    if (manufactureDate.after(todayTrunc)) {
-                        request.setAttribute("error", "Ngày sản xuất không được ở tương lai.");
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                response);
-                        return;
-                    }
-                    // Không cho phép ngày sản xuất quá 2 năm về trước
-                    Calendar twoYearsAgo = Calendar.getInstance();
-                    twoYearsAgo.setTime(today);
-                    twoYearsAgo.add(Calendar.YEAR, -2); // Trừ đi 2 năm
-                    Date twoYearsBefore = twoYearsAgo.getTime();
-                    if (manufactureDate.before(twoYearsBefore)) {
-                        request.setAttribute("error", "Ngày sản xuất không được quá 2 năm trước.");
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                response);
-                        return;
-                    }
-                    if (expirationDate.before(todayTrunc)) {
-                        request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                response);
-                        return;
-                    }
                     // Xử lý ảnh
                     Part filePart = request.getPart("pImage");
                     String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
                     if (!fileName.isEmpty()) {
                         File uploadDir = new File(IMAGE_UPLOAD_DIR);
-                        if (!uploadDir.exists()) {
+                        if (!uploadDir.exists())
                             uploadDir.mkdirs();
-                        }
                         filePart.write(IMAGE_UPLOAD_DIR + File.separator + fileName);
                     }
                     String pImage = fileName;
-                    Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-                    double price;
-                    double stockQuantity;
-                    int unitPerBox;
-                    String boxUnitName;
-                    String itemUnitName;
-                    if (isFruit) {
-                        String fruitPriceStr = request.getParameter("fruitPrice");
-                        String fruitQtyStr = request.getParameter("fruitQuantity");
-                        String fruitExpiryDaysStr = request.getParameter("fruitExpiryDays");
-                        if (fruitPriceStr == null || fruitPriceStr.trim().isEmpty()) {
-                            request.setAttribute("error", "Vui lòng nhập giá cho trái cây.");
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getActiveManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                        if (fruitQtyStr == null || fruitQtyStr.trim().isEmpty()) {
-                            request.setAttribute("error", "Vui lòng nhập số lượng (kg) cho trái cây.");
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getActiveManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                        if (fruitExpiryDaysStr == null || fruitExpiryDaysStr.trim().isEmpty()) {
-                            request.setAttribute("error", "Vui lòng nhập hạn sử dụng (ngày) cho trái cây.");
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getActiveManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                        price = Double.parseDouble(fruitPriceStr);
-                        stockQuantity = Double.parseDouble(fruitQtyStr);
-                        int fruitExpiryDays = Integer.parseInt(fruitExpiryDaysStr);
-                        // Chỉ cho phép số lượng là số nguyên dương
-                        if (stockQuantity <= 0 || stockQuantity != Math.floor(stockQuantity)) {
-                            request.setAttribute("error", "Số lượng trái cây phải là số nguyên dương (kg).");
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getActiveManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                        if (price <= 0 || fruitExpiryDays <= 0) {
-                            request.setAttribute("error", "Giá và hạn sử dụng phải lớn hơn 0.");
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getActiveManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                        Calendar calFruit = Calendar.getInstance();
-                        calFruit.setTime(manufactureDate);
-                        calFruit.add(Calendar.DATE, fruitExpiryDays);
-                        expirationDate = calFruit.getTime();
-                        unitPerBox = 1;
-                        boxUnitName = "kg";
-                        itemUnitName = "kg";
-                        // Chuẩn hóa ngày hết hạn
-                        Date expirationTrunc = truncateTime(expirationDate);
-                        if (expirationTrunc.before(todayTrunc)) {
-                            request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getActiveManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                    } else {
-                        double boxPrice = Double.parseDouble(request.getParameter("boxPrice"));
-                        int boxQuantity = Integer.parseInt(request.getParameter("boxQuantity"));
-                        unitPerBox = Integer.parseInt(request.getParameter("unitPerBox"));
-                        boxUnitName = request.getParameter("boxUnitName");
-                        itemUnitName = request.getParameter("itemUnitName");
-                        stockQuantity = boxQuantity;
-                        price = boxPrice; // Giá của 1 thùng, không chia cho unitPerBox
-                        // Chuẩn hóa ngày hết hạn
-                        Date expirationTrunc = truncateTime(expirationDate);
-                        if (expirationTrunc.before(todayTrunc)) {
-                            request.setAttribute("error", "Ngày hết hạn đã trôi qua.");
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getActiveManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                    }
-                    int res = dao.insert(pName, price, pDescription, stockQuantity, pImage, itemUnitName,
-                            createdAt, categoryID, manufacturerID, manufactureDate, expirationDate,
-                            unitPerBox, boxUnitName, itemUnitName);
+
+                    // Theo schema mới: giá có thể NULL; không nhập ở form tạo
+                    Double priceBox = null;
+                    Double priceUnit = null;
+                    Double pricePack = null;
+
+                    int res = dao.insertNewProduct(pName, categoryID, priceBox, priceUnit, pricePack,
+                            unitPerBox, boxUnit, itemUnitName, pDescription, pImage);
 
                     if (res == 1) {
                         response.sendRedirect(request.getContextPath() + "/admin/product");
@@ -381,298 +302,222 @@ public class ProductServlet extends HttpServlet {
                     } else {
                         request.setAttribute("error", "❌ Thêm sản phẩm thất bại.");
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getActiveManufacturers());
                         request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                                 response);
                     }
-
                 } catch (Exception e) {
                     e.printStackTrace();
                     request.setAttribute("error", "❌ Đã xảy ra lỗi khi tạo sản phẩm: " + e.getMessage());
                     request.setAttribute("dataCate", dao.getCategory());
-                    request.setAttribute("dataSup", dao.getActiveManufacturers());
                     request.getRequestDispatcher("/WEB-INF/admin/product/create-product.jsp").forward(request,
                             response);
                 }
                 break;
 
             case "delete":
-                String idRaw = request.getParameter("id");
-                int id = Integer.parseInt(idRaw);
-                if (dao.delete(id)) {
-                    response.sendRedirect(request.getContextPath() + "/admin/product");
-                } else {
-                    response.sendRedirect(request.getContextPath() + "/admin/product?action=delete&id=" + id);
+                try {
+                    String idRaw = request.getParameter("id");
+                    if (idRaw == null || idRaw.trim().isEmpty()) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=invalid_id");
+                        return;
+                    }
+
+                    int id = Integer.parseInt(idRaw);
+                    Product productToDelete = dao.getProductById(id);
+
+                    if (productToDelete == null) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=product_not_found");
+                        return;
+                    }
+
+                    // Thực hiện xóa sản phẩm
+                    boolean deleteSuccess = dao.delete(id);
+
+                    if (deleteSuccess) {
+                        response.sendRedirect(
+                                request.getContextPath() + "/admin/product?success=delete_success&product_name=" +
+                                        java.net.URLEncoder.encode(productToDelete.getProductName(), "UTF-8"));
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=delete_failed&id=" + id);
+                    }
+                } catch (NumberFormatException e) {
+                    response.sendRedirect(request.getContextPath() + "/admin/product?error=invalid_id_format");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    response.sendRedirect(request.getContextPath() + "/admin/product?error=delete_exception");
                 }
                 break;
 
             case "update":
                 try {
-                    int id1 = Integer.parseInt(request.getParameter("id"));
-                    String name = request.getParameter("pName");
+                    int productId = Integer.parseInt(request.getParameter("id"));
+                    String productName = request.getParameter("pName");
                     String description = request.getParameter("pDescription");
                     int categoryId = Integer.parseInt(request.getParameter("categoryID"));
-                    int manufacturerId = Integer.parseInt(request.getParameter("manufacturerID"));
-                    String manufactureDateStr1 = request.getParameter("manufactureDate");
-                    String expirySelect = request.getParameter("expirySelect");
-                    String fruitExpiryDaysStr = request.getParameter("fruitExpiryDays");
-                    String fruitPriceStr = request.getParameter("fruitPrice");
-                    String fruitQtyStr = request.getParameter("fruitQuantity");
-                    String boxPriceStr = request.getParameter("boxPrice");
-                    String boxQuantityStr = request.getParameter("boxQuantity");
+
+                    // Lấy thông tin đóng gói
                     String unitPerBoxStr = request.getParameter("unitPerBox");
                     String boxUnitName = request.getParameter("boxUnitName");
                     String itemUnitName = request.getParameter("itemUnitName");
 
-                    // Kiểm tra và chuyển đổi ngày sản xuất
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    Date manufactureDate;
-                    try {
-                        if (manufactureDateStr1 == null || manufactureDateStr1.isEmpty()) {
-                            throw new IllegalArgumentException("❌ Ngày sản xuất không được để trống.");
-                        }
-                        manufactureDate = sdf.parse(manufactureDateStr1);
-                    } catch (Exception e) {
-                        request.setAttribute("error", "❌ Ngày sản xuất không hợp lệ. Định dạng phải là yyyy-MM-dd.");
-                        Product existing = dao.getProductById(id1);
-                        request.setAttribute("mo", existing); // <-- fix ở đây
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
-                                response);
-                        return;
-                    }
-
                     // Xác định có phải trái cây không
                     List<Category> allCate = dao.getCategory();
-                    boolean isFruit = (categoryId == 3);
+                    boolean isFruit = false;
                     for (Category c : allCate) {
-                        if (c.getCategoryID() == categoryId && c.getParentID() != null && c.getParentID() == 3) {
-                            isFruit = true;
+                        if (c.getCategoryID() == categoryId) {
+                            isFruit = (c.getParentID() != null && c.getParentID() == 3);
                             break;
                         }
                     }
 
-                    double price = 0;
-                    double stockQuantity = 0;
-                    int unitPerBox = 1;
-                    String image;
-                    Date expirationDate = null;
+                    // Validate dữ liệu
+                    if (productName == null || productName.trim().isEmpty()) {
+                        throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
+                    }
 
                     if (isFruit) {
-                        // Validate các trường trái cây
-                        if (fruitPriceStr == null || fruitPriceStr.trim().isEmpty()) {
-                            request.setAttribute("error", "Vui lòng nhập giá cho trái cây.");
-                            Product existing = dao.getProductById(id1);
-                            request.setAttribute("mo", existing);
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                        if (fruitQtyStr == null || fruitQtyStr.trim().isEmpty()) {
-                            request.setAttribute("error", "Vui lòng nhập số lượng (kg) cho trái cây.");
-                            Product existing = dao.getProductById(id1);
-                            request.setAttribute("mo", existing);
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                        if (fruitExpiryDaysStr == null || fruitExpiryDaysStr.trim().isEmpty()) {
-                            request.setAttribute("error", "Vui lòng nhập hạn sử dụng (ngày) cho trái cây.");
-                            Product existing = dao.getProductById(id1);
-                            request.setAttribute("mo", existing);
-                            request.setAttribute("dataCate", dao.getCategory());
-                            request.setAttribute("dataSup", dao.getAllManufacturers());
-                            request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
-                                    response);
-                            return;
-                        }
-                        price = Double.parseDouble(fruitPriceStr);
-                        stockQuantity = Double.parseDouble(fruitQtyStr);
-                        int fruitExpiryDays = Integer.parseInt(fruitExpiryDaysStr);
-                        // Tính ngày hết hạn
-                        Calendar calFruit = Calendar.getInstance();
-                        calFruit.setTime(manufactureDate);
-                        calFruit.add(Calendar.DATE, fruitExpiryDays);
-                        expirationDate = calFruit.getTime();
-                        unitPerBox = 1;
-                        boxUnitName = "kg";
-                        itemUnitName = "kg";
+                        // Validate trái cây
+                        itemUnitName = "kg"; // Mặc định cho trái cây
                     } else {
-                        // Sản phẩm thường
-                        double boxPrice = Double.parseDouble(boxPriceStr);
-                        int boxQuantity = Integer.parseInt(boxQuantityStr);
-                        unitPerBox = Integer.parseInt(unitPerBoxStr);
-                        boxUnitName = boxUnitName;
-                        itemUnitName = itemUnitName;
-                        stockQuantity = boxQuantity; // Số lượng thùng, không nhân với unitPerBox
-                        price = boxPrice; // Giá của 1 thùng, không chia cho unitPerBox
-                        int months = Integer.parseInt(expirySelect);
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(manufactureDate);
-                        cal.add(Calendar.MONTH, months);
-                        expirationDate = cal.getTime();
-                    }
-
-                    // Kiểm tra hợp lệ ngày
-                    Date today = new Date();
-                    Calendar twoYearsAgo = Calendar.getInstance();
-                    twoYearsAgo.add(Calendar.YEAR, -2);
-                    String err = null;
-                    if (manufactureDate.after(today)) {
-                        err = "Ngày sản xuất không được ở tương lai.";
-                    } else if (manufactureDate.before(twoYearsAgo.getTime())) {
-                        err = "Ngày sản xuất không được quá 2 năm trước.";
-                    } else if (expirationDate.before(today)) {
-                        err = "Ngày hết hạn đã trôi qua.";
-                    }
-                    if (err != null) {
-                        request.setAttribute("error", err);
-                        Product existing = dao.getProductById(id1);
-                        request.setAttribute("mo", existing);
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
-                                response);
-                        return;
-                    }
-
-                    // Xử lý ảnh
-                    Part filePart1 = request.getPart("pImage");
-                    String fileName1 = Paths.get(filePart1.getSubmittedFileName()).getFileName().toString();
-                    if (!fileName1.isEmpty()) {
-                        File uploadDir = new File(IMAGE_UPLOAD_DIR);
-                        if (!uploadDir.exists()) {
-                            uploadDir.mkdirs();
+                        // Validate sản phẩm thường
+                        if (unitPerBoxStr == null || unitPerBoxStr.trim().isEmpty()) {
+                            throw new IllegalArgumentException("Vui lòng nhập số lượng sản phẩm trong 1 thùng.");
                         }
-                        filePart1.write(IMAGE_UPLOAD_DIR + File.separator + fileName1);
-                        image = fileName1;
-                    } else {
-                        Product existing = dao.getProductById(id1);
-                        image = existing.getImageURL();
+                        if (boxUnitName == null || boxUnitName.trim().isEmpty()) {
+                            throw new IllegalArgumentException("Vui lòng nhập đơn vị thùng.");
+                        }
+                        if (itemUnitName == null || itemUnitName.trim().isEmpty()) {
+                            throw new IllegalArgumentException("Vui lòng chọn đơn vị nhỏ nhất.");
+                        }
                     }
 
-                    Timestamp createdAt = new Timestamp(System.currentTimeMillis());
+                    // Xử lý hình ảnh
+                    Part filePart = request.getPart("pImage");
+                    String imageFileName = null;
+                    if (filePart != null && filePart.getSize() > 0) {
+                        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                        if (fileName != null && !fileName.isEmpty()) {
+                            String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                            imageFileName = System.currentTimeMillis() + fileExtension;
+                            File uploadDir = new File(IMAGE_UPLOAD_DIR);
+                            if (!uploadDir.exists()) {
+                                uploadDir.mkdirs();
+                            }
+                            filePart.write(IMAGE_UPLOAD_DIR + File.separator + imageFileName);
+                        }
+                    }
 
-                    Product product = new Product(id1, name, price, description, stockQuantity, image, itemUnitName,
-                            createdAt,
-                            manufactureDate, expirationDate);
-                    product.setUnitPerBox(unitPerBox);
-                    product.setBoxUnitName(boxUnitName);
-                    product.setItemUnitName(itemUnitName);
+                    // Lấy sản phẩm hiện tại để giữ nguyên hình ảnh nếu không thay đổi
+                    Product currentProduct = dao.getProductById(productId);
+                    if (currentProduct == null) {
+                        throw new IllegalArgumentException("Không tìm thấy sản phẩm.");
+                    }
 
-                    Category category = new Category();
-                    category.setCategoryID(categoryId);
-                    product.setCategory(category);
+                    // Thực hiện update
+                    String finalImageURL = imageFileName != null ? imageFileName : currentProduct.getImageURL();
 
-                    Manufacturer manufacturer = new Manufacturer();
-                    manufacturer.setManufacturerID(manufacturerId);
-                    product.setManufacturer(manufacturer);
+                    boolean updateSuccess = dao.updateProduct(
+                            productId, productName, description, categoryId,
+                            null, null, null, // Không cập nhật giá
+                            unitPerBoxStr, boxUnitName, itemUnitName,
+                            finalImageURL);
 
-                    boolean result = dao.update(product);
+                    // Xóa ảnh cũ nếu có ảnh mới
+                    if (updateSuccess && imageFileName != null && currentProduct.getImageURL() != null) {
+                        File oldImageFile = new File(IMAGE_UPLOAD_DIR, currentProduct.getImageURL());
+                        if (oldImageFile.exists()) {
+                            oldImageFile.delete();
+                        }
+                    }
 
-                    if (result) {
+                    if (updateSuccess) {
+                        // Redirect về trang danh sách sản phẩm
                         response.sendRedirect(request.getContextPath() + "/admin/product");
                     } else {
-                        request.setAttribute("error", "❌ Cập nhật sản phẩm thất bại.");
-                        Product existing = dao.getProductById(id1);
-                        request.setAttribute("mo", existing);
-                        request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
-                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
-                                response);
+                        throw new Exception("Cập nhật sản phẩm thất bại.");
                     }
+
                 } catch (Exception e) {
                     e.printStackTrace();
-                    request.setAttribute("error", "❌ Đã xảy ra lỗi khi cập nhật sản phẩm.");
+                    request.setAttribute("error", "❌ Đã xảy ra lỗi khi cập nhật sản phẩm: " + e.getMessage());
                     try {
-                        int id1 = Integer.parseInt(request.getParameter("id"));
-                        Product existing = dao.getProductById(id1);
+                        int productId = Integer.parseInt(request.getParameter("id"));
+                        Product existing = dao.getProductById(productId);
                         request.setAttribute("mo", existing);
                         request.setAttribute("dataCate", dao.getCategory());
-                        request.setAttribute("dataSup", dao.getAllManufacturers());
+                        request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request,
+                                response);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        response.sendRedirect(request.getContextPath() + "/admin/product");
                     }
-                    request.getRequestDispatcher("/WEB-INF/admin/product/edit-product.jsp").forward(request, response);
                 }
                 break;
 
             case "convertUnits":
                 try {
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
-                    PrintWriter jsonOut = response.getWriter();
-
                     int productId = Integer.parseInt(request.getParameter("productId"));
                     int boxesToConvert = Integer.parseInt(request.getParameter("boxesToConvert"));
                     String conversionType = request.getParameter("conversionType");
                     int packSize = 0;
                     String packSizeStr = request.getParameter("packSize");
+
                     if (packSizeStr != null && !packSizeStr.trim().isEmpty()) {
                         packSize = Integer.parseInt(packSizeStr);
                     }
 
                     // Validate input
                     if (boxesToConvert <= 0) {
-                        jsonOut.print("{\"success\": false, \"message\": \"Số lượng thùng phải lớn hơn 0\"}");
+                        request.setAttribute("error", "Số lượng thùng phải lớn hơn 0");
+                        Product product = dao.getProductById(productId);
+                        request.setAttribute("product", product);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                response);
                         return;
                     }
 
                     // Get current product to validate
                     Product currentProduct = dao.getProductById(productId);
                     if (currentProduct == null) {
-                        jsonOut.print("{\"success\": false, \"message\": \"Không tìm thấy sản phẩm\"}");
+                        request.setAttribute("error", "Không tìm thấy sản phẩm");
+                        request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                response);
                         return;
                     }
 
                     if (boxesToConvert > currentProduct.getStockQuantity()) {
-                        jsonOut.print(
-                                "{\"success\": false, \"message\": \"Số lượng thùng chuyển đổi vượt quá số lượng hiện có\"}");
+                        request.setAttribute("error", "Số lượng thùng chuyển đổi vượt quá số lượng hiện có");
+                        request.setAttribute("product", currentProduct);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                response);
                         return;
                     }
 
                     // Validate pack size for pack conversion
-                    if (conversionType.equals("pack")) {
+                    if (conversionType.equals("pack") || conversionType.equals("both")) {
                         if (packSize <= 0) {
-                            jsonOut.print("{\"success\": false, \"message\": \"Vui lòng nhập số lon = 1 lốc\"}");
+                            request.setAttribute("error", "Vui lòng nhập số lon = 1 lốc");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                    response);
                             return;
                         }
                         if (packSize < 2 || packSize >= currentProduct.getUnitPerBox()) {
-                            jsonOut.print("{\"success\": false, \"message\": \"Số đơn vị/lốc phải từ 2 đến "
-                                    + (currentProduct.getUnitPerBox() - 1)
-                                    + ". Không thể tạo lốc có số đơn vị bằng hoặc lớn hơn số đơn vị trong thùng\"}");
+                            request.setAttribute("error",
+                                    "Số đơn vị/lốc phải từ 2 đến " + (currentProduct.getUnitPerBox() - 1));
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                    response);
                             return;
                         }
 
-                        int totalUnits = boxesToConvert * currentProduct.getUnitPerBox();
-                        if (totalUnits % packSize != 0) {
-                            jsonOut.print("{\"success\": false, \"message\": \"Số đơn vị không chia hết cho " + packSize
-                                    + "\"}");
-                            return;
-                        }
-                    } else if (conversionType.equals("both")) {
-                        // Bắt buộc nhập số lon = 1 lốc khi chọn chuyển đổi cả 2
-                        if (packSize <= 0) {
-                            jsonOut.print(
-                                    "{\"success\": false, \"message\": \"Khi chọn chuyển đổi cả 2, vui lòng nhập số lon = 1 lốc\"}");
-                            return;
-                        }
-                        if (packSize < 2 || packSize >= currentProduct.getUnitPerBox()) {
-                            jsonOut.print("{\"success\": false, \"message\": \"Số đơn vị/lốc phải từ 2 đến "
-                                    + (currentProduct.getUnitPerBox() - 1)
-                                    + ". Không thể tạo lốc có số đơn vị bằng hoặc lớn hơn số đơn vị trong thùng\"}");
-                            return;
-                        }
-
-                        int totalUnits = boxesToConvert * currentProduct.getUnitPerBox();
-                        if (totalUnits % packSize != 0) {
-                            jsonOut.print("{\"success\": false, \"message\": \"Số đơn vị không chia hết cho " + packSize
-                                    + "\"}");
+                        // Kiểm tra số lon trong 1 thùng phải chia hết cho packSize
+                        if (currentProduct.getUnitPerBox() % packSize != 0) {
+                            request.setAttribute("error",
+                                    "Số lon trong 1 thùng (" + currentProduct.getUnitPerBox() +
+                                            ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                    response);
                             return;
                         }
                     }
@@ -681,17 +526,138 @@ public class ProductServlet extends HttpServlet {
                     boolean success = dao.convertUnits(productId, boxesToConvert, conversionType, packSize);
 
                     if (success) {
-                        jsonOut.print("{\"success\": true, \"message\": \"Chuyển đổi thành công\"}");
+                        // Hiển thị thông báo ngay trên trang chuyển đổi
+                        Product refreshed = dao.getProductById(productId);
+                        request.setAttribute("product", refreshed);
+                        request.setAttribute("success", "Chuyển đổi đơn vị thành công.");
+                        request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                response);
                     } else {
-                        jsonOut.print("{\"success\": false, \"message\": \"Chuyển đổi thất bại\"}");
+                        request.setAttribute("error", "Chuyển đổi thất bại");
+                        request.setAttribute("product", currentProduct);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                response);
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
-                    PrintWriter jsonOut = response.getWriter();
-                    jsonOut.print("{\"success\": false, \"message\": \"Lỗi: " + e.getMessage() + "\"}");
+                    request.setAttribute("error", "Đã xảy ra lỗi khi chuyển đổi: " + e.getMessage());
+                    try {
+                        int productId = Integer.parseInt(request.getParameter("productId"));
+                        Product product = dao.getProductById(productId);
+                        request.setAttribute("product", product);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
+                                response);
+                    } catch (Exception ex) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product");
+                    }
+                }
+                break;
+
+            case "updatePrice":
+                try {
+                    String productIdStr = request.getParameter("productId");
+                    String priceBoxStr = request.getParameter("priceBox");
+                    String priceUnitStr = request.getParameter("priceUnit");
+                    String pricePackStr = request.getParameter("pricePack");
+
+                    if (productIdStr == null || productIdStr.trim().isEmpty()) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=invalid_product_id");
+                        return;
+                    }
+
+                    int productId = Integer.parseInt(productIdStr);
+                    Product currentProduct = dao.getProductById(productId);
+
+                    if (currentProduct == null) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=product_not_found");
+                        return;
+                    }
+
+                    // Parse price values, allowing null for empty fields
+                    Double priceBox = null;
+                    Double priceUnit = null;
+                    Double pricePack = null;
+
+                    if (priceBoxStr != null && !priceBoxStr.trim().isEmpty()) {
+                        try {
+                            priceBox = Double.parseDouble(priceBoxStr);
+                            if (priceBox < 0) {
+                                request.setAttribute("error", "Giá thùng không được âm");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        } catch (NumberFormatException e) {
+                            request.setAttribute("error", "Giá thùng không hợp lệ");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
+                    if (priceUnitStr != null && !priceUnitStr.trim().isEmpty()) {
+                        try {
+                            priceUnit = Double.parseDouble(priceUnitStr);
+                            if (priceUnit < 0) {
+                                request.setAttribute("error", "Giá đơn vị không được âm");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        } catch (NumberFormatException e) {
+                            request.setAttribute("error", "Giá đơn vị không hợp lệ");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
+                    if (pricePackStr != null && !pricePackStr.trim().isEmpty()) {
+                        try {
+                            pricePack = Double.parseDouble(pricePackStr);
+                            if (pricePack < 0) {
+                                request.setAttribute("error", "Giá lốc không được âm");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        } catch (NumberFormatException e) {
+                            request.setAttribute("error", "Giá lốc không hợp lệ");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
+                    // Update product prices
+                    boolean success = dao.updateProductPrice(productId, priceBox, priceUnit, pricePack);
+
+                    if (success) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product?success=price_updated");
+                    } else {
+                        request.setAttribute("error", "Cập nhật giá thất bại");
+                        request.setAttribute("product", currentProduct);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request, response);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.setAttribute("error", "Đã xảy ra lỗi khi cập nhật giá: " + e.getMessage());
+                    try {
+                        int productId = Integer.parseInt(request.getParameter("productId"));
+                        Product product = dao.getProductById(productId);
+                        request.setAttribute("product", product);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request, response);
+                    } catch (Exception ex) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product");
+                    }
                 }
                 break;
 

@@ -10,10 +10,10 @@ import java.util.List;
 import model.Product;
 
 /**
- * PromotionDAO - Phiên bản đồng bộ với schema:
- *  - Bảng Promotion có cột ParentID (FK -> Category.CategoryID).
- *  - Cột scope trong Promotion là "applyScope" (chữ a thường).
- *  - Dùng alias ổn định để đọc ResultSet: PromoType, ApplyScope, CatID, CatName.
+ * PromotionDAO - Phiên bản đồng bộ với schema: - Bảng Promotion có cột ParentID
+ * (FK -> Category.CategoryID). - Cột scope trong Promotion là "applyScope" (chữ
+ * a thường). - Dùng alias ổn định để đọc ResultSet: PromoType, ApplyScope,
+ * CatID, CatName.
  */
 public class PromotionDAO extends DBContext {
 
@@ -42,7 +42,10 @@ public class PromotionDAO extends DBContext {
             if (!rs.wasNull()) {
                 c = new Category();
                 c.setCategoryID(catId);
-                try { c.setCategoryName(rs.getString("CatName")); } catch (SQLException ignore) {}
+                try {
+                    c.setCategoryName(rs.getString("CatName"));
+                } catch (SQLException ignore) {
+                }
             }
         } catch (SQLException ignore) {
             // SELECT có thể không alias CatID/CatName (trường hợp không JOIN)
@@ -55,8 +58,9 @@ public class PromotionDAO extends DBContext {
     // ======================
     // Queries
     // ======================
-
-    /** Lấy toàn bộ promotions, order mới nhất */
+    /**
+     * Lấy toàn bộ promotions, order mới nhất
+     */
     public List<Promotion> getAllPromotions() {
         String sql = """
             SELECT 
@@ -76,9 +80,10 @@ public class PromotionDAO extends DBContext {
             ORDER BY p.PromotionID DESC
         """;
         List<Promotion> out = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) out.add(mapRow(rs));
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                out.add(mapRow(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -87,16 +92,17 @@ public class PromotionDAO extends DBContext {
 
     /**
      * Danh sách có filter + phân trang.
-     * @param q         tìm theo tên/description (LIKE)
+     *
+     * @param q tìm theo tên/description (LIKE)
      * @param promoType null = bỏ lọc
-     * @param status    null = bỏ lọc; 0/1 -> false/true
-     * @param from      lọc EndDate >= from
-     * @param to        lọc StartDate <= to
-     * @param page      1-based; <=0 sẽ bỏ phân trang
-     * @param size      >0; <=0 sẽ bỏ phân trang
+     * @param status null = bỏ lọc; 0/1 -> false/true
+     * @param from lọc EndDate >= from
+     * @param to lọc StartDate <= to
+     * @param page 1-based; <=0 sẽ bỏ phân trang @param size
+     * >0; <=0 sẽ bỏ phân trang
      */
     public List<Promotion> list(String q, Integer promoType, Integer status,
-                                Timestamp from, Timestamp to, int page, int size) {
+            Timestamp from, Timestamp to, int page, int size) {
 
         StringBuilder sb = new StringBuilder("""
             SELECT 
@@ -121,7 +127,8 @@ public class PromotionDAO extends DBContext {
         if (q != null && !q.isBlank()) {
             sb.append(" AND (p.PromotionName LIKE ? OR p.Description LIKE ?)");
             String k = "%" + q.trim() + "%";
-            params.add(k); params.add(k);
+            params.add(k);
+            params.add(k);
         }
         if (promoType != null) {
             sb.append(" AND p.PromoType = ?");
@@ -151,14 +158,18 @@ public class PromotionDAO extends DBContext {
         List<Promotion> out = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sb.toString())) {
             int idx = 1;
-            for (Object param : params) ps.setObject(idx++, param);
+            for (Object param : params) {
+                ps.setObject(idx++, param);
+            }
             if (usePaging) {
                 int offset = Math.max(0, (page - 1) * size);
                 ps.setInt(idx++, offset);
                 ps.setInt(idx, size);
             }
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) out.add(mapRow(rs));
+                while (rs.next()) {
+                    out.add(mapRow(rs));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -166,7 +177,9 @@ public class PromotionDAO extends DBContext {
         return out;
     }
 
-    /** Lấy 1 promotion theo ID */
+    /**
+     * Lấy 1 promotion theo ID
+     */
     public Promotion getPromotionById(int id) {
         String sql = """
             SELECT 
@@ -188,7 +201,9 @@ public class PromotionDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -196,12 +211,15 @@ public class PromotionDAO extends DBContext {
         return null;
     }
 
-    /** Đếm tổng số promotion (không filter) */
+    /**
+     * Đếm tổng số promotion (không filter)
+     */
     public int countPromotions() {
         String sql = "SELECT COUNT(*) FROM Promotion";
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -211,8 +229,9 @@ public class PromotionDAO extends DBContext {
     // ======================
     // Mutations
     // ======================
-
-    /** Thêm mới, trả ID sinh ra; -1 nếu thất bại */
+    /**
+     * Thêm mới, trả ID sinh ra; -1 nếu thất bại
+     */
     public int insertPromotionReturningId(Promotion p) {
         String sql = """
             INSERT INTO Promotion
@@ -237,10 +256,14 @@ public class PromotionDAO extends DBContext {
             }
 
             int affected = ps.executeUpdate();
-            if (affected == 0) return -1;
+            if (affected == 0) {
+                return -1;
+            }
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) return keys.getInt(1);
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -248,7 +271,9 @@ public class PromotionDAO extends DBContext {
         return -1;
     }
 
-    /** Cập nhật theo ID; true nếu thành công */
+    /**
+     * Cập nhật theo ID; true nếu thành công
+     */
     public boolean updatePromotion(Promotion p) {
         String sql = """
             UPDATE Promotion
@@ -278,7 +303,9 @@ public class PromotionDAO extends DBContext {
         return false;
     }
 
-    /** Xoá theo ID; xoá mapping sản phẩm trước nếu có */
+    /**
+     * Xoá theo ID; xoá mapping sản phẩm trước nếu có
+     */
     public boolean deletePromotion(int id) {
         clearProductAssignments(id);
         String sql = "DELETE FROM Promotion WHERE PromotionID = ?";
@@ -291,7 +318,9 @@ public class PromotionDAO extends DBContext {
         return false;
     }
 
-    /** Bật/tắt IsActive */
+    /**
+     * Bật/tắt IsActive
+     */
     public boolean updatePromotionStatus(int id, boolean active) {
         String sql = "UPDATE Promotion SET IsActive=? WHERE PromotionID=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -307,7 +336,6 @@ public class PromotionDAO extends DBContext {
     // ======================
     // Product assignments
     // ======================
-
     public void clearProductAssignments(int promotionID) {
         String sql = "DELETE FROM Product_Promotion WHERE PromotionID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -318,13 +346,18 @@ public class PromotionDAO extends DBContext {
         }
     }
 
-    /** Gán danh sách sản phẩm cho promotion; trả list ProductID bị từ chối (đã có promotion khác) */
+    /**
+     * Gán danh sách sản phẩm cho promotion; trả list ProductID bị từ chối (đã
+     * có promotion khác)
+     */
     public List<Integer> updateProductAssignments(int promotionID, String[] productIDs) {
         List<Integer> failed = new ArrayList<>();
-        if (productIDs == null || productIDs.length == 0) return failed;
+        if (productIDs == null || productIDs.length == 0) {
+            return failed;
+        }
 
         final String insertSQL = "INSERT INTO Product_Promotion (ProductID, PromotionID) VALUES (?, ?)";
-        final String checkSQL  = "SELECT TOP 1 PromotionID FROM Product_Promotion WHERE ProductID = ?";
+        final String checkSQL = "SELECT TOP 1 PromotionID FROM Product_Promotion WHERE ProductID = ?";
 
         boolean startedTx = false;
         boolean oldAuto = true;
@@ -339,8 +372,7 @@ public class PromotionDAO extends DBContext {
             // Xoá mapping cũ của chính promotion này TRONG CÙNG TX
             clearProductAssignments(promotionID);
 
-            try (PreparedStatement chk = conn.prepareStatement(checkSQL);
-                 PreparedStatement ins = conn.prepareStatement(insertSQL)) {
+            try (PreparedStatement chk = conn.prepareStatement(checkSQL); PreparedStatement ins = conn.prepareStatement(insertSQL)) {
 
                 for (String pidStr : productIDs) {
                     try {
@@ -371,15 +403,23 @@ public class PromotionDAO extends DBContext {
                 ins.executeBatch();
             }
 
-            if (startedTx) conn.commit();
+            if (startedTx) {
+                conn.commit();
+            }
         } catch (SQLException e) {
             if (startedTx) {
-                try { conn.rollback(); } catch (SQLException ignore) {}
+                try {
+                    conn.rollback();
+                } catch (SQLException ignore) {
+                }
             }
             e.printStackTrace();
         } finally {
             if (startedTx) {
-                try { conn.setAutoCommit(oldAuto); } catch (SQLException ignore) {}
+                try {
+                    conn.setAutoCommit(oldAuto);
+                } catch (SQLException ignore) {
+                }
             }
         }
         return failed;
@@ -390,7 +430,9 @@ public class PromotionDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, promotionId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -425,7 +467,9 @@ public class PromotionDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productID);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -437,11 +481,12 @@ public class PromotionDAO extends DBContext {
     // Main test nhanh
     // ======================
     // ====== HẰNG SỐ TYPE ======
-    public static final int TYPE_SEASONAL  = 1; // Seasonal
+    public static final int TYPE_SEASONAL = 1; // Seasonal
     public static final int TYPE_FLASHSALE = 0; // Flash Sale
 
     // ====== SCOPE (nội bộ) ======
     private static class Scope {
+
         int applyScope;     // 0 = global, 1 = by-category
         Integer parentId;   // null = root-all (nếu applyScope=1) hoặc global (nếu =0), >0 = category cụ thể
     }
@@ -451,10 +496,12 @@ public class PromotionDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, promotionId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
                 Scope s = new Scope();
                 s.applyScope = rs.getInt("applyScope");
-                s.parentId   = (Integer) rs.getObject("ParentID");
+                s.parentId = (Integer) rs.getObject("ParentID");
                 return s;
             }
         } catch (SQLException e) {
@@ -465,7 +512,9 @@ public class PromotionDAO extends DBContext {
     // ====== LẤY LIST PRODUCT THEO LOGIC SCOPE (để rebuild mapping) ======
     public List<Product> listAppliedProducts(int promotionId) {
         Scope s = getScope(promotionId);
-        if (s == null) return List.of();
+        if (s == null) {
+            return List.of();
+        }
 
         try {
             // CASE A: Global → tất cả sản phẩm
@@ -475,8 +524,7 @@ public class PromotionDAO extends DBContext {
                     FROM Product
                     ORDER BY ProductID
                 """;
-                try (PreparedStatement ps = conn.prepareStatement(sqlAll);
-                     ResultSet rs = ps.executeQuery()) {
+                try (PreparedStatement ps = conn.prepareStatement(sqlAll); ResultSet rs = ps.executeQuery()) {
                     return mapProducts(rs);
                 }
             }
@@ -498,8 +546,7 @@ public class PromotionDAO extends DBContext {
                     JOIN tree t ON p.CategoryID = t.CategoryID
                     ORDER BY p.ProductID
                 """;
-                try (PreparedStatement ps = conn.prepareStatement(sqlRoots);
-                     ResultSet rs = ps.executeQuery()) {
+                try (PreparedStatement ps = conn.prepareStatement(sqlRoots); ResultSet rs = ps.executeQuery()) {
                     return mapProducts(rs);
                 }
             }
@@ -557,19 +604,29 @@ public class PromotionDAO extends DBContext {
                     ins.addBatch();
                 }
                 int[] res = ins.executeBatch();
-                for (int r : res) inserted += (r >= 0 ? r : 1);
+                for (int r : res) {
+                    inserted += (r >= 0 ? r : 1);
+                }
             }
 
-            if (startedTx) conn.commit();
+            if (startedTx) {
+                conn.commit();
+            }
             return inserted;
         } catch (SQLException e) {
             if (startedTx) {
-                try { conn.rollback(); } catch (SQLException ignore) {}
+                try {
+                    conn.rollback();
+                } catch (SQLException ignore) {
+                }
             }
             throw new RuntimeException("materializeMappingsForPromotion failed: " + promotionId, e);
         } finally {
             if (startedTx) {
-                try { conn.setAutoCommit(oldAuto); } catch (SQLException ignore) {}
+                try {
+                    conn.setAutoCommit(oldAuto);
+                } catch (SQLException ignore) {
+                }
             }
         }
     }
@@ -588,7 +645,9 @@ public class PromotionDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, promoType);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) ids.add(rs.getInt(1));
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("listActivePromotionIdsByType failed: " + promoType, e);
@@ -599,7 +658,9 @@ public class PromotionDAO extends DBContext {
     // ====== REBUILD MAPPING CHO TẤT CẢ PROMOTION ĐANG HIỆU LỰC CỦA 1 TYPE (ATOMIC) ======
     public int rebuildMappingsForActiveType(int promoType) {
         List<Integer> promoIds = listActivePromotionIdsByType(promoType);
-        if (promoIds.isEmpty()) return 0;
+        if (promoIds.isEmpty()) {
+            return 0;
+        }
 
         int total = 0;
         boolean startedTx = false;
@@ -617,21 +678,32 @@ public class PromotionDAO extends DBContext {
                 total += materializeMappingsForPromotion(id);
             }
 
-            if (startedTx) conn.commit();      // commit 1 lần cho toàn bộ
+            if (startedTx) {
+                conn.commit();      // commit 1 lần cho toàn bộ
+            }
             return total;
         } catch (RuntimeException e) {
             if (startedTx) {
-                try { conn.rollback(); } catch (SQLException ignore) {}
+                try {
+                    conn.rollback();
+                } catch (SQLException ignore) {
+                }
             }
             throw e;
         } catch (SQLException e) {
             if (startedTx) {
-                try { conn.rollback(); } catch (SQLException ignore) {}
+                try {
+                    conn.rollback();
+                } catch (SQLException ignore) {
+                }
             }
             throw new RuntimeException("rebuildMappingsForActiveType failed: " + promoType, e);
         } finally {
             if (startedTx) {
-                try { conn.setAutoCommit(oldAuto); } catch (SQLException ignore) {}
+                try {
+                    conn.setAutoCommit(oldAuto);
+                } catch (SQLException ignore) {
+                }
             }
         }
     }
@@ -660,18 +732,35 @@ public class PromotionDAO extends DBContext {
     }
 
     // ====== WRAPPER NGẮN ======
-    public List<Product> listFlashSaleFromMapping() { return listProductsByTypeFromMapping(TYPE_FLASHSALE); }
-    public List<Product> listSeasonalFromMapping()  { return listProductsByTypeFromMapping(TYPE_SEASONAL);  }
+    public List<Product> listFlashSaleFromMapping() {
+        return listProductsByTypeFromMapping(TYPE_FLASHSALE);
+    }
+
+    public List<Product> listSeasonalFromMapping() {
+        return listProductsByTypeFromMapping(TYPE_SEASONAL);
+    }
 
     // ====== MAP PRODUCT ======
     private List<Product> mapProducts(ResultSet rs) throws SQLException {
         List<Product> out = new ArrayList<>();
         while (rs.next()) {
             Product p = new Product();
-            try { p.setProductID(rs.getInt("ProductID")); } catch (Exception ignored) {}
-            try { p.setProductName(rs.getString("ProductName")); } catch (Exception ignored) {}
-            try { p.setPrice(rs.getDouble("Price")); } catch (Exception ignored) {}
-            try { p.setCategoryID(rs.getInt("CategoryID")); } catch (Exception ignored) {}
+            try {
+                p.setProductID(rs.getInt("ProductID"));
+            } catch (Exception ignored) {
+            }
+            try {
+                p.setProductName(rs.getString("ProductName"));
+            } catch (Exception ignored) {
+            }
+            try {
+                p.setPrice(rs.getDouble("Price"));
+            } catch (Exception ignored) {
+            }
+            try {
+                p.setCategoryID(rs.getInt("CategoryID"));
+            } catch (Exception ignored) {
+            }
             out.add(p);
         }
         return out;
@@ -683,42 +772,50 @@ public class PromotionDAO extends DBContext {
             PromotionDAO dao = new PromotionDAO();
 
             // 1) Rebuild mapping cho các promotion đang hiệu lực theo từng type
-            int flashInserted   = dao.rebuildMappingsForActiveType(TYPE_FLASHSALE);
-            int seasonalInserted= dao.rebuildMappingsForActiveType(TYPE_SEASONAL);
+            int flashInserted = dao.rebuildMappingsForActiveType(TYPE_FLASHSALE);
+            int seasonalInserted = dao.rebuildMappingsForActiveType(TYPE_SEASONAL);
             System.out.println("[Rebuild] FlashSale inserted rows = " + flashInserted);
             System.out.println("[Rebuild] Seasonal  inserted rows = " + seasonalInserted);
 
             // 2) Lấy sản phẩm theo type từ bảng mapping
             List<Product> flash = dao.listFlashSaleFromMapping();
-            List<Product> seas  = dao.listSeasonalFromMapping();
+            List<Product> seas = dao.listSeasonalFromMapping();
 
             System.out.println("\n=== FLASH SALE products (" + flash.size() + ") ===");
             for (int i = 0; i < Math.min(20, flash.size()); i++) {
                 Product p = flash.get(i);
                 System.out.println("  " + p.getProductID() + " - " + p.getProductName() + " - " + p.getPrice());
             }
-            if (flash.size() > 20) System.out.println("  ... (" + (flash.size() - 20) + " more)");
+            if (flash.size() > 20) {
+                System.out.println("  ... (" + (flash.size() - 20) + " more)");
+            }
 
             System.out.println("\n=== SEASONAL products (" + seas.size() + ") ===");
             for (int i = 0; i < Math.min(20, seas.size()); i++) {
                 Product p = seas.get(i);
                 System.out.println("  " + p.getProductID() + " - " + p.getProductName() + " - " + p.getPrice());
             }
-            if (seas.size() > 20) System.out.println("  ... (" + (seas.size() - 20) + " more)");
+            if (seas.size() > 20) {
+                System.out.println("  ... (" + (seas.size() - 20) + " more)");
+            }
 
             System.out.println("\nDONE.");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-    /** Lấy PromotionID đang gán cho 1 sản phẩm; null nếu chưa có */
+
+    /**
+     * Lấy PromotionID đang gán cho 1 sản phẩm; null nếu chưa có
+     */
     public Integer getAssignedPromotionId(int productID) {
         final String sql = "SELECT TOP 1 PromotionID FROM Product_Promotion WHERE ProductID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productID);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("getAssignedPromotionId failed: " + productID, e);
@@ -726,19 +823,24 @@ public class PromotionDAO extends DBContext {
         return null;
     }
 
-    /** True nếu có thể gán (chưa có promotion nào, hoặc đã gán chính promotionID này) */
+    /**
+     * True nếu có thể gán (chưa có promotion nào, hoặc đã gán chính promotionID
+     * này)
+     */
     public boolean canAssignProductToPromotion(int productID, int promotionID) {
         Integer existed = getAssignedPromotionId(productID);
         return existed == null || existed == promotionID;
     }
 
-    /** Ném lỗi nếu product đang thuộc promotion khác */
+    /**
+     * Ném lỗi nếu product đang thuộc promotion khác
+     */
     public void assertCanAssignProductToPromotion(int productID, int promotionID) {
         Integer existed = getAssignedPromotionId(productID);
         if (existed != null && existed != promotionID) {
             throw new IllegalStateException(
-                "Product " + productID + " đã thuộc Promotion " + existed +
-                " — không thể gán thêm Promotion " + promotionID);
+                    "Product " + productID + " đã thuộc Promotion " + existed
+                    + " — không thể gán thêm Promotion " + promotionID);
         }
     }
 }

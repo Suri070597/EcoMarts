@@ -167,38 +167,32 @@ INSERT INTO Category (CategoryName, ParentID, [Description]) VALUES
 
 CREATE TABLE Product (
     ProductID INT PRIMARY KEY IDENTITY(1,1),
-    ProductName NVARCHAR(255) NOT NULL,
-    Price DECIMAL(10,2) NOT NULL, -- giá của 1 thùng
-    [Description] NVARCHAR(MAX),
-    StockQuantity DECIMAL(10,2) NOT NULL DEFAULT 0, -- số lượng thùng
-    ImageURL NVARCHAR(255),
-    Unit NVARCHAR(50), -- đơn vị tính: kg, chai, gói,...
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    ManufactureDate DATE, 
-    ExpirationDate DATE,
-    CategoryID INT NOT NULL,
-    ManufacturerID INT NOT NULL,
-    [Status] NVARCHAR(50) DEFAULT N'Còn hàng',
-    UnitPerBox INT NOT NULL DEFAULT 1,  -- số lượng lon trong thùng
-    BoxUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
-    ItemUnitName NVARCHAR(50) NOT NULL DEFAULT N'Chưa rõ',
-    FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-    FOREIGN KEY (ManufacturerID) REFERENCES Manufacturer(ManufacturerID)
-);
 
+    ProductName NVARCHAR(255) NOT NULL, -- tên
+    CategoryID INT NOT NULL, -- thể loại
+    PriceBox DECIMAL(10,2) NULL, -- giá bán của 1 thùng
+    PriceUnit DECIMAL(10,2) NULL, -- giá bán của 1 lon
+    PricePack DECIMAL(10,2) NULL, -- giá bán của 1 lốc
+    UnitPerBox INT NOT NULL DEFAULT 1,  -- số lượng unit trong thùng
+    BoxUnitName NVARCHAR(50) NOT NULL,
+    ItemUnitName NVARCHAR(50) NOT NULL,
+    [Description] NVARCHAR(MAX),
+    ImageURL NVARCHAR(255),
+
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    [Status] NVARCHAR(50) DEFAULT N'Còn hàng',
+    FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID)
+);
 
 CREATE TABLE ProductUnitConversion (
     ConversionID INT PRIMARY KEY IDENTITY(1,1),
     ProductID INT NOT NULL,
     UnitPerBoxChange INT NOT NULL DEFAULT 0, -- Số lượng lon trong thùng sau khi chuyển đổi
     UnitsPerPackChange INT NULL, -- Số lượng lốc trong 1 thùng sau khi chuyển đổi
-    UnitPrice DECIMAL(18,2) NULL, -- Giá của 1 đơn vị nhỏ
-    PackPrice DECIMAL(18,2) NULL, -- Giá của 1 lốc
     BoxQuantity INT NULL, -- Số lượng thùng sử dụng trong lần chuyển đổi
     PackSize INT NULL, -- Số đơn vị trong 1 lốc tại thời điểm chuyển đổi (nếu có)
     ConversionDate DATETIME NOT NULL DEFAULT GETDATE(), -- Thời gian chuyển đổi
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE
-    -- Bỏ UNIQUE constraint để cho phép nhiều chuyển đổi
 );
 
 
@@ -348,7 +342,6 @@ CREATE TABLE Inventory (
     ProductID INT NOT NULL,
     PackageType NVARCHAR(10) NOT NULL, -- 'BOX' | 'UNIT' | 'PACK' | 'KG'
     Quantity DECIMAL(18,2) NOT NULL DEFAULT 0,
-    UnitPrice DECIMAL(18,2) NULL,      -- Giá bán cho loại đóng gói này
     PackSize INT NOT NULL DEFAULT 0,   -- Số đơn vị trong 1 lốc (0 cho BOX/UNIT)
     LastUpdated DATETIME NOT NULL DEFAULT GETDATE(),
     CONSTRAINT FK_Inventory_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE,
@@ -365,4 +358,47 @@ CREATE TABLE AccountVoucher (
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID),
     FOREIGN KEY (VoucherID) REFERENCES Voucher(VoucherID)
 );
+
+CREATE TABLE StockIn (
+    StockInID INT PRIMARY KEY IDENTITY(1,1),
+    ManufacturerID INT NOT NULL,
+    ReceiverID INT NOT NULL,
+    DateIn DATETIME NOT NULL DEFAULT GETDATE(),
+    Note NVARCHAR(255),
+    Status NVARCHAR(20) NOT NULL DEFAULT 'Pending', -- Pending / Completed / Canceled
+
+    CONSTRAINT FK_StockIn_Manufacturer FOREIGN KEY (ManufacturerID) REFERENCES Manufacturer(ManufacturerID),
+    CONSTRAINT FK_StockIn_Receiver FOREIGN KEY (ReceiverID) REFERENCES Account(AccountID)
+);
+
+CREATE TABLE StockInDetail (
+    StockInDetailID INT PRIMARY KEY IDENTITY(1,1),
+    StockInID INT NOT NULL,
+    InventoryID INT NOT NULL,
+    Quantity DECIMAL(18,2) NOT NULL,
+    UnitPrice DECIMAL(18,2),
+    
+    CONSTRAINT FK_StockInDetail_StockIn FOREIGN KEY (StockInID) REFERENCES StockIn(StockInID) ON DELETE CASCADE,
+    CONSTRAINT FK_StockInDetail_Inventory FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID)
+);
+
+-- Xóa constraint CHK_PackageType trong bảng Inventory
+ALTER TABLE Inventory
+DROP CONSTRAINT CHK_PackageType;
+
+
+INSERT INTO Manufacturer (BrandName, CompanyName, [Address], Email, Phone, [Status])
+VALUES
+(N'Vinamilk', N'Vietnam Dairy Products JSC', N'36-38 Ngô Đức Kế, Quận 1, TP.HCM', 'contact@vinamilk.com.vn', '0281234567', 1),
+(N'Trung Nguyên', N'Trung Nguyên Group', N'82-84 Bùi Thị Xuân, Quận 1, TP.HCM', 'info@trungnguyen.com', '0282345678', 1),
+(N'Tân Hiệp Phát', N'Tân Hiệp Phát Beverage Group', N'219 Đại lộ Bình Dương, Bình Dương', 'support@thp.com.vn', '0274388888', 1),
+(N'Pepsi', N'PepsiCo Vietnam', N'Lô 13 VSIP, Bình Dương', 'contact@pepsico.com', '0274356789', 1),
+(N'CocaCola', N'Coca-Cola Beverages Vietnam', N'485 Hà Nội Highway, Thủ Đức, TP.HCM', 'service@coca-cola.com', '0288765432', 1),
+(N'Kinh Đô', N'Kinh Đô Corporation', N'141 Nguyễn Du, Quận 1, TP.HCM', 'info@kinhdo.com.vn', '0283456123', 1),
+(N'Hải Hà', N'Hải Hà Confectionery JSC', N'25 Trương Định, Hai Bà Trưng, Hà Nội', 'contact@haiha.com.vn', '0249876543', 1),
+(N'Nutifood', N'Nutifood Nutrition Food JSC', N'281-283 Hoàng Diệu, Quận 4, TP.HCM', 'hello@nutifood.com.vn', '0287654321', 1),
+(N'Nestlé', N'Nestlé Vietnam Ltd.', N'5th Floor, Empress Tower, 138-142 Hai Bà Trưng, Quận 1, TP.HCM', 'consumer.services@vn.nestle.com', '0283838888', 1),
+(N'Orion', N'Orion Food Vina', N'Lô CN2-2, KCN Mỹ Phước 3, Bình Dương', 'orion@orion.com.vn', '0274222333', 1);
+
+
 

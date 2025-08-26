@@ -64,7 +64,12 @@ public class HomeServlet extends HttpServlet {
                 priceDisplayMap.put(pid, formatter.format(priceVal) + " đ / thùng");
         };
         java.util.function.Consumer<Product> putTraiCay = (p) -> {
-            priceDisplayMap.put(p.getProductID(), formatter.format(p.getPrice()) + " đ / " + p.getUnit());
+            Double priceUnit = p.getPriceUnit();
+            if (priceUnit != null) {
+                priceDisplayMap.put(p.getProductID(), formatter.format(priceUnit) + " đ / " + p.getUnit());
+            } else {
+                priceDisplayMap.put(p.getProductID(), "Chưa có giá");
+            }
         };
         java.util.function.BiConsumer<Integer, String> putUnit = (pid, unitLabel) -> {
             Double up = dao.getUnitOnlyPrice(pid);
@@ -74,89 +79,52 @@ public class HomeServlet extends HttpServlet {
         };
 
         // Lọc danh sách theo yêu cầu và build price map
-        // 1) Nước giải khát & 2) Sữa: giá thùng từ Inventory (BOX)
+        // 1) Nước giải khát: hiển thị giá theo đơn vị
         java.util.List<Product> filtered1 = new java.util.ArrayList<>();
         if (list1 != null) {
             for (Product p : list1) {
-                Double boxPrice = dao.getBoxPrice(p.getProductID());
-                if (boxPrice == null)
-                    boxPrice = p.getPrice(); // phòng hờ
-                // Build display with unit-per-box info if available
-                String display = formatter.format(boxPrice) + " đ / thùng";
-                try {
-                    Integer upbObj = null;
-                    String iun = null;
-                    try {
-                        upbObj = p.getUnitPerBox();
-                        iun = p.getItemUnitName();
-                    } catch (Exception ignore) {
-                    }
-                    if (upbObj == null || upbObj <= 0 || iun == null || iun.trim().isEmpty()) {
-                        Product full = dao.getProductById(p.getProductID());
-                        if (full != null) {
-                            upbObj = full.getUnitPerBox();
-                            iun = full.getItemUnitName();
-                        }
-                    }
-                    if (upbObj != null && upbObj > 0 && iun != null && !iun.trim().isEmpty()) {
-                        display += " (" + upbObj + " " + iun + ")";
-                    }
-                } catch (Exception ignore) {
+                Double priceUnit = p.getPriceUnit();
+                if (priceUnit != null) {
+                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    priceDisplayMap.put(p.getProductID(), display);
+                    filtered1.add(p);
                 }
-                priceDisplayMap.put(p.getProductID(), display);
-                filtered1.add(p);
             }
         }
+        // 2) Sữa: hiển thị giá theo đơn vị
         java.util.List<Product> filtered2 = new java.util.ArrayList<>();
         if (list2 != null) {
             for (Product p : list2) {
-                Double boxPrice = dao.getBoxPrice(p.getProductID());
-                if (boxPrice == null)
-                    boxPrice = p.getPrice();
-                // Build display with unit-per-box info if available
-                String display = formatter.format(boxPrice) + " đ / thùng";
-                try {
-                    Integer upbObj = null;
-                    String iun = null;
-                    try {
-                        upbObj = p.getUnitPerBox();
-                        iun = p.getItemUnitName();
-                    } catch (Exception ignore) {
-                    }
-                    if (upbObj == null || upbObj <= 0 || iun == null || iun.trim().isEmpty()) {
-                        Product full = dao.getProductById(p.getProductID());
-                        if (full != null) {
-                            upbObj = full.getUnitPerBox();
-                            iun = full.getItemUnitName();
-                        }
-                    }
-                    if (upbObj != null && upbObj > 0 && iun != null && !iun.trim().isEmpty()) {
-                        display += " (" + upbObj + " " + iun + ")";
-                    }
-                } catch (Exception ignore) {
+                Double priceUnit = p.getPriceUnit();
+                if (priceUnit != null) {
+                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    priceDisplayMap.put(p.getProductID(), display);
+                    filtered2.add(p);
                 }
-                priceDisplayMap.put(p.getProductID(), display);
-                filtered2.add(p);
             }
         }
 
-        // 3) Trái cây: giữ nguyên
+        // 3) Trái cây: hiển thị giá theo đơn vị
         java.util.List<Product> filtered3 = new java.util.ArrayList<>();
         if (list3 != null) {
             for (Product p : list3) {
-                putTraiCay.accept(p);
-                filtered3.add(p);
+                Double priceUnit = p.getPriceUnit();
+                if (priceUnit != null) {
+                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    priceDisplayMap.put(p.getProductID(), display);
+                    filtered3.add(p);
+                }
             }
         }
 
-        // 4/5/6) Khác: bắt buộc có UNIT, nếu không thì ẩn (lọc)
+        // 4/5/6) Khác: hiển thị giá theo đơn vị
         java.util.List<Product> filtered4 = new java.util.ArrayList<>();
         if (list4 != null) {
             for (Product p : list4) {
-                Double up = dao.getUnitOnlyPrice(p.getProductID());
-                if (up != null) {
-                    String unitLabel = dao.getItemUnitName(p.getProductID());
-                    putUnit.accept(p.getProductID(), unitLabel);
+                Double priceUnit = p.getPriceUnit();
+                if (priceUnit != null) {
+                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    priceDisplayMap.put(p.getProductID(), display);
                     filtered4.add(p);
                 }
             }
@@ -164,10 +132,10 @@ public class HomeServlet extends HttpServlet {
         java.util.List<Product> filtered5 = new java.util.ArrayList<>();
         if (list5 != null) {
             for (Product p : list5) {
-                Double up = dao.getUnitOnlyPrice(p.getProductID());
-                if (up != null) {
-                    String unitLabel = dao.getItemUnitName(p.getProductID());
-                    putUnit.accept(p.getProductID(), unitLabel);
+                Double priceUnit = p.getPriceUnit();
+                if (priceUnit != null) {
+                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    priceDisplayMap.put(p.getProductID(), display);
                     filtered5.add(p);
                 }
             }
@@ -175,10 +143,10 @@ public class HomeServlet extends HttpServlet {
         java.util.List<Product> filtered6 = new java.util.ArrayList<>();
         if (list6 != null) {
             for (Product p : list6) {
-                Double up = dao.getUnitOnlyPrice(p.getProductID());
-                if (up != null) {
-                    String unitLabel = dao.getItemUnitName(p.getProductID());
-                    putUnit.accept(p.getProductID(), unitLabel);
+                Double priceUnit = p.getPriceUnit();
+                if (priceUnit != null) {
+                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    priceDisplayMap.put(p.getProductID(), display);
                     filtered6.add(p);
                 }
             }
@@ -196,20 +164,12 @@ public class HomeServlet extends HttpServlet {
                 }
 
                 if (parentId == 1 || parentId == 2) {
-                    Double boxPrice = dao.getBoxPrice(p.getProductID());
-                    if (boxPrice == null)
-                        boxPrice = p.getPrice();
-                    String display = formatter.format(boxPrice) + " đ / thùng";
-                    try {
-                        int upb = p.getUnitPerBox();
-                        String iun = p.getItemUnitName();
-                        if (upb > 0 && iun != null && !iun.trim().isEmpty()) {
-                            display += " (" + upb + " " + iun + ")";
-                        }
-                    } catch (Exception ignore) {
+                    Double priceUnit = p.getPriceUnit();
+                    if (priceUnit != null) {
+                        String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                        priceDisplayMap.put(p.getProductID(), display);
+                        filtered7.add(p);
                     }
-                    priceDisplayMap.put(p.getProductID(), display);
-                    filtered7.add(p);
                 } else if (parentId == 3) {
                     putTraiCay.accept(p);
                     filtered7.add(p);
