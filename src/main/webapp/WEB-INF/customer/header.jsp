@@ -157,8 +157,8 @@
 
             int cartItemCount = 0;
             if (account != null && account.getRole() == 0) {
-                util.CartUtil cartUtil = new util.CartUtil();
-                cartItemCount = cartUtil.getCartItemCount(account.getAccountID());
+                dao.CartItemDAO cartItemDAO = new dao.CartItemDAO();
+                cartItemCount = cartItemDAO.countCartItems(account.getAccountID(), "Active");
             }
         %>
 
