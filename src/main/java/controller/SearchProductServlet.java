@@ -77,7 +77,8 @@ public class SearchProductServlet extends HttpServlet {
         try {
             List<Product> result = dao.searchProductsByKeyword(keyword);
 
-            // Filter results per rule: 1,2,3 keep; others require UNIT
+            // Filter results per rule: đúng PackageType (KG cho trái cây; UNIT cho danh mục
+            // khác) và hiển thị PriceUnit/ItemUnitName
             java.util.List<Product> filteredResult = new java.util.ArrayList<>();
             dao.ProductDAO productDao = new dao.ProductDAO();
             java.util.Map<Integer, Integer> parentIdMap = new java.util.HashMap<>();
@@ -101,19 +102,33 @@ public class SearchProductServlet extends HttpServlet {
                             p.setUnitPerBox(full.getUnitPerBox());
                         } catch (Exception ignore) {
                         }
+                        if (p.getPriceUnit() == null) {
+                            try {
+                                p.setPriceUnit(full.getPriceUnit());
+                            } catch (Exception ignore) {
+                            }
+                        }
                     }
                 } catch (Exception ignore) {
                 }
                 parentIdMap.put(pid, parentId);
 
-                if (parentId == 1 || parentId == 2 || parentId == 3) {
-                    filteredResult.add(p);
-                } else {
-                    Double unitOnly = productDao.getUnitOnlyPrice(pid);
-                    if (unitOnly != null) {
-                        filteredResult.add(p);
-                    }
-                }
+                // Kiểm tra tồn kho đúng loại
+                String packageType = (parentId == 3) ? "KG" : "UNIT";
+                double qty = productDao.getQuantityByPackageType(pid, packageType);
+                if (qty <= 0)
+                    continue;
+
+                // Phải có PriceUnit + ItemUnitName
+                if (p.getPriceUnit() == null)
+                    continue;
+                String itemUnit = p.getItemUnitName();
+                if (itemUnit == null || itemUnit.trim().isEmpty())
+                    continue;
+
+                // Set tồn kho để JSP điều khiển nút
+                p.setStockQuantity(qty);
+                filteredResult.add(p);
             }
 
             // Build display strings per MVC
@@ -121,58 +136,9 @@ public class SearchProductServlet extends HttpServlet {
             symbols.setGroupingSeparator('.');
             java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
             java.util.Map<Integer, String> priceDisplayMap = new java.util.HashMap<>();
-            java.util.Map<Integer, Double> unitPriceMap = new java.util.HashMap<>();
             for (Product p : filteredResult) {
                 int pid = p.getProductID();
-                Integer parentId = parentIdMap.get(pid);
-                Double unitPrice = productDao.getUnitPrice(pid); // UNIT or KG
-                unitPriceMap.put(pid, unitPrice);
-                String display;
-                if (parentId != null && (parentId == 1 || parentId == 2)) {
-                    // Drinks & Milk: box price with unit-per-box suffix
-                    Double boxPrice = productDao.getBoxPrice(pid);
-                    if (boxPrice == null)
-                        boxPrice = p.getPrice();
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(formatter.format(boxPrice)).append(" đ / thùng");
-                    try {
-                        Integer upb = p.getUnitPerBox();
-                        String iun = p.getItemUnitName();
-                        if (upb == null || upb <= 0 || iun == null || iun.trim().isEmpty()) {
-                            Product full = productDao.getProductById(pid);
-                            if (full != null) {
-                                upb = full.getUnitPerBox();
-                                iun = full.getItemUnitName();
-                            }
-                        }
-                        if (upb != null && upb > 0 && iun != null && !iun.trim().isEmpty()) {
-                            sb.append(" (").append(upb).append(" ").append(iun).append(")");
-                        }
-                    } catch (Exception ignore) {
-                    }
-                    display = sb.toString();
-                } else if (parentId != null && parentId == 3) {
-                    if (unitPrice != null) {
-                        display = formatter.format(unitPrice) + " đ / kg";
-                    } else {
-                        String boxLabel = (p.getBoxUnitName() != null && !p.getBoxUnitName().trim().isEmpty())
-                                ? p.getBoxUnitName()
-                                : "thùng";
-                        display = formatter.format(p.getPrice()) + " đ / " + boxLabel;
-                    }
-                } else {
-                    if (unitPrice != null) {
-                        String itemLabel = (p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty())
-                                ? p.getItemUnitName()
-                                : "cái";
-                        display = formatter.format(unitPrice) + " đ / " + itemLabel;
-                    } else {
-                        String boxLabel = (p.getBoxUnitName() != null && !p.getBoxUnitName().trim().isEmpty())
-                                ? p.getBoxUnitName()
-                                : "thùng";
-                        display = formatter.format(p.getPrice()) + " đ / " + boxLabel;
-                    }
-                }
+                String display = formatter.format(p.getPriceUnit()) + " đ / " + p.getItemUnitName();
                 priceDisplayMap.put(pid, display);
             }
 
@@ -204,8 +170,15 @@ public class SearchProductServlet extends HttpServlet {
             request.getRequestDispatcher("./WEB-INF/customer/searchProductResult.jsp").forward(request, response);
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("error", "Lỗi khi tìm kiếm sản phẩm");
-            request.getRequestDispatcher("error.jsp").forward(request, response);
+            request.setAttribute("error", "Đã xảy ra lỗi khi tìm kiếm. Vui lòng thử lại sau.");
+            // Đảm bảo JSP có dữ liệu an toàn để render
+            request.setAttribute("searchResult", java.util.Collections.emptyList());
+            request.setAttribute("searchKeyword", keyword);
+            request.setAttribute("parentIdMap", new java.util.HashMap<Integer, Integer>());
+            request.setAttribute("priceDisplayMap", new java.util.HashMap<Integer, String>());
+            request.setAttribute("avgRatingMap", new java.util.HashMap<Integer, Double>());
+            request.setAttribute("reviewCountMap", new java.util.HashMap<Integer, Integer>());
+            request.getRequestDispatcher("./WEB-INF/customer/searchProductResult.jsp").forward(request, response);
         }
     }
 
