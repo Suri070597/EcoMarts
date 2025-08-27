@@ -294,6 +294,9 @@ CREATE TABLE Promotion (
     StartDate DATETIME NOT NULL,
     EndDate DATETIME NOT NULL,
     IsActive BIT DEFAULT 1, -- 1 = active, 0 = inactive
+    PromoType TINYINT NOT NULL DEFAULT 0; -- 0=Flash sale, 1=Seasonal
+    applyScope TINYINT NOT NULL DEFAULT 0; -- 0=ALL, 1=CATEGORY
+    ParentID INT NULL;
     CHECK (StartDate < EndDate)
 );
 

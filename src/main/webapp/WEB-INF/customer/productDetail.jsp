@@ -195,34 +195,14 @@
                                             </div>
                                         </div>
                                         <div class="mt-3">
+                                            <c:set var="basePrice" value="${not empty mo.priceUnit ? mo.priceUnit : mo.price}"/>
+                                            <c:set var="unitLabel" value="${not empty mo.itemUnitName ? mo.itemUnitName : mo.boxUnitName}"/>
+                                            <c:set var="discounted" value="${basePrice * (1 - appliedPromotion.discountPercent/100.0)}"/>
                                             <span class="flash-sale-price">
-                                                <%
-                                                    Double priceUnit = mo.getPriceUnit();
-                                                    Double discountPercent = (Double) request.getAttribute("appliedPromotion.discountPercent");
-                                                    if (priceUnit != null && discountPercent != null) {
-                                                        double discountedPrice = priceUnit * (1 - discountPercent / 100);
-                                                %>
-                                                <fmt:formatNumber value="<%= discountedPrice%>" type="number" pattern="#,###"/> đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
-                                                <%
-                                                } else {
-                                                %>
-                                                0 đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
-                                                <%
-                                                    }
-                                                %>
+                                                <fmt:formatNumber value="${discounted}" type="number" pattern="#,###"/> đ / ${unitLabel}
                                             </span>
                                             <span class="original-price">
-                                                <%
-                                                    if (priceUnit != null) {
-                                                %>
-                                                <fmt:formatNumber value="<%= priceUnit%>" type="number" pattern="#,###"/> đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
-                                                <%
-                                                } else {
-                                                %>
-                                                0 đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
-                                                <%
-                                                    }
-                                                %>
+                                                <fmt:formatNumber value="${basePrice}" type="number" pattern="#,###"/> đ / ${unitLabel}
                                             </span>
                                             <span class="discount-percent">
                                                 -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
@@ -234,18 +214,9 @@
                                     <div class="flash-sale-banner mt-3">
                                         <div class="flash-sale-header">
                                             <span class="flash-sale-price">
-                                                <%
-                                                    Double priceUnit2 = mo.getPriceUnit();
-                                                    if (priceUnit2 != null) {
-                                                %>
-                                                <fmt:formatNumber value="<%= priceUnit2%>" type="number" pattern="#,###"/> đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
-                                                <%
-                                                } else {
-                                                %>
-                                                0 đ / <%= mo.getItemUnitName() != null ? mo.getItemUnitName() : "đơn vị"%>
-                                                <%
-                                                    }
-                                                %>
+                                                <c:set var="basePrice2" value="${not empty mo.priceUnit ? mo.priceUnit : mo.price}"/>
+                                                <c:set var="unitLabel2" value="${not empty mo.itemUnitName ? mo.itemUnitName : mo.boxUnitName}"/>
+                                                <fmt:formatNumber value="${basePrice2}" type="number" pattern="#,###"/> đ / ${unitLabel2}
                                             </span>
                                         </div>
                                     </div>
@@ -322,21 +293,54 @@
                                 <input type="hidden" name="packageType" id="selected-package-type" value="">
                                 <input type="hidden" name="packSize" id="selected-pack-size" value="0">
 
+                                <c:set var="discountPercent" value="${appliedPromotion != null ? appliedPromotion.discountPercent : 0}"/>
+
                                 <div class="mb-3">
                                     <strong>Phân loại:</strong>
                                     <div class="d-flex gap-2 mt-2" id="unit-selector">
                                         <c:if test="${!isFruit}">
-                                            <button type="button" class="btn btn-outline-secondary unit-btn" data-type="UNIT" data-available="${inventory['UNIT_Quantity']}">${mo.itemUnitName}</button>
-                                            <button type="button" class="btn btn-outline-secondary unit-btn" data-type="BOX" data-available="${inventory['BOX_Quantity']}">${mo.boxUnitName}</button>
+                                            <button type="button" class="btn btn-outline-secondary unit-btn" data-type="UNIT" data-available="${inventory['UNIT_Quantity']}" data-base="${basePrice * (1 - appliedPromotion.discountPercent/100.0)}">
+                                                <span class="btn-label">${mo.itemUnitName}</span>
+                                                <span class="btn-price-current text-danger ms-1"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through ms-1" style="display:none;"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary unit-btn" data-type="BOX" data-available="${inventory['BOX_Quantity']}" data-base="${mo.price * (1 - appliedPromotion.discountPercent/100.0)}">
+                                                <span class="btn-label">${mo.boxUnitName}</span>
+                                                <span class="btn-price-current text-danger ms-1"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through ms-1" style="display:none;"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                            </button>
                                             <c:if test="${not empty inventory['PACK_LIST']}">
                                                 <c:forEach var="p" items="${inventory['PACK_LIST']}">
-                                                    <button type="button" class="btn btn-outline-secondary unit-btn" data-type="PACK" data-packsize="${p.packSize}" data-available="${p.quantity}">Lốc ${p.packSize} ${mo.itemUnitName}</button>
+                                                    <button type="button" class="btn btn-outline-secondary unit-btn" data-type="PACK" data-packsize="${p.packSize}" data-available="${p.quantity}" data-base="${(mo.pricePack != null 
+                                                                                                                                                       ? mo.pricePack 
+                                                                                                                                                       : (mo.priceUnit != null ? mo.priceUnit * p.packSize : 0)) 
+                                                                                                                                                       * (1 - appliedPromotion.discountPercent/100.0)}">
+                                                        <span class="btn-label">Lốc ${p.packSize} ${mo.itemUnitName}</span>
+                                                        <span class="btn-price-current text-danger ms-1"></span>
+                                                        <span class="btn-price-original text-muted text-decoration-line-through ms-1" style="display:none;"></span>
+                                                        <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                                    </button>
                                                 </c:forEach>
                                             </c:if>
                                         </c:if>
                                         <c:if test="${isFruit}">
-                                            <button type="button" class="btn btn-outline-secondary unit-btn active" data-type="KG" data-available="${inventory['UNIT_Quantity']}">kg</button>
+                                            <button type="button" class="btn btn-outline-secondary unit-btn active" data-type="KG" data-available="${inventory['UNIT_Quantity']}" data-base="${mo.priceUnit * (1 - appliedPromotion.discountPercent/100.0)}">
+                                                <span class="btn-label">kg</span>
+                                                <span class="btn-price-current text-danger ms-1"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through ms-1" style="display:none;"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                            </button>
                                         </c:if>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div id="price-display" style="font-size: 0px;">
+                                        <span id="current-price" class="text-danger fw-bold"></span>
+                                        <span id="original-price" class="text-muted text-decoration-line-through ms-2" style="display:none;"></span>
+                                        <span id="discount-badge" class="badge bg-danger ms-2" style="display:none;">-0%</span>
                                     </div>
                                 </div>
 
@@ -372,21 +376,22 @@
                                         const isFruitPage = ${isFruit};
 
                                         function getAvailableFor(type, packSize) {
-                                            if (isFruitPage) return ${inventory['UNIT_Quantity'] != null ? inventory['UNIT_Quantity'] : 0};
-                                            
+                                            if (isFruitPage)
+                                                return ${inventory['UNIT_Quantity'] != null ? inventory['UNIT_Quantity'] : 0};
+
                                             // Lấy số lượng từ button đang active
                                             const active = document.querySelector('.unit-btn.active');
                                             if (active) {
                                                 const available = parseFloat(active.getAttribute('data-available') || '0');
                                                 return available;
                                             }
-                                            
+
                                             // Fallback: tìm button theo type và packSize
-                                            const targetBtn = document.querySelector(`.unit-btn[data-type="${type}"]\${packSize > 0 ? `[data-packsize="${packSize}"]` : ''}`);
+                                            const targetBtn = document.querySelector(`.unit-btn[data-type="${type}"]\${packSize > 0 ? `[data - packsize = "${packSize}"]` : ''}`);
                                             if (targetBtn) {
                                                 return parseFloat(targetBtn.getAttribute('data-available') || '0');
                                             }
-                                            
+
                                             return 0;
                                         }
 
@@ -401,12 +406,83 @@
                                             return 0;
                                         }
 
+                                        function formatVND(n) {
+                                            try {
+                                                return new Intl.NumberFormat('vi-VN').format(n);
+                                            } catch (e) {
+                                                return n;
+                                            }
+                                        }
+
+                                        function updateButtonPrices() {
+                                            const dp = parseFloat(`${discountPercentJS}`);
+                                            document.querySelectorAll('.unit-btn').forEach(btn => {
+                                                const base = parseFloat(btn.getAttribute('data-base') || '0');
+                                                const cur = btn.querySelector('.btn-price-current');
+                                                const orig = btn.querySelector('.btn-price-original');
+                                                const badge = btn.querySelector('.btn-price-percent');
+                                                if (!cur)
+                                                    return;
+                                                if (!isNaN(dp) && dp > 0 && base > 0) {
+                                                    const discounted = base * (1 - dp / 100);
+                                                    cur.textContent = '(' + formatVND(discounted) + ' đ)';
+                                                    if (orig) {
+                                                        orig.textContent = formatVND(base) + ' đ';
+                                                        orig.style.display = '';
+                                                    }
+                                                    if (badge) {
+                                                        badge.textContent = `-${dp}%`;
+                                                        badge.style.display = '';
+                                                    }
+                                                } else if (base > 0) {
+                                                    cur.textContent = '(' + formatVND(base) + ' đ)';
+                                                    if (orig)
+                                                        orig.style.display = 'none';
+                                                    if (badge)
+                                                        badge.style.display = 'none';
+                                                } else {
+                                                    cur.textContent = '';
+                                                    if (orig)
+                                                        orig.style.display = 'none';
+                                                    if (badge)
+                                                        badge.style.display = 'none';
+                                                }
+                                            });
+                                        }
+
+                                        function updatePriceDisplay() {
+                                            const active = document.querySelector('.unit-btn.active');
+                                            const current = document.getElementById('current-price');
+                                            const original = document.getElementById('original-price');
+                                            const badge = document.getElementById('discount-badge');
+                                            if (!active) {
+                                                current.textContent = '';
+                                                original.style.display = 'none';
+                                                badge.style.display = 'none';
+                                                return;
+                                            }
+                                            const basePrice = parseFloat(active.getAttribute('data-base') || '0');
+                                            const dp = parseFloat(`${discountPercentJS}`);
+                                            if (!isNaN(dp) && dp > 0 && basePrice > 0) {
+                                                const discounted = basePrice * (1 - dp / 100);
+                                                current.textContent = formatVND(discounted) + ' đ';
+                                                original.textContent = formatVND(basePrice) + ' đ';
+                                                original.style.display = '';
+                                                badge.textContent = `-${dp}%`;
+                                                badge.style.display = '';
+                                            } else {
+                                                current.textContent = formatVND(basePrice) + ' đ';
+                                                original.style.display = 'none';
+                                                badge.style.display = 'none';
+                                            }
+                                        }
+
                                         function selectDefaultUnit() {
                                             if (isFruitPage) {
                                                 selType.value = 'KG';
                                                 return;
                                             }
-                                            
+
                                             // Tìm button đầu tiên có sẵn và active nó
                                             const firstBtn = document.querySelector('.unit-btn');
                                             if (firstBtn) {
@@ -424,43 +500,48 @@
                                                 selType.value = btn.getAttribute('data-type');
                                                 selPack.value = btn.getAttribute('data-packsize') || '0';
                                                 updateAvailableLabel();
+                                                updatePriceDisplay();
+                                                updateButtonPrices();
                                             });
                                         });
 
                                         // Initialize defaults and labels
                                         selectDefaultUnit();
                                         updateAvailableLabel();
+                                        const discountPercentJS = ${discountPercent != null ? discountPercent : 0};
+                                        updatePriceDisplay();
+                                        updateButtonPrices();
 
                                         const decBtn = document.getElementById('qty-dec');
                                         const incBtn = document.getElementById('qty-inc');
-                                        
+
                                         decBtn.addEventListener('click', () => {
                                             const step = parseFloat(quantityInput.step || '1');
                                             const min = parseFloat(quantityInput.min || step);
                                             let val = parseFloat(quantityInput.value || min);
                                             val = Math.max(min, val - step);
                                             quantityInput.value = step < 1 ? val.toFixed(1) : val.toFixed(0);
-                                            
+
                                             // Clear warning when decreasing
                                             quantityWarning.style.display = 'none';
                                             addToCartBtn.disabled = false;
                                             buyNowBtn.disabled = false;
                                         });
-                                        
+
                                         incBtn.addEventListener('click', () => {
                                             const step = parseFloat(quantityInput.step || '1');
                                             let val = parseFloat(quantityInput.value || step);
                                             const maxAvail = updateAvailableLabel();
-                                            
+
                                             if (val + step > maxAvail) {
                                                 quantityWarning.style.display = 'block';
                                                 quantityWarning.textContent = 'Chỉ còn ' + maxAvail + ' sản phẩm trong kho';
                                                 return;
                                             }
-                                            
+
                                             val = val + step;
                                             quantityInput.value = step < 1 ? val.toFixed(1) : val.toFixed(0);
-                                            
+
                                             // Clear warning when increasing within limit
                                             quantityWarning.style.display = 'none';
                                             addToCartBtn.disabled = false;
@@ -538,7 +619,7 @@
                                             const productIdInput = document.createElement('input');
                                             productIdInput.type = 'hidden';
                                             productIdInput.name = 'productID';
-                                            productIdInput.value = '<%= mo.getProductID() %>';
+                                            productIdInput.value = '<%= mo.getProductID()%>';
                                             buyNowForm.appendChild(productIdInput);
 
                                             // Add quantity parameter

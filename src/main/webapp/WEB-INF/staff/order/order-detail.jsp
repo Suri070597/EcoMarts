@@ -206,13 +206,21 @@
                                 <td class="number"><fmt:formatNumber value="${d.unitPrice}" type="number" pattern="#,###"/> đ</td>
                                 <td class="number">
                                     <c:choose>
-                                        <c:when test="${d.quantity % 1 == 0}">
-                                            <fmt:formatNumber value="${d.quantity}" pattern="#"/>
+                                        <c:when test="${d.unit eq 'kg'}">
+                                            <c:choose>
+                                                <c:when test="${d.quantity % 1 == 0}">
+                                                    <fmt:formatNumber value="${d.quantity}" pattern="#"/>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <fmt:formatNumber value="${d.quantity}" pattern="#.##"/>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </c:when>
                                         <c:otherwise>
-                                            <fmt:formatNumber value="${d.quantity}" pattern="#.##"/>
+                                            <fmt:formatNumber value="${d.quantity}" pattern="#" />
                                         </c:otherwise>
                                     </c:choose>
+                                    ${d.unit}
                                 </td>
                                 <td class="number"><fmt:formatNumber value="${d.subTotal}" type="number" pattern="#,###"/> đ</td>
 
