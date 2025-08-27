@@ -148,6 +148,23 @@ public class BuyNowServlet extends HttpServlet {
         // Set product for the buy now item
         buyNowItem.setProduct(product);
 
+        // Derive effective unit label based on selected package and set stock
+        String unitLabel;
+        if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
+            String itemUnitName = product.getItemUnitName();
+            unitLabel = "Lốc" + (buyNowItem.getPackSize() != null ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+        } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
+            String boxUnitName = product.getBoxUnitName();
+            unitLabel = boxUnitName != null ? boxUnitName : "thùng";
+        } else if ("KG".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
+            unitLabel = "kg";
+        } else {
+            String itemUnitName = product.getItemUnitName();
+            unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
+        }
+        product.setUnit(unitLabel);
+        product.setStockQuantity(stockQuantity);
+
         // Get account info for shipping
         AccountDAO accountDAO = new AccountDAO();
         Account fullAccount = accountDAO.getUserDetail(account.getAccountID());
@@ -170,6 +187,7 @@ public class BuyNowServlet extends HttpServlet {
             if (price == null) price = 0.0;
         }
         double itemTotal = price * buyNowItem.getQuantity();
+        product.setPrice(price);
 
         // Get available vouchers for the user
         VoucherDAO voucherDAO = new VoucherDAO();
@@ -453,6 +471,22 @@ public class BuyNowServlet extends HttpServlet {
                 buyNowItem.setProduct(product);
             }
             if (buyNowItem.getProduct() != null) {
+                // Set effective unit label and stock for display consistency
+                String unitLabel;
+                if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
+                    String itemUnitName = product.getItemUnitName();
+                    unitLabel = "Lốc" + (buyNowItem.getPackSize() != null ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+                } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
+                    String boxUnitName = product.getBoxUnitName();
+                    unitLabel = boxUnitName != null ? boxUnitName : "thùng";
+                } else if ("KG".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
+                    unitLabel = "kg";
+                } else {
+                    String itemUnitName = product.getItemUnitName();
+                    unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
+                }
+                buyNowItem.getProduct().setUnit(unitLabel);
+                buyNowItem.getProduct().setStockQuantity(stockQty);
                 buyNowItem.getProduct().setPrice(price);
             }
             double discountAmount = 0;
@@ -648,6 +682,27 @@ public class BuyNowServlet extends HttpServlet {
                 if (price == null) price = 0.0;
             }
             double itemTotal = price * buyNowItem.getQuantity();
+            // Also set effective unit and stock for display
+            String unitLabel;
+            if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
+                String itemUnitName = product.getItemUnitName();
+                unitLabel = "Lốc" + (buyNowItem.getPackSize() != null ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+            } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
+                String boxUnitName = product.getBoxUnitName();
+                unitLabel = boxUnitName != null ? boxUnitName : "thùng";
+            } else if ("KG".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
+                unitLabel = "kg";
+            } else {
+                String itemUnitName = product.getItemUnitName();
+                unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
+            }
+            product.setUnit(unitLabel);
+            product.setStockQuantity(
+                ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null)
+                    ? new ProductDAO().getPackQuantity(buyNowItem.getProductID(), buyNowItem.getPackSize())
+                    : new ProductDAO().getQuantityByPackageType(buyNowItem.getProductID(), buyNowItem.getPackageType() != null ? buyNowItem.getPackageType() : "UNIT")
+            );
+            product.setPrice(price);
 
             // Get available vouchers for the user
             VoucherDAO voucherDAO = new VoucherDAO();
