@@ -654,12 +654,18 @@ public class OrderDAO extends DBContext {
     public List<RevenueStats> getMonthlyRevenueDetails(int month, int year) {
         List<RevenueStats> list = new ArrayList<>();
         String sql = """
-                    SELECT p.ProductName, SUM(od.Quantity) AS TotalQuantity, SUM(od.SubTotal) AS TotalRevenue
+                    SELECT p.ProductName,
+                           od.PackageType,
+                           od.PackSize,
+                           p.ItemUnitName,
+                           p.BoxUnitName,
+                           SUM(od.Quantity) AS TotalQuantity,
+                           SUM(od.SubTotal) AS TotalRevenue
                     FROM OrderDetail od
                     JOIN Product p ON od.ProductID = p.ProductID
                     JOIN [Order] o ON od.OrderID = o.OrderID
                     WHERE MONTH(o.OrderDate) = ? AND YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
-                    GROUP BY p.ProductName
+                    GROUP BY p.ProductName, od.PackageType, od.PackSize, p.ItemUnitName, p.BoxUnitName
                     ORDER BY TotalQuantity DESC
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -668,9 +674,23 @@ public class OrderDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String name = rs.getString("ProductName");
-                int quantity = rs.getInt("TotalQuantity");
+                String packageType = rs.getString("PackageType");
+                Integer packSize = (Integer) rs.getObject("PackSize");
+                String itemUnitName = rs.getString("ItemUnitName");
+                String boxUnitName = rs.getString("BoxUnitName");
+                String unitLabel;
+                if ("KG".equalsIgnoreCase(packageType)) {
+                    unitLabel = "kg";
+                } else if ("BOX".equalsIgnoreCase(packageType)) {
+                    unitLabel = boxUnitName != null ? boxUnitName : "thùng";
+                } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    unitLabel = "Lốc" + (packSize != null ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+                } else {
+                    unitLabel = itemUnitName != null ? itemUnitName : "đơn vị"; // UNIT hoặc null -> dùng ItemUnitName
+                }
+                double quantity = rs.getDouble("TotalQuantity");
                 double revenue = rs.getDouble("TotalRevenue");
-                list.add(new RevenueStats(name, quantity, revenue));
+                list.add(new RevenueStats(name, unitLabel, quantity, revenue));
             }
         } catch (SQLException e) {
             e.printStackTrace();

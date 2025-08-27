@@ -127,6 +127,7 @@
                         <thead>
                             <tr>
                                 <th><i class="fas fa-box"></i> Sản phẩm</th>
+                                <th><i class="fas fa-ruler-combined"></i> Đơn vị</th>
                                 <th><i class="fas fa-sort-amount-up-alt"></i> Số lượng đã bán</th>
                                 <th><i class="fas fa-money-bill-wave text-success"></i> Doanh thu</th>
                             </tr>
@@ -136,6 +137,7 @@
                             <c:forEach items="${productList}" var="item">
                                 <tr>
                                     <td>${item.productName}</td>
+                                    <td>${item.unit}</td>
                                     <td class="number">${item.totalQuantity}</td>
                                     <td class="number"><fmt:formatNumber value="${item.totalRevenue}" type="currency"/></td>
                                 </tr>
