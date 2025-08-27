@@ -219,6 +219,8 @@
                                         <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                         <input type="hidden" name="quantity" value="1"> 
                                         <input type="hidden" name="action" value="initiate"> 
+                                        <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT" %>"> 
+                                        <input type="hidden" name="packSize" value="0"> 
                                         <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                     </form>
                                 </div>

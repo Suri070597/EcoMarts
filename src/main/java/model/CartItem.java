@@ -9,6 +9,8 @@ public class CartItem {
     private double quantity;
     private Timestamp addedAt;
     private String status; // Active, SavedForLater, Removed
+    private String packageType; // BOX | UNIT | PACK | KG
+    private Integer packSize; // null for non-PACK
 
     // For joining with Product table
     private Product product;
@@ -73,6 +75,22 @@ public class CartItem {
         this.status = status;
     }
 
+    public String getPackageType() {
+        return packageType;
+    }
+
+    public void setPackageType(String packageType) {
+        this.packageType = packageType;
+    }
+
+    public Integer getPackSize() {
+        return packSize;
+    }
+
+    public void setPackSize(Integer packSize) {
+        this.packSize = packSize;
+    }
+
     public Product getProduct() {
         return product;
     }
@@ -90,6 +108,8 @@ public class CartItem {
                 ", quantity=" + quantity +
                 ", addedAt=" + addedAt +
                 ", status='" + status + '\'' +
+                ", packageType='" + packageType + '\'' +
+                ", packSize=" + packSize +
                 '}';
     }
 }

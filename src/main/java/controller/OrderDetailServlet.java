@@ -4,22 +4,23 @@
  */
 package controller;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import dao.CartItemDAO;
 import dao.CategoryDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
 import dao.ProductDAO;
 import dao.VoucherUsageDAO;
-import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import model.Account;
 import model.CartItem;
 import model.Category;
@@ -211,8 +212,9 @@ public class OrderDetailServlet extends HttpServlet {
 
                         // Only add to cart if stock is available
                         if (stockQuantity > 0) {
+                            // Default re-add as UNIT without pack info; could be enhanced to restore original package
                             cartItemDAO.upsertCartItem(account.getAccountID(), item.getProductID(),
-                                    Math.min(item.getQuantity(), stockQuantity));
+                                    Math.min(item.getQuantity(), stockQuantity), "UNIT", null);
                         }
                     }
 

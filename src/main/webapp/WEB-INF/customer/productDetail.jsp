@@ -289,21 +289,12 @@
                                     }
                                 %>
                             </p>
-                            <p><strong>Số Lượng Tồn Kho:</strong> 
-                                <%
-                                    double stockQty = mo.getStockQuantity();
-                                    if (stockQty % 1 == 0) {
-                                        out.print((int) stockQty);
-                                    } else {
-                                        out.print(stockQty);
-                                    }
-                                %>
-                            </p>
+                            <!-- Remove old stock quantity display per requirement -->
                             <%-- sửa ngay phần này --%>
                             <%-- <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p> --%>
                             <%-- <p><strong>Nhà Sản Xuất:</strong> <%=mo.getManufacturer().getCompanyName()%></p> --%>
 
-                            <form action="cart" method="post">
+                            <form action="cart" method="post" id="detail-cart-form">
                                 <input type="hidden" name="action" value="add">
                                 <input type="hidden" name="productID" value="<%= mo.getProductID()%>">
 
@@ -328,11 +319,37 @@
                                     String value = isFruit ? "0.1" : "1";
                                 %>
 
-                                <div class="d-flex gap-2 mb-3">
-                                    <strong>Số Lượng: </strong>
-                                    <input type="number" id="product-quantity" name="quantity" class="form-control w-25" value="<%= value%>" min="<%= min%>" max="<%= mo.getAvailableQuantity()%>" step="<%= step%>">
-                                    <div class="form-text text-danger" id="quantity-warning" style="display: none;">Số lượng vượt quá tồn kho!</div>
+                                <input type="hidden" name="packageType" id="selected-package-type" value="">
+                                <input type="hidden" name="packSize" id="selected-pack-size" value="0">
+
+                                <div class="mb-3">
+                                    <strong>Phân loại:</strong>
+                                    <div class="d-flex gap-2 mt-2" id="unit-selector">
+                                        <c:if test="${!isFruit}">
+                                            <button type="button" class="btn btn-outline-secondary unit-btn" data-type="UNIT" data-available="${inventory['UNIT_Quantity']}">${mo.itemUnitName}</button>
+                                            <button type="button" class="btn btn-outline-secondary unit-btn" data-type="BOX" data-available="${inventory['BOX_Quantity']}">${mo.boxUnitName}</button>
+                                            <c:if test="${not empty inventory['PACK_LIST']}">
+                                                <c:forEach var="p" items="${inventory['PACK_LIST']}">
+                                                    <button type="button" class="btn btn-outline-secondary unit-btn" data-type="PACK" data-packsize="${p.packSize}" data-available="${p.quantity}">Lốc ${p.packSize} ${mo.itemUnitName}</button>
+                                                </c:forEach>
+                                            </c:if>
+                                        </c:if>
+                                        <c:if test="${isFruit}">
+                                            <button type="button" class="btn btn-outline-secondary unit-btn active" data-type="KG" data-available="${inventory['UNIT_Quantity']}">kg</button>
+                                        </c:if>
+                                    </div>
                                 </div>
+
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <strong>Số Lượng</strong>
+                                    <div class="input-group" style="width:150px;">
+                                        <button class="btn btn-outline-secondary" type="button" id="qty-dec">-</button>
+                                        <input type="number" id="product-quantity" name="quantity" class="form-control text-center" value="<%= value%>" min="<%= min%>" step="<%= step%>">
+                                        <button class="btn btn-outline-secondary" type="button" id="qty-inc">+</button>
+                                    </div>
+                                    <span class="text-muted" id="available-text"></span>
+                                </div>
+                                <div class="form-text text-danger" id="quantity-warning" style="display:none;"></div>
 
                                 <div>
                                     <button type="submit" id="add-to-cart-btn" class="btn btn-outline-danger">
@@ -347,58 +364,160 @@
                                         const quantityWarning = document.getElementById('quantity-warning');
                                         const addToCartBtn = document.getElementById('add-to-cart-btn');
                                         const buyNowBtn = document.getElementById('buy-now-btn');
-                                        const maxStock = <%= mo.getAvailableQuantity()%>;
+                                        const availableText = document.getElementById('available-text');
+                                        const form = document.getElementById('detail-cart-form');
+                                        const selType = document.getElementById('selected-package-type');
+                                        const selPack = document.getElementById('selected-pack-size');
+
+                                        const isFruitPage = ${isFruit};
+
+                                        function getAvailableFor(type, packSize) {
+                                            if (isFruitPage) return ${inventory['UNIT_Quantity'] != null ? inventory['UNIT_Quantity'] : 0};
+                                            
+                                            // Lấy số lượng từ button đang active
+                                            const active = document.querySelector('.unit-btn.active');
+                                            if (active) {
+                                                const available = parseFloat(active.getAttribute('data-available') || '0');
+                                                return available;
+                                            }
+                                            
+                                            // Fallback: tìm button theo type và packSize
+                                            const targetBtn = document.querySelector(`.unit-btn[data-type="${type}"]\${packSize > 0 ? `[data-packsize="${packSize}"]` : ''}`);
+                                            if (targetBtn) {
+                                                return parseFloat(targetBtn.getAttribute('data-available') || '0');
+                                            }
+                                            
+                                            return 0;
+                                        }
+
+                                        function updateAvailableLabel() {
+                                            const active = document.querySelector('.unit-btn.active');
+                                            if (active) {
+                                                const avail = parseFloat(active.getAttribute('data-available') || '0');
+                                                availableText.textContent = avail + ' sản phẩm có sẵn';
+                                                return avail;
+                                            }
+                                            availableText.textContent = '0 sản phẩm có sẵn';
+                                            return 0;
+                                        }
+
+                                        function selectDefaultUnit() {
+                                            if (isFruitPage) {
+                                                selType.value = 'KG';
+                                                return;
+                                            }
+                                            
+                                            // Tìm button đầu tiên có sẵn và active nó
+                                            const firstBtn = document.querySelector('.unit-btn');
+                                            if (firstBtn) {
+                                                firstBtn.classList.add('active');
+                                                selType.value = firstBtn.getAttribute('data-type');
+                                                selPack.value = firstBtn.getAttribute('data-packsize') || '0';
+                                            }
+                                        }
+
+                                        // Unit selector
+                                        document.querySelectorAll('.unit-btn').forEach(btn => {
+                                            btn.addEventListener('click', () => {
+                                                document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+                                                btn.classList.add('active');
+                                                selType.value = btn.getAttribute('data-type');
+                                                selPack.value = btn.getAttribute('data-packsize') || '0';
+                                                updateAvailableLabel();
+                                            });
+                                        });
+
+                                        // Initialize defaults and labels
+                                        selectDefaultUnit();
+                                        updateAvailableLabel();
+
+                                        const decBtn = document.getElementById('qty-dec');
+                                        const incBtn = document.getElementById('qty-inc');
+                                        
+                                        decBtn.addEventListener('click', () => {
+                                            const step = parseFloat(quantityInput.step || '1');
+                                            const min = parseFloat(quantityInput.min || step);
+                                            let val = parseFloat(quantityInput.value || min);
+                                            val = Math.max(min, val - step);
+                                            quantityInput.value = step < 1 ? val.toFixed(1) : val.toFixed(0);
+                                            
+                                            // Clear warning when decreasing
+                                            quantityWarning.style.display = 'none';
+                                            addToCartBtn.disabled = false;
+                                            buyNowBtn.disabled = false;
+                                        });
+                                        
+                                        incBtn.addEventListener('click', () => {
+                                            const step = parseFloat(quantityInput.step || '1');
+                                            let val = parseFloat(quantityInput.value || step);
+                                            const maxAvail = updateAvailableLabel();
+                                            
+                                            if (val + step > maxAvail) {
+                                                quantityWarning.style.display = 'block';
+                                                quantityWarning.textContent = 'Chỉ còn ' + maxAvail + ' sản phẩm trong kho';
+                                                return;
+                                            }
+                                            
+                                            val = val + step;
+                                            quantityInput.value = step < 1 ? val.toFixed(1) : val.toFixed(0);
+                                            
+                                            // Clear warning when increasing within limit
+                                            quantityWarning.style.display = 'none';
+                                            addToCartBtn.disabled = false;
+                                            buyNowBtn.disabled = false;
+                                        });
 
                                         // Validate quantity when changed
                                         quantityInput.addEventListener('input', function () {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(this.value) : parseInt(this.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const quantity = isFruitPage ? parseFloat(this.value) : parseInt(this.value);
+                                            const minValue = isFruitPage ? 0.1 : 1;
 
                                             if (isNaN(quantity) || quantity < minValue) {
                                                 this.value = minValue;
                                                 quantityWarning.style.display = 'none';
                                                 addToCartBtn.disabled = false;
                                                 buyNowBtn.disabled = false;
-                                            } else if (quantity > maxStock) {
-                                                quantityWarning.style.display = 'block';
-                                                quantityWarning.textContent = 'Số lượng tối đa có thể mua: ' + maxStock;
-                                                addToCartBtn.disabled = true;
-                                                buyNowBtn.disabled = true;
                                             } else {
-                                                quantityWarning.style.display = 'none';
-                                                addToCartBtn.disabled = false;
-                                                buyNowBtn.disabled = false;
+                                                const maxAvail = updateAvailableLabel();
+                                                if (quantity > maxAvail) {
+                                                    quantityWarning.style.display = 'block';
+                                                    quantityWarning.textContent = 'Số lượng tối đa có thể mua: ' + maxAvail;
+                                                    addToCartBtn.disabled = true;
+                                                    buyNowBtn.disabled = true;
+                                                } else {
+                                                    quantityWarning.style.display = 'none';
+                                                    addToCartBtn.disabled = false;
+                                                    buyNowBtn.disabled = false;
+                                                }
                                             }
                                         });
 
                                         // Prevent form submission if quantity is invalid
-                                        const form = quantityInput.closest('form');
                                         form.addEventListener('submit', function (event) {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const quantity = isFruitPage ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
+                                            const minValue = isFruitPage ? 0.1 : 1;
+                                            const maxAvail = updateAvailableLabel();
 
-                                            if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
+                                            if (isNaN(quantity) || quantity < minValue || quantity > maxAvail) {
                                                 event.preventDefault();
                                                 quantityWarning.style.display = 'block';
-                                                quantityWarning.textContent = quantity > maxStock
-                                                        ? 'Số lượng tối đa có thể mua: ' + maxStock
+                                                quantityWarning.textContent = quantity > maxAvail
+                                                        ? 'Số lượng tối đa có thể mua: ' + maxAvail
                                                         : 'Vui lòng nhập số lượng hợp lệ (tối thiểu: ' + minValue + ')';
                                             }
                                         });
 
                                         // Add Buy Now functionality
                                         buyNowBtn.addEventListener('click', function () {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const quantity = isFruitPage ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
+                                            const minValue = isFruitPage ? 0.1 : 1;
+                                            const maxAvail = updateAvailableLabel();
 
                                             // Validate quantity
-                                            if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
+                                            if (isNaN(quantity) || quantity < minValue || quantity > maxAvail) {
                                                 quantityWarning.style.display = 'block';
-                                                quantityWarning.textContent = quantity > maxStock
-                                                        ? 'Số lượng tối đa có thể mua: ' + maxStock
+                                                quantityWarning.textContent = quantity > maxAvail
+                                                        ? 'Số lượng tối đa có thể mua: ' + maxAvail
                                                         : 'Vui lòng nhập số lượng hợp lệ (tối thiểu: ' + minValue + ')';
                                                 return;
                                             }
@@ -419,7 +538,7 @@
                                             const productIdInput = document.createElement('input');
                                             productIdInput.type = 'hidden';
                                             productIdInput.name = 'productID';
-                                            productIdInput.value = '<c:out value="${mo.productID}"/>';
+                                            productIdInput.value = '<%= mo.getProductID() %>';
                                             buyNowForm.appendChild(productIdInput);
 
                                             // Add quantity parameter
@@ -428,6 +547,19 @@
                                             quantityInputHidden.name = 'quantity';
                                             quantityInputHidden.value = quantity;
                                             buyNowForm.appendChild(quantityInputHidden);
+
+                                            // Add selected package info
+                                            const packageTypeHidden = document.createElement('input');
+                                            packageTypeHidden.type = 'hidden';
+                                            packageTypeHidden.name = 'packageType';
+                                            packageTypeHidden.value = selType.value || 'UNIT';
+                                            buyNowForm.appendChild(packageTypeHidden);
+
+                                            const packSizeHidden = document.createElement('input');
+                                            packSizeHidden.type = 'hidden';
+                                            packSizeHidden.name = 'packSize';
+                                            packSizeHidden.value = selPack.value || '0';
+                                            buyNowForm.appendChild(packSizeHidden);
 
                                             // Append form to body and submit
                                             document.body.appendChild(buyNowForm);

@@ -98,8 +98,7 @@ INSERT INTO Category (CategoryName, [Description]) VALUES
 (N'Trái cây', N'Trái cây tươi các loại'),
 (N'Bánh kẹo', N'Các loại bánh kẹo'),
 (N'Mẹ và bé', N'Sản phẩm dành cho mẹ và bé'),
-(N'Mỹ phẩm', N'Các sản phẩm làm đẹp'),
-(N'Sản phẩm nổi bật', N'Sản phẩm đặc biệt được đề xuất');
+(N'Mỹ phẩm', N'Các sản phẩm làm đẹp')
 
 DECLARE @NuocGiaiKhat INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Nước giải khát');
 DECLARE @Sua INT = (SELECT CategoryID FROM Category WHERE CategoryName = N'Sữa các loại');
@@ -221,6 +220,8 @@ CREATE TABLE CartItem (
     AccountID INT NOT NULL,
     ProductID INT NOT NULL,
     Quantity DECIMAL(10,2) NOT NULL DEFAULT 1, -- Gộp trực tiếp kiểu và default
+    PackageType NVARCHAR(10) NOT NULL DEFAULT 'UNIT', -- BOX, UNIT, PACK, KG
+    PackSize INT NULL DEFAULT NULL, -- Số đơn vị trong 1 lốc (NULL cho BOX/UNIT)
     AddedAt DATETIME DEFAULT GETDATE(),
     [Status] NVARCHAR(50) DEFAULT 'Active', -- Active, SavedForLater, Removed
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE,
@@ -242,7 +243,7 @@ CREATE TABLE [Order] (
     ShippingPhone VARCHAR(15) NOT NULL,
     PaymentMethod NVARCHAR(50) NOT NULL, -- "Cash", "VNPay"
     PaymentStatus NVARCHAR(50) DEFAULT N'Chưa thanh toán', -- "Chưa thanh toán", "Đã thanh toán"
-    OrderStatus NVARCHAR(50) DEFAULT N'Đang xử lý', -- "Đang xử lý", "Đang giao hàng", "Đã giao", "Đã hủy"
+    OrderStatus NVARCHAR(50) DEFAULT N'Đang xử lý', -- "Đang xử lý", "Đang giao hàng", "Đã giao", "Đã hủy
     Notes NVARCHAR(255),
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
 );
@@ -253,6 +254,8 @@ CREATE TABLE OrderDetail (
     ProductID INT NOT NULL,
     Quantity DECIMAL(10,2) NOT NULL,
     UnitPrice DECIMAL(10,2) NOT NULL,
+    PackageType NVARCHAR(10) NOT NULL DEFAULT 'UNIT', -- BOX, UNIT, PACK, KG
+    PackSize INT NULL DEFAULT NULL, -- Số đơn vị trong 1 lốc (NULL cho BOX/UNIT)
     SubTotal AS (Quantity * UnitPrice) PERSISTED,
     FOREIGN KEY (OrderID) REFERENCES [Order](OrderID) ON DELETE CASCADE,
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
@@ -386,19 +389,6 @@ CREATE TABLE StockInDetail (
 ALTER TABLE Inventory
 DROP CONSTRAINT CHK_PackageType;
 
-
-INSERT INTO Manufacturer (BrandName, CompanyName, [Address], Email, Phone, [Status])
-VALUES
-(N'Vinamilk', N'Vietnam Dairy Products JSC', N'36-38 Ngô Đức Kế, Quận 1, TP.HCM', 'contact@vinamilk.com.vn', '0281234567', 1),
-(N'Trung Nguyên', N'Trung Nguyên Group', N'82-84 Bùi Thị Xuân, Quận 1, TP.HCM', 'info@trungnguyen.com', '0282345678', 1),
-(N'Tân Hiệp Phát', N'Tân Hiệp Phát Beverage Group', N'219 Đại lộ Bình Dương, Bình Dương', 'support@thp.com.vn', '0274388888', 1),
-(N'Pepsi', N'PepsiCo Vietnam', N'Lô 13 VSIP, Bình Dương', 'contact@pepsico.com', '0274356789', 1),
-(N'CocaCola', N'Coca-Cola Beverages Vietnam', N'485 Hà Nội Highway, Thủ Đức, TP.HCM', 'service@coca-cola.com', '0288765432', 1),
-(N'Kinh Đô', N'Kinh Đô Corporation', N'141 Nguyễn Du, Quận 1, TP.HCM', 'info@kinhdo.com.vn', '0283456123', 1),
-(N'Hải Hà', N'Hải Hà Confectionery JSC', N'25 Trương Định, Hai Bà Trưng, Hà Nội', 'contact@haiha.com.vn', '0249876543', 1),
-(N'Nutifood', N'Nutifood Nutrition Food JSC', N'281-283 Hoàng Diệu, Quận 4, TP.HCM', 'hello@nutifood.com.vn', '0287654321', 1),
-(N'Nestlé', N'Nestlé Vietnam Ltd.', N'5th Floor, Empress Tower, 138-142 Hai Bà Trưng, Quận 1, TP.HCM', 'consumer.services@vn.nestle.com', '0283838888', 1),
-(N'Orion', N'Orion Food Vina', N'Lô CN2-2, KCN Mỹ Phước 3, Bình Dương', 'orion@orion.com.vn', '0274222333', 1);
 
 
 
