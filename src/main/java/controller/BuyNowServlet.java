@@ -92,6 +92,21 @@ public class BuyNowServlet extends HttpServlet {
                 return;
             }
 
+            // Ensure totals and helper attrs are available for JSP
+            Object cartTotal = session.getAttribute("cartTotal");
+            if (cartTotal != null) {
+                request.setAttribute("itemTotal", cartTotal);
+                request.setAttribute("totalAmount", cartTotal);
+            }
+            Object validVouchers = session.getAttribute("validVouchers");
+            if (validVouchers != null) {
+                request.setAttribute("validVouchers", validVouchers);
+            }
+            Object userInfo = session.getAttribute("userInfo");
+            if (userInfo != null) {
+                request.setAttribute("userInfo", userInfo);
+            }
+
             // Forward to checkout page with cart items
             request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
             return;
@@ -353,13 +368,20 @@ public class BuyNowServlet extends HttpServlet {
                 return;
             }
 
-            // Check stock availability again
-            if (product.getStockQuantity() < buyNowItem.getQuantity()) {
+            // Check stock availability again per selected package
+            double stockQty;
+            if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
+                stockQty = productDAO.getPackQuantity(buyNowItem.getProductID(), buyNowItem.getPackSize());
+            } else {
+                String effType = buyNowItem.getPackageType() != null ? buyNowItem.getPackageType() : "UNIT";
+                stockQty = productDAO.getQuantityByPackageType(buyNowItem.getProductID(), effType);
+            }
+            if (stockQty < buyNowItem.getQuantity()) {
                 request.setAttribute("error", "Sản phẩm đã hết hàng hoặc không đủ số lượng yêu cầu. Hiện chỉ còn "
-                        + product.getStockQuantity() + " " + product.getUnit());
+                        + stockQty);
 
                 // Adjust quantity to maximum available
-                buyNowItem.setQuantity(product.getStockQuantity());
+                buyNowItem.setQuantity(stockQty);
 
                 // Re-populate the form with corrected quantity
                 prepareCheckoutPage(request, account, buyNowItem, product);
@@ -425,6 +447,14 @@ public class BuyNowServlet extends HttpServlet {
                 if (price == null) price = 0.0;
             }
             double totalAmount = price * buyNowItem.getQuantity();
+
+            // Ensure the product attached to buyNowItem carries the effective unit price
+            if (buyNowItem.getProduct() == null) {
+                buyNowItem.setProduct(product);
+            }
+            if (buyNowItem.getProduct() != null) {
+                buyNowItem.getProduct().setPrice(price);
+            }
             double discountAmount = 0;
 
             // Apply voucher if provided
@@ -841,25 +871,31 @@ public class BuyNowServlet extends HttpServlet {
             double totalAmount = 0;
             ProductDAO productDAO = new ProductDAO();
 
-            // Validate products and calculate total
+            // Validate products and calculate total (respect selected package/unit)
             for (CartItem item : cartItems) {
                 Product product = item.getProduct();
                 if (product == null) {
+                    // Fallback: fetch and compute effective fields on the fly
                     product = productDAO.getProductById(item.getProductID());
-                    if (product == null) {
-                        continue; // Skip invalid products
-                    }
-                    item.setProduct(product);
                 }
 
-                // Check stock again
-                if (product.getStockQuantity() < item.getQuantity()) {
-                    request.setAttribute("error", "Sản phẩm " + product.getProductName() + " không đủ số lượng yêu cầu.");
+                // Re-check stock by package selection
+                double stockQty;
+                if ("PACK".equalsIgnoreCase(item.getPackageType()) && item.getPackSize() != null) {
+                    stockQty = productDAO.getPackQuantity(item.getProductID(), item.getPackSize());
+                } else {
+                    String effType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
+                    stockQty = productDAO.getQuantityByPackageType(item.getProductID(), effType);
+                }
+                if (stockQty < item.getQuantity()) {
+                    request.setAttribute("error", "Sản phẩm " + (product != null ? product.getProductName() : ("#" + item.getProductID())) + " không đủ số lượng yêu cầu. Còn lại: " + stockQty);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
                 }
 
-                totalAmount += product.getPrice() * item.getQuantity();
+                // Use effective price coming from DAO-populated cart item when available
+                double effectivePrice = (product != null && product.getPrice() != null) ? product.getPrice() : 0.0;
+                totalAmount += effectivePrice * item.getQuantity();
             }
 
             // Apply voucher if provided
@@ -1021,24 +1057,28 @@ public class BuyNowServlet extends HttpServlet {
             ProductDAO productDAO = new ProductDAO();
 
             for (CartItem item : cartItems) {
-                Product product = productDAO.getProductById(item.getProductID());
-
+                Product product = item.getProduct(); // Coming from DAO with effective unit/price
                 if (product == null) {
-                    session.setAttribute("cartError", "Có lỗi xảy ra với sản phẩm trong giỏ hàng. Vui lòng thử lại.");
-                    response.sendRedirect("cart");
-                    return;
+                    // Fallback if not set
+                    product = productDAO.getProductById(item.getProductID());
+                    item.setProduct(product);
                 }
 
-                // Update product info in cart item
-                item.setProduct(product);
+                // Check stock availability by selected package
+                double stockQty;
+                if ("PACK".equalsIgnoreCase(item.getPackageType()) && item.getPackSize() != null) {
+                    stockQty = productDAO.getPackQuantity(item.getProductID(), item.getPackSize());
+                } else {
+                    String effType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
+                    stockQty = productDAO.getQuantityByPackageType(item.getProductID(), effType);
+                }
 
-                // Check stock availability
-                if (product.getStockQuantity() < item.getQuantity()) {
+                if (stockQty < item.getQuantity()) {
                     hasStockIssues = true;
                     // Adjust quantity to available stock
-                    if (product.getStockQuantity() > 0) {
-                        item.setQuantity(product.getStockQuantity());
-                        cartItemDAO.updateCartItemQuantity(item.getCartItemID(), product.getStockQuantity());
+                    if (stockQty > 0) {
+                        item.setQuantity(stockQty);
+                        cartItemDAO.updateCartItemQuantity(item.getCartItemID(), stockQty);
                     } else {
                         // Remove item if no stock available
                         cartItemDAO.removeCartItem(item.getCartItemID());
@@ -1046,8 +1086,9 @@ public class BuyNowServlet extends HttpServlet {
                     }
                 }
 
-                // Calculate item total
-                itemTotal += product.getPrice() * item.getQuantity();
+                // Calculate item total using effective price/unit already set on product by DAO
+                double effectivePrice = (product != null && product.getPrice() != null) ? product.getPrice() : 0.0;
+                itemTotal += effectivePrice * item.getQuantity();
             }
 
             // If stock issues and cart is now empty, redirect back to cart

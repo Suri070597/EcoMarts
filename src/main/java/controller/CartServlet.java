@@ -457,16 +457,15 @@ public class CartServlet extends HttpServlet {
             // Get current quantity in cart
             double currentQuantity = cartItem.getQuantity();
 
-            // Check if stock is sufficient using inventory by package type
+            // Check stock based on the item's selected package (BOX/UNIT/PACK/KG)
             ProductDAO productDAO = new ProductDAO();
-            Product p = productDAO.getProductById(cartItem.getProductID());
-            String packageType = "UNIT";
-            try {
-                if (p != null && p.getCategory() != null && p.getCategory().getParentID() == 3) {
-                    packageType = "KG";
-                }
-            } catch (Exception ignore) {}
-            double stockQuantity = productDAO.getQuantityByPackageType(cartItem.getProductID(), packageType);
+            String packageType = cartItem.getPackageType() != null ? cartItem.getPackageType() : "UNIT";
+            Double stockQuantity;
+            if ("PACK".equalsIgnoreCase(packageType) && cartItem.getPackSize() != null) {
+                stockQuantity = productDAO.getPackQuantity(cartItem.getProductID(), cartItem.getPackSize());
+            } else {
+                stockQuantity = productDAO.getQuantityByPackageType(cartItem.getProductID(), packageType);
+            }
             System.out.println("Updating cart item: ID=" + cartItemID + ", Current quantity=" + currentQuantity
                     + ", New quantity=" + quantity + ", Stock quantity=" + stockQuantity);
 

@@ -1,6 +1,5 @@
 package dao;
 
-import db.DBContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import db.DBContext;
 import model.CartItem;
 import model.OrderDetail;
 import model.Product;
@@ -22,7 +23,10 @@ public class OrderDetailDAO extends DBContext {
                 + "    od.OrderID,\n"
                 + "    od.ProductID,\n"
                 + "    p.ProductName,\n"
-                + "    p.Unit,\n"
+                + "    p.ItemUnitName,\n"
+                + "    p.BoxUnitName,\n"
+                + "    od.PackageType,\n"
+                + "    od.PackSize,\n"
                 + "    od.Quantity,\n"
                 + "    od.UnitPrice,\n"
                 + "    od.SubTotal,\n"
@@ -42,15 +46,31 @@ public class OrderDetailDAO extends DBContext {
                         rs.getInt("OrderDetailID"),
                         rs.getInt("OrderID"),
                         rs.getInt("ProductID"),
-                        rs.getDouble("Quantity"),  // Lấy là double để hỗ trợ số lượng thập phân
+                        rs.getDouble("Quantity"),
                         rs.getDouble("UnitPrice")
                 );
 
                 // Set thêm thông tin phụ
                 orderDetail.setProductName(rs.getString("ProductName"));
-                orderDetail.setUnit(rs.getString("Unit"));  // Lưu đơn vị để hiển thị đúng
                 orderDetail.setOrderStatus(rs.getString("OrderStatus"));
-                orderDetail.setSubTotal(rs.getDouble("SubTotal")); // nếu không tính trong constructor
+                orderDetail.setSubTotal(rs.getDouble("SubTotal"));
+
+                // Derive unit label from package type
+                String packageType = rs.getString("PackageType");
+                Integer packSize = (Integer) rs.getObject("PackSize");
+                String itemUnitName = rs.getString("ItemUnitName");
+                String boxUnitName = rs.getString("BoxUnitName");
+                String unitLabel;
+                if ("KG".equalsIgnoreCase(packageType)) {
+                    unitLabel = "kg";
+                } else if ("BOX".equalsIgnoreCase(packageType)) {
+                    unitLabel = boxUnitName != null ? boxUnitName : "thùng";
+                } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    unitLabel = "Lốc" + (packSize != null ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+                } else {
+                    unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
+                }
+                orderDetail.setUnit(unitLabel);
 
                 orderDetails.add(orderDetail);
             }

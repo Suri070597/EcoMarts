@@ -243,9 +243,7 @@ CREATE TABLE [Order] (
     ShippingPhone VARCHAR(15) NOT NULL,
     PaymentMethod NVARCHAR(50) NOT NULL, -- "Cash", "VNPay"
     PaymentStatus NVARCHAR(50) DEFAULT N'Chưa thanh toán', -- "Chưa thanh toán", "Đã thanh toán"
-    OrderStatus NVARCHAR(50) DEFAULT N'Đang xử lý', -- "Đang xử lý", "Đang giao hàng", "Đã giao", "Đã hủy"
-    PackageType NVARCHAR(10) NOT NULL DEFAULT 'UNIT', -- BOX, UNIT, PACK, KG
-    PackSize INT NULL DEFAULT NULL, -- Số đơn vị trong 1 lốc (NULL cho BOX/UNIT)
+    OrderStatus NVARCHAR(50) DEFAULT N'Đang xử lý', -- "Đang xử lý", "Đang giao hàng", "Đã giao", "Đã hủy
     Notes NVARCHAR(255),
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
 );
