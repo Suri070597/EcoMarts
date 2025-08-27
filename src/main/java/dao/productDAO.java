@@ -552,6 +552,23 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
+    
+    public boolean hasProcessingOrders(int productId) {
+    String sql = "SELECT TOP 1 1 " +
+                 "FROM OrderDetail od " +
+                 "JOIN [Order] o ON od.OrderID = o.OrderID " +
+                 "WHERE od.ProductID = ? AND o.OrderStatus IN (N'Đang xử lý', N'Đã xử lý',N'Đang giao')";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, productId);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+    
     public List<Product> getRelatedProductsByParentCategory(int parentId, int excludeProductId) {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.* FROM Product p "
