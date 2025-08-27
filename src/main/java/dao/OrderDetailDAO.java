@@ -55,9 +55,13 @@ public class OrderDetailDAO extends DBContext {
                 orderDetail.setOrderStatus(rs.getString("OrderStatus"));
                 orderDetail.setSubTotal(rs.getDouble("SubTotal"));
 
-                // Derive unit label from package type
+                // Set package information
                 String packageType = rs.getString("PackageType");
                 Integer packSize = (Integer) rs.getObject("PackSize");
+                orderDetail.setPackageType(packageType);
+                orderDetail.setPackSize(packSize);
+
+                // Derive unit label from package type
                 String itemUnitName = rs.getString("ItemUnitName");
                 String boxUnitName = rs.getString("BoxUnitName");
                 String unitLabel;

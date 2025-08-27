@@ -340,13 +340,23 @@ public class CartServlet extends HttpServlet {
             // Check if stock is sufficient for total intended quantity
             if (stockQuantity < requestedTotal) {
                 if (isAjax) {
-                    String errorMessage = "Không đủ số lượng trong kho.";
+                    String errorMessage;
+                    if (existing != null && existing.getQuantity() > 0) {
+                        errorMessage = "Bạn đã có " + existing.getQuantity() + " sản phẩm trong giỏ hàng. Không thể thêm số lượng đã chọn vào giỏ hàng vì sẽ vượt quá giới hạn mua hàng của bạn.";
+                    } else {
+                        errorMessage = "Không đủ số lượng trong kho.";
+                    }
                     response.getWriter().write("{\"success\":false,\"message\":\"" + errorMessage + "\"}");
                     return;
                 }
 
-                request.getSession().setAttribute("cartError",
-                        "Không đủ số lượng trong kho.");
+                String errorMessage;
+                if (existing != null && existing.getQuantity() > 0) {
+                    errorMessage = "Bạn đã có " + existing.getQuantity() + " sản phẩm trong giỏ hàng. Không thể thêm số lượng đã chọn vào giỏ hàng vì sẽ vượt quá giới hạn mua hàng của bạn.";
+                } else {
+                    errorMessage = "Không đủ số lượng trong kho.";
+                }
+                request.getSession().setAttribute("cartError", errorMessage);
                 response.sendRedirect("ProductDetail?id=" + productID);
                 return;
             }
