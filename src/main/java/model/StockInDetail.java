@@ -4,6 +4,8 @@
  */
 package model;
 
+import java.util.Date;
+
 /**
  *
  * @author ADMIN
@@ -16,6 +18,7 @@ public class StockInDetail {
     private String productName;
     private double quantity;
     private double unitPrice;
+    private Date expiryDate;
 
     public StockInDetail() {
     }
@@ -115,6 +118,20 @@ public class StockInDetail {
      */
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    /**
+     * @return the expiryDate
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * @param expiryDate the expiryDate to set
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
 }

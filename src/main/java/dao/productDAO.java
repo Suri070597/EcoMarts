@@ -1463,12 +1463,12 @@ public class ProductDAO extends DBContext {
      * Lấy ngày hết hạn của lô nhập gần nhất
      */
     public Date getLatestExpiryDate(int productId) {
-        String sql = "SELECT TOP 1 si.ExpiryDate "
+        String sql = "SELECT TOP 1 sid.ExpiryDate "
                 + "FROM Product p "
                 + "JOIN Inventory i ON i.ProductID = p.ProductID "
                 + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID "
                 + "JOIN StockIn si ON si.StockInID = sid.StockInID "
-                + "WHERE p.ProductID = ? AND si.ExpiryDate IS NOT NULL "
+                + "WHERE p.ProductID = ? AND sid.ExpiryDate IS NOT NULL "
                 + "ORDER BY si.DateIn DESC, si.StockInID DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
