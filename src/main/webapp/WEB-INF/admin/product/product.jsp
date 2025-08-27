@@ -157,6 +157,8 @@
                             Không tìm thấy sản phẩm.
                         <% } else if (errorParam.equals("delete_failed")) { %>
                             Xóa sản phẩm thất bại.
+                        <% } else if (errorParam.equals("product_processing")) { %>
+                            Sản phẩm đang được xử lý trong đơn hàng. Không thể xóa.
                         <% } else if (errorParam.equals("invalid_id_format")) { %>
                             Định dạng ID không hợp lệ.
                         <% } else if (errorParam.equals("delete_exception")) { %>

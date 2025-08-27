@@ -388,6 +388,28 @@ public class ProductDAO extends DBContext {
         }
     }
 
+        public Date getLatestExpiryDate(int productId) {
+        String sql = "SELECT TOP 1 sid.ExpiryDate "
+                + "FROM Product p "
+                + "JOIN Inventory i ON i.ProductID = p.ProductID "
+                + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID "
+                + "JOIN StockIn si ON si.StockInID = sid.StockInID "
+                + "WHERE p.ProductID = ? AND sid.ExpiryDate IS NOT NULL "
+                + "ORDER BY si.DateIn DESC, si.StockInID DESC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDate("ExpiryDate");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
     public List<Category> getCategory() {
         List<Category> list = new ArrayList<>();
         String sql = "SELECT * FROM Category";
@@ -530,6 +552,23 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
+    
+    public boolean hasProcessingOrders(int productId) {
+    String sql = "SELECT TOP 1 1 " +
+                 "FROM OrderDetail od " +
+                 "JOIN [Order] o ON od.OrderID = o.OrderID " +
+                 "WHERE od.ProductID = ? AND o.OrderStatus IN (N'Đang xử lý', N'Đã xử lý', N'Đang giao')";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, productId);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+    
     public List<Product> getRelatedProductsByParentCategory(int parentId, int excludeProductId) {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.* FROM Product p "
@@ -1459,30 +1498,6 @@ public class ProductDAO extends DBContext {
         return result;
     }
 
-    /**
-     * Lấy ngày hết hạn của lô nhập gần nhất
-     */
-    public Date getLatestExpiryDate(int productId) {
-        String sql = "SELECT TOP 1 si.ExpiryDate "
-                + "FROM Product p "
-                + "JOIN Inventory i ON i.ProductID = p.ProductID "
-                + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID "
-                + "JOIN StockIn si ON si.StockInID = sid.StockInID "
-                + "WHERE p.ProductID = ? AND si.ExpiryDate IS NOT NULL "
-                + "ORDER BY si.DateIn DESC, si.StockInID DESC";
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, productId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getDate("ExpiryDate");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * Lấy số lượng theo package type cụ thể
