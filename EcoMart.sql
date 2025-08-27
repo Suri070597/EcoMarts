@@ -221,6 +221,8 @@ CREATE TABLE CartItem (
     AccountID INT NOT NULL,
     ProductID INT NOT NULL,
     Quantity DECIMAL(10,2) NOT NULL DEFAULT 1, -- Gộp trực tiếp kiểu và default
+    PackageType NVARCHAR(10) NOT NULL DEFAULT 'UNIT', -- BOX, UNIT, PACK, KG
+    PackSize INT NULL DEFAULT NULL, -- Số đơn vị trong 1 lốc (NULL cho BOX/UNIT)
     AddedAt DATETIME DEFAULT GETDATE(),
     [Status] NVARCHAR(50) DEFAULT 'Active', -- Active, SavedForLater, Removed
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE,
@@ -253,6 +255,8 @@ CREATE TABLE OrderDetail (
     ProductID INT NOT NULL,
     Quantity DECIMAL(10,2) NOT NULL,
     UnitPrice DECIMAL(10,2) NOT NULL,
+    PackageType NVARCHAR(10) NOT NULL DEFAULT 'UNIT', -- BOX, UNIT, PACK, KG
+    PackSize INT NULL DEFAULT NULL, -- Số đơn vị trong 1 lốc (NULL cho BOX/UNIT)
     SubTotal AS (Quantity * UnitPrice) PERSISTED,
     FOREIGN KEY (OrderID) REFERENCES [Order](OrderID) ON DELETE CASCADE,
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
