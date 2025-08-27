@@ -12,8 +12,6 @@ public class OrderDetail {
     private Product product;
     private String orderStatus;
     private String unit;  // Thêm trường đơn vị
-    private String packageType;
-    private int packSize;
 
     public OrderDetail() {
     }
@@ -108,23 +106,6 @@ public class OrderDetail {
     public String getOrderStatus() {
         return orderStatus;
     }
-
-    public String getPackageType() {
-        return packageType;
-    }
-
-    public void setPackageType(String packageType) {
-        this.packageType = packageType;
-    }
-
-    public int getPackSize() {
-        return packSize;
-    }
-
-    public void setPackSize(int packSize) {
-        this.packSize = packSize;
-    }
-    
 public OrderDetail(int productID, double quantity) {
     this.productID = productID;
     this.quantity = quantity;
