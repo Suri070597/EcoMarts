@@ -32,7 +32,40 @@ public class SeasonalServlet extends HttpServlet {
         
         PromotionDAO promoDao = new PromotionDAO();
         List<Product> flash = promoDao.listSeasonalFromMapping();
-        request.setAttribute("flashSaleProducts", flash);
+        // Hydrate đầy đủ thông tin sản phẩm (stockQuantity, imageURL, unit names...)
+        List<Product> hydrated = new java.util.ArrayList<>();
+        if (flash != null) {
+            for (Product sp : flash) {
+                Product full = dao.getProductById(sp.getProductID());
+                if (full != null) hydrated.add(full);
+            }
+        }
+        request.setAttribute("flashSaleProducts", hydrated);
+
+        // Xây map hiển thị giá tương tự homepage (ưu tiên giá đơn vị + tên đơn vị)
+        try {
+            java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+            symbols.setGroupingSeparator('.');
+            java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
+            java.util.Map<Integer, String> priceDisplayMap = new java.util.HashMap<>();
+
+            if (hydrated != null) {
+                for (Product p : hydrated) {
+                    Double priceUnit = p.getPriceUnit();
+                    String itemUnitName = p.getItemUnitName();
+                    if (priceUnit != null && itemUnitName != null && !itemUnitName.trim().isEmpty()) {
+                        priceDisplayMap.put(p.getProductID(), formatter.format(priceUnit) + " đ / " + itemUnitName);
+                    } else if (p.getPrice() != null) {
+                        priceDisplayMap.put(p.getProductID(), formatter.format(p.getPrice()) + " đ / thùng");
+                    } else {
+                        priceDisplayMap.put(p.getProductID(), "Chưa có giá");
+                    }
+                }
+            }
+
+            request.setAttribute("priceDisplayMap", priceDisplayMap);
+        } catch (Exception ignore) {
+        }
 
         // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
         try {
@@ -41,8 +74,9 @@ public class SeasonalServlet extends HttpServlet {
             java.util.Map<Integer, Integer> reviewCountMap = new java.util.HashMap<>();
             java.util.Map<Integer, Double> unitPriceMap = new java.util.HashMap<>();
 
+            // Sử dụng attribute đúng đã set ở trên
             List<List<Product>> allProductLists = java.util.Arrays.asList(
-                    (List<Product>) request.getAttribute("flash"));
+                    (List<Product>) request.getAttribute("flashSaleProducts"));
 
             for (List<Product> plist : allProductLists) {
                 if (plist != null) {

@@ -513,17 +513,16 @@ public class PromotionDAO extends DBContext {
     public List<Product> listAppliedProducts(int promotionId) {
         Scope s = getScope(promotionId);
         if (s == null) {
-            return List.of();
+            return new java.util.ArrayList<>();
         }
 
         try {
             // CASE A: Global → tất cả sản phẩm
             if (s.applyScope == 0) {
-                final String sqlAll = """
-                    SELECT ProductID, ProductName, Price, CategoryID
-                    FROM Product
-                    ORDER BY ProductID
-                """;
+                final String sqlAll =
+                        "SELECT ProductID, ProductName, PriceBox AS Price, CategoryID " +
+                        "FROM Product " +
+                        "ORDER BY ProductID";
                 try (PreparedStatement ps = conn.prepareStatement(sqlAll); ResultSet rs = ps.executeQuery()) {
                     return mapProducts(rs);
                 }
@@ -531,40 +530,38 @@ public class PromotionDAO extends DBContext {
 
             // CASE B: Scope=category nhưng ParentID = NULL → tất cả root + con cháu
             if (s.parentId == null) {
-                final String sqlRoots = """
-                    ;WITH tree AS (
-                        SELECT CategoryID
-                        FROM Category
-                        WHERE ParentID IS NULL
-                        UNION ALL
-                        SELECT c.CategoryID
-                        FROM Category c
-                        JOIN tree t ON c.ParentID = t.CategoryID
-                    )
-                    SELECT p.ProductID, p.ProductName, p.Price, p.CategoryID
-                    FROM Product p
-                    JOIN tree t ON p.CategoryID = t.CategoryID
-                    ORDER BY p.ProductID
-                """;
+                final String sqlRoots =
+                        ";WITH tree AS (" +
+                        "    SELECT CategoryID " +
+                        "    FROM Category " +
+                        "    WHERE ParentID IS NULL " +
+                        "    UNION ALL " +
+                        "    SELECT c.CategoryID " +
+                        "    FROM Category c " +
+                        "    JOIN tree t ON c.ParentID = t.CategoryID " +
+                        ") " +
+                        "SELECT p.ProductID, p.ProductName, p.PriceBox AS Price, p.CategoryID " +
+                        "FROM Product p " +
+                        "JOIN tree t ON p.CategoryID = t.CategoryID " +
+                        "ORDER BY p.ProductID";
                 try (PreparedStatement ps = conn.prepareStatement(sqlRoots); ResultSet rs = ps.executeQuery()) {
                     return mapProducts(rs);
                 }
             }
 
             // CASE C: Scope=category với ParentID cụ thể
-            final String sqlTree = """
-                ;WITH tree AS (
-                    SELECT CategoryID FROM Category WHERE CategoryID = ?
-                    UNION ALL
-                    SELECT c.CategoryID
-                    FROM Category c
-                    JOIN tree t ON c.ParentID = t.CategoryID
-                )
-                SELECT p.ProductID, p.ProductName, p.Price, p.CategoryID
-                FROM Product p
-                JOIN tree t ON p.CategoryID = t.CategoryID
-                ORDER BY p.ProductID
-            """;
+            final String sqlTree =
+                    ";WITH tree AS (" +
+                    "    SELECT CategoryID FROM Category WHERE CategoryID = ? " +
+                    "    UNION ALL " +
+                    "    SELECT c.CategoryID " +
+                    "    FROM Category c " +
+                    "    JOIN tree t ON c.ParentID = t.CategoryID " +
+                    ") " +
+                    "SELECT p.ProductID, p.ProductName, p.PriceBox AS Price, p.CategoryID " +
+                    "FROM Product p " +
+                    "JOIN tree t ON p.CategoryID = t.CategoryID " +
+                    "ORDER BY p.ProductID";
             try (PreparedStatement ps = conn.prepareStatement(sqlTree)) {
                 ps.setInt(1, s.parentId);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -633,14 +630,13 @@ public class PromotionDAO extends DBContext {
 
     // ====== LẤY DANH SÁCH ID PROMOTION ĐANG HIỆU LỰC THEO TYPE ======
     public List<Integer> listActivePromotionIdsByType(int promoType) {
-        final String sql = """
-            SELECT p.PromotionID
-            FROM Promotion p
-            WHERE p.IsActive = 1
-              AND p.StartDate <= GETDATE()
-              AND p.EndDate   >= GETDATE()
-              AND p.PromoType = ?
-        """;
+        final String sql =
+                "SELECT p.PromotionID " +
+                "FROM Promotion p " +
+                "WHERE p.IsActive = 1 " +
+                "  AND p.StartDate <= GETDATE() " +
+                "  AND p.EndDate   >= GETDATE() " +
+                "  AND p.PromoType = ?";
         List<Integer> ids = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, promoType);
@@ -710,17 +706,16 @@ public class PromotionDAO extends DBContext {
 
     // ====== LẤY SẢN PHẨM THEO TYPE TỪ BẢNG MAPPING (CÁCH B) ======
     public List<Product> listProductsByTypeFromMapping(int promoType) {
-        final String sql = """
-            SELECT DISTINCT p.ProductID, p.ProductName, p.Price, p.CategoryID
-            FROM Product p
-            JOIN Product_Promotion pp ON p.ProductID = pp.ProductID
-            JOIN Promotion pr         ON pr.PromotionID = pp.PromotionID
-            WHERE pr.IsActive = 1
-              AND pr.StartDate <= GETDATE()
-              AND pr.EndDate   >= GETDATE()
-              AND pr.PromoType = ?
-            ORDER BY p.ProductID
-        """;
+        final String sql =
+                "SELECT DISTINCT p.ProductID, p.ProductName, p.PriceBox AS Price, p.CategoryID " +
+                "FROM Product p " +
+                "JOIN Product_Promotion pp ON p.ProductID = pp.ProductID " +
+                "JOIN Promotion pr         ON pr.PromotionID = pp.PromotionID " +
+                "WHERE pr.IsActive = 1 " +
+                "  AND pr.StartDate <= GETDATE() " +
+                "  AND pr.EndDate   >= GETDATE() " +
+                "  AND pr.PromoType = ? " +
+                "ORDER BY p.ProductID";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, promoType);
             try (ResultSet rs = ps.executeQuery()) {
