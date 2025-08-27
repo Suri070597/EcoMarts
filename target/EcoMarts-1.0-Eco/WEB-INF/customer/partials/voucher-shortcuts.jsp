@@ -314,6 +314,42 @@
 
     <!-- Load More JavaScript -->
     <script src="${pageContext.request.contextPath}/assets/js/loadMore.js?version=<%= System.currentTimeMillis()%>"></script>
+	<!-- SweetAlert2 for voucher claim notifications -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script>
+		(function () {
+			var params = new URLSearchParams(window.location.search);
+			var msg = params.get('msg');
+			var err = params.get('err');
+
+			if (msg === 'saved') {
+				Swal.fire({
+					icon: 'success',
+					title: 'Thành công',
+					text: 'Nhận voucher thành công'
+				});
+			} else if (err || msg === 'duplicate') {
+				var text = 'Nhận voucher thất bại';
+				if (msg === 'duplicate') text = 'Bạn đã nhận voucher này rồi';
+				if (err === 'notfound') text = 'Không tìm thấy voucher';
+				if (err === 'expired') text = 'Voucher đã hết hạn hoặc chưa hiệu lực';
+				if (err === 'limit') text = 'Voucher đã hết lượt nhận';
+				Swal.fire({
+					icon: 'error',
+					title: 'Thất bại',
+					text: text
+				});
+			}
+
+			if (msg || err) {
+				params.delete('msg');
+				params.delete('err');
+				var newQuery = params.toString();
+				var newUrl = window.location.pathname + (newQuery ? ('?' + newQuery) : '');
+				window.history.replaceState({}, '', newUrl);
+			}
+		})();
+	</script>
 </body>
 
 </html>
