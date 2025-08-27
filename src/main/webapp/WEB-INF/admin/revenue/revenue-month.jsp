@@ -127,7 +127,6 @@
                         <thead>
                             <tr>
                                 <th><i class="fas fa-box"></i> Sản phẩm</th>
-                                <th><i class="fas fa-tag"></i> Đơn vị</th>
                                 <th><i class="fas fa-sort-amount-up-alt"></i> Số lượng đã bán</th>
                                 <th><i class="fas fa-money-bill-wave text-success"></i> Doanh thu</th>
                             </tr>
@@ -135,43 +134,11 @@
                         </thead>
                         <tbody>
                             <c:forEach items="${productList}" var="item">
-                                <c:if test="${item.boxQuantity > 0}">
-                                    <tr>
-                                        <td>${item.productName}</td>
-                                        <td>Thùng</td>
-                                        <td class="number">${item.boxQuantity}</td>
-                                        <td class="number"><fmt:formatNumber value="${item.boxRevenue}" type="currency"/></td>
-                                    </tr>
-                                </c:if>
-                                <c:if test="${item.packQuantity > 0}">
-                                    <tr>
-                                        <td>${item.productName}</td>
-                                        <td>Lốc</td>
-                                        <td class="number">${item.packQuantity}</td>
-                                        <td class="number"><fmt:formatNumber value="${item.packRevenue}" type="currency"/></td>
-                                    </tr>
-                                </c:if>
-                                <c:if test="${item.unitQuantity > 0}">
-                                    <tr>
-                                        <td>${item.productName}</td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${not empty item.itemUnitName}">${item.itemUnitName}</c:when>
-                                                <c:otherwise>Cái</c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td class="number">${item.unitQuantity}</td>
-                                        <td class="number"><fmt:formatNumber value="${item.unitRevenue}" type="currency"/></td>
-                                    </tr>
-                                </c:if>
-                                <c:if test="${item.kgQuantity > 0}">
-                                    <tr>
-                                        <td>${item.productName}</td>
-                                        <td>Kg</td>
-                                        <td class="number">${item.kgQuantity}</td>
-                                        <td class="number"><fmt:formatNumber value="${item.kgRevenue}" type="currency"/></td>
-                                    </tr>
-                                </c:if>
+                                <tr>
+                                    <td>${item.productName}</td>
+                                    <td class="number">${item.totalQuantity}</td>
+                                    <td class="number"><fmt:formatNumber value="${item.totalRevenue}" type="currency"/></td>
+                                </tr>
                             </c:forEach>
                         </tbody>
                     </table>
