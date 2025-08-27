@@ -1,26 +1,20 @@
 package dao;
 
 import java.sql.PreparedStatement;
-
 import java.sql.ResultSet;
-
+import java.sql.SQLException;
 import java.sql.Timestamp;
-
 import java.text.ParseException;
-
 import java.util.ArrayList;
-
-import java.util.Date;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
 import db.DBContext;
-import java.sql.SQLException;
-import java.util.Collections;
 import model.Category;
-import model.InventoryTransaction;
-import model.Product;
 import model.Manufacturer;
+import model.Product;
 
 public class ProductDAO extends DBContext {
 
@@ -1339,9 +1333,13 @@ public class ProductDAO extends DBContext {
     public Map<String, Object> getProductInventory(int productId) {
         Map<String, Object> inventory = new HashMap<>();
         List<Map<String, Object>> packList = new ArrayList<>();
-        String sql = "SELECT PackageType, Quantity, UnitPrice, PackSize FROM Inventory WHERE ProductID = ?";
+        
+        // Lấy thông tin inventory
+        String inventorySql = "SELECT PackageType, Quantity, PackSize FROM Inventory WHERE ProductID = ?";
+        // Lấy thông tin giá từ Product
+        String productSql = "SELECT PriceBox, PriceUnit, PricePack, ItemUnitName, BoxUnitName FROM Product WHERE ProductID = ?";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(inventorySql)) {
             ps.setInt(1, productId);
             ResultSet rs = ps.executeQuery();
 
@@ -1349,18 +1347,12 @@ public class ProductDAO extends DBContext {
             while (rs.next()) {
                 String packageType = rs.getString("PackageType");
                 double qty = rs.getDouble("Quantity");
-                double price = rs.getDouble("UnitPrice");
-                int packSize = 0;
-                try {
-                    packSize = rs.getInt("PackSize");
-                } catch (Exception ignore) {
-                }
+                int packSize = rs.getInt("PackSize");
 
                 if ("PACK".equalsIgnoreCase(packageType)) {
                     Map<String, Object> p = new HashMap<>();
                     p.put("packSize", packSize);
                     p.put("quantity", qty);
-                    p.put("price", price);
                     packList.add(p);
                     totalPackQty += qty;
                 } else {
@@ -1369,12 +1361,28 @@ public class ProductDAO extends DBContext {
                         effectiveType = "UNIT"; // Chuẩn hóa key để phía gọi không cần đổi
                     }
                     inventory.put(effectiveType + "_Quantity", qty);
-                    inventory.put(effectiveType + "_Price", price);
                 }
             }
+            
             if (!packList.isEmpty()) {
                 inventory.put("PACK_LIST", packList);
                 inventory.put("PACK_Quantity", totalPackQty);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Lấy thông tin giá từ Product
+        try (PreparedStatement ps = conn.prepareStatement(productSql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                inventory.put("BOX_Price", rs.getObject("PriceBox", Double.class));
+                inventory.put("UNIT_Price", rs.getObject("PriceUnit", Double.class));
+                inventory.put("PACK_Price", rs.getObject("PricePack", Double.class));
+                inventory.put("ItemUnitName", rs.getString("ItemUnitName"));
+                inventory.put("BoxUnitName", rs.getString("BoxUnitName"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1614,6 +1622,28 @@ public class ProductDAO extends DBContext {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
                 ps.setString(2, packageType);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        qty = rs.getDouble("Q");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return qty;
+    }
+
+    /**
+     * Get PACK quantity filtered by packSize
+     */
+    public double getPackQuantity(int productId, int packSize) {
+        double qty = 0.0;
+        try {
+            String sql = "SELECT COALESCE(Quantity, 0) AS Q FROM Inventory WHERE ProductID = ? AND PackageType = 'PACK' AND PackSize = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.setInt(2, packSize);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         qty = rs.getDouble("Q");

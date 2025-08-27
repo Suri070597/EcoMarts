@@ -65,7 +65,7 @@ public class CartItemDAO extends DBContext {
     public List<CartItem> getCartItems(int accountID, String status) {
         List<CartItem> cartItems = new ArrayList<>();
 
-        String sql = "SELECT ci.*, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.Status as ProductStatus "
+        String sql = "SELECT ci.*, p.ProductName, p.ImageURL, p.Status as ProductStatus, p.PriceBox, p.PriceUnit, p.PricePack, p.ItemUnitName, p.BoxUnitName "
                 +
                 "FROM CartItem ci " +
                 "JOIN Product p ON ci.ProductID = p.ProductID " +
@@ -84,20 +84,61 @@ public class CartItemDAO extends DBContext {
                 item.setAccountID(rs.getInt("AccountID"));
                 item.setProductID(rs.getInt("ProductID"));
                 item.setQuantity(rs.getDouble("Quantity"));
+                try { item.setPackageType(rs.getString("PackageType")); } catch (Exception ignore) {}
+                try { item.setPackSize((Integer) rs.getObject("PackSize")); } catch (Exception ignore) {}
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
-                // Create product object with essential information
+                // Build product for cart display using unit price/unit label consistent with home
+                int pid = rs.getInt("ProductID");
+                ProductDAO pdao = new ProductDAO();
+                Product full = pdao.getProductById(pid);
                 Product product = new Product();
-                product.setProductID(rs.getInt("ProductID"));
+                product.setProductID(pid);
                 product.setProductName(rs.getString("ProductName"));
-                product.setPrice(rs.getDouble("Price"));
                 product.setImageURL(rs.getString("ImageURL"));
-                product.setUnit(rs.getString("Unit"));
-                product.setStockQuantity(rs.getDouble("StockQuantity"));
                 product.setStatus(rs.getString("ProductStatus"));
 
-                // Set the product to the cart item
+                // Determine package type/pack size from cart item
+                String packageType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
+                Integer packSize = item.getPackSize();
+
+                // Stock by selected package
+                double stockQty;
+                if ("PACK".equalsIgnoreCase(packageType) && packSize != null) {
+                    stockQty = pdao.getPackQuantity(pid, packSize);
+                } else {
+                    stockQty = pdao.getQuantityByPackageType(pid, packageType);
+                }
+                product.setStockQuantity(stockQty);
+
+                // Price and unit label by selected package
+                Double priceBox = rs.getObject("PriceBox", Double.class);
+                Double priceUnit = rs.getObject("PriceUnit", Double.class);
+                Double pricePack = rs.getObject("PricePack", Double.class);
+                String itemUnitName = rs.getString("ItemUnitName");
+                String boxUnitName = rs.getString("BoxUnitName");
+                Double effectivePrice = 0.0;
+                String unitLabel = itemUnitName;
+                if ("KG".equalsIgnoreCase(packageType) || "UNIT".equalsIgnoreCase(packageType)) {
+                    effectivePrice = priceUnit != null ? priceUnit : 0.0;
+                    unitLabel = ("KG".equalsIgnoreCase(packageType)) ? "kg" : (itemUnitName != null ? itemUnitName : "đơn vị");
+                } else if ("BOX".equalsIgnoreCase(packageType)) {
+                    effectivePrice = priceBox != null ? priceBox : 0.0;
+                    unitLabel = boxUnitName != null ? boxUnitName : "thùng";
+                } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    if (pricePack != null) {
+                        effectivePrice = pricePack;
+                    } else if (priceUnit != null && packSize != null) {
+                        effectivePrice = priceUnit * packSize;
+                    } else {
+                        effectivePrice = 0.0;
+                    }
+                    unitLabel = "Lốc" + (packSize != null ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+                }
+                product.setPrice(effectivePrice);
+                product.setUnit(unitLabel);
+
                 item.setProduct(product);
 
                 cartItems.add(item);
@@ -118,7 +159,7 @@ public class CartItemDAO extends DBContext {
      * @return CartItem object or null if not found
      */
     public CartItem getCartItemById(int cartItemID) {
-        String sql = "SELECT ci.*, p.ProductName, p.Price, p.ImageURL, p.Unit, p.StockQuantity, p.Status as ProductStatus "
+        String sql = "SELECT ci.*, p.ProductName, p.ImageURL, p.Status as ProductStatus, p.PriceBox, p.PriceUnit, p.PricePack, p.ItemUnitName, p.BoxUnitName "
                 +
                 "FROM CartItem ci " +
                 "JOIN Product p ON ci.ProductID = p.ProductID " +
@@ -135,20 +176,56 @@ public class CartItemDAO extends DBContext {
                 item.setAccountID(rs.getInt("AccountID"));
                 item.setProductID(rs.getInt("ProductID"));
                 item.setQuantity(rs.getDouble("Quantity"));
+                try { item.setPackageType(rs.getString("PackageType")); } catch (Exception ignore) {}
+                try { item.setPackSize((Integer) rs.getObject("PackSize")); } catch (Exception ignore) {}
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
-                // Create product object with essential information
+                int pid = rs.getInt("ProductID");
+                ProductDAO pdao = new ProductDAO();
+                Product full = pdao.getProductById(pid);
                 Product product = new Product();
-                product.setProductID(rs.getInt("ProductID"));
+                product.setProductID(pid);
                 product.setProductName(rs.getString("ProductName"));
-                product.setPrice(rs.getDouble("Price"));
                 product.setImageURL(rs.getString("ImageURL"));
-                product.setUnit(rs.getString("Unit"));
-                product.setStockQuantity(rs.getDouble("StockQuantity"));
                 product.setStatus(rs.getString("ProductStatus"));
 
-                // Set the product to the cart item
+                String packageType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
+                Integer packSize = item.getPackSize();
+                double stockQty;
+                if ("PACK".equalsIgnoreCase(packageType) && packSize != null) {
+                    stockQty = pdao.getPackQuantity(pid, packSize);
+                } else {
+                    stockQty = pdao.getQuantityByPackageType(pid, packageType);
+                }
+                product.setStockQuantity(stockQty);
+
+                Double priceBox = rs.getObject("PriceBox", Double.class);
+                Double priceUnit = rs.getObject("PriceUnit", Double.class);
+                Double pricePack = rs.getObject("PricePack", Double.class);
+                String itemUnitName = rs.getString("ItemUnitName");
+                String boxUnitName = rs.getString("BoxUnitName");
+                Double effectivePrice = 0.0;
+                String unitLabel = itemUnitName;
+                if ("KG".equalsIgnoreCase(packageType) || "UNIT".equalsIgnoreCase(packageType)) {
+                    effectivePrice = priceUnit != null ? priceUnit : 0.0;
+                    unitLabel = ("KG".equalsIgnoreCase(packageType)) ? "kg" : (itemUnitName != null ? itemUnitName : "đơn vị");
+                } else if ("BOX".equalsIgnoreCase(packageType)) {
+                    effectivePrice = priceBox != null ? priceBox : 0.0;
+                    unitLabel = boxUnitName != null ? boxUnitName : "thùng";
+                } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    if (pricePack != null) {
+                        effectivePrice = pricePack;
+                    } else if (priceUnit != null && packSize != null) {
+                        effectivePrice = priceUnit * packSize;
+                    } else {
+                        effectivePrice = 0.0;
+                    }
+                    unitLabel = "Lốc" + (packSize != null ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+                }
+                product.setPrice(effectivePrice);
+                product.setUnit(unitLabel);
+
                 item.setProduct(product);
 
                 rs.close();
@@ -199,6 +276,53 @@ public class CartItemDAO extends DBContext {
             ps.close();
         } catch (SQLException e) {
             System.err.println("Error getting cart item by product ID: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Get a cart item by product and packaging for a specific user and status
+     * 
+     * @param accountID The ID of the account
+     * @param productID The ID of the product
+     * @param status    The status to check for (Active, SavedForLater, Removed)
+     * @param packageType The package type (BOX | UNIT | PACK | KG)
+     * @param packSize  The pack size (nullable, used only when packageType = PACK)
+     * @return CartItem object or null if not found
+     */
+    public CartItem getCartItemByProductAndPackage(int accountID, int productID, String status, String packageType, Integer packSize) {
+        String sql = "SELECT TOP 1 * FROM CartItem WHERE AccountID = ? AND ProductID = ? AND Status = ? AND PackageType = ? AND (PackSize = ? OR (PackSize IS NULL AND ? IS NULL))";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, accountID);
+            ps.setInt(2, productID);
+            ps.setString(3, status);
+            ps.setString(4, packageType);
+            if (packSize != null) { ps.setInt(5, packSize); } else { ps.setNull(5, java.sql.Types.INTEGER); }
+            if (packSize != null) { ps.setInt(6, packSize); } else { ps.setNull(6, java.sql.Types.INTEGER); }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                CartItem item = new CartItem();
+                item.setCartItemID(rs.getInt("CartItemID"));
+                item.setAccountID(rs.getInt("AccountID"));
+                item.setProductID(rs.getInt("ProductID"));
+                item.setQuantity(rs.getDouble("Quantity"));
+                item.setAddedAt(rs.getTimestamp("AddedAt"));
+                item.setStatus(rs.getString("Status"));
+                try { item.setPackageType(rs.getString("PackageType")); } catch (Exception ignore) {}
+                try { item.setPackSize((Integer) rs.getObject("PackSize")); } catch (Exception ignore) {}
+
+                rs.close();
+                ps.close();
+                return item;
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.err.println("Error getting cart item by product and package: " + e.getMessage());
         }
 
         return null;
@@ -354,15 +478,18 @@ public class CartItemDAO extends DBContext {
         return false;
     }
     
-    public void upsertCartItem(int accountID, int productID, double quantity) {
-        String select = "SELECT Quantity FROM CartItem WHERE AccountID = ? AND ProductID = ? AND Status = N'Active'";
-        String update = "UPDATE CartItem SET Quantity = Quantity + ? WHERE AccountID = ? AND ProductID = ? AND Status = N'Active'";
-        String insert = "INSERT INTO CartItem (AccountID, ProductID, Quantity, AddedAt, Status) VALUES (?, ?, ?, GETDATE(), N'Active')";
+    public void upsertCartItem(int accountID, int productID, double quantity, String packageType, Integer packSize) {
+        String select = "SELECT Quantity FROM CartItem WHERE AccountID = ? AND ProductID = ? AND Status = N'Active' AND PackageType = ? AND (PackSize = ? OR (PackSize IS NULL AND ? IS NULL))";
+        String update = "UPDATE CartItem SET Quantity = Quantity + ? WHERE AccountID = ? AND ProductID = ? AND Status = N'Active' AND PackageType = ? AND (PackSize = ? OR (PackSize IS NULL AND ? IS NULL))";
+        String insert = "INSERT INTO CartItem (AccountID, ProductID, Quantity, PackageType, PackSize, AddedAt, Status) VALUES (?, ?, ?, ?, ?, GETDATE(), N'Active')";
 
         try {
             PreparedStatement ps = conn.prepareStatement(select);
             ps.setInt(1, accountID);
             ps.setInt(2, productID);
+            ps.setString(3, packageType);
+            if (packSize != null) { ps.setInt(4, packSize); } else { ps.setNull(4, java.sql.Types.INTEGER); }
+            if (packSize != null) { ps.setInt(5, packSize); } else { ps.setNull(5, java.sql.Types.INTEGER); }
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
@@ -371,6 +498,9 @@ public class CartItemDAO extends DBContext {
                 ups.setDouble(1, quantity);
                 ups.setInt(2, accountID);
                 ups.setInt(3, productID);
+                ups.setString(4, packageType);
+                if (packSize != null) { ups.setInt(5, packSize); } else { ups.setNull(5, java.sql.Types.INTEGER); }
+                if (packSize != null) { ups.setInt(6, packSize); } else { ups.setNull(6, java.sql.Types.INTEGER); }
                 ups.executeUpdate();
                 ups.close();
             } else {
@@ -379,6 +509,8 @@ public class CartItemDAO extends DBContext {
                 ins.setInt(1, accountID);
                 ins.setInt(2, productID);
                 ins.setDouble(3, quantity);
+                ins.setString(4, packageType);
+                if (packSize != null) { ins.setInt(5, packSize); } else { ins.setNull(5, java.sql.Types.INTEGER); }
                 ins.executeUpdate();
                 ins.close();
             }

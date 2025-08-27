@@ -295,34 +295,65 @@ public class CartServlet extends HttpServlet {
 
             int productID = Integer.parseInt(request.getParameter("productID"));
             double quantity = Double.parseDouble(request.getParameter("quantity"));
+            String packageTypeReq = request.getParameter("packageType"); // UNIT | BOX | PACK | KG
+            String packSizeStr = request.getParameter("packSize");
+            Integer packSize = null;
+            if (packSizeStr != null && !packSizeStr.trim().isEmpty()) {
+                try { packSize = Integer.parseInt(packSizeStr); } catch (Exception ignore) {}
+            }
 
             // Validate quantity
             if (quantity <= 0) {
                 quantity = 1;
             }
 
-            // Get the actual stock quantity
+            // Get the actual stock quantity by package type (KG for fruits, UNIT otherwise)
             ProductDAO productDAO = new ProductDAO();
-            double stockQuantity = productDAO.getStockQuantityById(productID);
+            Product product = productDAO.getProductById(productID);
+            String packageType = "UNIT";
+            try {
+                if (product != null && product.getCategory() != null) {
+                    int parentId = product.getCategory().getParentID();
+                    if (parentId == 3) {
+                        packageType = "KG";
+                    }
+                }
+            } catch (Exception ignore) {}
+            // Override by explicit request when not fruit
+            if (packageTypeReq != null && !"KG".equals(packageType)) {
+                packageType = packageTypeReq;
+            }
+            // Normalize pack selection for subsequent checks
+            Integer effectivePackSize = ("PACK".equalsIgnoreCase(packageType) && packSize != null) ? packSize : null;
 
-            // Check if stock is sufficient
-            if (stockQuantity < quantity) {
+            double stockQuantity;
+            if ("PACK".equalsIgnoreCase(packageType) && packSize != null) {
+                stockQuantity = productDAO.getPackQuantity(productID, packSize);
+            } else {
+                stockQuantity = productDAO.getQuantityByPackageType(productID, packageType);
+            }
+
+            // Check existing quantity in cart with same package selection
+            CartItem existing = cartItemDAO.getCartItemByProductAndPackage(account.getAccountID(), productID, "Active", packageType, effectivePackSize);
+            double requestedTotal = quantity + (existing != null ? existing.getQuantity() : 0.0);
+
+            // Check if stock is sufficient for total intended quantity
+            if (stockQuantity < requestedTotal) {
                 if (isAjax) {
-                    String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity
-                            + " sản phẩm.";
+                    String errorMessage = "Không đủ số lượng trong kho.";
                     response.getWriter().write("{\"success\":false,\"message\":\"" + errorMessage + "\"}");
                     return;
                 }
 
                 request.getSession().setAttribute("cartError",
-                        "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.");
+                        "Không đủ số lượng trong kho.");
                 response.sendRedirect("ProductDetail?id=" + productID);
                 return;
             }
 
-            // Add to cart
-            // upsert behavior: increment if exists, else insert
-            cartItemDAO.upsertCartItem(account.getAccountID(), productID, quantity);
+            // Add to cart with selected package type and pack size
+            // upsert behavior: increment if exists (same packageType+packSize), else insert
+            cartItemDAO.upsertCartItem(account.getAccountID(), productID, quantity, packageType, effectivePackSize);
             boolean success = true;
 
             if (isAjax) {
@@ -426,9 +457,16 @@ public class CartServlet extends HttpServlet {
             // Get current quantity in cart
             double currentQuantity = cartItem.getQuantity();
 
-            // Check if stock is sufficient using ProductDAO directly
+            // Check if stock is sufficient using inventory by package type
             ProductDAO productDAO = new ProductDAO();
-            double stockQuantity = productDAO.getStockQuantityById(cartItem.getProductID());
+            Product p = productDAO.getProductById(cartItem.getProductID());
+            String packageType = "UNIT";
+            try {
+                if (p != null && p.getCategory() != null && p.getCategory().getParentID() == 3) {
+                    packageType = "KG";
+                }
+            } catch (Exception ignore) {}
+            double stockQuantity = productDAO.getQuantityByPackageType(cartItem.getProductID(), packageType);
             System.out.println("Updating cart item: ID=" + cartItemID + ", Current quantity=" + currentQuantity
                     + ", New quantity=" + quantity + ", Stock quantity=" + stockQuantity);
 

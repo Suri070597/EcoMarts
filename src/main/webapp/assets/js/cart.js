@@ -57,6 +57,38 @@
         }
 
         /**
+         * Tính lại tổng theo các item đang được tick trong cart.jsp
+         */
+        updateSelectedTotals() {
+            try {
+                const itemCheckboxes = document.querySelectorAll('.item-select');
+                if (!itemCheckboxes || itemCheckboxes.length === 0) return;
+
+                const selected = Array.from(itemCheckboxes).filter(cb => cb.checked);
+                let total = 0;
+                selected.forEach(cb => {
+                    const row = cb.closest('.cart-item');
+                    const itemTotalEl = row && row.querySelector('.item-total');
+                    if (itemTotalEl) {
+                        const priceText = itemTotalEl.textContent.trim();
+                        const price = parseFloat(priceText.replace(/[^0-9]/g, ''));
+                        if (!isNaN(price)) total += price;
+                    }
+                });
+
+                const formattedTotal = new Intl.NumberFormat('vi-VN').format(total);
+                const cartTotalEl = document.querySelector('.cart-total');
+                if (cartTotalEl) cartTotalEl.textContent = formattedTotal + ' ₫';
+                const subtotalEl = document.getElementById('cart-subtotal-amount');
+                if (subtotalEl) subtotalEl.textContent = formattedTotal + ' ₫';
+                const countSpan = document.getElementById('cart-item-count');
+                if (countSpan) countSpan.textContent = `Tạm tính (${selected.length} sản phẩm)`;
+            } catch (e) {
+                console.error('Lỗi khi tính lại tổng đã chọn:', e);
+            }
+        }
+
+        /**
          * Định dạng giá tiền một cách an toàn
          * @param {number|string} price - Giá tiền cần định dạng
          * @param {string} currency - Ký hiệu tiền tệ (mặc định: đ)
@@ -773,30 +805,8 @@
                             itemTotalElement.textContent = this.formatPrice(data.itemTotal);
                         }
 
-                        // Cập nhật tổng giá trị giỏ hàng
-                        const cartTotalElement = document.querySelector('.cart-total');
-                        if (cartTotalElement && data.cartTotal !== undefined) {
-                            cartTotalElement.textContent = this.formatPrice(data.cartTotal);
-                        }
-
-                        // Cập nhật tạm tính (subtotal) và số lượng sản phẩm trong phần tóm tắt đơn hàng
-                        if (data.itemCount !== undefined) {
-                            // Cập nhật span hiển thị số lượng sản phẩm bằng ID
-                            const countSpan = document.getElementById('cart-item-count');
-                            if (countSpan) {
-                                countSpan.textContent = `Tạm tính (${data.itemCount} sản phẩm)`;
-                                console.log('Đã cập nhật số lượng sản phẩm:', data.itemCount);
-                            }
-
-                            // Cập nhật giá tạm tính bằng ID
-                            const priceSpan = document.getElementById('cart-subtotal-amount');
-                            if (priceSpan && data.cartTotal !== undefined) {
-                                priceSpan.textContent = this.formatPrice(data.cartTotal);
-                                console.log('Đã cập nhật giá tạm tính:', this.formatPrice(data.cartTotal));
-                            } else {
-                                console.log('Không tìm thấy phần tử hiển thị giá tạm tính hoặc không có dữ liệu cartTotal');
-                            }
-                        }
+                        // Sau khi cập nhật giá trị item, tính lại tổng dựa trên các item đang được tick
+                        this.updateSelectedTotals();
 
                         // Cập nhật số lượng sản phẩm trong badge
                         if (data.itemCount !== undefined) {
@@ -901,30 +911,8 @@
                             cartItemRow.remove();
                         }
 
-                        // Cập nhật tổng giá trị giỏ hàng
-                        const cartTotalElement = document.querySelector('.cart-total');
-                        if (cartTotalElement && data.cartTotal !== undefined) {
-                            cartTotalElement.textContent = this.formatPrice(data.cartTotal);
-                        }
-
-                        // Cập nhật tạm tính (subtotal) và số lượng sản phẩm trong phần tóm tắt đơn hàng
-                        if (data.itemCount !== undefined) {
-                            // Cập nhật span hiển thị số lượng sản phẩm bằng ID
-                            const countSpan = document.getElementById('cart-item-count');
-                            if (countSpan) {
-                                countSpan.textContent = `Tạm tính (${data.itemCount} sản phẩm)`;
-                                console.log('Đã cập nhật số lượng sản phẩm sau khi xóa:', data.itemCount);
-                            }
-
-                            // Cập nhật giá tạm tính bằng ID
-                            const priceSpan = document.getElementById('cart-subtotal-amount');
-                            if (priceSpan && data.cartTotal !== undefined) {
-                                priceSpan.textContent = this.formatPrice(data.cartTotal);
-                                console.log('Đã cập nhật giá tạm tính sau khi xóa:', this.formatPrice(data.cartTotal));
-                            } else {
-                                console.log('Không tìm thấy phần tử hiển thị giá tạm tính hoặc không có dữ liệu cartTotal');
-                            }
-                        }
+                        // Sau khi xóa item, tính lại tổng dựa trên các item đang được tick
+                        this.updateSelectedTotals();
 
                         // Cập nhật số lượng sản phẩm trong badge trên header
                         if (data.cartCount !== undefined) {
