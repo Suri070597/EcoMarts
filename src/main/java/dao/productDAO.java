@@ -1216,25 +1216,25 @@ public class ProductDAO extends DBContext {
         }
     }
 
-
-    public double getQuantityByPackageType(int productId, String packageType) {
-        double qty = 0.0;
-        try {
-            String sql = "SELECT COALESCE(Quantity, 0) AS Q FROM Inventory WHERE ProductID = ? AND PackageType = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, productId);
-                ps.setString(2, packageType);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        qty = rs.getDouble("Q");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return qty;
-    }
+//
+//    public double getQuantityByPackageType(int productId, String packageType) {
+//        double qty = 0.0;
+//        try {
+//            String sql = "SELECT COALESCE(Quantity, 0) AS Q FROM Inventory WHERE ProductID = ? AND PackageType = ?";
+//            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+//                ps.setInt(1, productId);
+//                ps.setString(2, packageType);
+//                try (ResultSet rs = ps.executeQuery()) {
+//                    if (rs.next()) {
+//                        qty = rs.getDouble("Q");
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return qty;
+//    }
 
     /**
      * Get PACK quantity filtered by packSize
