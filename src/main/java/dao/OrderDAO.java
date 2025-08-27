@@ -1,7 +1,5 @@
 package dao;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import db.DBContext;
+import java.math.BigDecimal;
+import java.sql.Connection;
 import model.Account;
 import model.CartItem;
 import model.Order;
@@ -99,7 +99,7 @@ public class OrderDAO extends DBContext {
                     SELECT od.OrderDetailID, od.OrderID, od.ProductID,
                            od.Quantity, od.UnitPrice, od.SubTotal,
                            od.PackageType, od.PackSize,
-                           p.ProductName, p.ItemUnitName, p.BoxUnitName
+                           p.ProductName
                     FROM OrderDetail od
                     JOIN Product p ON od.ProductID = p.ProductID
                     WHERE od.OrderID = ?
@@ -116,22 +116,8 @@ public class OrderDAO extends DBContext {
                 od.setUnitPrice(rs.getDouble("UnitPrice"));
                 od.setSubTotal(rs.getDouble("SubTotal"));
                 od.setProductName(rs.getString("ProductName"));
-                // Derive unit label from package type
-                String packageType = rs.getString("PackageType");
-                Integer packSize = (Integer) rs.getObject("PackSize");
-                String itemUnitName = rs.getString("ItemUnitName");
-                String boxUnitName = rs.getString("BoxUnitName");
-                String unitLabel = itemUnitName;
-                if ("KG".equalsIgnoreCase(packageType)) {
-                    unitLabel = "kg";
-                } else if ("BOX".equalsIgnoreCase(packageType)) {
-                    unitLabel = boxUnitName != null ? boxUnitName : "thùng";
-                } else if ("PACK".equalsIgnoreCase(packageType)) {
-                    unitLabel = "Lốc" + (packSize != null ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
-                } else {
-                    unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
-                }
-                od.setUnit(unitLabel);
+                od.setPackageType(rs.getString("PackageType"));
+                od.setPackSize((Integer) rs.getObject("PackSize"));
                 list.add(od);
             }
         } catch (SQLException e) {
@@ -654,13 +640,24 @@ public class OrderDAO extends DBContext {
     public List<RevenueStats> getMonthlyRevenueDetails(int month, int year) {
         List<RevenueStats> list = new ArrayList<>();
         String sql = """
-                    SELECT p.ProductName, SUM(od.Quantity) AS TotalQuantity, SUM(od.SubTotal) AS TotalRevenue
+                    SELECT 
+                        p.ProductName,
+                        p.ItemUnitName,
+                        SUM(CASE WHEN od.PackageType = 'BOX' THEN od.Quantity ELSE 0 END) AS BoxQuantity,
+                        SUM(CASE WHEN od.PackageType = 'PACK' THEN od.Quantity ELSE 0 END) AS PackQuantity,
+                        SUM(CASE WHEN od.PackageType = 'UNIT' THEN od.Quantity ELSE 0 END) AS UnitQuantity,
+                        SUM(CASE WHEN od.PackageType = 'KG' THEN od.Quantity ELSE 0 END) AS KgQuantity,
+                        SUM(CASE WHEN od.PackageType = 'BOX' THEN od.SubTotal ELSE 0 END) AS BoxRevenue,
+                        SUM(CASE WHEN od.PackageType = 'PACK' THEN od.SubTotal ELSE 0 END) AS PackRevenue,
+                        SUM(CASE WHEN od.PackageType = 'UNIT' THEN od.SubTotal ELSE 0 END) AS UnitRevenue,
+                        SUM(CASE WHEN od.PackageType = 'KG' THEN od.SubTotal ELSE 0 END) AS KgRevenue,
+                        SUM(od.SubTotal) AS TotalRevenue
                     FROM OrderDetail od
                     JOIN Product p ON od.ProductID = p.ProductID
                     JOIN [Order] o ON od.OrderID = o.OrderID
                     WHERE MONTH(o.OrderDate) = ? AND YEAR(o.OrderDate) = ? AND o.OrderStatus = N'Đã giao'
-                    GROUP BY p.ProductName
-                    ORDER BY TotalQuantity DESC
+                    GROUP BY p.ProductName, p.ItemUnitName
+                    ORDER BY SUM(od.Quantity) DESC
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, month);
@@ -668,9 +665,23 @@ public class OrderDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String name = rs.getString("ProductName");
-                int quantity = rs.getInt("TotalQuantity");
+                String itemUnitName = rs.getString("ItemUnitName");
+                double boxQ = rs.getDouble("BoxQuantity");
+                double packQ = rs.getDouble("PackQuantity");
+                double unitQ = rs.getDouble("UnitQuantity");
+                double kgQ = rs.getDouble("KgQuantity");
+                double boxR = rs.getDouble("BoxRevenue");
+                double packR = rs.getDouble("PackRevenue");
+                double unitR = rs.getDouble("UnitRevenue");
+                double kgR = rs.getDouble("KgRevenue");
                 double revenue = rs.getDouble("TotalRevenue");
-                list.add(new RevenueStats(name, quantity, revenue));
+                RevenueStats stats = new RevenueStats(name, boxQ, packQ, unitQ, kgQ, revenue);
+                stats.setItemUnitName(itemUnitName);
+                stats.setBoxRevenue(boxR);
+                stats.setPackRevenue(packR);
+                stats.setUnitRevenue(unitR);
+                stats.setKgRevenue(kgR);
+                list.add(stats);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -829,7 +840,8 @@ public class OrderDAO extends DBContext {
 
     public void cancelOrder(int orderId) {
         String cancelOrderSQL = "UPDATE [Order] SET OrderStatus = N'Đã hủy' WHERE OrderID = ?";
-        String getOrderDetailsSQL = "SELECT ProductID, Quantity, PackageType, PackSize FROM OrderDetail WHERE OrderID = ?";
+        String getOrderDetailsSQL = "SELECT ProductID, Quantity FROM OrderDetail WHERE OrderID = ?";
+        String updateStockSQL = "UPDATE Product SET StockQuantity = StockQuantity + ? WHERE ProductID = ?";
 
         try {
             conn.setAutoCommit(false); // Bắt đầu transaction
@@ -840,18 +852,26 @@ public class OrderDAO extends DBContext {
                 cancelStmt.executeUpdate();
             }
 
-            // 2 & 3. Lấy chi tiết và cập nhật tồn kho Inventory theo đơn vị
-            InventoryDAO invDao = new InventoryDAO();
+            // 2. Lấy chi tiết đơn hàng
+            List<OrderDetail> orderDetails = new ArrayList<>();
             try (PreparedStatement detailStmt = conn.prepareStatement(getOrderDetailsSQL)) {
                 detailStmt.setInt(1, orderId);
                 ResultSet rs = detailStmt.executeQuery();
                 while (rs.next()) {
                     int productId = rs.getInt("ProductID");
                     double quantity = rs.getDouble("Quantity");
-                    String packageType = rs.getString("PackageType");
-                    Integer packSize = (Integer) rs.getObject("PackSize");
-                    invDao.adjustInventoryQuantity(productId, packageType != null ? packageType : "UNIT", packSize, quantity);
+                    orderDetails.add(new OrderDetail(productId, quantity)); // ✅ sửa chỗ này
                 }
+            }
+
+            // 3. Cập nhật tồn kho
+            try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSQL)) {
+                for (OrderDetail od : orderDetails) {
+                    stockStmt.setDouble(1, od.getQuantity());
+                    stockStmt.setInt(2, od.getProductID());
+                    stockStmt.addBatch();
+                }
+                stockStmt.executeBatch();
             }
 
             conn.commit(); // Ghi nhận thay đổi
@@ -1004,8 +1024,8 @@ public class OrderDAO extends DBContext {
             // If order creation succeeded, insert order details
             if (orderId > 0) {
                 // Insert order details
-                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize) " +
-                        "VALUES (?, ?, ?, ?, ?, ?)";
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
+                        "VALUES (?, ?, ?, ?)";
 
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     for (CartItem item : items) {
@@ -1014,27 +1034,10 @@ public class OrderDAO extends DBContext {
                             ps.setInt(2, item.getProductID());
                             ps.setDouble(3, item.getQuantity());
                             ps.setDouble(4, item.getProduct().getPrice());
-                            ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
-                            if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
                             ps.addBatch();
                         }
                     }
                     ps.executeBatch();
-                }
-
-                // Adjust inventory by ordered quantities
-                String selectDetails = "SELECT ProductID, Quantity, PackageType, PackSize FROM OrderDetail WHERE OrderID = ?";
-                try (PreparedStatement sel = conn.prepareStatement(selectDetails)) {
-                    sel.setInt(1, orderId);
-                    ResultSet rs = sel.executeQuery();
-                    InventoryDAO invDao = new InventoryDAO();
-                    while (rs.next()) {
-                        int pid = rs.getInt("ProductID");
-                        double qty = rs.getDouble("Quantity");
-                        String pkg = rs.getString("PackageType");
-                        Integer psize = (Integer) rs.getObject("PackSize");
-                        invDao.adjustInventoryQuantity(pid, pkg, psize, -qty);
-                    }
                 }
             } else {
                 // Order creation failed, rollback transaction
@@ -1113,16 +1116,14 @@ public class OrderDAO extends DBContext {
                 Product product = productDAO.getProductById(item.getProductID());
 
                 if (product != null) {
-                    String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize) " +
-                            "VALUES (?, ?, ?, ?, ?, ?)";
+                    String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice) " +
+                            "VALUES (?, ?, ?, ?)";
 
                     try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                         ps.setInt(1, orderId);
                         ps.setInt(2, item.getProductID());
                         ps.setDouble(3, item.getQuantity());
                         ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
-                        ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
-                        if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
 
                         ps.executeUpdate();
                     }
@@ -1131,23 +1132,6 @@ public class OrderDAO extends DBContext {
                     conn.rollback();
                     orderId = -1;
                     return orderId;
-                }
-            }
-
-            // Deduct inventory for single item order
-            if (orderId > 0) {
-                String selectDetails = "SELECT ProductID, Quantity, PackageType, PackSize FROM OrderDetail WHERE OrderID = ?";
-                try (PreparedStatement sel = conn.prepareStatement(selectDetails)) {
-                    sel.setInt(1, orderId);
-                    ResultSet rs = sel.executeQuery();
-                    InventoryDAO invDao = new InventoryDAO();
-                    while (rs.next()) {
-                        int pid = rs.getInt("ProductID");
-                        double qty = rs.getDouble("Quantity");
-                        String pkg = rs.getString("PackageType");
-                        Integer psize = (Integer) rs.getObject("PackSize");
-                        invDao.adjustInventoryQuantity(pid, pkg, psize, -qty);
-                    }
                 }
             }
 
