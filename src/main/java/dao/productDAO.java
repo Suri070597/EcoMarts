@@ -557,7 +557,7 @@ public class ProductDAO extends DBContext {
     String sql = "SELECT TOP 1 1 " +
                  "FROM OrderDetail od " +
                  "JOIN [Order] o ON od.OrderID = o.OrderID " +
-                 "WHERE od.ProductID = ? AND o.OrderStatus IN (N'Đang xử lý', N'Đã xử lý',N'Đang giao')";
+                 "WHERE od.ProductID = ? AND o.OrderStatus IN (N'Đang xử lý', N'Đã xử lý', N'Đang giao')";
     try (PreparedStatement ps = conn.prepareStatement(sql)) {
         ps.setInt(1, productId);
         try (ResultSet rs = ps.executeQuery()) {

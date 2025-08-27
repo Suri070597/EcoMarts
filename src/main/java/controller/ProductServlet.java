@@ -23,7 +23,7 @@ import model.Category;
 import model.Product;
 import model.Manufacturer;
 
-@WebServlet(name = "ProductServlet", urlPatterns = {"/admin/product"})
+@WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
@@ -96,8 +96,8 @@ public class ProductServlet extends HttpServlet {
                 // Counters for stock status cards based on search results
                 final int SEARCH_LOW_STOCK_THRESHOLD = 10;
                 int searchInStock = 0,
-                 searchLowStock = 0,
-                 searchOutOfStock = 0;
+                        searchLowStock = 0,
+                        searchOutOfStock = 0;
 
                 for (Product p : searchResults) {
                     double boxQuantity = dao.getQuantityByPackageType(p.getProductID(), "BOX");
@@ -358,6 +358,13 @@ public class ProductServlet extends HttpServlet {
                         return;
                     }
 
+                    // Không cho xóa nếu sản phẩm đang nằm trong đơn hàng đang xử lý
+                    boolean inProcessingOrders = dao.hasProcessingOrders(id);
+                    if (inProcessingOrders) {
+                        response.sendRedirect(request.getContextPath() + "/admin/product?error=product_processing");
+                        return;
+                    }
+
                     // Thực hiện xóa sản phẩm
                     boolean deleteSuccess = dao.delete(id);
 
@@ -532,7 +539,7 @@ public class ProductServlet extends HttpServlet {
                         if (currentProduct.getUnitPerBox() % packSize != 0) {
                             request.setAttribute("error",
                                     "Số lon trong 1 thùng (" + currentProduct.getUnitPerBox()
-                                    + ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
+                                            + ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
                             request.setAttribute("product", currentProduct);
                             request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
                                     response);
