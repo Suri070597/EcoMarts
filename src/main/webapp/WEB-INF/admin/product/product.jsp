@@ -168,15 +168,11 @@
                     </div>
                     <% } %>
 
-                    <% if (success != null) { %>
+                    <% if (success != null && !success.equals("price_updated")) { %>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle"></i>
                         <strong>Thành công!</strong> 
-                        <% if (success.equals("price_updated")) { %>
-                            Cập nhật giá thành công.
-                        <% } else { %>
-                            <%= success %>
-                        <% } %>
+                        <%= success %>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                     <% } %>

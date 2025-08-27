@@ -23,7 +23,7 @@ import model.Category;
 import model.Product;
 import model.Manufacturer;
 
-@WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
+@WebServlet(name = "ProductServlet", urlPatterns = {"/admin/product"})
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
@@ -94,14 +94,19 @@ public class ProductServlet extends HttpServlet {
                 request.setAttribute("keyword", keyword);
 
                 // Counters for stock status cards based on search results
-                final int SEARCH_LOW_STOCK_THRESHOLD = 5;
-                int searchInStock = 0, searchLowStock = 0, searchOutOfStock = 0;
+                final int SEARCH_LOW_STOCK_THRESHOLD = 10;
+                int searchInStock = 0,
+                 searchLowStock = 0,
+                 searchOutOfStock = 0;
 
                 for (Product p : searchResults) {
-                    double stock = p.getStockQuantity();
-                    if (stock > SEARCH_LOW_STOCK_THRESHOLD) {
+                    double boxQuantity = dao.getQuantityByPackageType(p.getProductID(), "BOX");
+                    double kgQuantity = dao.getQuantityByPackageType(p.getProductID(), "KG");
+                    double totalStock = boxQuantity + kgQuantity;
+
+                    if (totalStock > SEARCH_LOW_STOCK_THRESHOLD) {
                         searchInStock++;
-                    } else if (stock > 0) {
+                    } else if (totalStock > 0) {
                         searchLowStock++;
                     } else {
                         searchOutOfStock++;
@@ -120,8 +125,30 @@ public class ProductServlet extends HttpServlet {
                     int idDetail = Integer.parseInt(idDetailRaw);
                     Product productDetail = dao.getProductById(idDetail);
                     Map<String, Object> inventory = dao.getProductInventory(idDetail);
+
+                    // Lấy thông tin nhà sản xuất và ngày nhập kho
+                    Map<String, Object> manufacturerInfo = dao.getLatestManufacturerInfo(idDetail);
+                    Date expiryDate = dao.getLatestExpiryDate(idDetail);
+
+                    // Lấy số lượng theo package type
+                    double boxQty = dao.getQuantityByPackageType(idDetail, "BOX");
+                    double unitQty = dao.getQuantityByPackageType(idDetail, "UNIT");
+                    double packQty = dao.getQuantityByPackageType(idDetail, "PACK");
+                    double kgQty = dao.getQuantityByPackageType(idDetail, "KG");
+
+                    // Kiểm tra xem có phải sản phẩm nước giải khát hoặc sữa không
+                    boolean isBeverageOrMilk = dao.isBeverageOrMilkCategory(idDetail);
+
                     request.setAttribute("productDetail", productDetail);
                     request.setAttribute("inventory", inventory);
+                    request.setAttribute("manufacturerInfo", manufacturerInfo);
+                    request.setAttribute("expiryDate", expiryDate);
+                    request.setAttribute("boxQty", boxQty);
+                    request.setAttribute("unitQty", unitQty);
+                    request.setAttribute("packQty", packQty);
+                    request.setAttribute("kgQty", kgQty);
+                    request.setAttribute("isBeverageOrMilk", isBeverageOrMilk);
+
                     request.getRequestDispatcher("/WEB-INF/admin/product/product-detail.jsp").forward(request,
                             response);
                 } catch (Exception e) {
@@ -282,8 +309,9 @@ public class ProductServlet extends HttpServlet {
                     String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
                     if (!fileName.isEmpty()) {
                         File uploadDir = new File(IMAGE_UPLOAD_DIR);
-                        if (!uploadDir.exists())
+                        if (!uploadDir.exists()) {
                             uploadDir.mkdirs();
+                        }
                         filePart.write(IMAGE_UPLOAD_DIR + File.separator + fileName);
                     }
                     String pImage = fileName;
@@ -334,9 +362,7 @@ public class ProductServlet extends HttpServlet {
                     boolean deleteSuccess = dao.delete(id);
 
                     if (deleteSuccess) {
-                        response.sendRedirect(
-                                request.getContextPath() + "/admin/product?success=delete_success&product_name=" +
-                                        java.net.URLEncoder.encode(productToDelete.getProductName(), "UTF-8"));
+                        response.sendRedirect(request.getContextPath() + "/admin/product");
                     } else {
                         response.sendRedirect(request.getContextPath() + "/admin/product?error=delete_failed&id=" + id);
                     }
@@ -484,14 +510,6 @@ public class ProductServlet extends HttpServlet {
                         return;
                     }
 
-                    if (boxesToConvert > currentProduct.getStockQuantity()) {
-                        request.setAttribute("error", "Số lượng thùng chuyển đổi vượt quá số lượng hiện có");
-                        request.setAttribute("product", currentProduct);
-                        request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
-                                response);
-                        return;
-                    }
-
                     // Validate pack size for pack conversion
                     if (conversionType.equals("pack") || conversionType.equals("both")) {
                         if (packSize <= 0) {
@@ -513,8 +531,8 @@ public class ProductServlet extends HttpServlet {
                         // Kiểm tra số lon trong 1 thùng phải chia hết cho packSize
                         if (currentProduct.getUnitPerBox() % packSize != 0) {
                             request.setAttribute("error",
-                                    "Số lon trong 1 thùng (" + currentProduct.getUnitPerBox() +
-                                            ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
+                                    "Số lon trong 1 thùng (" + currentProduct.getUnitPerBox()
+                                    + ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
                             request.setAttribute("product", currentProduct);
                             request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
                                     response);
@@ -636,11 +654,81 @@ public class ProductServlet extends HttpServlet {
                         }
                     }
 
+                    // Kiểm tra validation đặc biệt cho nước giải khát, sữa và các loại khác
+                    if (currentProduct.getCategory() != null) {
+                        int parentId = currentProduct.getCategory().getParentID();
+                        boolean isFruit = parentId == 3;
+                        boolean isBeverageOrMilk = parentId == 1 || parentId == 2;
+
+                        // Kiểm tra xem có thể nhập giá cho unit không (cho tất cả các loại trừ trái
+                        // cây)
+                        if (!isFruit && priceUnit != null && priceUnit > 0) {
+                            double unitQuantity = dao.getQuantityByPackageType(productId, "UNIT");
+                            if (unitQuantity <= 0) {
+                                request.setAttribute("error",
+                                        "Không thể nhập giá cho đơn vị khi chưa có số lượng sau chuyển đổi. Vui lòng thực hiện chuyển đổi đơn vị trước.");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        }
+
+                        // Kiểm tra xem có thể nhập giá cho pack không (chỉ cho nước giải khát và sữa)
+                        if (isBeverageOrMilk && pricePack != null && pricePack > 0) {
+                            double packQuantity = dao.getQuantityByPackageType(productId, "PACK");
+                            if (packQuantity <= 0) {
+                                request.setAttribute("error",
+                                        "Không thể nhập giá cho lốc khi chưa có số lượng sau chuyển đổi. Vui lòng thực hiện chuyển đổi đơn vị trước.");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        }
+                    }
+
+                    // Kiểm tra logic giá: UNIT ≤ PACK ≤ BOX
+                    if (priceBox != null && priceUnit != null && priceBox > 0 && priceUnit > 0) {
+                        if (priceUnit > priceBox) {
+                            request.setAttribute("error", "❌ Lỗi logic giá: Giá đơn vị (" + priceUnit
+                                    + "đ) không được lớn hơn giá thùng (" + priceBox + "đ)!");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
+                    if (pricePack != null && priceUnit != null && pricePack > 0 && priceUnit > 0) {
+                        if (priceUnit > pricePack) {
+                            request.setAttribute("error", "❌ Lỗi logic giá: Giá đơn vị (" + priceUnit
+                                    + "đ) không được lớn hơn giá lốc (" + pricePack + "đ)!");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
+                    if (pricePack != null && priceBox != null && pricePack > 0 && priceBox > 0) {
+                        if (pricePack > priceBox) {
+                            request.setAttribute("error", "❌ Lỗi logic giá: Giá lốc (" + pricePack
+                                    + "đ) không được lớn hơn giá thùng (" + priceBox + "đ)!");
+                            request.setAttribute("product", currentProduct);
+                            request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                    response);
+                            return;
+                        }
+                    }
+
                     // Update product prices
                     boolean success = dao.updateProductPrice(productId, priceBox, priceUnit, pricePack);
 
                     if (success) {
-                        response.sendRedirect(request.getContextPath() + "/admin/product?success=price_updated");
+                        request.setAttribute("success", "Cập nhật giá thành công");
+                        request.setAttribute("product", currentProduct);
+                        request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request, response);
                     } else {
                         request.setAttribute("error", "Cập nhật giá thất bại");
                         request.setAttribute("product", currentProduct);
