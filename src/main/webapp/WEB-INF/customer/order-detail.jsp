@@ -42,7 +42,7 @@
                 margin-bottom: 10px;
                 line-height: 1.6;
             }
-            
+
             .fw-bold {
                 margin-bottom: 10px;
                 line-height: 1.6;
@@ -211,6 +211,8 @@
                                         <th>Sản phẩm</th>
                                         <th class="text-center">Đơn giá</th>
                                         <th class="text-center">Số lượng</th>
+                                        <th class="text-center">Đơn vị</th>
+                                        <th class="text-center">Lốc</th>
                                         <th class="text-center">Đánh giá</th>
                                         <th class="text-end">Thành tiền</th>
                                     </tr>
@@ -237,22 +239,16 @@
                                             <td class="text-center"><fmt:formatNumber value="${od.unitPrice}" type="number" pattern="#,###"/> đ</td>
                                             <td class="text-center">
                                                 <c:choose>
-                                                    <c:when test="${od.unit eq 'kg'}">
-                                                        <c:choose>
-                                                            <c:when test="${od.quantity % 1 == 0}">
-                                                                <fmt:formatNumber value="${od.quantity}" pattern="#"/>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <fmt:formatNumber value="${od.quantity}" pattern="#.##"/>
-                                                            </c:otherwise>
-                                                        </c:choose>
+                                                    <c:when test="${od.quantity % 1 == 0}">
+                                                        <fmt:formatNumber value="${od.quantity}" pattern="#"/>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <fmt:formatNumber value="${od.quantity}" pattern="#" />
+                                                        <fmt:formatNumber value="${od.quantity}" pattern="#.##"/>
                                                     </c:otherwise>
                                                 </c:choose>
-                                                ${od.unit}
                                             </td>
+                                            <td class="text-center">${od.packageType}</td>
+                                            <td class="text-center">${od.packSize}</td>
                                             <td class="text-center">
                                                 <a href="${pageContext.request.contextPath}/ProductDetail?id=${od.productID}" class="btn btn-sm btn-outline-primary">Đánh giá</a>
                                             </td>
