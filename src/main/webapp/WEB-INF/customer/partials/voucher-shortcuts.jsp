@@ -44,6 +44,8 @@
         <link rel="stylesheet" href="./assets/css/shortcuts.css?version=<%= System.currentTimeMillis()%>">
 
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
 
     <body>
@@ -309,6 +311,37 @@
                                 slides[slideIndex - 1].style.display = "block";
                                 dots[slideIndex - 1].className += " active";
                             }
+    </script>
+
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const msg = params.get('msg');
+            const err = params.get('err');
+
+            if (msg === 'saved') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Nhận voucher thành công',
+                    confirmButtonText: 'Xác nhận'
+                }).then(() => {
+                    params.delete('msg');
+                    const url = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+                    history.replaceState({}, document.title, url);
+                });
+            } else if (err || (msg && msg !== 'saved')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nhận voucher không thành công',
+                    confirmButtonText: 'Xác nhận'
+                }).then(() => {
+                    params.delete('msg');
+                    params.delete('err');
+                    const url = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+                    history.replaceState({}, document.title, url);
+                });
+            }
+        })();
     </script>
 
 
