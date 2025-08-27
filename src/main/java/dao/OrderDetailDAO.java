@@ -22,7 +22,8 @@ public class OrderDetailDAO extends DBContext {
                 + "    od.OrderID,\n"
                 + "    od.ProductID,\n"
                 + "    p.ProductName,\n"
-                + "    p.Unit,\n"
+                + "    od.PackageType,\n"
+                + "    od.PackSize,\n"
                 + "    od.Quantity,\n"
                 + "    od.UnitPrice,\n"
                 + "    od.SubTotal,\n"
@@ -42,13 +43,14 @@ public class OrderDetailDAO extends DBContext {
                         rs.getInt("OrderDetailID"),
                         rs.getInt("OrderID"),
                         rs.getInt("ProductID"),
-                        rs.getDouble("Quantity"),  // Lấy là double để hỗ trợ số lượng thập phân
-                        rs.getDouble("UnitPrice")
-                );
+                        rs.getDouble("Quantity"), // Lấy là double để hỗ trợ số lượng thập phân
+                        rs.getDouble("UnitPrice"));
 
                 // Set thêm thông tin phụ
                 orderDetail.setProductName(rs.getString("ProductName"));
-                orderDetail.setUnit(rs.getString("Unit"));  // Lưu đơn vị để hiển thị đúng
+                orderDetail.setPackageType(rs.getString("PackageType"));
+                int pack = rs.getInt("PackSize");
+                orderDetail.setPackSize(rs.wasNull() ? null : pack);
                 orderDetail.setOrderStatus(rs.getString("OrderStatus"));
                 orderDetail.setSubTotal(rs.getDouble("SubTotal")); // nếu không tính trong constructor
 
@@ -126,8 +128,7 @@ public class OrderDetailDAO extends DBContext {
         }
 
         StringBuilder queryBuilder = new StringBuilder(
-                "SELECT OrderID, SUM(Quantity) as TotalQty FROM OrderDetail WHERE OrderID IN ("
-        );
+                "SELECT OrderID, SUM(Quantity) as TotalQty FROM OrderDetail WHERE OrderID IN (");
         for (int i = 0; i < orderIDs.size(); i++) {
             queryBuilder.append("?");
             if (i < orderIDs.size() - 1) {
@@ -136,7 +137,8 @@ public class OrderDetailDAO extends DBContext {
         }
         queryBuilder.append(") GROUP BY OrderID");
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(queryBuilder.toString())) {
+        try (Connection conn = new DBContext().getConnection();
+                PreparedStatement ps = conn.prepareStatement(queryBuilder.toString())) {
 
             for (int i = 0; i < orderIDs.size(); i++) {
                 ps.setInt(i + 1, orderIDs.get(i));
@@ -189,46 +191,47 @@ public class OrderDetailDAO extends DBContext {
 
         return items;
     }
-public int countDistinctProductsInOrder(int orderId) {
-    String sql = "SELECT COUNT(DISTINCT ProductID) FROM OrderDetail WHERE OrderID = ?";
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, orderId);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return rs.getInt(1);
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return 0;
-}
 
-public String getProductNamesByOrderId(int orderId) {
-    String sql = "SELECT p.ProductName FROM OrderDetail od " +
-                 "JOIN Product p ON od.ProductID = p.ProductID " +
-                 "WHERE od.OrderID = ?";
-    
-    List<String> productNames = new ArrayList<>();
-    
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, orderId);
-        ResultSet rs = ps.executeQuery();
-        
-        while (rs.next()) {
-            productNames.add(rs.getString("ProductName"));
+    public int countDistinctProductsInOrder(int orderId) {
+        String sql = "SELECT COUNT(DISTINCT ProductID) FROM OrderDetail WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        
-        rs.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return 0;
     }
-    
-    // Chỉ hiển thị 3 tên sản phẩm đầu tiên, nếu có nhiều hơn thì thêm "..."
-    if (productNames.size() <= 3) {
-        return String.join(", ", productNames);
-    } else {
-        return String.join(", ", productNames.subList(0, 3)) + "...";
+
+    public String getProductNamesByOrderId(int orderId) {
+        String sql = "SELECT p.ProductName FROM OrderDetail od " +
+                "JOIN Product p ON od.ProductID = p.ProductID " +
+                "WHERE od.OrderID = ?";
+
+        List<String> productNames = new ArrayList<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                productNames.add(rs.getString("ProductName"));
+            }
+
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Chỉ hiển thị 3 tên sản phẩm đầu tiên, nếu có nhiều hơn thì thêm "..."
+        if (productNames.size() <= 3) {
+            return String.join(", ", productNames);
+        } else {
+            return String.join(", ", productNames.subList(0, 3)) + "...";
+        }
     }
-}
 
 }

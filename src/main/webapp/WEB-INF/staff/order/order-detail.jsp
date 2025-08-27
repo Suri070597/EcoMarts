@@ -196,6 +196,8 @@
                             <th>Sản phẩm</th>
                             <th>Đơn giá</th>
                             <th>Số lượng</th>
+                            <th>Đơn vị</th>
+                            <th>Lốc</th>
                             <th>Thành tiền</th>
                         </tr>
                     </thead>
@@ -214,6 +216,8 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
+                                <td>${d.packageType}</td>
+                                <td>${d.packSize}</td>
                                 <td class="number"><fmt:formatNumber value="${d.subTotal}" type="number" pattern="#,###"/> đ</td>
 
                             </tr>

@@ -5,13 +5,14 @@ public class OrderDetail {
     private int orderDetailID;
     private int orderID;
     private int productID;
-    private double quantity;  // Đổi thành double để hỗ trợ số lượng thập phân
+    private double quantity; // Đổi thành double để hỗ trợ số lượng thập phân
     private double unitPrice;
     private double subTotal;
     private String productName;
     private Product product;
     private String orderStatus;
-    private String unit;  // Thêm trường đơn vị
+    private String packageType; // UNIT, BOX, PACK, KG
+    private Integer packSize; // Số đơn vị trong 1 lốc (chỉ cho PACK)
 
     public OrderDetail() {
     }
@@ -57,13 +58,21 @@ public class OrderDetail {
         this.quantity = quantity;
         this.subTotal = this.quantity * this.unitPrice;
     }
-    
-    public String getUnit() {
-        return unit;
+
+    public String getPackageType() {
+        return packageType;
     }
-    
-    public void setUnit(String unit) {
-        this.unit = unit;
+
+    public void setPackageType(String packageType) {
+        this.packageType = packageType;
+    }
+
+    public Integer getPackSize() {
+        return packSize;
+    }
+
+    public void setPackSize(Integer packSize) {
+        this.packSize = packSize;
     }
 
     public double getUnitPrice() {
@@ -106,10 +115,11 @@ public class OrderDetail {
     public String getOrderStatus() {
         return orderStatus;
     }
-public OrderDetail(int productID, double quantity) {
-    this.productID = productID;
-    this.quantity = quantity;
-}
+
+    public OrderDetail(int productID, double quantity) {
+        this.productID = productID;
+        this.quantity = quantity;
+    }
 
     @Override
     public String toString() {
@@ -120,6 +130,8 @@ public OrderDetail(int productID, double quantity) {
                 + ", quantity=" + quantity
                 + ", unitPrice=" + unitPrice
                 + ", subTotal=" + subTotal
+                + ", packageType=" + packageType
+                + ", packSize=" + packSize
                 + '}';
     }
 }

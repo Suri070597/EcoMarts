@@ -96,7 +96,10 @@ public class OrderDAO extends DBContext {
     public List<OrderDetail> getOrderDetailsByOrderId(int orderId) {
         List<OrderDetail> list = new ArrayList<>();
         String sql = """
-                    SELECT od.*, p.ProductName, p.Unit
+                    SELECT od.OrderDetailID, od.OrderID, od.ProductID,
+                           od.Quantity, od.UnitPrice, od.SubTotal,
+                           od.PackageType, od.PackSize,
+                           p.ProductName
                     FROM OrderDetail od
                     JOIN Product p ON od.ProductID = p.ProductID
                     WHERE od.OrderID = ?
@@ -113,7 +116,9 @@ public class OrderDAO extends DBContext {
                 od.setUnitPrice(rs.getDouble("UnitPrice"));
                 od.setSubTotal(rs.getDouble("SubTotal"));
                 od.setProductName(rs.getString("ProductName"));
-                od.setUnit(rs.getString("Unit"));
+                od.setPackageType(rs.getString("PackageType"));
+                int pack = rs.getInt("PackSize");
+                od.setPackSize(rs.wasNull() ? null : pack);
                 list.add(od);
             }
         } catch (SQLException e) {
