@@ -154,7 +154,7 @@
                     <div class="section-title">
                         <i class="fas fa-glass-cheers"></i> Sản phẩm nổi bật
                     </div>
-                    <a href="ViewAllProductServlet?type=featured" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>    
+                    <%-- <a href="ViewAllProductServlet?type=featured" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>     --%>
                 </div>
                 <div class="product-grid" id="featured-Products">
                     <%

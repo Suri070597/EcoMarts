@@ -66,7 +66,7 @@ public class HomeServlet extends HttpServlet {
         java.util.function.Consumer<Product> putTraiCay = (p) -> {
             Double priceUnit = p.getPriceUnit();
             if (priceUnit != null) {
-                priceDisplayMap.put(p.getProductID(), formatter.format(priceUnit) + " đ / " + p.getUnit());
+                priceDisplayMap.put(p.getProductID(), formatter.format(priceUnit) + " đ / " + p.getItemUnitName());
             } else {
                 priceDisplayMap.put(p.getProductID(), "Chưa có giá");
             }
@@ -85,7 +85,7 @@ public class HomeServlet extends HttpServlet {
             for (Product p : list1) {
                 Double priceUnit = p.getPriceUnit();
                 if (priceUnit != null) {
-                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    String display = formatter.format(priceUnit) + " đ / " + p.getItemUnitName();
                     priceDisplayMap.put(p.getProductID(), display);
                     filtered1.add(p);
                 }
@@ -97,7 +97,7 @@ public class HomeServlet extends HttpServlet {
             for (Product p : list2) {
                 Double priceUnit = p.getPriceUnit();
                 if (priceUnit != null) {
-                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    String display = formatter.format(priceUnit) + " đ / " + p.getItemUnitName();
                     priceDisplayMap.put(p.getProductID(), display);
                     filtered2.add(p);
                 }
@@ -110,7 +110,7 @@ public class HomeServlet extends HttpServlet {
             for (Product p : list3) {
                 Double priceUnit = p.getPriceUnit();
                 if (priceUnit != null) {
-                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    String display = formatter.format(priceUnit) + " đ / " + p.getItemUnitName();
                     priceDisplayMap.put(p.getProductID(), display);
                     filtered3.add(p);
                 }
@@ -123,7 +123,7 @@ public class HomeServlet extends HttpServlet {
             for (Product p : list4) {
                 Double priceUnit = p.getPriceUnit();
                 if (priceUnit != null) {
-                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    String display = formatter.format(priceUnit) + " đ / " + p.getItemUnitName();
                     priceDisplayMap.put(p.getProductID(), display);
                     filtered4.add(p);
                 }
@@ -134,7 +134,7 @@ public class HomeServlet extends HttpServlet {
             for (Product p : list5) {
                 Double priceUnit = p.getPriceUnit();
                 if (priceUnit != null) {
-                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    String display = formatter.format(priceUnit) + " đ / " + p.getItemUnitName();
                     priceDisplayMap.put(p.getProductID(), display);
                     filtered5.add(p);
                 }
@@ -145,7 +145,7 @@ public class HomeServlet extends HttpServlet {
             for (Product p : list6) {
                 Double priceUnit = p.getPriceUnit();
                 if (priceUnit != null) {
-                    String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                    String display = formatter.format(priceUnit) + " đ / " + p.getItemUnitName();
                     priceDisplayMap.put(p.getProductID(), display);
                     filtered6.add(p);
                 }
@@ -166,7 +166,7 @@ public class HomeServlet extends HttpServlet {
                 if (parentId == 1 || parentId == 2) {
                     Double priceUnit = p.getPriceUnit();
                     if (priceUnit != null) {
-                        String display = formatter.format(priceUnit) + " đ / " + p.getUnit();
+                        String display = formatter.format(priceUnit) + " đ / " + p.getItemUnitName();
                         priceDisplayMap.put(p.getProductID(), display);
                         filtered7.add(p);
                     }
