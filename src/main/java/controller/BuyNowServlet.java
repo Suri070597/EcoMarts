@@ -363,18 +363,7 @@ public class BuyNowServlet extends HttpServlet {
                 return;
             }
 
-            // Get updated quantity from form
-            String quantityStr = request.getParameter("quantity");
-            if (quantityStr != null && !quantityStr.trim().isEmpty()) {
-                try {
-                    double newQuantity = Double.parseDouble(quantityStr);
-                    if (newQuantity > 0) {
-                        buyNowItem.setQuantity(newQuantity);
-                    }
-                } catch (NumberFormatException e) {
-                    // Invalid quantity, continue with existing quantity
-                }
-            }
+            // Quantity changes from the client are ignored; use existing session quantity
 
             // Get product information and check stock again
             ProductDAO productDAO = new ProductDAO();
@@ -868,20 +857,7 @@ public class BuyNowServlet extends HttpServlet {
                 return;
             }
 
-            // Update quantities from form
-            for (CartItem item : cartItems) {
-                String quantityParam = request.getParameter("cartQuantity_" + item.getCartItemID());
-                if (quantityParam != null && !quantityParam.trim().isEmpty()) {
-                    try {
-                        double newQuantity = Double.parseDouble(quantityParam);
-                        if (newQuantity > 0) {
-                            item.setQuantity(newQuantity);
-                        }
-                    } catch (NumberFormatException e) {
-                        // Invalid quantity, continue with existing quantity
-                    }
-                }
-            }
+            // Quantity changes from the client are ignored; use quantities from session/cart
 
             // Get order details from form
             String recipientName = request.getParameter("recipientName");
