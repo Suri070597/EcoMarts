@@ -66,6 +66,8 @@
 
         <!-- Animate on scroll -->
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
 
     <body>
@@ -96,21 +98,7 @@
             <%
             } else if (mo != null) {
             %>
-            <% if (session.getAttribute("cartMessage") != null) { %>
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 45px; margin-bottom: 20px;">
-                ${sessionScope.cartMessage}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <% session.removeAttribute("cartMessage"); %>
-            <% } %>
-
-            <% if (session.getAttribute("cartError") != null) { %>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 45px; margin-bottom: 20px;">
-                ${sessionScope.cartError}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <% session.removeAttribute("cartError"); %>
-            <% }%>
+            <!-- SweetAlert2 sẽ hiển thị thông báo thay vì Bootstrap alert -->
 
             <div class="container mt-5">
                 <div class="row">
@@ -648,6 +636,8 @@
                                         });
                                     });
                                 </script>
+                                
+
                             </form>
 
 
@@ -1215,6 +1205,38 @@
                     ss.innerHTML = seconds;
                 }, 1000);
             })();
+        </script>
+
+        <!-- Script để xử lý thông báo từ session -->
+        <script>
+            // Kiểm tra và hiển thị thông báo từ session
+            document.addEventListener('DOMContentLoaded', function() {
+                // Kiểm tra cartError
+                <% if (session.getAttribute("cartError") != null) { %>
+                    const errorMessage = '<%= session.getAttribute("cartError") %>';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: errorMessage,
+                        confirmButtonText: 'Đóng',
+                        confirmButtonColor: '#d33'
+                    });
+                    <% session.removeAttribute("cartError"); %>
+                <% } %>
+                
+                // Kiểm tra cartMessage
+                <% if (session.getAttribute("cartMessage") != null) { %>
+                    const successMessage = '<%= session.getAttribute("cartMessage") %>';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: successMessage,
+                        confirmButtonText: 'Đóng',
+                        confirmButtonColor: '#28a745'
+                    });
+                    <% session.removeAttribute("cartMessage"); %>
+                <% } %>
+            });
         </script>
 
     </body>

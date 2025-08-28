@@ -5,6 +5,7 @@
 package controller;
 
 import dao.AccountDAO;
+import dao.CustomerDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
+import model.Customer;
 
 /**
  *
@@ -50,6 +52,23 @@ public class UpdateProfileServlet extends HttpServlet {
 
             if (updated) {
                 Account acc = dao.getFullAccountById(accountId);
+                // Đồng bộ sang bảng Customer nếu là khách hàng (role = 0)
+                if (acc != null && acc.getRole() == 0) {
+                    Customer customer = new Customer();
+                    customer.setAccountID(acc.getAccountID());
+                    customer.setFullName(acc.getFullName());
+                    customer.setEmail(acc.getEmail());
+                    customer.setPhone(acc.getPhone());
+                    customer.setGender(acc.getGender());
+                    customer.setAddress(acc.getAddress());
+                    try {
+                        new CustomerDAO().upsertByAccountId(customer);
+                    } catch (RuntimeException re) {
+                        throw re;
+                    } catch (Exception ex) {
+                        throw new ServletException(ex);
+                    }
+                }
                 req.getSession().setAttribute("account", acc);
                 req.setAttribute("message", "Cập nhật thành công!");
             }

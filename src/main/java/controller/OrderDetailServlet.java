@@ -22,7 +22,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
-import model.CartItem;
 import model.Category;
 import model.Order;
 import model.OrderDetail;
@@ -94,6 +93,12 @@ public class OrderDetailServlet extends HttpServlet {
                     // vì chúng ta muốn giữ giá trị gốc từ thời điểm đặt hàng
                     od.setProduct(product);
                 }
+
+                // Get current stock information
+                double stockQuantity = productDAO.getQuantityByPackageType(
+                    od.getProductID(), 
+                    od.getPackageType() != null ? od.getPackageType() : "UNIT"
+                );
 
                 total += od.getSubTotal();
             }
@@ -191,39 +196,87 @@ public class OrderDetailServlet extends HttpServlet {
                     break;
 
                 case "reorder":
-                    // Add order items to cart
-                    List<CartItem> items = orderDAO.getCartItemsFromOrder(orderId);
+                    // Add order items to cart with original package information
+                    List<OrderDetail> orderDetailsForReorder = orderDetailDAO.getOrderDetailsByOrderId(orderId);
+                    
+                    if (orderDetailsForReorder.isEmpty()) {
+                        session.setAttribute("errorMessage", "Không tìm thấy thông tin sản phẩm trong đơn hàng");
+                        response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + orderId);
+                        return;
+                    }
 
-                    // Check stock availability before adding to cart
-                    Map<Integer, Double> insufficientStock = new HashMap<>();
-                    for (CartItem item : items) {
-                        double stockQuantity = productDAO.getStockQuantityById(item.getProductID());
-                        if (stockQuantity < item.getQuantity()) {
-                            // Save the product with insufficient stock for message
-                            Product product = productDAO.getProductById(item.getProductID());
+                    // Check stock availability and add to cart
+                    Map<Integer, String> insufficientStock = new HashMap<>();
+                    Map<Integer, String> addedToCart = new HashMap<>();
+                    int totalItems = 0;
+                    int addedItems = 0;
+
+                    for (OrderDetail od : orderDetailsForReorder) {
+                        totalItems++;
+                        
+                        // Get current stock information
+                        double stockQuantity = productDAO.getQuantityByPackageType(
+                            od.getProductID(), 
+                            od.getPackageType() != null ? od.getPackageType() : "UNIT"
+                        );
+                        
+                        // Check if stock is sufficient
+                        if (stockQuantity < od.getQuantity()) {
+                            Product product = productDAO.getProductById(od.getProductID());
                             if (product != null) {
-                                insufficientStock.put(item.getProductID(), stockQuantity);
-                                // Adjust quantity to available stock
-                                if (stockQuantity > 0) {
-                                    item.setQuantity(stockQuantity);
-                                }
+                                insufficientStock.put(od.getProductID(), 
+                                    String.format("Chỉ còn %.2f %s", stockQuantity, 
+                                        od.getPackageType() != null ? od.getPackageType() : "UNIT"));
+                            }
+                            
+                            // Add available quantity if any
+                            if (stockQuantity > 0) {
+                                cartItemDAO.upsertCartItem(
+                                    account.getAccountID(), 
+                                    od.getProductID(),
+                                    stockQuantity, 
+                                    od.getPackageType() != null ? od.getPackageType() : "UNIT",
+                                    od.getPackSize()
+                                );
+                                addedItems++;
+                            }
+                        } else {
+                            // Stock is sufficient, add full quantity
+                            cartItemDAO.upsertCartItem(
+                                account.getAccountID(), 
+                                od.getProductID(),
+                                od.getQuantity(), 
+                                od.getPackageType() != null ? od.getPackageType() : "UNIT",
+                                od.getPackSize()
+                            );
+                            addedItems++;
+                            
+                            Product product = productDAO.getProductById(od.getProductID());
+                            if (product != null) {
+                                addedToCart.put(od.getProductID(), 
+                                    String.format("Đã thêm %.2f %s", od.getQuantity(), 
+                                        od.getPackageType() != null ? od.getPackageType() : "UNIT"));
                             }
                         }
+                    }
 
-                        // Only add to cart if stock is available
-                        if (stockQuantity > 0) {
-                            // Default re-add as UNIT without pack info; could be enhanced to restore original package
-                            cartItemDAO.upsertCartItem(account.getAccountID(), item.getProductID(),
-                                    Math.min(item.getQuantity(), stockQuantity), "UNIT", null);
+                    // Set appropriate messages for cart page
+                    if (addedItems == totalItems) {
+                        session.setAttribute("cartMessage", "🎉 Đã thêm tất cả " + totalItems + " sản phẩm vào giỏ hàng thành công! Bạn có thể tiếp tục mua sắm hoặc thanh toán.");
+                    } else if (addedItems > 0) {
+                        StringBuilder message = new StringBuilder();
+                        message.append("✅ Đã thêm ").append(addedItems).append("/").append(totalItems).append(" sản phẩm vào giỏ hàng. ");
+                        
+                        if (!insufficientStock.isEmpty()) {
+                            message.append("⚠️ Một số sản phẩm không đủ số lượng trong kho.");
                         }
-                    }
-
-                    if (!insufficientStock.isEmpty()) {
-                        session.setAttribute("cartError", "Một số sản phẩm không đủ số lượng trong kho");
+                        
+                        session.setAttribute("cartMessage", message.toString());
                     } else {
-                        session.setAttribute("cartMessage", "Đã thêm tất cả sản phẩm vào giỏ hàng");
+                        session.setAttribute("cartError", "❌ Không thể thêm sản phẩm nào vào giỏ hàng do không đủ số lượng trong kho. Vui lòng thử lại sau.");
                     }
 
+                    // Redirect to cart page
                     response.sendRedirect(request.getContextPath() + "/cart");
                     break;
 

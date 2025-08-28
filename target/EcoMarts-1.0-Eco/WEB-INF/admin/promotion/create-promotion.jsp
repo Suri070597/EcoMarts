@@ -32,9 +32,14 @@
           </div>
 
           <div class="card-body">
-            <c:if test="${not empty errorMessage}">
-              <div class="alert alert-danger">${errorMessage}</div>
-            </c:if>
+<c:if test="${not empty errorMessage}">
+  <ul>
+    <c:forEach var="err" items="${errorMessage}">
+      <li style="color:red">${err}</li>
+    </c:forEach>
+  </ul>
+</c:if>
+
 
             <form id="createForm" method="post" action="${pageContext.request.contextPath}/admin/promotion">
               <input type="hidden" name="action" value="create"/>
@@ -91,9 +96,9 @@
                   <label class="form-label d-block">Áp dụng <span class="text-danger">*</span></label>
 
                   <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="applyScope" id="scopeAll" value="0"
+<!--                    <input class="form-check-input" type="radio" name="applyScope" id="scopeAll" value="0"
                            <c:if test="${promotion == null || promotion.applyScope == 0}">checked</c:if>>
-                    <label class="form-check-label" for="scopeAll">Tất cả sản phẩm</label>
+                    <label class="form-check-label" for="scopeAll">Tất cả sản phẩm</label>-->
                   </div>
 
                   <div class="form-check form-check-inline">
@@ -115,7 +120,7 @@
                       </option>
                     </c:forEach>
                   </select>
-                  <div class="form-text">Nếu chọn “Theo danh mục”, bắt buộc chọn 1 danh mục.</div>
+                  <!--<div class="form-text">Nếu chọn “Theo danh mục”, bắt buộc chọn 1 danh mục.</div>-->
                 </div>
 
               </div>
