@@ -388,13 +388,13 @@ public class ProductDAO extends DBContext {
         }
     }
 
-        public Date getLatestExpiryDate(int productId) {
+    public Date getLatestExpiryDate(int productId) {
         String sql = "SELECT TOP 1 sid.ExpiryDate "
                 + "FROM Product p "
                 + "JOIN Inventory i ON i.ProductID = p.ProductID "
                 + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID "
                 + "JOIN StockIn si ON si.StockInID = sid.StockInID "
-                + "WHERE p.ProductID = ? AND sid.ExpiryDate IS NOT NULL "
+                + "WHERE p.ProductID = ? AND sid.ExpiryDate IS NOT NULL AND si.Status = 'Completed' "
                 + "ORDER BY si.DateIn DESC, si.StockInID DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -409,7 +409,7 @@ public class ProductDAO extends DBContext {
         }
         return null;
     }
-    
+
     public List<Category> getCategory() {
         List<Category> list = new ArrayList<>();
         String sql = "SELECT * FROM Category";
@@ -552,23 +552,22 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
-    
     public boolean hasProcessingOrders(int productId) {
-    String sql = "SELECT TOP 1 1 " +
-                 "FROM OrderDetail od " +
-                 "JOIN [Order] o ON od.OrderID = o.OrderID " +
-                 "WHERE od.ProductID = ? AND o.OrderStatus IN (N'Đang xử lý', N'Đã xử lý', N'Đang giao')";
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        try (ResultSet rs = ps.executeQuery()) {
-            return rs.next();
+        String sql = "SELECT TOP 1 1 "
+                + "FROM OrderDetail od "
+                + "JOIN [Order] o ON od.OrderID = o.OrderID "
+                + "WHERE od.ProductID = ? AND o.OrderStatus IN (N'Đang xử lý', N'Đã xử lý', N'Đang giao')";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-        return false;
     }
-}
-    
+
     public List<Product> getRelatedProductsByParentCategory(int parentId, int excludeProductId) {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.* FROM Product p "
@@ -970,12 +969,11 @@ public class ProductDAO extends DBContext {
     public Map<String, Object> getProductInventory(int productId) {
         Map<String, Object> inventory = new HashMap<>();
         List<Map<String, Object>> packList = new ArrayList<>();
-        
+
         // Lấy thông tin inventory
         String inventorySql = "SELECT PackageType, Quantity, PackSize FROM Inventory WHERE ProductID = ?";
         // Lấy thông tin giá từ Product
         String productSql = "SELECT PriceBox, PriceUnit, PricePack, ItemUnitName, BoxUnitName FROM Product WHERE ProductID = ?";
-
 
         try (PreparedStatement ps = conn.prepareStatement(inventorySql)) {
             ps.setInt(1, productId);
@@ -987,7 +985,6 @@ public class ProductDAO extends DBContext {
                 double qty = rs.getDouble("Quantity");
 
                 int packSize = rs.getInt("PackSize");
-
 
                 if ("PACK".equalsIgnoreCase(packageType)) {
                     Map<String, Object> p = new HashMap<>();
@@ -1003,7 +1000,7 @@ public class ProductDAO extends DBContext {
                     inventory.put(effectiveType + "_Quantity", qty);
                 }
             }
-            
+
             if (!packList.isEmpty()) {
                 inventory.put("PACK_LIST", packList);
                 inventory.put("PACK_Quantity", totalPackQty);
@@ -1016,7 +1013,7 @@ public class ProductDAO extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(productSql)) {
             ps.setInt(1, productId);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 inventory.put("BOX_Price", rs.getObject("PriceBox", Double.class));
                 inventory.put("UNIT_Price", rs.getObject("PriceUnit", Double.class));
@@ -1274,7 +1271,6 @@ public class ProductDAO extends DBContext {
 //        }
 //        return qty;
 //    }
-
     /**
      * Get PACK quantity filtered by packSize
      */
@@ -1296,8 +1292,8 @@ public class ProductDAO extends DBContext {
         }
         return qty;
     }
-    
-     public List<Product> getProductsByCategoryExpandedFiltered(int categoryId) {
+
+    public List<Product> getProductsByCategoryExpandedFiltered(int categoryId) {
         List<Product> list = new ArrayList<>();
         boolean isFruitCategory = false;
         try {
@@ -1478,7 +1474,7 @@ public class ProductDAO extends DBContext {
                 + "JOIN StockInDetail sid ON sid.InventoryID = i.InventoryID "
                 + "JOIN StockIn si ON si.StockInID = sid.StockInID "
                 + "JOIN Manufacturer m ON m.ManufacturerID = si.ManufacturerID "
-                + "WHERE p.ProductID = ? "
+                + "WHERE p.ProductID = ? AND si.Status = 'Completed' "
                 + "ORDER BY si.DateIn DESC, si.StockInID DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1497,7 +1493,6 @@ public class ProductDAO extends DBContext {
         }
         return result;
     }
-
 
     /**
      * Lấy số lượng theo package type cụ thể
