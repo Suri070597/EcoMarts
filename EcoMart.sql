@@ -294,9 +294,9 @@ CREATE TABLE Promotion (
     StartDate DATETIME NOT NULL,
     EndDate DATETIME NOT NULL,
     IsActive BIT DEFAULT 1, -- 1 = active, 0 = inactive
-    PromoType TINYINT NOT NULL DEFAULT 0; -- 0=Flash sale, 1=Seasonal
-    applyScope TINYINT NOT NULL DEFAULT 0; -- 0=ALL, 1=CATEGORY
-    ParentID INT NULL;
+    PromoType TINYINT NOT NULL DEFAULT 0, -- 0=Flash sale, 1=Seasonal
+    applyScope TINYINT NOT NULL DEFAULT 0, -- 0=ALL, 1=CATEGORY
+    ParentID INT NULL,
     CHECK (StartDate < EndDate)
 );
 
@@ -372,7 +372,6 @@ CREATE TABLE StockIn (
     DateIn DATETIME NOT NULL DEFAULT GETDATE(),
     Note NVARCHAR(255),
     Status NVARCHAR(20) NOT NULL DEFAULT 'Pending', -- Pending / Completed / Canceled
-	ExpiryDate DATE,
     CONSTRAINT FK_StockIn_Manufacturer FOREIGN KEY (ManufacturerID) REFERENCES Manufacturer(ManufacturerID),
     CONSTRAINT FK_StockIn_Receiver FOREIGN KEY (ReceiverID) REFERENCES Account(AccountID)
 );
@@ -383,6 +382,7 @@ CREATE TABLE StockInDetail (
     InventoryID INT NOT NULL,
     Quantity DECIMAL(18,2) NOT NULL,
     UnitPrice DECIMAL(18,2),
+	ExpiryDate DATE,
     
     CONSTRAINT FK_StockInDetail_StockIn FOREIGN KEY (StockInID) REFERENCES StockIn(StockInID) ON DELETE CASCADE,
     CONSTRAINT FK_StockInDetail_Inventory FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID)
