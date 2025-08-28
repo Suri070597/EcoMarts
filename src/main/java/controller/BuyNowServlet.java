@@ -14,6 +14,7 @@ import dao.CartItemDAO;
 import dao.CategoryDAO;
 import dao.OrderDAO;
 import dao.ProductDAO;
+import dao.PromotionDAO;
 import dao.VoucherDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,6 +27,7 @@ import model.CartItem;
 import model.Category;
 import model.Order;
 import model.Product;
+import model.Promotion;
 import model.Voucher;
 import util.VNPayUtil;
 
@@ -169,54 +171,42 @@ public class BuyNowServlet extends HttpServlet {
         AccountDAO accountDAO = new AccountDAO();
         Account fullAccount = accountDAO.getUserDetail(account.getAccountID());
 
-        // Calculate total
-        // Determine unit price according to selected package
-        Double price;
-        if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
-            Double pricePack = product.getPricePack();
-            if (pricePack != null) {
-                price = pricePack;
-            } else {
-                Double unitPrice = product.getPriceUnit();
-                price = unitPrice != null ? unitPrice * buyNowItem.getPackSize() : 0.0;
-            }
-        } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
-            price = product.getPrice();
-        } else {
-            price = product.getPriceUnit();
-            if (price == null) price = 0.0;
-        }
-        double itemTotal = price * buyNowItem.getQuantity();
-        product.setPrice(price);
-
-        // Get available vouchers for the user
+            // Calculate total price including promotions
+            prepareCheckoutPage(request, account, buyNowItem, product);        // Get available vouchers for the user
         VoucherDAO voucherDAO = new VoucherDAO();
         List<Voucher> availableVouchers = voucherDAO.getVouchersByAccountId(account.getAccountID());
 
-        // Filter valid vouchers (active and not expired)
-        List<Voucher> validVouchers = new ArrayList<>();
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+            // Filter valid vouchers (active and not expired)
+            List<Voucher> validVouchers = new ArrayList<>();
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            
+            // Calculate total amount before voucher
+            double itemTotal = product.getPrice() * buyNowItem.getQuantity();
 
-        for (Voucher voucher : availableVouchers) {
-            if (voucher.isActive()
-                    && now.after(voucher.getStartDate())
-                    && now.before(voucher.getEndDate())
-                    && itemTotal >= voucher.getMinOrderValue()
-                    && voucher.getUsageCount() < voucher.getMaxUsage()) {
+            for (Voucher voucher : availableVouchers) {
+                if (voucher.isActive()
+                        && now.after(voucher.getStartDate())
+                        && now.before(voucher.getEndDate())
+                        && itemTotal >= voucher.getMinOrderValue()
+                        && voucher.getUsageCount() < voucher.getMaxUsage()) {
 
-                // Check if voucher is applicable to this product's category
-                if (voucher.getCategoryID() == null
-                        || voucher.getCategoryID() == product.getCategory().getCategoryID()
-                        || voucher.getCategoryID() == product.getCategory().getParentID()) {
-                    validVouchers.add(voucher);
+                    // Check if voucher is applicable to this product's category
+                    Integer voucherCategoryId = voucher.getCategoryID();
+                    Category productCategory = product.getCategory();
+                    
+                    if (voucherCategoryId == null 
+                            || (productCategory != null && (
+                                voucherCategoryId.equals(productCategory.getCategoryID())
+                                || (productCategory.getParentID() != null 
+                                    && voucherCategoryId.equals(productCategory.getParentID()))
+                            ))) {
+                        validVouchers.add(voucher);
+                    }
                 }
             }
-        }
 
-        // Calculate rounded totals for consistent display
-        double roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;
-
-        // Set attributes for the checkout page
+            // Calculate rounded totals for consistent display
+            double roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;        // Set attributes for the checkout page
         request.setAttribute("buyNowItem", buyNowItem);
         request.setAttribute("itemTotal", roundedItemTotal);
         request.setAttribute("totalAmount", roundedItemTotal); // Initial total before voucher
@@ -436,24 +426,11 @@ public class BuyNowServlet extends HttpServlet {
                 return;
             }
 
-            // Calculate total amount
-            // Determine unit price by selected package
-            Double price;
-            if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
-                Double pricePack = product.getPricePack();
-                if (pricePack != null) {
-                    price = pricePack;
-                } else {
-                    Double unitPrice = product.getPriceUnit();
-                    price = unitPrice != null ? unitPrice * buyNowItem.getPackSize() : 0.0;
-                }
-            } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
-                price = product.getPrice();
-            } else {
-                price = product.getPriceUnit();
-                if (price == null) price = 0.0;
-            }
-            double totalAmount = price * buyNowItem.getQuantity();
+            // Re-prepare checkout page to ensure consistent pricing
+            prepareCheckoutPage(request, account, buyNowItem, product);
+            
+            // Get the final price including any promotions
+            double totalAmount = product.getPrice() * buyNowItem.getQuantity();
 
             // Ensure the product attached to buyNowItem carries the effective unit price
             if (buyNowItem.getProduct() == null) {
@@ -474,9 +451,27 @@ public class BuyNowServlet extends HttpServlet {
                     String itemUnitName = product.getItemUnitName();
                     unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
                 }
+
+                // Calculate base price based on package type
+                Double basePrice;
+                if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
+                    Double pricePack = product.getPricePack();
+                    if (pricePack != null) {
+                        basePrice = pricePack;
+                    } else {
+                        Double unitPrice = product.getPriceUnit();
+                        basePrice = unitPrice != null ? unitPrice * buyNowItem.getPackSize() : 0.0;
+                    }
+                } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
+                    basePrice = product.getPrice();
+                } else {
+                    basePrice = product.getPriceUnit();
+                    if (basePrice == null) basePrice = 0.0;
+                }
+
                 buyNowItem.getProduct().setUnit(unitLabel);
                 buyNowItem.getProduct().setStockQuantity(stockQty);
-                buyNowItem.getProduct().setPrice(price);
+                buyNowItem.getProduct().setPrice(basePrice); // Set base price for order detail
             }
             double discountAmount = 0;
 
@@ -649,29 +644,75 @@ public class BuyNowServlet extends HttpServlet {
             // Set product for the buy now item
             buyNowItem.setProduct(product);
 
-            // Get categories from database
+            // Get categories from database 
             CategoryDAO categoryDAO = new CategoryDAO();
             List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
             request.setAttribute("categories", categories);
 
-            // Calculate total
-            Double price;
-            if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
-                Double pricePack = product.getPricePack();
-                if (pricePack != null) {
-                    price = pricePack;
-                } else {
-                    Double unitPrice = product.getPriceUnit();
-                    price = unitPrice != null ? unitPrice * buyNowItem.getPackSize() : 0.0;
-                }
-            } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
-                price = product.getPrice();
-            } else {
-                price = product.getPriceUnit();
-                if (price == null) price = 0.0;
+            // Get base price based on package type
+            Double basePrice;
+            String packageType = buyNowItem.getPackageType();
+            if (packageType == null) packageType = "UNIT";
+            
+            switch(packageType.toUpperCase()) {
+                case "PACK":
+                    if (buyNowItem.getPackSize() != null) {
+                        Double pricePack = product.getPricePack();
+                        if (pricePack != null) {
+                            basePrice = pricePack;
+                        } else {
+                            Double unitPrice = product.getPriceUnit();
+                            basePrice = unitPrice != null ? unitPrice * buyNowItem.getPackSize() : 0.0;
+                        }
+                    } else {
+                        basePrice = product.getPriceUnit(); // Fallback to unit price if pack size not specified
+                    }
+                    break;
+                    
+                case "BOX":
+                    basePrice = product.getPrice(); // price field holds priceBox value
+                    break;
+                    
+                case "KG":
+                case "UNIT":
+                default:
+                    basePrice = product.getPriceUnit();
+                    break;
             }
-            double itemTotal = price * buyNowItem.getQuantity();
-            // Also set effective unit and stock for display
+            
+            if (basePrice == null) basePrice = 0.0;
+            
+            // Check for active promotion and calculate final price
+            double finalPrice = basePrice;
+            
+            // Debug log for base price
+            System.out.println("Debug - Product ID: " + product.getProductID());
+            System.out.println("Debug - Base Price before promotion: " + basePrice);
+            
+            PromotionDAO promotionDAO = new PromotionDAO();
+            Promotion activePromotion = promotionDAO.getValidPromotionForProduct(product.getProductID());
+            
+            if (activePromotion != null) {
+                // Calculate discounted price
+                double discountPercent = activePromotion.getDiscountPercent();
+                finalPrice = basePrice * (1 - discountPercent / 100);
+                
+                // Debug log for promotion calculation
+                System.out.println("Debug - Found active promotion with " + discountPercent + "% discount");
+                System.out.println("Debug - Final price after promotion: " + finalPrice);
+                
+                // Store promotion info for display
+                request.setAttribute("appliedPromotion", activePromotion); 
+                request.setAttribute("originalPrice", basePrice);
+            } else {
+                System.out.println("Debug - No active promotion found for product");
+            }
+
+            // Set final price and calculate total
+            product.setPrice(finalPrice);
+            double itemTotal = finalPrice * buyNowItem.getQuantity();
+
+            // Set effective unit and stock for display
             String unitLabel;
             if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
                 String itemUnitName = product.getItemUnitName();
@@ -686,12 +727,13 @@ public class BuyNowServlet extends HttpServlet {
                 unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
             }
             product.setUnit(unitLabel);
+
+            // Update stock quantity
             product.setStockQuantity(
                 ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null)
                     ? new ProductDAO().getPackQuantity(buyNowItem.getProductID(), buyNowItem.getPackSize())
                     : new ProductDAO().getQuantityByPackageType(buyNowItem.getProductID(), buyNowItem.getPackageType() != null ? buyNowItem.getPackageType() : "UNIT")
             );
-            product.setPrice(price);
 
             // Get available vouchers for the user
             VoucherDAO voucherDAO = new VoucherDAO();
@@ -717,17 +759,14 @@ public class BuyNowServlet extends HttpServlet {
                 }
             }
 
-            // Calculate item total
-            double roundedItemTotal = itemTotal;
-
-            // Set attributes for the checkout page
+            // Set checkout page attributes
             request.setAttribute("buyNowItem", buyNowItem);
-            request.setAttribute("itemTotal", roundedItemTotal);
-            request.setAttribute("totalAmount", roundedItemTotal); // Initial total before voucher
+            request.setAttribute("itemTotal", itemTotal);
+            request.setAttribute("totalAmount", itemTotal); // Initial total before voucher
+            request.setAttribute("validVouchers", validVouchers);
 
             // Add some debug log to verify values
-            System.out.println("Setting totalAmount attribute in prepareCheckoutPage: " + roundedItemTotal);
-            request.setAttribute("validVouchers", validVouchers);
+            System.out.println("Setting totalAmount attribute in prepareCheckoutPage: " + itemTotal);
 
             // Get user info if not already set
             if (request.getAttribute("userInfo") == null) {
@@ -751,6 +790,170 @@ public class BuyNowServlet extends HttpServlet {
         // Pattern for Vietnamese mobile numbers (10 digits, starting with 03, 05, 07, 08, 09)
         String pattern = "^(0|\\+84)[3|5|7|8|9][0-9]{8}$";
         return phone.matches(pattern);
+    }
+    /**
+     * Calculate base price for a product based on package type.
+     * Extracted from prepareCheckoutPage for testing.
+     */
+
+    /**
+     * Test method to verify price calculation and promotion application
+     */
+    public static void testPriceCalculation() {
+        try {
+            System.out.println("\n=== Test 1: Product Price Calculation ===");
+            
+            // Tạo test product
+            Product testProduct = new Product();
+            testProduct.setProductID(6);
+            testProduct.setProductName("Sữa tươi Vinamilk 180ml");
+            testProduct.setPrice(100000.0);      // priceBox
+            testProduct.setPriceUnit(10000.0);   // priceUnit
+            testProduct.setPricePack(50000.0);   // pricePack
+            
+            // Tạo category cho product
+            Category category = new Category();
+            category.setCategoryID(1);
+            category.setParentID(null);
+            testProduct.setCategory(category);
+            
+            // Test case 1: BOX package
+            CartItem testItem = new CartItem();
+            testItem.setProductID(6);
+            testItem.setQuantity(2.0);
+            testItem.setPackageType("BOX");
+            System.out.println("\nTest case 1 - BOX package:");
+            System.out.println("Expected price: 100,000");
+            System.out.println("Actual price: " + calculateBasePrice(testProduct, testItem));
+            
+            // Test case 2: PACK package
+            testItem.setPackageType("PACK");
+            testItem.setPackSize(6);
+            System.out.println("\nTest case 2 - PACK package (size=6):");
+            System.out.println("Expected price: 50,000");
+            System.out.println("Actual price: " + calculateBasePrice(testProduct, testItem));
+            
+            // Test case 3: UNIT package
+            testItem.setPackageType("UNIT");
+            testItem.setPackSize(null);
+            System.out.println("\nTest case 3 - UNIT package:");
+            System.out.println("Expected price: 10,000");
+            System.out.println("Actual price: " + calculateBasePrice(testProduct, testItem));
+
+            System.out.println("\n=== Test 2: Voucher Application ===");
+            
+            // Tạo test voucher
+            Voucher testVoucher = new Voucher();
+            testVoucher.setActive(true);
+            testVoucher.setStartDate(new Timestamp(System.currentTimeMillis() - 86400000)); // Yesterday
+            testVoucher.setEndDate(new Timestamp(System.currentTimeMillis() + 86400000));   // Tomorrow
+            testVoucher.setMinOrderValue(50000.0);
+            testVoucher.setMaxUsage(100);
+            testVoucher.setUsageCount(0);
+            testVoucher.setCategoryID(1); // Same as product category
+            
+            List<Voucher> testVouchers = new ArrayList<>();
+            testVouchers.add(testVoucher);
+            
+            // Test case 4: Valid voucher
+            System.out.println("\nTest case 4 - Valid voucher:");
+            System.out.println("Total amount: 200,000 (2 * 100,000)");
+            System.out.println("Min order value: 50,000");
+            System.out.println("Category match: Yes");
+            boolean isValid = false;
+            double itemTotal = testProduct.getPrice() * testItem.getQuantity();
+            
+            if (testVoucher.isActive()
+                    && itemTotal >= testVoucher.getMinOrderValue()
+                    && testVoucher.getUsageCount() < testVoucher.getMaxUsage()) {
+
+                Integer voucherCategoryId = testVoucher.getCategoryID();
+                Category productCategory = testProduct.getCategory();
+                
+                if (voucherCategoryId == null 
+                        || (productCategory != null && (
+                            voucherCategoryId.equals(productCategory.getCategoryID())
+                            || (productCategory.getParentID() != null 
+                                && voucherCategoryId.equals(productCategory.getParentID()))
+                        ))) {
+                    isValid = true;
+                }
+            }
+            System.out.println("Voucher valid: " + isValid);
+            
+            // Test case 5: Category mismatch
+            System.out.println("\nTest case 5 - Category mismatch:");
+            testVoucher.setCategoryID(99); // Different category
+            isValid = false;
+            if (testVoucher.isActive()
+                    && itemTotal >= testVoucher.getMinOrderValue()
+                    && testVoucher.getUsageCount() < testVoucher.getMaxUsage()) {
+
+                Integer voucherCategoryId = testVoucher.getCategoryID();
+                Category productCategory = testProduct.getCategory();
+                
+                if (voucherCategoryId == null 
+                        || (productCategory != null && (
+                            voucherCategoryId.equals(productCategory.getCategoryID())
+                            || (productCategory.getParentID() != null 
+                                && voucherCategoryId.equals(productCategory.getParentID()))
+                        ))) {
+                    isValid = true;
+                }
+            }
+            System.out.println("Expected: false (category mismatch)");
+            System.out.println("Actual: " + isValid);
+
+            System.out.println("\n=== Test Completed ===");
+            
+        } catch (Exception e) {
+            System.out.println("Test failed with error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    // Helper method to calculate base price
+    private static double calculateBasePrice(Product product, CartItem item) {
+        if (product == null || item == null) return 0.0;
+        
+        String packageType = item.getPackageType();
+        if (packageType == null) packageType = "UNIT";
+        
+        Double basePrice = 0.0;
+        switch(packageType.toUpperCase()) {
+            case "PACK":
+                if (item.getPackSize() != null) {
+                    Double pricePack = product.getPricePack();
+                    if (pricePack != null) {
+                        basePrice = pricePack;
+                    } else {
+                        Double unitPrice = product.getPriceUnit();
+                        basePrice = unitPrice != null ? unitPrice * item.getPackSize() : 0.0;
+                    }
+                } else {
+                    basePrice = product.getPriceUnit();
+                }
+                break;
+                
+            case "BOX":
+                basePrice = product.getPrice(); // price field holds priceBox value
+                break;
+                
+            case "KG":
+            case "UNIT":
+            default:
+                basePrice = product.getPriceUnit();
+                break;
+        }
+        
+        return basePrice != null ? basePrice : 0.0;
+    }
+    
+    /**
+     * Main method to run tests
+     */
+    public static void main(String[] args) {
+        testPriceCalculation();
     }
 
     /**
@@ -924,9 +1127,41 @@ public class BuyNowServlet extends HttpServlet {
                     return;
                 }
 
-                // Use effective price coming from DAO-populated cart item when available
-                double effectivePrice = (product != null && product.getPrice() != null) ? product.getPrice() : 0.0;
-                totalAmount += effectivePrice * item.getQuantity();
+                // Calculate base price
+                double basePrice = 0.0;
+                if (product != null) {
+                    if ("PACK".equalsIgnoreCase(item.getPackageType()) && item.getPackSize() != null) {
+                        Double pricePack = product.getPricePack();
+                        if (pricePack != null) {
+                            basePrice = pricePack;
+                        } else {
+                            Double unitPrice = product.getPriceUnit();
+                            basePrice = unitPrice != null ? unitPrice * item.getPackSize() : 0.0;
+                        }
+                    } else if ("BOX".equalsIgnoreCase(String.valueOf(item.getPackageType()))) {
+                        basePrice = product.getPrice() != null ? product.getPrice() : 0.0;
+                    } else {
+                        basePrice = product.getPriceUnit() != null ? product.getPriceUnit() : 0.0;
+                    }
+
+                    // Check for active promotion
+                    PromotionDAO promotionDAO = new PromotionDAO();
+                    Promotion activePromotion = promotionDAO.getValidPromotionForProduct(product.getProductID());
+                    
+                    if (activePromotion != null) {
+                        // Calculate discounted price
+                        double discountPercent = activePromotion.getDiscountPercent();
+                        double finalPrice = basePrice * (1 - discountPercent / 100);
+                        // Store promotion info for display
+                        request.setAttribute("promotion_" + product.getProductID(), activePromotion);
+                        request.setAttribute("originalPrice_" + product.getProductID(), basePrice);
+                        product.setPrice(finalPrice); // Set discounted price to product
+                        totalAmount += finalPrice * item.getQuantity();
+                    } else {
+                        product.setPrice(basePrice);
+                        totalAmount += basePrice * item.getQuantity();
+                    }
+                }
             }
 
             // Apply voucher if provided

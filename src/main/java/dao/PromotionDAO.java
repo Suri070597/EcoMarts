@@ -761,37 +761,38 @@ public class PromotionDAO extends DBContext {
         return out;
     }
 
-    // ====== MAIN TEST NHANH (CÁCH B) ======
+    // ====== MAIN TEST NHANH ======
     public static void main(String[] args) {
         try {
             PromotionDAO dao = new PromotionDAO();
 
-            // 1) Rebuild mapping cho các promotion đang hiệu lực theo từng type
-            int flashInserted = dao.rebuildMappingsForActiveType(TYPE_FLASHSALE);
-            int seasonalInserted = dao.rebuildMappingsForActiveType(TYPE_SEASONAL);
-            System.out.println("[Rebuild] FlashSale inserted rows = " + flashInserted);
-            System.out.println("[Rebuild] Seasonal  inserted rows = " + seasonalInserted);
-
-            // 2) Lấy sản phẩm theo type từ bảng mapping
-            List<Product> flash = dao.listFlashSaleFromMapping();
-            List<Product> seas = dao.listSeasonalFromMapping();
-
-            System.out.println("\n=== FLASH SALE products (" + flash.size() + ") ===");
-            for (int i = 0; i < Math.min(20, flash.size()); i++) {
-                Product p = flash.get(i);
-                System.out.println("  " + p.getProductID() + " - " + p.getProductName() + " - " + p.getPrice());
+            // Test getValidPromotionForProduct cho các sản phẩm từ ID 1-10
+            System.out.println("\n=== Testing getValidPromotionForProduct ===");
+            for (int productId = 1; productId <= 10; productId++) {
+                Promotion promo = dao.getValidPromotionForProduct(productId);
+                System.out.println("\nProduct ID: " + productId);
+                if (promo != null) {
+                    System.out.println("  Found Promotion:");
+                    System.out.println("  - ID: " + promo.getPromotionID());
+                    System.out.println("  - Name: " + promo.getPromotionName());
+                    System.out.println("  - Discount: " + promo.getDiscountPercent() + "%");
+                    System.out.println("  - Active: " + promo.isActive());
+                    System.out.println("  - Start: " + promo.getStartDate());
+                    System.out.println("  - End: " + promo.getEndDate());
+                } else {
+                    System.out.println("  No valid promotion found");
+                }
             }
-            if (flash.size() > 20) {
-                System.out.println("  ... (" + (flash.size() - 20) + " more)");
-            }
 
-            System.out.println("\n=== SEASONAL products (" + seas.size() + ") ===");
-            for (int i = 0; i < Math.min(20, seas.size()); i++) {
-                Product p = seas.get(i);
-                System.out.println("  " + p.getProductID() + " - " + p.getProductName() + " - " + p.getPrice());
-            }
-            if (seas.size() > 20) {
-                System.out.println("  ... (" + (seas.size() - 20) + " more)");
+            // Test Product_Promotion mapping
+            System.out.println("\n=== Checking Product_Promotion mappings ===");
+            final String sql = "SELECT pp.ProductID, pp.PromotionID FROM Product_Promotion pp ORDER BY pp.ProductID";
+            try (PreparedStatement ps = dao.conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    System.out.println("Product " + rs.getInt("ProductID") + 
+                                     " -> Promotion " + rs.getInt("PromotionID"));
+                }
             }
 
             System.out.println("\nDONE.");

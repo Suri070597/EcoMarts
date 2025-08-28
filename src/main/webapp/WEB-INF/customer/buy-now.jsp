@@ -2,6 +2,28 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+                                                    <div class="price-section">
+                                                        <c:set var="productPromotion" value="${requestScope['promotion_'.concat(item.product.productID)]}" />
+                                                        <c:if test="${not empty productPromotion}">
+                                                            <!-- Giá gốc (gạch ngang) -->
+                                                            <p class="text-muted small mb-1" style="text-decoration: line-through;">
+                                                                <fmt:formatNumber value="${requestScope['originalPrice_'.concat(item.product.productID)]}" type="number" pattern="#,###"/> đ / ${item.product.unit}
+                                                            </p>
+                                                            <!-- Giá đã giảm và badge khuyến mãi -->
+                                                            <p class="text-danger small fw-bold mb-0 d-flex align-items-center">
+                                                                <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
+                                                                <span class="badge bg-danger ms-2" style="font-size: 11px;">
+                                                                    -<fmt:formatNumber value="${productPromotion.discountPercent}" pattern="#,##0"/>%
+                                                                </span>
+                                                            </p>
+                                                        </c:if>
+                                                        <c:if test="${empty productPromotion}">
+                                                            <!-- Chỉ hiển thị giá gốc nếu không có khuyến mãi -->
+                                                            <p class="text-muted small mb-0">
+                                                                <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
+                                                            </p>
+                                                        </c:if>
+                                                    </div>
 <!DOCTYPE html>
 <html>
     <head>
@@ -265,9 +287,35 @@
                                                         </div>
                                                         <small class="text-muted">Còn lại: ${buyNowItem.product.stockQuantity} ${buyNowItem.product.unit}</small>
                                                     </div>
-                                                    <p class="text-success fw-bold mb-0">
-                                                        <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ / ${buyNowItem.product.unit}
-                                                    </p>
+                                                    <div class="price-section">
+                                                        <!-- DEBUG INFO -->
+                                                        <div style="font-size: 12px; color: #666;">
+                                                            Debug - Applied Promotion: ${not empty appliedPromotion ? 'YES' : 'NO'}<br/>
+                                                            Debug - Original Price: ${originalPrice}<br/>
+                                                            Debug - Product Price: ${buyNowItem.product.price}<br/>
+                                                            Debug - Promotion Info: ${not empty appliedPromotion ? appliedPromotion.promotionName.concat(' (').concat(appliedPromotion.discountPercent).concat('%)') : 'N/A'}
+                                                        </div>
+                                                        
+                                                        <c:if test="${not empty appliedPromotion}">
+                                                            <!-- Giá gốc (gạch ngang) -->
+                                                            <p class="text-muted mb-1" style="text-decoration: line-through;">
+                                                                <fmt:formatNumber value="${originalPrice}" type="number" pattern="#,###"/> đ
+                                                            </p>
+                                                            <!-- Giá đã giảm và badge khuyến mãi -->
+                                                            <p class="text-danger fw-bold mb-0 d-flex align-items-center">
+                                                                <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ
+                                                                <span class="badge bg-danger ms-2">
+                                                                    -<fmt:formatNumber value="${appliedPromotion.discountPercent}" pattern="#,##0"/>%
+                                                                </span>
+                                                            </p>
+                                                        </c:if>
+                                                        <c:if test="${empty appliedPromotion}">
+                                                            <!-- Chỉ hiển thị giá gốc nếu không có khuyến mãi -->
+                                                            <p class="text-success fw-bold mb-0">
+                                                                <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ
+                                                            </p>
+                                                        </c:if>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </c:otherwise>
