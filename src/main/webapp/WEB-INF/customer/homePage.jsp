@@ -146,7 +146,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -237,7 +237,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner1.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -328,7 +328,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner2.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -422,7 +422,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner3.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -515,7 +515,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner4.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -611,7 +611,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner5.png" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -704,7 +704,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner6.png" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
