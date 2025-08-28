@@ -4,7 +4,7 @@
  */
 package model;
 
-import java.util.Date;
+import java.sql.Date;
 
 /**
  *
@@ -18,14 +18,15 @@ public class StockInDetail {
     private String productName;
     private double quantity;
     private double unitPrice;
-    private Date expiryDate;
+    private Date expirationDate;
 
     public StockInDetail() {
     }
 
-    public StockInDetail(double quantity, double unitPrice) {
+    public StockInDetail(double quantity, double unitPrice, Date expirationDate) {
         this.quantity = quantity;
         this.unitPrice = unitPrice;
+        this.expirationDate = expirationDate;
     }
 
     public StockInDetail(int stockInDetailID, int stockInID, int inventoryID, double quantity, double unitPrice) {
@@ -120,12 +121,18 @@ public class StockInDetail {
         this.productName = productName;
     }
 
-    public Date getExpiryDate() {
-        return expiryDate;
+    /**
+     * @return the expirationDate
+     */
+    public Date getExpirationDate() {
+        return expirationDate;
     }
 
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
+    /**
+     * @param expirationDate the expirationDate to set
+     */
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
 }

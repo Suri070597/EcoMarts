@@ -1,6 +1,17 @@
 package controller.supplier;
 
+import java.io.IOException;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.Gson;
+
+import dao.AccountDAO;
 import dao.CategoryDAO;
+import dao.InventoryDAO;
+import dao.ManufacturerDAO;
 import dao.ProductDAO;
 import dao.StockDAO;
 import jakarta.servlet.RequestDispatcher;
@@ -9,19 +20,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.List;
-import model.Product;
-import com.google.gson.Gson;
-import dao.AccountDAO;
-import dao.InventoryDAO;
-import dao.ManufacturerDAO;
-import java.sql.Date;
-import java.util.ArrayList;
 import model.Account;
 import model.Inventory;
 import model.Manufacturer;
+import model.Product;
 import model.StockIn;
 import model.StockInDetail;
 
@@ -55,7 +57,8 @@ public class StockInFormServlet extends HttpServlet {
         // Nếu là AJAX search
         if ("search".equalsIgnoreCase(action)) {
             String keyword = request.getParameter("keyword");
-            List<Product> products = productDAO.searchProductsByName1(keyword);
+            // Dùng search có JOIN Inventory và LIKE để lấy tồn kho theo BOX/KG
+            List<Product> products = productDAO.searchProductsByName(keyword);
 
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write(new Gson().toJson(products));
@@ -72,6 +75,14 @@ public class StockInFormServlet extends HttpServlet {
 // 1.4. Lấy danh sách inventory            
             List<StockIn> stockIns = stockDAO.getAllStockIns();
 
+            if (action != null && action.equals("searchInventory")) {
+                String keyword = request.getParameter("keyword");
+                if (keyword != null && !keyword.trim().isEmpty()) {
+                    // Tìm theo mã nhập, tên nhà cung cấp, hoặc tên người nhận
+                    stockIns = stockDAO.searchStockIn(keyword.trim());
+                }
+            }
+
             // Với mỗi StockIn, load chi tiết
             for (StockIn s : stockIns) {
                 List<StockInDetail> details = stockDAO.getDetailsByStockInID(s.getStockInID());
@@ -82,11 +93,11 @@ public class StockInFormServlet extends HttpServlet {
 
             // ===== PHẦN 2: GỬI DỮ LIỆU ĐẾN JSP (View Layer) =====
             // 2.3. Gửi dữ liệu nhà cung cấp và người nhận
-            request.setAttribute("suppliers", manufactureList);
+            request.setAttribute("manufacturers", manufactureList);
             request.setAttribute("receivers", adminList);
 
             // 2.3. Gửi thông tin bổ sung cho JSP
-            request.setAttribute("totalSuppliers", manufactureList.size());
+            request.setAttribute("totalManufacturers", manufactureList.size());
             request.setAttribute("totalReceivers", adminList.size());
 
             // ===== PHẦN 3: FORWARD ĐẾN JSP =====
@@ -118,7 +129,8 @@ public class StockInFormServlet extends HttpServlet {
         String[] prices = request.getParameterValues("price");
         String[] packageTypes = request.getParameterValues("packageType");
         String[] packSizes = request.getParameterValues("packSize");
-        String supplierIdStr = request.getParameter("supplierId");
+        String[] expiryDates = request.getParameterValues("expiryDate");
+        String manufacturerIdStr = request.getParameter("manufacturerId");
         String receiverIdStr = request.getParameter("receiverId");
         String dateStr = request.getParameter("date");
         String note = request.getParameter("note");
@@ -130,7 +142,7 @@ public class StockInFormServlet extends HttpServlet {
             return;
         }
 
-        if (supplierIdStr == null || supplierIdStr.trim().isEmpty()) {
+        if (manufacturerIdStr == null || manufacturerIdStr.trim().isEmpty()) {
             request.setAttribute("errorMessage", "Vui lòng chọn nhà cung cấp");
             doGet(request, response);
             return;
@@ -143,11 +155,11 @@ public class StockInFormServlet extends HttpServlet {
         }
 
         try {
-            int supplierID = Integer.parseInt(request.getParameter("supplierId"));
+            int manufaturerID = Integer.parseInt(request.getParameter("manufacturerId"));
             int receiverID = Integer.parseInt(request.getParameter("receiverId"));
-            System.out.println("SupplierID: " + supplierID + ", ReceiverID: " + receiverID);
+            System.out.println("ManufacturerID: " + manufaturerID + ", ReceiverID: " + receiverID);
 
-            StockIn stock = new StockIn(supplierID, receiverID, java.sql.Date.valueOf(dateStr), note);
+            StockIn stock = new StockIn(manufaturerID, receiverID, java.sql.Date.valueOf(dateStr), note);
             System.out.println("Created StockIn: " + stock);
 
             List<Inventory> invList = new ArrayList<>();
@@ -159,6 +171,10 @@ public class StockInFormServlet extends HttpServlet {
                 double price = Double.parseDouble(prices[i]);
                 String pkgType = packageTypes[i];
                 int pSize = Integer.parseInt(packSizes[i]);
+                Date expiryDate = null;
+                if (expiryDates != null && expiryDates[i] != null && !expiryDates[i].trim().isEmpty()) {
+                    expiryDate = Date.valueOf(expiryDates[i]); // chuyển từ String sang java.sql.Date
+                }
 
                 System.out.println("Processing productId=" + pid
                         + ", qty=" + qty
@@ -167,7 +183,7 @@ public class StockInFormServlet extends HttpServlet {
                         + ", packSize=" + pSize);
 
                 Inventory inv = new Inventory(pid, pkgType, qty, price, pSize, Date.valueOf(dateStr));
-                StockInDetail detail = new StockInDetail(qty, price);
+                StockInDetail detail = new StockInDetail(qty, price, expiryDate);
 
                 invList.add(inv);
                 detailList.add(detail);

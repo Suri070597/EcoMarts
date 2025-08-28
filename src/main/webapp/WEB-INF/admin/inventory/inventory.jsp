@@ -1,34 +1,85 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
 <html lang="en">
+
     <head>
         <meta charset="UTF-8">
         <title>Quản lý nhập kho</title>
-        <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
+        <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png"
+              type="image/x-icon">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
     </head>
+
     <body>
         <div class="container-fluid">
             <%-- Sidebar --%>
             <jsp:include page="../components/sidebar.jsp" />
 
             <div class="main-content">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-warehouse fa-2x me-2" style="color:#a67c52;"></i>
+                                <h3 class="m-0" style="color:#a67c52;">Quản lý nhập kho</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <%-- Thống kê trạng thái với icon --%>
+                <div class="row text-center mb-4">
+                    <div class="col-md-4">
+                        <div class="card" style="background-color:#f9d67a; color:#000;">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-clock me-2"></i>Pending</h5>
+                                <p class="card-text display-4">${pendingCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card" style="background-color:#6cc070; color:#fff;">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-check-circle me-2"></i>Completed
+                                </h5>
+                                <p class="card-text display-4">${completedCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card" style="background-color:#e87a7a; color:#fff;">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-times-circle me-2"></i>Rejected
+                                </h5>
+                                <p class="card-text display-4">${rejectedCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions d-flex justify-content-between align-items-center">
                             <h1 class="card-title">Danh sách nhập kho</h1>
                             <div class="d-flex gap-2">
-                                <form action="${pageContext.request.contextPath}/admin/inventory" method="get" class="d-flex gap-2">
-                                    <select name="supplierId" class="form-select form-select-sm" style="width:650px;" onchange="this.form.submit()">
+                                <form action="${pageContext.request.contextPath}/admin/inventory"
+                                      method="get" class="d-flex gap-2">
+                                    <select name="manufacturerId" class="form-select form-select-sm"
+                                            style="width:650px;" onchange="this.form.submit()">
                                         <option value="">-- Tất cả nhà cung cấp --</option>
-                                        <c:forEach var="sup" items="${suppliers}">
-                                            <option value="${sup.manufacturerID}" <c:if test="${sup.manufacturerID == manufacturerID}">selected</c:if>>
+                                        <c:forEach var="sup" items="${manufacturers}">
+                                            <option value="${sup.manufacturerID}" <c:if
+                                                        test="${sup.manufacturerID == manufacturerId}">selected
+                                                    </c:if>>
                                                 ${sup.companyName}
                                             </option>
                                         </c:forEach>
@@ -59,33 +110,35 @@
                                         <td>${stock.manufacturerName}</td>
                                         <td>${stock.receiverName}</td>
                                         <td>${stock.dateIn}</td>
-                                        <td style="font-weight:bold;
+                                        <td
+                                            style="font-weight:bold;
                                             color:${stock.status == 'Pending' ? '#e6b800' : (stock.status == 'Completed' ? '#28a745' : '#dc3545')}">
                                             ${stock.status}
                                         </td>
                                         <td>
                                             <div class="d-flex gap-2 justify-content-center">
-                                                <a href="${pageContext.request.contextPath}/admin/inventory?service=detail&id=${stock.stockInID}" class="btn btn-sm btn-info">
+                                                <a href="${pageContext.request.contextPath}/admin/inventory?service=detail&id=${stock.stockInID}"
+                                                   class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 <!-- chỉ hiển thị 2 nút khi trạng thái Pending -->
                                                 <c:if test="${stock.status == 'Pending'}">
-                                                    <a href="${pageContext.request.contextPath}/admin/inventory?service=approve&id=${stock.stockInID}" 
+                                                    <a href="${pageContext.request.contextPath}/admin/inventory?service=approve&id=${stock.stockInID}"
                                                        class="btn btn-sm btn-success">
                                                         <i class="fas fa-check"></i>
                                                     </a>
 
-                                                    <a href="${pageContext.request.contextPath}/admin/inventory?service=reject&id=${stock.stockInID}" 
+                                                    <a href="${pageContext.request.contextPath}/admin/inventory?service=reject&id=${stock.stockInID}"
                                                        class="btn btn-sm btn-danger">
                                                         <i class="fas fa-times"></i>
                                                     </a>
                                                 </c:if>
                                             </div>
                                         </td>
-                                    </tr>                                  
+                                    </tr>
                                 </c:forEach>
                             </tbody>
-                        </table>                       
+                        </table>
                     </div>
                 </div>
             </div>
@@ -96,12 +149,12 @@
         <!-- 2: Check message and show alert -->
         <c:if test="${param.message eq 'approved'}">
             <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Approve thành công',
-            showConfirmButton: false,
-            timer: 1000
-        });
+                                                    Swal.fire({
+                                                        icon: 'success',
+                                                        title: 'Approve thành công',
+                                                        showConfirmButton: false,
+                                                        timer: 1000
+                                                    });
             </script>
         </c:if>
 
@@ -119,4 +172,5 @@
         <!-- 3: Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
+
 </html>
