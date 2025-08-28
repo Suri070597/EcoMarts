@@ -35,21 +35,11 @@
                                     <i class="fas fa-arrow-left"></i>
                                     Quay lại danh sách
                                 </a>
-                                <c:choose>
-                                    <c:when test='${account.role == 1}'>
-                                        <button type="button" class="btn btn-secondary" disabled title="Không thể chỉnh sửa tài khoản quản trị viên">
-                                            <i class="fas fa-edit"></i>
-                                            Chỉnh sửa
-                                        </button>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/admin/account?view=edit&id=${account.accountID}"
-                                           class="btn btn-primary">
-                                            <i class="fas fa-edit"></i>
-                                            Chỉnh sửa
-                                        </a>
-                                    </c:otherwise>
-                                </c:choose>
+                                <a href="${pageContext.request.contextPath}/admin/account?view=edit&id=${account.accountID}"
+                                   class="btn btn-primary">
+                                    <i class="fas fa-edit"></i>
+                                    Chỉnh sửa
+                                </a>
                             </div>
                         </div>
                     </div>

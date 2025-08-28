@@ -1,5 +1,5 @@
 <%-- 
-    Tài liệu   : manage-manufacturer
+    Tài liệu   : manage-supplier
     Tạo ngày  : Jun 17, 2025, 9:54:48 PM
     Tác giả   : ADMIN
 --%>
@@ -29,11 +29,11 @@
                         <div class="header-actions">
                             <h1 class="card-title">Danh Sách Nhà Sản Xuất</h1>
                             <div class="d-flex gap-3">
-                                <form action="${pageContext.request.contextPath}/admin/manufacturer" method="get" class="search-box">
+                                <form action="${pageContext.request.contextPath}/admin/supplier" method="get" class="search-box">
                                     <i class="fas fa-search"></i>
                                     <input type="text" name="search" placeholder="Tìm kiếm nhà sản xuất..." value="${keyword != null ? keyword : ''}">
                                 </form>
-                                <a href="${pageContext.request.contextPath}/admin/manufacturer?view=create" class="btn btn-success">
+                                <a href="${pageContext.request.contextPath}/admin/supplier?view=create" class="btn btn-success">
                                     <i class="fas fa-plus"></i> Thêm nhà sản xuất
                                 </a>
                             </div>
@@ -45,7 +45,7 @@
                                 <i class="fas fa-building"></i>
                             </div>
                             <div class="stat-details">
-                                <h3>${totalManufacturers}</h3>
+                                <h3>${totalSuppliers}</h3>
                                 <p>Tổng số nhà sản xuất</p>
                             </div>
                         </div>
@@ -54,7 +54,7 @@
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <div class="stat-details">
-                                <h3>${activeManufacturers}</h3>
+                                <h3>${activeSuppliers}</h3>
                                 <p>Đang hợp tác</p>
                             </div>
                         </div>
@@ -63,7 +63,7 @@
                                 <i class="fas fa-times-circle"></i>
                             </div>
                             <div class="stat-details">
-                                <h3>${inactiveManufacturers}</h3>
+                                <h3>${inactiveSuppliers}</h3>
                                 <p>Ngừng hợp tác</p>
                             </div>
                         </div>
@@ -86,9 +86,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <c:forEach items="${manufacturers}" var="sup">
+                                <c:forEach items="${suppliers}" var="sup">
                                     <tr>
-                                        <td>${sup.manufacturerID}</td>
+                                        <td>${sup.supplierID}</td>
                                         <td>${sup.brandName}</td>
                                         <td>${sup.companyName}</td>
                                         <td>${sup.address}</td>
@@ -101,16 +101,16 @@
                                         </td>
                                         <td>
                                             <div class="d-flex gap-2">
-                                                <a href="${pageContext.request.contextPath}/admin/manufacturer?view=detail&id=${sup.manufacturerID}" class="btn btn-sm btn-info" title="Xem chi tiết">
+                                                <a href="${pageContext.request.contextPath}/admin/supplier?view=detail&id=${sup.supplierID}" class="btn btn-sm btn-info" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="${pageContext.request.contextPath}/admin/manufacturer?view=edit&id=${sup.manufacturerID}" class="btn btn-sm btn-primary" title="Chỉnh sửa">
+                                                <a href="${pageContext.request.contextPath}/admin/supplier?view=edit&id=${sup.supplierID}" class="btn btn-sm btn-primary" title="Chỉnh sửa">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="javascript:void(0)" onclick="confirmStatusChange('${pageContext.request.contextPath}/admin/manufacturer?action=status&id=${sup.manufacturerID}&status=${sup.status}', ${sup.status})" class="btn btn-sm ${sup.status == 1 ? 'btn-warning' : 'btn-success'}" title="Thay đổi trạng thái">
+                                                <a href="javascript:void(0)" onclick="confirmStatusChange('${pageContext.request.contextPath}/admin/supplier?action=status&id=${sup.supplierID}&status=${sup.status}', ${sup.status})" class="btn btn-sm ${sup.status == 1 ? 'btn-warning' : 'btn-success'}" title="Thay đổi trạng thái">
                                                     <i class="fas ${sup.status == 1 ? 'fa-ban' : 'fa-check'}"></i>
                                                 </a>
-                                                <a href="${pageContext.request.contextPath}/admin/manufacturer?action=delete&id=${sup.manufacturerID}" class="btn btn-sm btn-danger" onclick="return confirmDelete(event, '${sup.manufacturerID}')" title="Xóa">
+                                                <a href="${pageContext.request.contextPath}/admin/supplier?action=delete&id=${sup.supplierID}" class="btn btn-sm btn-danger" onclick="return confirmDelete(event, '${sup.supplierID}')" title="Xóa">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             </div>
@@ -153,7 +153,7 @@
                 });
             });
 
-            function confirmDelete(event, manufacturerId) {
+            function confirmDelete(event, supplierId) {
                 event.preventDefault();
                 Swal.fire({
                     title: 'Xác nhận xóa nhà sản xuất',
@@ -166,26 +166,11 @@
                     cancelButtonText: 'Hủy'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = '${pageContext.request.contextPath}/admin/manufacturer?action=delete&id=' + manufacturerId;
+                        window.location.href = '${pageContext.request.contextPath}/admin/supplier?action=delete&id=' + supplierId;
                     }
                 });
                 return false;
             }
-
-            // Flash message via URL params (SweetAlert)
-            window.addEventListener('load', function () {
-                const urlParams = new URLSearchParams(window.location.search);
-                const message = urlParams.get('message');
-                const type = urlParams.get('type');
-                if (message) {
-                    Swal.fire({
-                        title: type === 'success' ? 'Thành công!' : 'Lỗi!',
-                        text: message,
-                        icon: type === 'success' ? 'success' : 'error',
-                        confirmButtonColor: type === 'success' ? '#8b6c42' : '#c35f5f'
-                    });
-                }
-            });
         </script>
     </body>
 </html>

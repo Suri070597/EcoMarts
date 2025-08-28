@@ -66,19 +66,6 @@ public class SearchProductsDAO extends DBContext {
                 p.setExpirationDate(rs.getDate("ExpirationDate"));
                 p.setCategoryID(rs.getInt("CategoryID"));
                 p.setManufacturerID(rs.getInt("ManufacturerID"));
-                // Bổ sung các trường đơn vị
-                try {
-                    p.setUnitPerBox(rs.getInt("UnitPerBox"));
-                } catch (Exception ignore) {
-                }
-                try {
-                    p.setBoxUnitName(rs.getString("BoxUnitName"));
-                } catch (Exception ignore) {
-                }
-                try {
-                    p.setItemUnitName(rs.getString("ItemUnitName"));
-                } catch (Exception ignore) {
-                }
                 productList.add(p);
             }
         }

@@ -47,7 +47,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp)
         return;
     }
 
-    List<Order> orders = orderDAO.getOrdersByAccountId(acc.getAccountID());
+    List<Order> orders = orderDAO.getOrdersByCustomerName(acc.getFullName());
     List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
 
 for (Order order : orders) {
@@ -62,10 +62,6 @@ for (Order order : orders) {
     order.setSubtotal(subtotal);
     order.setVat(vat);
     order.setGrandTotal(grandTotal);
-    
-    // Lấy danh sách tên sản phẩm cho order này
-    String productNames = orderDetailDAO.getProductNamesByOrderId(order.getOrderID());
-    order.setProductNames(productNames); // Cần thêm field này vào model Order
 }
 
 

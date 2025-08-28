@@ -68,16 +68,6 @@
                 color: #333;
                 vertical-align: middle;
             }
-            
-            .order-table td.price {
-                text-align: right;
-            }
-            
-            .order-table td:nth-child(2) {
-                text-align: center;
-                max-width: 300px;
-                word-wrap: break-word;
-            }
 
             .order-table tr:hover {
                 background-color: #f9f9f9;
@@ -183,7 +173,7 @@
                                 <thead>
                                     <tr>
                                         <th>Mã đơn hàng</th>
-                                        <th>Sản phẩm</th>
+                                        <th>Ngày đặt</th>
                                         <th>Tổng tiền</th>
                                         <th>Trạng thái</th>
                                         <th>Số lượng sản phẩm</th>
@@ -194,8 +184,8 @@
                                     <c:forEach var="order" items="${orders}">
                                         <tr>
                                             <td>#${order.orderID}</td>
-                                            <td>${order.productNames}</td>
-                                            <td class="price"><fmt:formatNumber value="${order.grandTotal}" type="number"/> đ</td>
+                                            <td><fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" /></td>
+                                            <td><fmt:formatNumber value="${order.grandTotal}" type="number"/> đ<br/>
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${order.orderStatus == 'Đang xử lý'}">

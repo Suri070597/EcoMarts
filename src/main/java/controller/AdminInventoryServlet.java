@@ -21,6 +21,7 @@ import java.util.List;
 import model.Manufacturer;
 import model.StockIn;
 import model.StockInDetail;
+import model.Supplier;
 
 /**
  *
@@ -53,7 +54,7 @@ public class AdminInventoryServlet extends HttpServlet {
 
             try {
                 //Lấy danh sách inventory            
-                List<StockIn> stockIns ;
+                List<StockIn> stockIns;
 
                 if (supplierIdStr != null && !supplierIdStr.isEmpty()) {
                     int supplierId = Integer.parseInt(supplierIdStr);
@@ -70,6 +71,28 @@ public class AdminInventoryServlet extends HttpServlet {
                 }
 
                 List<Manufacturer> supplierList = manufacturerDAO.getAllManufacturers();
+
+                int pendingCount = 0;
+                int completedCount = 0;
+                int rejectedCount = 0;
+
+                for (StockIn stock : stockIns) {
+                    switch (stock.getStatus()) {
+                        case "Pending":
+                            pendingCount++;
+                            break;
+                        case "Completed":
+                            completedCount++;
+                            break;
+                        case "Canceled":
+                            rejectedCount++;
+                            break;
+                    }
+                }
+
+                request.setAttribute("pendingCount", pendingCount);
+                request.setAttribute("completedCount", completedCount);
+                request.setAttribute("rejectedCount", rejectedCount);
 
                 request.setAttribute("suppliers", supplierList);
                 request.setAttribute("stockIns", stockIns);
@@ -140,11 +163,9 @@ public class AdminInventoryServlet extends HttpServlet {
             StockDAO stockDAO = new StockDAO();
 
             try {
-                // Lấy chi tiết StockIn
-                List<StockInDetail> details = stockDAO.getDetailsByStockInID(stockInID);
 
                 // Approve
-                stockDAO.approveStockIn(stockInID, details);
+                stockDAO.approveStockIn(stockInID);
 
                 // Redirect về danh sách với thông báo thành công
                 response.sendRedirect(request.getContextPath() + "/admin/inventory?message=approved");
@@ -164,11 +185,7 @@ public class AdminInventoryServlet extends HttpServlet {
             StockDAO stockDAO = new StockDAO();
 
             try {
-                // Lấy chi tiết StockIn
-                List<StockInDetail> details = stockDAO.getDetailsByStockInID(stockInID);
-
-                // Approve
-                stockDAO.rejectStockIn(stockInID, details);
+                stockDAO.rejectStockIn(stockInID);
 
                 // Redirect về danh sách với thông báo thành công
                 response.sendRedirect(request.getContextPath() + "/admin/inventory?message=rejected");

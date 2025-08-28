@@ -1,7 +1,6 @@
 package controller.dangky;
 
 import dao.AccountDAO1;
-import dao.CustomerDAO;
 import dao.TokenDAO;
 
 import jakarta.mail.MessagingException;
@@ -147,19 +146,6 @@ public class RegistrationServlet extends HttpServlet {
 
             int accountId = accountDAO1.insertAccount(account);
             System.out.println("Tài khoản đã được đăng ký với ID: " + accountId);
-
-            // Nếu là khách hàng (role=0) thì thêm vào bảng Customer
-            if (accountId > 0 && account.getRole() == 0) {
-                CustomerDAO customerDAO = new CustomerDAO();
-                model.Customer customer = new model.Customer();
-                customer.setAccountID(accountId);
-                customer.setFullName(fullName);
-                customer.setEmail(email.trim().toLowerCase());
-                customer.setPhone(phone);
-                customer.setGender(gender);
-                customer.setAddress(address);
-                customerDAO.insert(customer);
-            }
 
             // Tạo và gửi OTP
             String otp = EmailUtil.generateOtp();

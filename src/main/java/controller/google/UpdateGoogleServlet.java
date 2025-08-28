@@ -5,7 +5,6 @@ package controller.google;
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
 import dao.AccountDAO1;
-import dao.CustomerDAO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,7 +13,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
 import model.Account;
 
 /**
@@ -118,25 +116,15 @@ public class UpdateGoogleServlet extends HttpServlet {
 
             acc.setPassword(db.MD5Util.hash("GOOGLE_LOGIN"));
             // Lưu mới vào DB
-            int accountId = dao.insertAccount(acc);
+            dao.insertAccount(acc);
 
             // Lấy lại thông tin đầy đủ từ DB để set lên session (accountID v.v)
             Account accDb = dao.getAccountByEmail(email);
-            if (accountId > 0 && accDb != null && accDb.getRole() == 0) {
-                CustomerDAO customerDAO = new CustomerDAO();
-                model.Customer customer = new model.Customer();
-                customer.setAccountID(accDb.getAccountID());
-                customer.setFullName(fullName);
-                customer.setEmail(email);
-                customer.setPhone(phone);
-                customer.setGender(gender);
-                customer.setAddress(address);
-                customerDAO.insert(customer);
-            }
             request.getSession().setAttribute("account", accDb);
 
             response.sendRedirect(request.getContextPath() + "/home");
-        } catch (ServletException | IOException | SQLException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             request.setAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/login/google/updategoogle.jsp").forward(request, response);
         }

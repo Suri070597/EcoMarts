@@ -59,9 +59,23 @@ public class ManageStaffServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession();
+        Account account = (Account) session.getAttribute("account");
+        if (account != null && account.getRole() == 2) {
+            StaffDAO staffDAO = new StaffDAO();
+            Staff staff = staffDAO.getStaffByAccountId(account.getAccountID());
+            req.setAttribute("staff", staff);
+            req.getRequestDispatcher("/WEB-INF/staff/staffs/manage-staff.jsp").forward(req, resp);
+        } else {
+            resp.sendRedirect("login.jsp");
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         try {
             int staffId = Integer.parseInt(req.getParameter("staffId"));
             String fullName = req.getParameter("fullName");
@@ -78,39 +92,19 @@ public class ManageStaffServlet extends HttpServlet {
                 staff.setGender(gender);
 
                 boolean updated = staffDAO.updateStaff(staff);
-                session.setAttribute("flashMessage", updated ? "Cập nhật thành công!" : "Cập nhật thất bại!");
+
+                if (updated) {
+                    req.setAttribute("message", "Cập nhật thành công!");
+                } else {
+                    req.setAttribute("message", "Cập nhật thất bại!");
+                }
+                req.setAttribute("staff", staffDAO.getStaffById(staffId));
             } else {
-                session.setAttribute("flashMessage", "Không tìm thấy thông tin nhân viên.");
+                req.setAttribute("message", "Không tìm thấy thông tin nhân viên.");
             }
-
-            // PRG: quay về trang xem
-            resp.sendRedirect(req.getContextPath() + "/ManageStaffServlet");
-        } catch (Exception e) {
-            session.setAttribute("flashMessage", "Cập nhật thất bại: " + e.getMessage());
-            resp.sendRedirect(req.getContextPath() + "/ManageStaffServlet?action=edit");
-        }
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        Account account = (Account) session.getAttribute("account");
-        if (account == null || account.getRole() != 2) {
-            resp.sendRedirect("login.jsp");
-            return;
-        }
-
-        StaffDAO staffDAO = new StaffDAO();
-        Staff staff = staffDAO.getStaffByAccountId(account.getAccountID());
-        req.setAttribute("staff", staff);
-
-        String action = req.getParameter("action");
-        if ("edit".equalsIgnoreCase(action)) {
-            // Trang chỉnh sửa
-            req.getRequestDispatcher("/WEB-INF/staff/staffs/editprofilestaff.jsp").forward(req, resp);
-        } else {
-            // Trang xem
+            req.getRequestDispatcher("/WEB-INF/staff/staffs/manage-staff.jsp").forward(req, resp);
+        } catch (ServletException | IOException | NumberFormatException e) {
+            req.setAttribute("message", "Cập nhật thất bại: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/staff/staffs/manage-staff.jsp").forward(req, resp);
         }
     }

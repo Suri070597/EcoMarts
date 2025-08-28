@@ -19,6 +19,46 @@
             <jsp:include page="../components/sidebar.jsp" />
 
             <div class="main-content">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-warehouse fa-2x me-2" style="color:#a67c52;"></i>
+                                <h3 class="m-0" style="color:#a67c52;">Quản lý nhập kho</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <%-- Thống kê trạng thái với icon --%>
+                <div class="row text-center mb-4">
+                    <div class="col-md-4">
+                        <div class="card" style="background-color:#f9d67a; color:#000;">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-clock me-2"></i>Pending</h5>
+                                <p class="card-text display-4">${pendingCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card" style="background-color:#6cc070; color:#fff;">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-check-circle me-2"></i>Completed</h5>
+                                <p class="card-text display-4">${completedCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card" style="background-color:#e87a7a; color:#fff;">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-times-circle me-2"></i>Rejected</h5>
+                                <p class="card-text display-4">${rejectedCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-header">
                         <div class="header-actions d-flex justify-content-between align-items-center">
@@ -96,12 +136,12 @@
         <!-- 2: Check message and show alert -->
         <c:if test="${param.message eq 'approved'}">
             <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Approve thành công',
-            showConfirmButton: false,
-            timer: 1000
-        });
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Approve thành công',
+                                            showConfirmButton: false,
+                                            timer: 1000
+                                        });
             </script>
         </c:if>
 

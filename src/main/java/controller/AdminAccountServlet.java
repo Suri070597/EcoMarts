@@ -4,17 +4,13 @@ import java.io.IOException;
 import java.util.List;
 
 import dao.AccountDAO;
-import dao.CustomerDAO;
-import dao.StaffDAO;
 import db.MD5Util;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
 import model.Account;
-import model.Staff;
 
 @WebServlet(name = "AdminAccountServlet", urlPatterns = {"/admin/account"})
 public class AdminAccountServlet extends HttpServlet {
@@ -27,50 +23,25 @@ public class AdminAccountServlet extends HttpServlet {
         AccountDAO accDAO = new AccountDAO();
 
         if (action != null && action.equals("delete")) {
-            try {
-                int id = Integer.parseInt(request.getParameter("id"));
-                String base = request.getContextPath() + "/admin/account";
-                Account target = accDAO.getFullAccountById(id);
-                if (target == null) {
-                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Tài khoản không tồn tại", java.nio.charset.StandardCharsets.UTF_8));
-                    return;
-                }
-                if (target.getRole() == 1) {
-                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Không thể xóa tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
-                    return;
-                }
-                boolean result = accDAO.deleteAccount(id);
-                if (result) {
-                    response.sendRedirect(base + "?type=success&message=" + java.net.URLEncoder.encode("Xóa tài khoản thành công", java.nio.charset.StandardCharsets.UTF_8));
-                } else {
-                    response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Không thể xóa vì có liên kết dữ liệu liên quan", java.nio.charset.StandardCharsets.UTF_8));
-                }
-            } catch (Exception e) {
-                String base = request.getContextPath() + "/admin/account";
-                response.sendRedirect(base + "?type=error&message=" + java.net.URLEncoder.encode("Không thể xóa vì có liên kết dữ liệu liên quan", java.nio.charset.StandardCharsets.UTF_8));
+            int id = Integer.parseInt(request.getParameter("id"));
+            boolean result = accDAO.deleteAccount(id);
+            if (!result) {
+                request.setAttribute("errorMessage", "Không thể xóa tài khoản này vì có dữ liệu liên quan!");
+                List<Account> accounts = accDAO.getAllAccountsFull();
+                request.setAttribute("accounts", accounts);
+                request.getRequestDispatcher("/WEB-INF/admin/account/manage-account.jsp").forward(request, response);
+                return;
             }
+            response.sendRedirect(request.getContextPath() + "/admin/account");
             return;
         }
 
         if (action != null && action.equals("status")) {
-            try {
-                int id = Integer.parseInt(request.getParameter("id"));
-                Account target = accDAO.getFullAccountById(id);
-                if (target == null) {
-                    response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Tài khoản không tồn tại", java.nio.charset.StandardCharsets.UTF_8));
-                    return;
-                }
-                if (target.getRole() == 1) {
-                    response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Không thể cập nhật trạng thái tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
-                    return;
-                }
-                String status = request.getParameter("status");
-                String newStatus = status.equals("Active") ? "Inactive" : "Active";
-                accDAO.updateAccountStatus(id, newStatus);
-                response.sendRedirect(request.getContextPath() + "/admin/account?type=success&message=" + java.net.URLEncoder.encode("Cập nhật trạng thái thành công", java.nio.charset.StandardCharsets.UTF_8));
-            } catch (Exception e) {
-                response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Lỗi khi cập nhật trạng thái", java.nio.charset.StandardCharsets.UTF_8));
-            }
+            int id = Integer.parseInt(request.getParameter("id"));
+            String status = request.getParameter("status");
+            String newStatus = status.equals("Active") ? "Inactive" : "Active";
+            accDAO.updateAccountStatus(id, newStatus);
+            response.sendRedirect(request.getContextPath() + "/admin/account");
             return;
         }
 
@@ -83,10 +54,6 @@ public class AdminAccountServlet extends HttpServlet {
                     int id = Integer.parseInt(request.getParameter("id"));
                     Account account = accDAO.getFullAccountById(id);
                     if (account != null) {
-                        if (account.getRole() == 1) {
-                            response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message=" + java.net.URLEncoder.encode("Không thể chỉnh sửa tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
-                            return;
-                        }
                         request.setAttribute("account", account);
                         request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     } else {
@@ -159,16 +126,6 @@ public class AdminAccountServlet extends HttpServlet {
                 int role = Integer.parseInt(request.getParameter("role"));
                 String status = request.getParameter("status").trim();
 
-                role = 0;
-                status = "Active";
-
-                // Block creating admin accounts
-                if (role == 1) {
-                    request.setAttribute("errorMessage", "Không thể tạo tài khoản quản trị viên.");
-                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
-                    return;
-                }
-
                 if (accDAO.isUsernameExists(username)) {
                     request.setAttribute("errorMessage", "Tên đăng nhập đã tồn tại.");
                     request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
@@ -179,7 +136,7 @@ public class AdminAccountServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
                     return;
                 }
-
+                
                 if (accDAO.isPhoneExists(phone)) {
                     request.setAttribute("errorMessage", "Phone đã tồn tại.");
                     request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
@@ -241,80 +198,6 @@ public class AdminAccountServlet extends HttpServlet {
                 boolean res = accDAO.insertFullAccount(account);
 
                 if (res) {
-                    // Nếu tạo tài khoản customer (role = 0), cần insert vào bảng Customer (HuuDuc)
-                    if (role == 0) {
-                        try {
-                            int accountId = accDAO.getAccountIdByUsername(username);
-                            if (accountId != -1) {
-                                model.Customer customer = new model.Customer();
-                                customer.setAccountID(accountId);
-                                customer.setFullName(fullName);
-                                customer.setEmail(email);
-                                customer.setPhone(phone);
-                                customer.setGender(gender);
-                                customer.setAddress(address);
-
-                                CustomerDAO customerDAO = new CustomerDAO();
-                                int customerId = customerDAO.insert(customer);
-                                if (customerId <= 0) {
-                                    accDAO.deleteAccount(accountId);
-                                    request.setAttribute("errorMessage", "Tạo thông tin customer thất bại. Vui lòng thử lại.");
-                                    request.setAttribute("account", account);
-                                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
-                                    return;
-                                }
-                            }
-                        } catch (ServletException | IOException | SQLException e) {
-                            int accountId = accDAO.getAccountIdByUsername(username);
-                            if (accountId != -1) {
-                                accDAO.deleteAccount(accountId);
-                            }
-                            request.setAttribute("errorMessage", "Lỗi khi tạo thông tin customer: " + e.getMessage());
-                            request.setAttribute("account", account);
-                            request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
-                            return;
-                        }
-                    }
-                    // Nếu tạo tài khoản staff (role = 2), cần insert vào bảng Staff(HuuDuc)
-                    if (role == 2) {
-                        try {
-                            // Lấy AccountID vừa tạo
-                            int accountId = accDAO.getAccountIdByUsername(username);
-                            if (accountId != -1) {
-                                // Tạo Staff object và insert vào bảng Staff
-                                Staff staff = new Staff();
-                                staff.setAccountID(accountId);
-                                staff.setFullName(fullName);
-                                staff.setEmail(email);
-                                staff.setPhone(phone);
-                                staff.setGender(gender);
-                                staff.setAddress(address);
-                                staff.setStatus(status);
-
-                                StaffDAO staffDAO = new StaffDAO();
-                                boolean staffCreated = staffDAO.insertStaff(staff);
-                                if (!staffCreated) {
-                                    // Nếu tạo staff thất bại, xóa tài khoản vừa tạo
-                                    accDAO.deleteAccount(accountId);
-                                    request.setAttribute("errorMessage", "Tạo thông tin staff thất bại. Vui lòng thử lại.");
-                                    request.setAttribute("account", account);
-                                    request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
-                                    return;
-                                }
-                            }
-                        } catch (ServletException | IOException e) {
-                            // Nếu có lỗi, xóa tài khoản vừa tạo
-                            int accountId = accDAO.getAccountIdByUsername(username);
-                            if (accountId != -1) {
-                                accDAO.deleteAccount(accountId);
-                            }
-                            request.setAttribute("errorMessage", "Lỗi khi tạo thông tin staff: " + e.getMessage());
-                            request.setAttribute("account", account);
-                            request.getRequestDispatcher("/WEB-INF/admin/account/create-account.jsp").forward(request, response);
-                            return;
-                        }
-                    }
-
                     response.sendRedirect(request.getContextPath() + "/admin/account");
                 } else {
                     request.setAttribute("errorMessage", "Tạo tài khoản thất bại. Vui lòng thử lại.");
@@ -339,25 +222,10 @@ public class AdminAccountServlet extends HttpServlet {
                 int role = Integer.parseInt(request.getParameter("role"));
                 String status = request.getParameter("status").trim();
 
-                role = 0; // ép về customer
-
                 Account existingAccount = accDAO.getFullAccountById(id);
 
-                if (existingAccount != null && existingAccount.getRole() == 1) {
-                    response.sendRedirect(request.getContextPath() + "/admin/account?type=error&message="
-                            + java.net.URLEncoder.encode("Không thể chỉnh sửa tài khoản quản trị viên", java.nio.charset.StandardCharsets.UTF_8));
-                    return;
-                }
-
-                if (role == 1) {
-                    request.setAttribute("errorMessage", "Không thể cập nhật vai trò thành quản trị viên.");
-                    request.setAttribute("account", existingAccount);
-                    request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
-                    return;
-                }
-
-                if (username.isEmpty() || email.isEmpty() || fullName.isEmpty()
-                        || phone.isEmpty() || address.isEmpty() || gender.isEmpty() || status.isEmpty()) {
+                if (username.isEmpty() || email.isEmpty() || fullName.isEmpty() ||
+                    phone.isEmpty() || address.isEmpty() || gender.isEmpty() || status.isEmpty()) {
                     request.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin.");
                     request.setAttribute("account", existingAccount);
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
@@ -379,15 +247,15 @@ public class AdminAccountServlet extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     return;
                 }
-
+                
                 Account checkPhone = accDAO.getAccountByPhone(phone);
                 if (checkPhone != null && checkPhone.getAccountID() != id) {
-                    request.setAttribute("errorMessage", "Số điện thoại đã tồn tại."); // <-- FIX
+                    request.setAttribute("errorMessage", "Email đã tồn tại.");
                     request.setAttribute("account", existingAccount);
                     request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
                     return;
                 }
-
+                
                 Account account = new Account();
                 account.setAccountID(id);
                 account.setUsername(username);
@@ -407,27 +275,6 @@ public class AdminAccountServlet extends HttpServlet {
                 boolean res = accDAO.updateFullAccount(account);
 
                 if (res) {
-                    // === Đồng bộ sang bảng Customer === (HuuDuc)
-                    CustomerDAO customerDAO = new CustomerDAO();
-                    model.Customer acc = new model.Customer();
-                    acc.setAccountID(id);
-                    acc.setFullName(fullName);
-                    acc.setEmail(email);
-                    acc.setPhone(phone);
-                    acc.setGender(gender);
-                    acc.setAddress(address);
-
-                    try {
-                        boolean ok = customerDAO.upsertByAccountId(acc);
-                        if (!ok) {
-                            // Không chặn flow, nhưng hiển thị cảnh báo (tuỳ bạn muốn rollback hay không)
-                            request.setAttribute("warningMessage", "Cập nhật Customer không thay đổi hoặc thất bại. Vui lòng kiểm tra.");
-                        }
-                    } catch (SQLException sqlEx) {
-                        // Nếu bạn muốn rollback thực sự, cần refactor DAO để dùng chung 1 Connection + transaction.
-                        request.setAttribute("warningMessage", "Lỗi khi cập nhật Customer: " + sqlEx.getMessage());
-                    }
-
                     response.sendRedirect(request.getContextPath() + "/admin/account");
                 } else {
                     request.setAttribute("errorMessage", "Cập nhật tài khoản thất bại. Vui lòng thử lại.");
@@ -443,10 +290,10 @@ public class AdminAccountServlet extends HttpServlet {
                     Account acc = accDAO.getFullAccountById(id);
                     request.setAttribute("account", acc);
                 } catch (Exception ex) {
-                    /* bỏ qua */ }
+                    // Bỏ qua
+                }
                 request.getRequestDispatcher("/WEB-INF/admin/account/edit-account.jsp").forward(request, response);
             }
-
         }
     }
 }

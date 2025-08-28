@@ -1,61 +1,72 @@
 // Load More Functionality
+console.log('🔧 LoadMore.js đã được load');
 
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('🚀 LoadMore.js đã được khởi tạo');
+
     const offsets = {};
     const limitPerLoad = 3;
 
     const buttons = document.querySelectorAll(".see-more-btn");
+    console.log('📋 Tìm thấy', buttons.length, 'nút "xem thêm"');
 
-    buttons.forEach((btn) => {
+    buttons.forEach((btn, index) => {
         const parentId = btn.getAttribute('data-parent');
-        const type = btn.getAttribute('data-type');
         const targetId = btn.getAttribute('data-target');
 
-        if ((!parentId && type !== 'featured') || !targetId) {
+        console.log(`🔍 Nút ${index + 1}: parentId="${parentId}", targetId="${targetId}"`);
+
+        if (!parentId || !targetId) {
             console.error("❌ Nút thiếu data-parent hoặc data-target:", btn);
             return;
         }
 
-        const key = type === 'featured' ? 'featured' : parentId;
-        if (!(key in offsets)) {
-            offsets[key] = 6;
+        if (!(parentId in offsets)) {
+            offsets[parentId] = 6;
         }
 
         btn.addEventListener("click", function (e) {
             e.preventDefault();
 
-            const offset = offsets[key];
+            const offset = offsets[parentId];
+            console.log(`🖱️ Bấm nút: parentId=${parentId}, offset=${offset}`);
 
             btn.disabled = true;
             btn.innerHTML = "Đang tải...";
 
-            const url = type === 'featured'
-                ? `loadMoreFeatured?offset=${offset}&parentId=0&limit=${limitPerLoad}&type=featured`
-                : `loadMoreFeatured?offset=${offset}&parentId=${parentId}&limit=${limitPerLoad}`;
+            const url = `loadMoreFeatured?offset=${offset}&parentId=${parentId}&limit=${limitPerLoad}`;
+            console.log('🌐 Gửi request đến:', url);
 
             fetch(url)
                 .then(response => {
+                    console.log('📡 Response status:', response.status);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.text();
                 })
                 .then(html => {
+                    console.log('📄 Response length:', html.length);
+                    console.log('📄 Response preview:', html.substring(0, 100));
+
                     if (html && html.trim() !== '' && html !== 'error') {
                         const container = document.getElementById(targetId);
                         if (container) {
                             container.insertAdjacentHTML('beforeend', html);
-                            offsets[key] += limitPerLoad;
+                            offsets[parentId] += limitPerLoad;
+                            console.log('✅ Đã thêm sản phẩm thành công, offset mới:', offsets[parentId]);
 
                             if (window.ecomartsCart && typeof window.ecomartsCart.setupCartButtons === 'function') {
+                                console.log('🛒 Khởi tạo lại cart functionality');
                                 window.ecomartsCart.setupCartButtons();
                             }
                         } else {
                             console.error('❌ Không tìm thấy container:', targetId);
                         }
 
-                        checkMoreProducts(key, btn, type);
+                        checkMoreProducts(parentId, btn);
                     } else {
+                        console.log('📭 Không còn sản phẩm để load');
                         btn.disabled = true;
                         btn.innerHTML = "Không còn sản phẩm";
                         btn.style.opacity = "0.5";
@@ -69,20 +80,20 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    function checkMoreProducts(key, btn, type) {
-        const nextOffset = offsets[key];
+    function checkMoreProducts(parentId, btn) {
+        const nextOffset = offsets[parentId];
+        console.log('🔍 Kiểm tra còn sản phẩm không, offset:', nextOffset);
 
-        const url = type === 'featured'
-            ? `loadMoreFeatured?offset=${nextOffset}&parentId=0&limit=1&type=featured`
-            : `loadMoreFeatured?offset=${nextOffset}&parentId=${key}&limit=1`;
-        fetch(url)
+        fetch(`loadMoreFeatured?offset=${nextOffset}&parentId=${parentId}&limit=1`)
             .then(response => response.text())
             .then(html => {
                 if (html && html.trim() !== '' && html !== 'error') {
+                    console.log('✅ Còn sản phẩm để load');
                     btn.disabled = false;
                     btn.innerHTML = "Xem thêm sản phẩm <i class=\"fas fa-arrow-right\"></i>";
                     btn.style.opacity = "1";
                 } else {
+                    console.log('📭 Không còn sản phẩm');
                     btn.disabled = true;
                     btn.innerHTML = "Không còn sản phẩm";
                     btn.style.opacity = "0.5";

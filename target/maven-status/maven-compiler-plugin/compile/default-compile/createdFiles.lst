@@ -9,7 +9,6 @@ dao\SupplierDAO.class
 controller\staff\ManageReviewServlet.class
 db\EmailUtil$1.class
 dao\CategoryDAO.class
-controller\shortcuts\SeasonalServlet.class
 controller\YearlyRevenueServlet.class
 controller\ChangePasswordServlet.class
 controller\ProductDetailServlet.class
@@ -29,12 +28,12 @@ controller\StaffFeedBack.class
 controller\AdminDashboardServlet.class
 dao\StaffDAO.class
 model\AccountVoucher.class
-controller\VoucherSaveServlet.class
 controller\ImageServlet.class
-dao\VoucherDAO$AssignResult.class
 model\StockInDetail.class
 dao\ProductDAO.class
 dao\StockDAO.class
+controller\supplier\SupplierServlet.class
+model\Supplier.class
 db\DBContext1.class
 model\InventoryTransaction.class
 dao\AccountDAO.class
@@ -48,7 +47,6 @@ controller\dangky\RegisterRedirectServlet.class
 dao\FeedBackDAO.class
 controller\dangky\OtpVerificationServlet.class
 model\Account.class
-controller\shortcuts\flashsale.class
 dao\ManufacturerDAO.class
 controller\ExportYearlyRevenueServlet.class
 model\RevenueStats.class
@@ -58,19 +56,15 @@ controller\LoadMoreFeaturedServlet.class
 controller\ReadNotificationServlet.class
 controller\MonthlyRevenueServlet.class
 model\StockIn.class
-controller\VoucherSaveServlet$1.class
 util\CartUtil.class
 controller\HomeServlet.class
-dao\CustomerDAO.class
 controller\google\LoginServlets.class
 db\Dotenv.class
 model\Product.class
 dao\AccountDAO1.class
 model\Manufacturer.class
 model\Voucher.class
-controller\staff\StaffReplyServlet.class
 controller\staff\StaffServlet.class
-model\Customer.class
 controller\register\LoginServlet.class
 controller\ProductServlet.class
 dao\VoucherUsageDAO.class
@@ -79,9 +73,7 @@ controller\viewstaff\verifypasswordServlet.class
 controller\forgetpassword\ForgetPasswordServlet.class
 controller\register\LogoutServlet.class
 model\Category.class
-controller\shortcuts\VoucherShortcuts.class
 controller\AdminVoucherServlet.class
-controller\Manufacturer\ManufacturerServlet.class
 model\Token.class
 model\CartItem.class
 model\OrderDetail.class
@@ -90,7 +82,6 @@ dao\ReceiverDAO.class
 controller\AdminPromotionServlet.class
 db\EmailUtil.class
 controller\BuyNowServlet.class
-dao\PromotionDAO$Scope.class
 model\VoucherUsage.class
 controller\AdminInventoryServlet.class
 controller\UpdateProfileServlet.class
@@ -106,7 +97,6 @@ controller\MarkNotificationsReadServlet.class
 Iconstant\Iconstant.class
 controller\google\GoogleLogin.class
 model\Promotion.class
-controller\AdminVoucherServlet$1.class
 dao\ViewProductDAO.class
 controller\register\AdminServlet.class
 filter\AuthenticationFilter.class

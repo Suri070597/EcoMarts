@@ -15,8 +15,7 @@ import model.OrderDetail;
 @WebServlet(name = "OrderServlet", urlPatterns = {
     "/staff/order",
     "/staff/order/detail",
-    "/staff/order/updateStatus",
-    "/staff/order/nextStatus"
+    "/staff/order/updateStatus" // 👈 thêm dòng này
 })
 
 public class OrderServlet extends HttpServlet {
@@ -38,13 +37,9 @@ public class OrderServlet extends HttpServlet {
     private void handleOrderList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String search = request.getParameter("search");
-        String status = request.getParameter("status");
 
         List<Order> orders;
-        if (status != null && !status.trim().isEmpty()) {
-            // Lọc theo trạng thái
-            orders = dao.getOrdersByStatus(status.trim());
-        } else if (search != null && !search.trim().isEmpty()) {
+        if (search != null && !search.trim().isEmpty()) {
             try {
                 // Nếu nhập số → tìm theo OrderID
                 int orderId = Integer.parseInt(search.trim());
@@ -56,18 +51,16 @@ public class OrderServlet extends HttpServlet {
             }
         } else {
             orders = dao.getAllOrders();
-        }
+            for (Order o : orders) {
+                calculateOrderSummary(o);
+            }
 
-        // Tính toán tổng tiền và các giá trị liên quan cho tất cả kết quả (kể cả khi tìm kiếm)
-        for (Order o : orders) {
-            calculateOrderSummary(o);
         }
 
         int total = dao.countAllOrders();
         int delivered = dao.countDeliveredOrders();
         int cancelled = dao.countCancelledOrders();
         request.setAttribute("cancelled", cancelled);
-        request.setAttribute("status", status);
         request.setAttribute("orders", orders);
         request.setAttribute("total", total);
         request.setAttribute("delivered", delivered);
@@ -111,8 +104,6 @@ public class OrderServlet extends HttpServlet {
 
         if (path.equals("/staff/order/updateStatus")) {
             updateOrderStatus(request, response);
-        } else if (path.equals("/staff/order/nextStatus")) {
-            moveToNextStatus(request, response);
         }
     }
 
@@ -145,53 +136,6 @@ public class OrderServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect("order");
-        }
-    }
-
-    private void moveToNextStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            int orderId = Integer.parseInt(request.getParameter("orderId"));
-            Order order = dao.getOrderById(orderId);
-            if (order == null) {
-                response.sendRedirect(request.getContextPath() + "/staff/order");
-                return;
-            }
-
-            String current = order.getOrderStatus();
-            String next = getNextStatus(current);
-
-            // Nếu trạng thái hiện tại là cuối cùng hoặc không xác định → không cập nhật
-            if (next == null) {
-                response.sendRedirect(request.getContextPath() + "/staff/order");
-                return;
-            }
-
-            boolean success = dao.updateOrderStatus(orderId, next);
-            if (success && "Đã giao".equals(next)) {
-                dao.updatePaymentStatus(orderId, "Đã thanh toán");
-            }
-
-            response.sendRedirect(request.getContextPath() + "/staff/order");
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/staff/order");
-        }
-    }
-
-    private String getNextStatus(String current) {
-        if (current == null) return null;
-        switch (current) {
-            case "Đang xử lý":
-                return "Đã xử lý";
-            case "Đã xử lý":
-                return "Đang giao";
-            case "Đang giao":
-                return "Đã giao";
-            // Trạng thái cuối hoặc không xác định → không có next
-            case "Đã giao":
-            case "Đã hủy":
-            default:
-                return null;
         }
     }
 

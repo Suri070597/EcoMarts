@@ -17,7 +17,7 @@
         <li><a href="${pageContext.request.contextPath}/admin/account"><i class="fas fa-user"></i> Quản lý tài khoản</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/staff"><i class="fas fa-user-tie"></i>
                 Quản lý nhân viên</a></li>
-        <li><a href="${pageContext.request.contextPath}/admin/manufacturer"><i class="fas fa-handshake"></i>
+        <li><a href="${pageContext.request.contextPath}/admin/supplier"><i class="fas fa-handshake"></i>
                 Quản lý nhà sản xuất</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/category"><i class="fas fa-folder"></i>
                 Quản lý danh mục</a></li>

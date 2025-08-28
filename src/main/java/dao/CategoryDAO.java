@@ -8,9 +8,7 @@ import db.DBContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 
 public class CategoryDAO extends DBContext {
@@ -105,81 +103,14 @@ public class CategoryDAO extends DBContext {
         }
     }
 
-    public boolean deleteCategory(int id) {
+    public void deleteCategory(int id) {
         String sql = "DELETE FROM Category WHERE CategoryID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    //====================================================//
-    public Category getCategoryById(int id) {
-        String sql = "SELECT * FROM Category WHERE CategoryID = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Category(
-                            rs.getInt("CategoryID"),
-                            rs.getString("CategoryName"),
-                            rs.getObject("ParentID") != null ? rs.getInt("ParentID") : null,
-                            rs.getString("ImageURL")
-                    );
-                }
-            }
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
-    }
-
-    /**
-     * Mở rộng các category gốc thành toàn bộ hậu duệ (bao gồm chính nó). Không
-     * dùng CTE: lặp SELECT theo frontier.
-     */
-    public List<Integer> getDescendantCategoryIds(List<Integer> rootIds) {
-        List<Integer> all = new ArrayList<>();
-        if (rootIds == null || rootIds.isEmpty()) {
-            return all;
-        }
-
-        // bỏ trùng + copy
-        LinkedHashSet<Integer> set = new LinkedHashSet<>(rootIds);
-        all.addAll(set);
-
-        List<Integer> frontier = new ArrayList<>(set);
-        final String baseSql = "SELECT CategoryID FROM Category WHERE ParentID IN (%s)";
-
-        try {
-            while (!frontier.isEmpty()) {
-                String placeholders = String.join(",", Collections.nCopies(frontier.size(), "?"));
-                String sql = String.format(baseSql, placeholders);
-
-                try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    for (int i = 0; i < frontier.size(); i++) {
-                        ps.setInt(i + 1, frontier.get(i));
-                    }
-                    List<Integer> next = new ArrayList<>();
-                    try (ResultSet rs = ps.executeQuery()) {
-                        while (rs.next()) {
-                            int cid = rs.getInt(1);
-                            if (!set.contains(cid)) {
-                                set.add(cid);
-                                next.add(cid);
-                            }
-                        }
-                    }
-                    frontier = next;
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return new ArrayList<>(set);
     }
 
     public List<Category> getAllCategories() {

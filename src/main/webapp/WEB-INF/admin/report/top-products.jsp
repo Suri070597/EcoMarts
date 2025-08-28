@@ -42,8 +42,8 @@
                                     <th>ID</th>
                                     <th>Hình ảnh</th>
                                     <th>Tên sản phẩm</th>
-                                    <th style="text-align: right;">Tổng số lượng bán</th>
-                                    <th style="text-align: right;">Tổng doanh thu</th>
+                                    <th>Tổng số lượng bán</th>
+                                    <th>Tổng doanh thu</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -54,9 +54,9 @@
                                             <img src="<%= request.getContextPath()%>/ImageServlet?name=${product.image}" alt="${product.productName}" width="60" height="60" style="object-fit: cover; border-radius: 6px;">
                                         </td>
                                         <td>${product.productName}</td>
-                                        <td style="text-align: right;">${product.totalQuantity}</td>
-                                        <td style="text-align: right;">
-                                            <fmt:formatNumber value="${product.totalRevenue}" type="number"/>đ
+                                        <td>${product.totalQuantity}</td>
+                                        <td>
+                                            <fmt:formatNumber value="${product.totalRevenue}" type="number"/>
                                         </td>
                                     </tr>
                                 </c:forEach>

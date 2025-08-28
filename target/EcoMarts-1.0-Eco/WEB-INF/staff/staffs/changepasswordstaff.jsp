@@ -4,116 +4,119 @@
     Author     : ADMIN
 --%>
 
-<%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%
-    request.setAttribute("activeMenu", "profile");
-%>
 <!DOCTYPE html>
-<html lang="vi">
+<html>
     <head>
         <meta charset="UTF-8">
         <title>Đổi mật khẩu</title>
-        <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/img/eco.png" type="image/x-icon">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?version=<%= System.currentTimeMillis()%>">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css?version=<%= System.currentTimeMillis()%>">
+         <link rel="shortcut icon" href="assets/img/eco.png" type="image/x-icon">
         <style>
-            .card-beige{
-                border-radius:15px;
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: linear-gradient(to right, #fff6ec, #fff);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                color: #000; /* chữ đen */
             }
-            .btn-beige{
-                background:#dbc09a;
-                color:#111;
-                border:none;
+            .form-container {
+                background-color: #fff;
+                padding: 32px 24px;
+                border-radius: 15px;
+                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+                max-width: 420px;
+                width: 100%;
+                margin: 0 18px;
+                box-sizing: border-box;
+                color: #000;
             }
-            .btn-beige:hover{
-                background:#bfa270;
-                color:#111;
+            h2 {
+                text-align: center;
+                color: #000; /* tiêu đề đen */
+                margin-bottom: 26px;
+                letter-spacing: 0.5px;
             }
-            .btn-outline-beige{
-                border:1px solid #dbc09a;
-                color:#111;
-                background:#fff;
+            label {
+                display: block;
+                margin-bottom: 7px;
+                color: #000;
+                font-weight: 500;
             }
-            .btn-outline-beige:hover{
-                background:#f4e6d0;
-                color:#111;
+            input[type="password"] {
+                width: 100%;
+                padding: 11px 12px;
+                border: 1.5px solid #dbc09a; /* viền nâu nhạt */
+                border-radius: 12px;
+                margin-bottom: 17px;
+                font-size: 16px;
+                background: #fff;
+                color: #000;
+                transition: border-color 0.3s;
+                box-sizing: border-box;
             }
-            .main-content{
-                padding:24px;
+            input[type="password"]:focus {
+                border-color: #b3936b; /* nâu đậm hơn khi focus */
+                outline: none;
             }
-            .card-header{
-                border-bottom:1px solid #eee;
+            .btn-group {
+                display: flex;
+                justify-content: space-between;
+                gap: 18px;
+                margin-top: 8px;
             }
-            .card-body{
-                padding-left:1.25rem;
-                padding-right:1.25rem;
+            button, .back-btn {
+                flex: 1;
+                padding: 10px 0;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.3s, color 0.3s;
+                text-align: center;
+                background-color: #dbc09a; /* nền nâu nhạt */
+                color: #000; /* chữ đen */
             }
-            .row.mb-3{
-                margin-bottom:.75rem!important;
+            button:hover, .back-btn:hover {
+                background-color: #b3936b; /* hover nâu đậm */
+                color: #000;
             }
-            .col-form-label{
-                font-weight:600;
-                color:#5a4634;
+            .back-btn {
+                text-decoration: none;
+                display: inline-block;
             }
-            .message{
-                margin-top:12px;
-            }
-            .form-control{
-                border-radius:10px;
+            .message {
+                color: red;
+                font-weight: bold;
+                text-align: center;
+                margin-top: 15px;
+                font-size: 17px;
             }
         </style>
     </head>
     <body>
-        <div class="container-fluid">
-            <jsp:include page="../components/sidebar.jsp" />
+        <div class="form-container">
+            <h2>Đổi mật khẩu</h2>
+            <form action="changepasswordstaff" method="post">
+                <label>Mật khẩu mới:</label>
+                <input type="password" name="newPassword" required />
 
-            <div class="main-content">
-                <div class="card card-beige shadow-sm">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h1 class="card-title mb-0">
-                            <i class="fa-solid fa-key me-2"></i> Đổi mật khẩu
-                        </h1>
-                        <a href="${pageContext.request.contextPath}/verifypasswordServlet" class="btn btn-sm btn-outline-beige">
-                            <i class="fa-solid fa-arrow-left-long me-1"></i> Quay lại
-                        </a>
-                    </div>
+                <label>Xác nhận mật khẩu mới:</label>
+                <input type="password" name="confirmPassword" required />
 
-                    <div class="card-body" style="max-width:560px;">
-                        <form action="${pageContext.request.contextPath}/changepasswordstaff" method="post">
-                            <div class="row mb-3 align-items-center">
-                                <label class="col-sm-4 col-form-label">Mật khẩu mới:</label>
-                                <div class="col-sm-8">
-                                    <input type="password" name="newPassword" class="form-control" required>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3 align-items-center">
-                                <label class="col-sm-4 col-form-label">Xác nhận mật khẩu:</label>
-                                <div class="col-sm-8">
-                                    <input type="password" name="confirmPassword" class="form-control" required>
-                                </div>
-                            </div>
-
-                            <!-- Hai nút tách riêng -->
-                            <div class="mt-2">
-                                <button type="submit" class="btn btn-beige">
-                                    <i class="fa-solid fa-floppy-disk me-1"></i> Xác nhận
-                                </button>
-                            </div>
-
-
-                            <c:if test="${not empty message}">
-                                <p class="message text-danger fw-semibold">${message}</p>
-                            </c:if>
-                        </form>
-                    </div>
+                <div class="btn-group">
+                    <button type="submit">Xác nhận</button>
+                    <a href="staff" class="back-btn">Quay lại</a>
                 </div>
-            </div>
+
+                <c:if test="${not empty message}">
+                    <p class="message">${message}</p>
+                </c:if>
+            </form>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>
-

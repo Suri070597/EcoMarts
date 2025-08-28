@@ -13,9 +13,6 @@
     String keyword = (String) request.getAttribute("searchKeyword");
     Map<Integer, Double> avgRatingMap = (Map<Integer, Double>) request.getAttribute("avgRatingMap");
     Map<Integer, Integer> reviewCountMap = (Map<Integer, Integer>) request.getAttribute("reviewCountMap");
-    Map<Integer, Double> unitPriceMap = (Map<Integer, Double>) request.getAttribute("unitPriceMap");
-    Map<Integer, Integer> parentIdMap = (Map<Integer, Integer>) request.getAttribute("parentIdMap");
-    Map<Integer, String> priceDisplayMap = (Map<Integer, String>) request.getAttribute("priceDisplayMap");
 %>
 <!DOCTYPE html>
 <html>
@@ -100,8 +97,7 @@
                                         <span>(${reviewCount})</span>
                                     </div>
                                     <div class="product-price">
-                                        <c:set var="pid" value="${p.productID}" />
-                                        ${priceDisplayMap[pid]}
+                                        <fmt:formatNumber value="${p.price}" type="number" pattern="#,###" /> đ / ${p.unit}
                                     </div>
                                     <div class="button-group">
                                         <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}" <c:if test="${p.stockQuantity <= 0}">disabled style='opacity:0.5;cursor:not-allowed;'</c:if>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>

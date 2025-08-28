@@ -406,7 +406,7 @@
                                         </a>
                                     </c:when>
                                     <c:otherwise>
-                                        <a href="home" class="btn btn-outline-secondary w-100 py-2">
+                                        <a href="ProductDetail?id=${buyNowItem.productID}" class="btn btn-outline-secondary w-100 py-2">
                                             <i class="fas fa-arrow-left me-2"></i>Quay lại
                                         </a>
                                     </c:otherwise>

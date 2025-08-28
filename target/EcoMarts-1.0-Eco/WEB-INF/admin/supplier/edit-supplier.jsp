@@ -1,5 +1,5 @@
 <%-- 
-    Tài liệu   : edit-manufacturer
+    Tài liệu   : edit-supplier
     Tạo ngày   : 17/06/2025, 21:54:24
     Tác giả    : ADMIN
 --%>
@@ -29,43 +29,43 @@
                     <c:if test="${not empty errorMessage}">
                         <div class="alert alert-danger" role="alert">${errorMessage}</div>
                     </c:if>
-                    <form method="POST" action="${pageContext.request.contextPath}/admin/manufacturer" class="needs-validation" novalidate>
+                    <form method="POST" action="${pageContext.request.contextPath}/admin/supplier" class="needs-validation" novalidate>
                         <input type="hidden" name="action" value="edit">
-                        <input type="hidden" name="id" value="${manufacturer.manufacturerID}">
+                        <input type="hidden" name="id" value="${supplier.supplierID}">
                         <div class="mb-3">
                             <label class="form-label" for="brandName">Tên thương hiệu</label>
-                            <input type="text" class="form-control" id="brandName" name="brandName" value="${manufacturer.brandName}" required>
+                            <input type="text" class="form-control" id="brandName" name="brandName" value="${supplier.brandName}" required>
                             <div class="invalid-feedback">Vui lòng nhập tên thương hiệu</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="companyName">Tên công ty</label>
-                            <input type="text" class="form-control" id="companyName" name="companyName" value="${manufacturer.companyName}" required>
+                            <input type="text" class="form-control" id="companyName" name="companyName" value="${supplier.companyName}" required>
                             <div class="invalid-feedback">Vui lòng nhập tên công ty</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="address">Địa chỉ</label>
-                            <input type="text" class="form-control" id="address" name="address" value="${manufacturer.address}">
+                            <input type="text" class="form-control" id="address" name="address" value="${supplier.address}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" value="${manufacturer.email}" required>
+                            <input type="email" class="form-control" id="email" name="email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" value="${supplier.email}" required>
                             <div class="invalid-feedback">Vui lòng nhập email hợp lệ (ví dụ: example@domain.com)</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="phone">Số điện thoại</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" value="${manufacturer.phone}" required>
+                            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" value="${supplier.phone}" required>
                             <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 chữ số)</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="status">Trạng thái</label>
                             <select class="form-control" name="status" id="status" required>
-                                <option value="1" ${manufacturer.status == 1 ? 'selected' : ''}>Đang hợp tác</option>
-                                <option value="0" ${manufacturer.status == 0 ? 'selected' : ''}>Ngừng hợp tác</option>
+                                <option value="1" ${supplier.status == 1 ? 'selected' : ''}>Đang hợp tác</option>
+                                <option value="0" ${supplier.status == 0 ? 'selected' : ''}>Ngừng hợp tác</option>
                             </select>
                             <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
                         </div>
                         <div class="btn-group">
-                            <a href="${pageContext.request.contextPath}/admin/manufacturer" class="btn btn-secondary">Quay lại</a>
+                            <a href="${pageContext.request.contextPath}/admin/supplier" class="btn btn-secondary">Quay lại</a>
                             <button type="submit" class="btn btn-primary">Cập nhật</button>
                         </div>
                     </form>

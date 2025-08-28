@@ -38,16 +38,6 @@
                 border: none;
             }
 
-            .order-card p {
-                margin-bottom: 10px;
-                line-height: 1.6;
-            }
-            
-            .fw-bold {
-                margin-bottom: 10px;
-                line-height: 1.6;
-            }
-
             .order-card-header {
                 background: linear-gradient(to right, #f5f5dc, #eae2d0);
                 border-bottom: 1px solid #e1d9c4;
@@ -211,7 +201,6 @@
                                         <th>Sản phẩm</th>
                                         <th class="text-center">Đơn giá</th>
                                         <th class="text-center">Số lượng</th>
-                                        <th class="text-center">Đánh giá</th>
                                         <th class="text-end">Thành tiền</th>
                                     </tr>
                                 </thead>
@@ -220,11 +209,11 @@
                                         <tr>
                                             <td class="text-center">
                                                 <c:if test="${not empty od.product && not empty od.product.imageURL}">
-                                                    <img style="display:block; margin:auto;" src="${pageContext.request.contextPath}/ImageServlet?name=${od.product.imageURL}" 
+                                                    <img src="${pageContext.request.contextPath}/ImageServlet?name=${od.product.imageURL}" 
                                                          class="product-img" alt="${od.productName}">
                                                 </c:if>
                                                 <c:if test="${empty od.product || empty od.product.imageURL}">
-                                                    <div style="display:block; margin:auto;" class="product-img bg-light d-flex align-items-center justify-content-center">
+                                                    <div class="product-img bg-light d-flex align-items-center justify-content-center">
                                                         <i class="fas fa-image text-muted"></i>
                                                     </div>
                                                 </c:if>
@@ -252,9 +241,6 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                                 ${od.unit}
-                                            </td>
-                                            <td class="text-center">
-                                                <a href="${pageContext.request.contextPath}/ProductDetail?id=${od.productID}" class="btn btn-sm btn-outline-primary">Đánh giá</a>
                                             </td>
                                             <td class="text-end fw-bold"><fmt:formatNumber value="${od.subTotal}" type="number"/> đ</td>
                                         </tr>

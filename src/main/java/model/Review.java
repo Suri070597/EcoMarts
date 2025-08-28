@@ -21,8 +21,6 @@ public class Review {
     private String productName;
     private String status;
     private boolean isRead; // Thông báo đã đọc hay chưa
-    // Độ sâu dùng cho render phẳng (0 = root, 1 = con, ...)
-    private int depth;
 
     // For joining with other tables
     private Product product;
@@ -184,14 +182,6 @@ public class Review {
 
     public void setIsRead(boolean isRead) {
         this.isRead = isRead;
-    }
-
-    public int getDepth() {
-        return depth;
-    }
-
-    public void setDepth(int depth) {
-        this.depth = depth;
     }
 
     @Override

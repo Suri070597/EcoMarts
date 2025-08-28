@@ -2,6 +2,8 @@ package controller.supplier;
 
 import dao.CategoryDAO;
 import dao.ProductDAO;
+import dao.ReceiverDAO;
+import dao.SupplierDAO;
 import dao.StockDAO;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -11,8 +13,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import model.Category;
 import model.Product;
+import model.Supplier;
 import com.google.gson.Gson;
 import dao.AccountDAO;
 import dao.InventoryDAO;
@@ -72,6 +78,15 @@ public class StockInFormServlet extends HttpServlet {
 // 1.4. Lấy danh sách inventory            
             List<StockIn> stockIns = stockDAO.getAllStockIns();
 
+            
+            if (action != null && action.equals("searchInventory")) {
+                String keyword = request.getParameter("keyword");
+                if (keyword != null && !keyword.trim().isEmpty()) {
+                    // Tìm theo mã nhập, tên nhà cung cấp, hoặc tên người nhận
+                    stockIns = stockDAO.searchStockIn(keyword.trim());
+                }
+            }
+
             // Với mỗi StockIn, load chi tiết
             for (StockIn s : stockIns) {
                 List<StockInDetail> details = stockDAO.getDetailsByStockInID(s.getStockInID());
@@ -118,6 +133,7 @@ public class StockInFormServlet extends HttpServlet {
         String[] prices = request.getParameterValues("price");
         String[] packageTypes = request.getParameterValues("packageType");
         String[] packSizes = request.getParameterValues("packSize");
+        String[] expiryDates = request.getParameterValues("expiryDate");
         String supplierIdStr = request.getParameter("supplierId");
         String receiverIdStr = request.getParameter("receiverId");
         String dateStr = request.getParameter("date");
@@ -159,6 +175,10 @@ public class StockInFormServlet extends HttpServlet {
                 double price = Double.parseDouble(prices[i]);
                 String pkgType = packageTypes[i];
                 int pSize = Integer.parseInt(packSizes[i]);
+                Date expiryDate = null;
+                if (expiryDates != null && expiryDates[i] != null && !expiryDates[i].trim().isEmpty()) {
+                    expiryDate = Date.valueOf(expiryDates[i]); // chuyển từ String sang java.sql.Date
+                }
 
                 System.out.println("Processing productId=" + pid
                         + ", qty=" + qty
@@ -167,7 +187,7 @@ public class StockInFormServlet extends HttpServlet {
                         + ", packSize=" + pSize);
 
                 Inventory inv = new Inventory(pid, pkgType, qty, price, pSize, Date.valueOf(dateStr));
-                StockInDetail detail = new StockInDetail(qty, price);
+                StockInDetail detail = new StockInDetail(qty, price, expiryDate);
 
                 invList.add(inv);
                 detailList.add(detail);

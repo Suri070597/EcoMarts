@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package dao;
 
 import db.DBContext;
@@ -9,7 +13,32 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.io.File;
 
+/**
+ *
+ * @author LNQB
+ */
 public class FeedBackDAO extends DBContext {
+
+    public boolean canReview(int accountId, int orderId, int productId) throws SQLException {
+        String sql = "SELECT 1 FROM [Order] o "
+                + "JOIN OrderDetail od ON o.OrderID = od.OrderID "
+                + "WHERE o.AccountID = ? AND o.OrderID = ? AND od.ProductID = ? AND o.PaymentStatus = N'Đã thanh toán' "
+                + "AND NOT EXISTS (SELECT 1 FROM Review r WHERE r.AccountID = ? AND r.ProductID = ? AND r.Comment IS NOT NULL AND r.ParentReviewID IS NULL AND r.ReviewID IN "
+                + "(SELECT ReviewID FROM Review WHERE ProductID = ? AND AccountID = ?))";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.setInt(2, orderId);
+            ps.setInt(3, productId);
+            ps.setInt(4, accountId);
+            ps.setInt(5, productId);
+            ps.setInt(6, productId);
+            ps.setInt(7, accountId);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        }
+    }
 
     // Kiểm tra role của account (0: customer, 1: admin, 2: staff, ...)
     public int getAccountRole(int accountId) throws SQLException {
@@ -63,20 +92,16 @@ public class FeedBackDAO extends DBContext {
     }
 
     // Thêm review hoặc reply
-    public boolean addReview(Integer parentReviewId, Integer orderId, int productId, int accountId, Integer rating,
+    public boolean addReview(Integer parentReviewId, int orderId, int productId, int accountId, Integer rating,
             String comment, String imageUrl) throws SQLException {
-        int role = getAccountRole(accountId);
-        // Với customer, bắt buộc tài khoản active; staff bỏ qua kiểm tra này
-        if (role != 2 && !isAccountActive(accountId)) {
+        // Không cho phép nếu tài khoản không active
+        if (!isAccountActive(accountId)) {
             return false;
         }
+        int role = getAccountRole(accountId);
         // Chỉ customer mới được review gốc
         if (parentReviewId == null) {
             if (role != 0) {
-                return false;
-            }
-            // orderId bắt buộc với review gốc
-            if (orderId == null || orderId <= 0) {
                 return false;
             }
             if (!isOrderPaid(orderId, accountId)) {
@@ -87,36 +112,29 @@ public class FeedBackDAO extends DBContext {
             }
         } else {
             if (role == 2) {
-                // Staff reply vào bất kỳ review của customer (gốc hoặc con)
-                String sqlCheckParentRole = "SELECT a.Role FROM Review r JOIN Account a ON r.AccountID = a.AccountID WHERE r.ReviewID = ?";
+                // Staff reply vào review gốc của customer
+                String sqlCheckParentRole = "SELECT a.Role FROM Review r JOIN Account a ON r.AccountID = a.AccountID WHERE r.ReviewID = ? AND r.ParentReviewID IS NULL";
                 try (PreparedStatement ps = conn.prepareStatement(sqlCheckParentRole)) {
                     ps.setInt(1, parentReviewId);
                     ResultSet rs = ps.executeQuery();
                     if (!rs.next() || rs.getInt(1) != 0) {
-                        return false; // parent không phải customer
+                        return false;
                     }
                 }
             } else if (role == 0) {
-                // Customer reply: cho phép trả lời BẤT KỲ reply của STAFF trong thread
-                // Điều kiện:
-                // 1) parentReviewId thuộc về STAFF
-                // 2) Review GỐC của thread thuộc về customer hiện tại
-                // Kiểm tra (1)
-                String sqlParentRole = "SELECT a.Role FROM Review r JOIN Account a ON r.AccountID = a.AccountID WHERE r.ReviewID = ?";
-                try (PreparedStatement ps = conn.prepareStatement(sqlParentRole)) {
+                // Customer reply vào reply của staff (trả lời phản hồi nhân viên)
+                // Kiểm tra parentReviewId là reply của staff, cha là review gốc của customer,
+                // và accountId là chủ review gốc đó
+                String sql = "SELECT r0.ReviewID FROM Review r1 "
+                        + "JOIN Review r0 ON r1.ParentReviewID = r0.ReviewID "
+                        + "JOIN Account a1 ON r1.AccountID = a1.AccountID "
+                        + "WHERE r1.ReviewID = ? AND r1.ParentReviewID IS NOT NULL "
+                        + "AND a1.Role = 2 AND r0.AccountID = ? AND r0.ParentReviewID IS NULL";
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setInt(1, parentReviewId);
+                    ps.setInt(2, accountId);
                     ResultSet rs = ps.executeQuery();
-                    if (!rs.next() || rs.getInt(1) != 2) {
-                        return false; // parent không phải staff
-                    }
-                }
-                // Kiểm tra (2): chủ thread là customer hiện tại
-                int rootId = findRootReviewId(parentReviewId);
-                String sqlRoot = "SELECT AccountID FROM Review WHERE ReviewID = ? AND ParentReviewID IS NULL";
-                try (PreparedStatement ps = conn.prepareStatement(sqlRoot)) {
-                    ps.setInt(1, rootId);
-                    ResultSet rs = ps.executeQuery();
-                    if (!rs.next() || rs.getInt(1) != accountId) {
+                    if (!rs.next()) {
                         return false;
                     }
                 }
@@ -131,11 +149,7 @@ public class FeedBackDAO extends DBContext {
             } else {
                 ps.setNull(1, java.sql.Types.INTEGER);
             }
-            if (orderId != null && orderId > 0) {
-                ps.setInt(2, orderId);
-            } else {
-                ps.setNull(2, java.sql.Types.INTEGER);
-            }
+            ps.setInt(2, orderId);
             ps.setInt(3, productId);
             ps.setInt(4, accountId);
             if (rating != null) {
@@ -173,11 +187,18 @@ public class FeedBackDAO extends DBContext {
 
                 // Customer chỉ sửa được review/reply của mình trong 30 ngày
                 if (reviewerRole == 0) {
+                    System.out.println("DEBUG: Kiểm tra customer có thể sửa review ID=" + reviewId + ", parentReviewId="
+                            + parentReviewId);
+
                     // Tìm review gốc để kiểm tra
                     int rootReviewId = reviewId;
                     if (parentReviewId != null) {
                         // Nếu là reply, tìm review gốc
                         rootReviewId = findRootReviewId(reviewId);
+                        System.out.println("DEBUG: Review ID=" + reviewId + " có parent=" + parentReviewId
+                                + ", tìm được root=" + rootReviewId);
+                    } else {
+                        System.out.println("DEBUG: Review ID=" + reviewId + " là review gốc");
                     }
 
                     // Kiểm tra review gốc có quá 30 ngày không
@@ -188,6 +209,9 @@ public class FeedBackDAO extends DBContext {
                         if (rootRs.next()) {
                             int rootRole = rootRs.getInt("Role");
                             Timestamp rootCreatedAt = rootRs.getTimestamp("CreatedAt");
+
+                            System.out.println("DEBUG: Review gốc ID=" + rootReviewId + ", role=" + rootRole
+                                    + ", ngày tạo=" + rootCreatedAt);
 
                             // Nếu review gốc là của customer và quá 30 ngày, thì không cho sửa bất kỳ
                             // review/reply nào
@@ -195,71 +219,22 @@ public class FeedBackDAO extends DBContext {
                                 long currentTime = System.currentTimeMillis();
                                 long rootTime = rootCreatedAt.getTime();
                                 long rootDaysDiff = (currentTime - rootTime) / (1000 * 60 * 60 * 24);
+                                System.out.println("DEBUG: Review gốc là customer, số ngày=" + rootDaysDiff);
                                 if (rootDaysDiff > 30) {
+                                    System.out.println("DEBUG: Review gốc quá 30 ngày, không cho sửa");
                                     return false;
+                                } else {
+                                    System.out.println("DEBUG: Review gốc chưa quá 30 ngày, cho phép sửa");
                                 }
+                            } else {
+                                System.out.println("DEBUG: Review gốc là staff, cho phép sửa");
                             }
+                        } else {
+                            System.out.println("DEBUG: Không tìm thấy review gốc ID=" + rootReviewId);
                         }
                     }
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
-    // Kiểm tra customer có thể xóa review không (trong 30 ngày)
-    public boolean canDeleteReview(int reviewId, int accountId) throws SQLException {
-        String sql = "SELECT r.CreatedAt, r.AccountID, a.Role, r.ParentReviewID FROM Review r JOIN Account a ON r.AccountID = a.AccountID WHERE r.ReviewID = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, reviewId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                int reviewerAccountId = rs.getInt("AccountID");
-                int reviewerRole = rs.getInt("Role");
-                Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                Integer parentReviewId = rs.getInt("ParentReviewID");
-
-                // Chỉ cho phép xóa review/reply của chính mình
-                if (reviewerAccountId != accountId) {
-                    return false;
-                }
-
-                // Staff có thể xóa review/reply của mình bất kỳ lúc nào
-                if (reviewerRole == 2) {
-                    return true;
-                }
-
-                // Customer chỉ xóa được review/reply của mình trong 30 ngày
-                if (reviewerRole == 0) {
-                    // Tìm review gốc để kiểm tra
-                    int rootReviewId = reviewId;
-                    if (parentReviewId != null) {
-                        // Nếu là reply, tìm review gốc
-                        rootReviewId = findRootReviewId(reviewId);
-                    }
-
-                    // Kiểm tra review gốc có quá 30 ngày không
-                    String rootSql = "SELECT r.CreatedAt, a.Role FROM Review r JOIN Account a ON r.AccountID = a.AccountID WHERE r.ReviewID = ?";
-                    try (PreparedStatement rootPs = conn.prepareStatement(rootSql)) {
-                        rootPs.setInt(1, rootReviewId);
-                        ResultSet rootRs = rootPs.executeQuery();
-                        if (rootRs.next()) {
-                            int rootRole = rootRs.getInt("Role");
-                            Timestamp rootCreatedAt = rootRs.getTimestamp("CreatedAt");
-
-                            // Nếu review gốc là của customer và quá 30 ngày, thì không cho xóa bất kỳ
-                            // review/reply nào
-                            if (rootRole == 0) {
-                                long currentTime = System.currentTimeMillis();
-                                long rootTime = rootCreatedAt.getTime();
-                                long rootDaysDiff = (currentTime - rootTime) / (1000 * 60 * 60 * 24);
-                                if (rootDaysDiff > 30) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
+                    System.out.println("DEBUG: Cho phép customer sửa review ID=" + reviewId);
                     return true;
                 }
             }
@@ -278,15 +253,18 @@ public class FeedBackDAO extends DBContext {
                 if (rs.wasNull()) {
                     parentId = null;
                 }
+                System.out.println("DEBUG: findRootReviewId - Review ID=" + reviewId + ", Parent ID=" + parentId);
                 if (parentId != null) {
                     // Nếu có parent, tiếp tục tìm lên
                     return findRootReviewId(parentId);
                 } else {
                     // Nếu không có parent, đây là review gốc
+                    System.out.println("DEBUG: findRootReviewId - Tìm được review gốc ID=" + reviewId);
                     return reviewId;
                 }
             }
         }
+        System.out.println("DEBUG: findRootReviewId - Không tìm thấy review ID=" + reviewId);
         return reviewId;
     }
 
@@ -323,13 +301,10 @@ public class FeedBackDAO extends DBContext {
         }
     }
 
-    // Lấy danh sách reply cho 1 review (không lọc Status để staff thấy tất cả)
+    // Lấy danh sách reply cho 1 review gốc (trả về List<Review> thay vì ResultSet)
     public List<model.Review> getRepliesByParentId(int parentReviewId) throws SQLException {
         List<model.Review> replies = new java.util.ArrayList<>();
-        String sql = "SELECT r.*, a.FullName, a.Username, a.Role FROM Review r "
-                + "JOIN Account a ON r.AccountID = a.AccountID "
-                + "WHERE r.ParentReviewID = ? "
-                + "ORDER BY r.CreatedAt ASC";
+        String sql = "SELECT r.*, a.FullName, a.Username, a.Role FROM Review r JOIN Account a ON r.AccountID = a.AccountID WHERE r.ParentReviewID = ? AND r.Status = 'VISIBLE' ORDER BY r.CreatedAt ASC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, parentReviewId);
             ResultSet rs = ps.executeQuery();
@@ -343,7 +318,6 @@ public class FeedBackDAO extends DBContext {
                 r.setComment(rs.getString("Comment"));
                 r.setImageURL(rs.getString("ImageURL"));
                 r.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                r.setStatus(rs.getString("Status"));
                 String fullName = rs.getString("FullName");
                 String username = rs.getString("Username");
                 r.setAccountName(fullName != null && !fullName.isEmpty() ? fullName : username);
@@ -460,15 +434,13 @@ public class FeedBackDAO extends DBContext {
         return null;
     }
 
-    // Lấy toàn bộ review GỐC (ParentReviewID IS NULL), join Account và Product, kèm
-    // danh sách replies
+    // Lấy toàn bộ review, join Account và Product, phục vụ staff quản lý
     public List<model.Review> getAllReviewsWithAccountAndProduct() throws SQLException {
         List<model.Review> list = new ArrayList<>();
         String sql = "SELECT r.*, a.Username, a.FullName, a.Role, p.ProductName "
                 + "FROM Review r "
                 + "JOIN Account a ON r.AccountID = a.AccountID "
                 + "JOIN Product p ON r.ProductID = p.ProductID "
-                + "WHERE r.ParentReviewID IS NULL "
                 + "ORDER BY r.CreatedAt DESC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
@@ -481,18 +453,23 @@ public class FeedBackDAO extends DBContext {
                 r.setComment(rs.getString("Comment"));
                 r.setImageURL(rs.getString("ImageURL"));
                 r.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                r.setParentReviewID(null);
+                Integer parentReviewId = rs.getInt("ParentReviewID");
+                if (rs.wasNull()) {
+                    r.setParentReviewID(null);
+                } else {
+                    r.setParentReviewID(parentReviewId);
+                }
                 r.setAccountName(rs.getString("FullName"));
                 r.setUserName(rs.getString("Username"));
                 r.setAccountRole(rs.getInt("Role"));
                 r.setProductName(rs.getString("ProductName"));
                 r.setStatus(rs.getString("Status"));
-                // Load replies cho review gốc
-                List<model.Review> replies = getRepliesByParentId(r.getReviewID());
-                r.setReplies(replies);
                 list.add(r);
+                System.out.println("DEBUG: Review loaded: ID=" + r.getReviewID() + ", Status=" + r.getStatus()
+                        + ", Product=" + r.getProductName() + ", User=" + r.getUserName());
             }
         }
+        System.out.println("DEBUG: Total reviews loaded: " + list.size());
         return list;
     }
 
@@ -506,12 +483,9 @@ public class FeedBackDAO extends DBContext {
         }
     }
 
-    // Xóa review và tất cả replies của nó (recursive)
+    // Xóa review
     public void deleteReview(int reviewId) throws SQLException {
-        // Đầu tiên, xóa tất cả replies con (recursive)
-        deleteAllReplies(reviewId);
-
-        // Lấy imageURL trước khi xóa review gốc
+        // Lấy imageURL trước khi xóa
         String imageUrl = null;
         String getSql = "SELECT ImageURL FROM Review WHERE ReviewID = ?";
         try (PreparedStatement ps = conn.prepareStatement(getSql)) {
@@ -521,18 +495,17 @@ public class FeedBackDAO extends DBContext {
                 imageUrl = rs.getString("ImageURL");
             }
         } catch (Exception e) {
-            // Ignore error when getting imageURL
+            System.out.println("[deleteReview] Lỗi khi lấy imageURL: " + e.getMessage());
         }
-
         // Xóa file ảnh vật lý nếu có
         if (imageUrl != null && !imageUrl.isEmpty() && !imageUrl.startsWith("http")) {
             File imgFile = new File("C:/EcoMarts/ReviewImages", imageUrl);
             if (imgFile.exists()) {
-                imgFile.delete();
+                boolean deleted = imgFile.delete();
+                System.out.println("[deleteReview] Xóa file ảnh " + imgFile.getAbsolutePath() + ": " + deleted);
             }
         }
-
-        // Cuối cùng, xóa review gốc
+        // Xóa review trong DB
         String sql = "DELETE FROM Review WHERE ReviewID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, reviewId);
@@ -540,58 +513,14 @@ public class FeedBackDAO extends DBContext {
         }
     }
 
-    // Helper method: Xóa tất cả replies của một review (recursive)
-    private void deleteAllReplies(int parentReviewId) throws SQLException {
-        // Lấy danh sách tất cả replies trực tiếp
-        String selectSql = "SELECT ReviewID, ImageURL FROM Review WHERE ParentReviewID = ?";
-        List<Integer> replyIds = new ArrayList<>();
-        List<String> imageUrls = new ArrayList<>();
-
-        try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
-            ps.setInt(1, parentReviewId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                replyIds.add(rs.getInt("ReviewID"));
-                String imageUrl = rs.getString("ImageURL");
-                if (imageUrl != null && !imageUrl.isEmpty()) {
-                    imageUrls.add(imageUrl);
-                }
-            }
-        }
-
-        // Xóa replies của từng reply con (recursive)
-        for (int replyId : replyIds) {
-            deleteAllReplies(replyId);
-        }
-
-        // Xóa file ảnh vật lý của các replies
-        for (String imageUrl : imageUrls) {
-            if (!imageUrl.startsWith("http")) {
-                File imgFile = new File("C:/EcoMarts/ReviewImages", imageUrl);
-                if (imgFile.exists()) {
-                    imgFile.delete();
-                }
-            }
-        }
-
-        // Xóa tất cả replies trực tiếp
-        if (!replyIds.isEmpty()) {
-            String deleteSql = "DELETE FROM Review WHERE ParentReviewID = ?";
-            try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
-                ps.setInt(1, parentReviewId);
-                ps.executeUpdate();
-            }
-        }
-    }
-
-    // Lấy toàn bộ review GỐC theo tên sản phẩm, kèm replies
+    // Lấy toàn bộ review, join Account và Product, lọc theo tên sản phẩm
     public List<model.Review> getAllReviewsWithAccountAndProductByProductName(String keyword) throws SQLException {
         List<model.Review> list = new ArrayList<>();
         String sql = "SELECT r.*, a.Username, a.FullName, a.Role, p.ProductName "
                 + "FROM Review r "
                 + "JOIN Account a ON r.AccountID = a.AccountID "
                 + "JOIN Product p ON r.ProductID = p.ProductID "
-                + "WHERE LOWER(p.ProductName) LIKE ? AND r.ParentReviewID IS NULL "
+                + "WHERE LOWER(p.ProductName) LIKE ? "
                 + "ORDER BY r.CreatedAt DESC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword.toLowerCase() + "%");
@@ -605,46 +534,38 @@ public class FeedBackDAO extends DBContext {
                 r.setComment(rs.getString("Comment"));
                 r.setImageURL(rs.getString("ImageURL"));
                 r.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                r.setParentReviewID(null);
+                Integer parentReviewId = rs.getInt("ParentReviewID");
+                if (rs.wasNull()) {
+                    r.setParentReviewID(null);
+                } else {
+                    r.setParentReviewID(parentReviewId);
+                }
                 r.setAccountName(rs.getString("FullName"));
                 r.setUserName(rs.getString("Username"));
                 r.setAccountRole(rs.getInt("Role"));
                 r.setProductName(rs.getString("ProductName"));
                 r.setStatus(rs.getString("Status"));
-                // Load replies cho review gốc
-                List<model.Review> replies = getRepliesByParentId(r.getReviewID());
-                r.setReplies(replies);
                 list.add(r);
             }
         }
         return list;
     }
 
-    // Lấy các phản hồi staff chưa đọc cho customer, bao gồm cả phản hồi vào reply
-    // con
+    // Lấy các phản hồi staff chưa đọc cho customer
     public List<model.Review> getUnreadStaffRepliesForCustomer(int customerId) throws SQLException {
         List<model.Review> list = new ArrayList<>();
         String sql = "SELECT r.*, a.FullName, a.Username, a.Role, p.ProductName FROM Review r " +
                 "JOIN Account a ON r.AccountID = a.AccountID " +
                 "JOIN Product p ON r.ProductID = p.ProductID " +
-                "WHERE a.Role = 2 AND r.IsRead = 0 AND r.Status = 'VISIBLE' ORDER BY r.CreatedAt DESC";
+                "WHERE r.ParentReviewID IN (SELECT ReviewID FROM Review WHERE AccountID = ? AND ParentReviewID IS NULL) "
+                +
+                "AND a.Role = 2 AND r.IsRead = 0 AND r.Status = 'VISIBLE' ORDER BY r.CreatedAt DESC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                int replyId = rs.getInt("ReviewID");
-                int rootId = findRootReviewId(replyId);
-                // Kiểm tra review gốc có thuộc customer này không
-                try (PreparedStatement psRoot = conn
-                        .prepareStatement("SELECT AccountID FROM Review WHERE ReviewID = ?")) {
-                    psRoot.setInt(1, rootId);
-                    ResultSet rsRoot = psRoot.executeQuery();
-                    if (!rsRoot.next() || rsRoot.getInt(1) != customerId) {
-                        continue;
-                    }
-                }
-
                 model.Review r = new model.Review();
-                r.setReviewID(replyId);
+                r.setReviewID(rs.getInt("ReviewID"));
                 r.setOrderID(rs.getInt("OrderID"));
                 r.setProductID(rs.getInt("ProductID"));
                 r.setAccountID(rs.getInt("AccountID"));
@@ -663,7 +584,7 @@ public class FeedBackDAO extends DBContext {
                 r.setAccountRole(rs.getInt("Role"));
                 r.setStatus(rs.getString("Status"));
                 r.setIsRead(rs.getBoolean("IsRead"));
-                r.setProductName(rs.getString("ProductName"));
+                r.setProductName(rs.getString("ProductName")); // Lấy tên sản phẩm
                 list.add(r);
             }
         }
@@ -672,38 +593,10 @@ public class FeedBackDAO extends DBContext {
 
     // Đánh dấu tất cả phản hồi staff cho customer là đã đọc
     public void markAllStaffRepliesAsRead(int customerId) throws SQLException {
-        // Lấy các reply staff thuộc thread của customer và đang chưa đọc
-        String sql = "SELECT r.ReviewID FROM Review r WHERE r.IsRead = 0 AND (SELECT Role FROM Account WHERE AccountID = r.AccountID) = 2";
-        List<Integer> toMark = new ArrayList<>();
+        String sql = "UPDATE Review SET IsRead = 1 WHERE ParentReviewID IN (SELECT ReviewID FROM Review WHERE AccountID = ? AND ParentReviewID IS NULL) AND IsRead = 0 AND (SELECT Role FROM Account WHERE AccountID = Review.AccountID) = 2";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                int replyId = rs.getInt(1);
-                int rootId = findRootReviewId(replyId);
-                try (PreparedStatement psRoot = conn
-                        .prepareStatement("SELECT AccountID FROM Review WHERE ReviewID = ?")) {
-                    psRoot.setInt(1, rootId);
-                    ResultSet rsRoot = psRoot.executeQuery();
-                    if (rsRoot.next() && rsRoot.getInt(1) == customerId) {
-                        toMark.add(replyId);
-                    }
-                }
-            }
-        }
-        if (!toMark.isEmpty()) {
-            StringBuilder inClause = new StringBuilder();
-            for (int i = 0; i < toMark.size(); i++) {
-                if (i > 0)
-                    inClause.append(",");
-                inClause.append("?");
-            }
-            String update = "UPDATE Review SET IsRead = 1 WHERE ReviewID IN (" + inClause + ")";
-            try (PreparedStatement psUp = conn.prepareStatement(update)) {
-                for (int i = 0; i < toMark.size(); i++) {
-                    psUp.setInt(i + 1, toMark.get(i));
-                }
-                psUp.executeUpdate();
-            }
+            ps.setInt(1, customerId);
+            ps.executeUpdate();
         }
     }
 
@@ -716,4 +609,25 @@ public class FeedBackDAO extends DBContext {
         }
     }
 
+    public static void main(String[] args) {
+        FeedBackDAO dao = new FeedBackDAO();
+        try {
+            List<model.Review> reviews = dao.getAllReviewsWithAccountAndProduct();
+            System.out.println("TEST: Tổng số review lấy được: " + (reviews != null ? reviews.size() : "null"));
+            if (reviews != null) {
+                for (model.Review r : reviews) {
+                    System.out.println("ReviewID=" + r.getReviewID()
+                            + ", ProductName=" + r.getProductName()
+                            + ", UserName=" + r.getUserName()
+                            + ", Status=" + r.getStatus()
+                            + ", Comment=" + r.getComment());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("TEST: Lỗi khi lấy review: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            dao.closeConnection();
+        }
+    }
 }

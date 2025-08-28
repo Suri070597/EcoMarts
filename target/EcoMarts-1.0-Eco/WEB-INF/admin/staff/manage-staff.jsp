@@ -230,21 +230,6 @@
                 }
             });
         }
-
-        // Flash message via URL params (SweetAlert)
-        window.addEventListener('load', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const message = urlParams.get('message');
-            const type = urlParams.get('type');
-            if (message) {
-                Swal.fire({
-                    title: type === 'success' ? 'Thành công!' : 'Lỗi!',
-                    text: message,
-                    icon: type === 'success' ? 'success' : 'error',
-                    confirmButtonColor: type === 'success' ? '#8b6c42' : '#c35f5f'
-                });
-            }
-        });
     </script>
 </body>
 

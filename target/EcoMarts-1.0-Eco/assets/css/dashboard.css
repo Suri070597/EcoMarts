@@ -98,7 +98,6 @@ html {
     color: var(--text-dark);
     margin-top: 0;
     padding-right: 35px;
-    white-space: nowrap;
 }
 
 .stat-card .stat-icon {
@@ -174,17 +173,11 @@ html {
 .orders-table th,
 .orders-table td {
     padding: 15px;
-    text-align: center;
+    text-align: left;
     border-bottom: 1px solid var(--gray-200);
-    white-space: nowrap;
-}
-
-.orders-table td.price {
-    text-align: right;
 }
 
 .orders-table th {
-    text-align: center;
     background-color: var(--gray-100);
     color: var(--text-dark);
     font-weight: 600;

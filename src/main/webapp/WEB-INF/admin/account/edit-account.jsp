@@ -90,20 +90,19 @@
                     
                     <div class="mb-3">
                         <label class="form-label" for="role">Vai trò</label>
-                        <select class="form-control" id="role" disabled>
-                            <option value="0" selected>Khách hàng</option>
+                        <select class="form-control" name="role" id="role" required>
+                            <option value="0" ${account.role==0 ? 'selected' : '' }>Khách hàng</option>
+                            <option value="1" ${account.role==1 ? 'selected' : '' }>Quản trị viên</option>
                         </select>
-                        <input type="hidden" name="role" value="0">
                         <div class="invalid-feedback">Vui lòng chọn vai trò</div>
                     </div>
                     
                     <div class="mb-3">
                         <label class="form-label" for="status">Trạng thái</label>
-                        <select class="form-control" id="status" disabled>
+                        <select class="form-control" name="status" id="status" required>
                             <option value="Active" ${account.status eq 'Active' ? 'selected' : '' }>Hoạt động</option>
                             <option value="Inactive" ${account.status eq 'Inactive' ? 'selected' : '' }>Ngừng hoạt động</option>
                         </select>
-                        <input type="hidden" name="status" value="${account.status}">
                         <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
                     </div>
                     

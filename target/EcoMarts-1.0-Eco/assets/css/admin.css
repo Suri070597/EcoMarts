@@ -252,14 +252,13 @@ body {
   background-color: var(--gray-100);
   color: var(--accent-color);
   font-weight: 600;
-  text-align: center;
+  text-align: left;
   padding: 15px;
   border-bottom: 2px solid var(--gray-200);
 }
 
 .table td {
   padding: 15px;
-  text-align: center;
   border-bottom: 1px solid var(--gray-200);
   vertical-align: middle;
 }

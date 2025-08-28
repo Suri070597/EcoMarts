@@ -14,7 +14,6 @@ public class Voucher {
     private Timestamp endDate;
     private boolean isActive;
     private Integer categoryID; // Can be null if applicable to all categories
-    private Integer claimLimit; // Max number of claims that can be taken by users (null => unlimited)
 
     // For joining with other tables
     private Category category;
@@ -126,14 +125,6 @@ public class Voucher {
         this.categoryID = categoryID;
     }
 
-    public Integer getClaimLimit() {
-        return claimLimit;
-    }
-
-    public void setClaimLimit(Integer claimLimit) {
-        this.claimLimit = claimLimit;
-    }
-
     public Category getCategory() {
         return category;
     }
@@ -156,7 +147,6 @@ public class Voucher {
                 ", endDate=" + endDate +
                 ", isActive=" + isActive +
                 ", categoryID=" + categoryID +
-                ", claimLimit=" + claimLimit +
                 '}';
     }
 }

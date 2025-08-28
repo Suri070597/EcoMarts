@@ -203,32 +203,4 @@ public int countDistinctProductsInOrder(int orderId) {
     return 0;
 }
 
-public String getProductNamesByOrderId(int orderId) {
-    String sql = "SELECT p.ProductName FROM OrderDetail od " +
-                 "JOIN Product p ON od.ProductID = p.ProductID " +
-                 "WHERE od.OrderID = ?";
-    
-    List<String> productNames = new ArrayList<>();
-    
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, orderId);
-        ResultSet rs = ps.executeQuery();
-        
-        while (rs.next()) {
-            productNames.add(rs.getString("ProductName"));
-        }
-        
-        rs.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    
-    // Chỉ hiển thị 3 tên sản phẩm đầu tiên, nếu có nhiều hơn thì thêm "..."
-    if (productNames.size() <= 3) {
-        return String.join(", ", productNames);
-    } else {
-        return String.join(", ", productNames.subList(0, 3)) + "...";
-    }
-}
-
 }

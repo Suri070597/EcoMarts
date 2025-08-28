@@ -5,34 +5,6 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
     <!-- Session Configuration -->
-    <servlet>
-        <servlet-name>flashsales</servlet-name>
-        <servlet-class>controller.shortcuts.flashsales</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>seasonal</servlet-name>
-        <servlet-class>controller.shortcuts.seasonal</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>SeasonalServlet</servlet-name>
-        <servlet-class>controller.shortcuts.SeasonalServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>VoucherShortcuts</servlet-name>
-        <url-pattern>/VoucherShortcuts</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>flashsales</servlet-name>
-        <url-pattern>/flashsales</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>seasonal</servlet-name>
-        <url-pattern>/seasonal</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>SeasonalServlet</servlet-name>
-        <url-pattern>/SeasonalServlet</url-pattern>
-    </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
@@ -51,10 +23,6 @@
     <servlet>
         <servlet-name>ImageServlet_2</servlet-name>
         <servlet-class>controller.ImageServlet_2</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>VoucherShortcuts</servlet-name>
-        <servlet-class>VoucherShortcuts</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ImageServlet_2</servlet-name>
