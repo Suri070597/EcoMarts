@@ -1534,4 +1534,24 @@ public class ProductDAO extends DBContext {
         }
         return false;
     }
+
+    // xử lí trang home kiểm tra số lượng để vô hiệu hóa
+    // xử lí trang home kiểm tra số lượng để vô hiệu hóa
+    public double getUnitQuantity(int productId) {
+        String sql = "SELECT ISNULL(SUM(i.Quantity), 0) as TotalUnitQuantity "
+                + "FROM Inventory i "
+                + "WHERE i.ProductID = ? AND i.PackageType IN ('UNIT', 'KG')";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("TotalUnitQuantity");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
 }

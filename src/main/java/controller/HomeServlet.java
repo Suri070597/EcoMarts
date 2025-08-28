@@ -195,11 +195,13 @@ public class HomeServlet extends HttpServlet {
         request.setAttribute("priceDisplayMap", priceDisplayMap);
 
         // Lấy rating trung bình và số lượt đánh giá cho từng sản phẩm
+        // Đồng thời lấy unit quantity từ bảng Inventory để xác định hết hàng
         try {
             FeedBackDAO fbDao = new FeedBackDAO();
             java.util.Map<Integer, Double> avgRatingMap = new java.util.HashMap<>();
             java.util.Map<Integer, Integer> reviewCountMap = new java.util.HashMap<>();
             java.util.Map<Integer, Double> unitPriceMap = new java.util.HashMap<>();
+            java.util.Map<Integer, Double> unitQuantityMap = new java.util.HashMap<>();
 
             List<List<Product>> allProductLists = java.util.Arrays.asList(
                     (List<Product>) request.getAttribute("featuredProducts1"),
@@ -221,6 +223,12 @@ public class HomeServlet extends HttpServlet {
                             reviewCountMap.put(pid, count);
                         }
 
+                        // Lấy unit quantity từ bảng Inventory với packType = 'UNIT'
+                        if (!unitQuantityMap.containsKey(pid)) {
+                            double unitQty = dao.getUnitQuantity(pid);
+                            unitQuantityMap.put(pid, unitQty);
+                        }
+
                         // Map cũ để tương thích (không còn dùng ở JSP sau khi cập nhật)
                         if (!unitPriceMap.containsKey(pid)) {
                             unitPriceMap.put(pid, null);
@@ -231,6 +239,7 @@ public class HomeServlet extends HttpServlet {
             request.setAttribute("avgRatingMap", avgRatingMap);
             request.setAttribute("reviewCountMap", reviewCountMap);
             request.setAttribute("unitPriceMap", unitPriceMap);
+            request.setAttribute("unitQuantityMap", unitQuantityMap);
         } catch (Exception e) {
             e.printStackTrace();
         }
