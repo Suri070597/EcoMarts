@@ -4,20 +4,18 @@
  */
 package controller;
 
-import dao.ManufacturerDAO;
-import dao.ProductDAO;
-import dao.StockDAO;
-import dao.SupplierDAO;
-import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.List;
+
+import dao.ManufacturerDAO;
+import dao.StockDAO;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
-import java.util.List;
 import model.Manufacturer;
 import model.StockIn;
 import model.StockInDetail;
@@ -47,18 +45,18 @@ public class AdminInventoryServlet extends HttpServlet {
         }
 
         if (service.equals("listInventory")) {
-            String supplierIdStr = request.getParameter("supplierId");
+            String manufacturerIdStr = request.getParameter("manufacturerId");
             StockDAO stockDAO = new StockDAO();
             ManufacturerDAO manufacturerDAO = new ManufacturerDAO();
 
             try {
                 //Lấy danh sách inventory            
-                List<StockIn> stockIns ;
+                List<StockIn> stockIns;
 
-                if (supplierIdStr != null && !supplierIdStr.isEmpty()) {
-                    int supplierId = Integer.parseInt(supplierIdStr);
-                    stockIns = stockDAO.getStockInByManufacturer(supplierId);
-                    request.setAttribute("supplierId", supplierId);
+                if (manufacturerIdStr != null && !manufacturerIdStr.isEmpty()) {
+                    int manufacturerId = Integer.parseInt(manufacturerIdStr);
+                    stockIns = stockDAO.getStockInByManufacturer(manufacturerId);
+                    request.setAttribute("manufacturerId", manufacturerId);
                 } else {
                     stockIns = stockDAO.getAllStockIns();
                 }
@@ -69,9 +67,31 @@ public class AdminInventoryServlet extends HttpServlet {
                     s.setDetails(details); // StockIn có field List<StockInDetail> details
                 }
 
-                List<Manufacturer> supplierList = manufacturerDAO.getAllManufacturers();
+                List<Manufacturer> manufacturerList = manufacturerDAO.getAllManufacturers();
 
-                request.setAttribute("suppliers", supplierList);
+                int pendingCount = 0;
+                int completedCount = 0;
+                int rejectedCount = 0;
+
+                for (StockIn stock : stockIns) {
+                    switch (stock.getStatus()) {
+                        case "Pending":
+                            pendingCount++;
+                            break;
+                        case "Completed":
+                            completedCount++;
+                            break;
+                        case "Canceled":
+                            rejectedCount++;
+                            break;
+                    }
+                }
+
+                request.setAttribute("pendingCount", pendingCount);
+                request.setAttribute("completedCount", completedCount);
+                request.setAttribute("rejectedCount", rejectedCount);
+
+                request.setAttribute("manufacturers", manufacturerList);
                 request.setAttribute("stockIns", stockIns);
                 RequestDispatcher dispatcher = request.getRequestDispatcher(
                         "/WEB-INF/admin/inventory/inventory.jsp"
@@ -81,7 +101,7 @@ public class AdminInventoryServlet extends HttpServlet {
                 // Xử lý lỗi theo MVC pattern
                 request.setAttribute("errorMessage", "Lỗi khi tải dữ liệu: " + e.getMessage());
                 request.setAttribute("errorDetails", e.toString());
-
+               
                 // Forward đến trang lỗi hoặc trang hiện tại với thông báo lỗi
                 RequestDispatcher dispatcher = request.getRequestDispatcher(
                         "/WEB-INF/admin/inventory/inventory.jsp"
@@ -140,11 +160,9 @@ public class AdminInventoryServlet extends HttpServlet {
             StockDAO stockDAO = new StockDAO();
 
             try {
-                // Lấy chi tiết StockIn
-                List<StockInDetail> details = stockDAO.getDetailsByStockInID(stockInID);
 
                 // Approve
-                stockDAO.approveStockIn(stockInID, details);
+                stockDAO.approveStockIn(stockInID);
 
                 // Redirect về danh sách với thông báo thành công
                 response.sendRedirect(request.getContextPath() + "/admin/inventory?message=approved");
@@ -164,11 +182,7 @@ public class AdminInventoryServlet extends HttpServlet {
             StockDAO stockDAO = new StockDAO();
 
             try {
-                // Lấy chi tiết StockIn
-                List<StockInDetail> details = stockDAO.getDetailsByStockInID(stockInID);
-
-                // Approve
-                stockDAO.rejectStockIn(stockInID, details);
+                stockDAO.rejectStockIn(stockInID);
 
                 // Redirect về danh sách với thông báo thành công
                 response.sendRedirect(request.getContextPath() + "/admin/inventory?message=rejected");

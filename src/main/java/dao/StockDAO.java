@@ -1,6 +1,5 @@
 package dao;
 
-import db.DBContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import db.DBContext;
 import model.Inventory;
 import model.StockIn;
 import model.StockInDetail;
@@ -79,24 +80,20 @@ public class StockDAO extends DBContext {
             List<StockInDetail> detailList) throws SQLException {
 
         String sqlStockIn = "INSERT INTO StockIn (ManufacturerID, ReceiverID, DateIn, Note) VALUES (?, ?, ?, ?)";
-        String sqlInventory = "INSERT INTO Inventory (ProductID, PackageType, Quantity, UnitPrice, PackSize) VALUES (?, ?, ?, ?, ?)";
-        String sqlDetail = "INSERT INTO StockInDetail (StockInID, InventoryID, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
+        String sqlInsertInv = "INSERT INTO Inventory (ProductID, PackageType, Quantity, PackSize, LastUpdated) VALUES (?, ?, 0, ?, GETDATE())";
+        String sqlCheckInv = "SELECT InventoryID FROM Inventory WHERE ProductID = ? AND PackageType = ? AND PackSize = ?";
+        String sqlDetail = "INSERT INTO StockInDetail (StockInID, InventoryID, Quantity, UnitPrice, ExpiryDate) VALUES (?, ?, ?, ?, ?)";
 
-        PreparedStatement psStock = null;
-        PreparedStatement psInventory = null;
-        PreparedStatement psDetail = null;
-
-        try {
+        try (
+                PreparedStatement psStock = conn.prepareStatement(sqlStockIn, Statement.RETURN_GENERATED_KEYS); PreparedStatement psCheckInv = conn.prepareStatement(sqlCheckInv); PreparedStatement psInsertInv = conn.prepareStatement(sqlInsertInv, Statement.RETURN_GENERATED_KEYS); PreparedStatement psDetail = conn.prepareStatement(sqlDetail)) {
             conn.setAutoCommit(false);
 
             // 1. Insert StockIn
-            psStock = conn.prepareStatement(sqlStockIn, Statement.RETURN_GENERATED_KEYS);
             psStock.setInt(1, stockIn.getManufacturerID());
             psStock.setInt(2, stockIn.getReceiverID());
             psStock.setDate(3, stockIn.getDateIn());
             psStock.setString(4, stockIn.getNote());
-            int rowsStock = psStock.executeUpdate();
-            System.out.println("Inserted StockIn rows: " + rowsStock);
+            psStock.executeUpdate();
 
             ResultSet rsStock = psStock.getGeneratedKeys();
             int stockInID = 0;
@@ -106,39 +103,46 @@ public class StockDAO extends DBContext {
             stockIn.setStockInID(stockInID);
             System.out.println("Generated StockInID: " + stockInID);
 
-            // 2. Prepare statements
-            psInventory = conn.prepareStatement(sqlInventory, Statement.RETURN_GENERATED_KEYS);
-            psDetail = conn.prepareStatement(sqlDetail);
-
-            // 3. Loop over lists
+            // 2. Loop over inventory & details
             for (int i = 0; i < invList.size(); i++) {
                 Inventory inv = invList.get(i);
 
-                psInventory.setInt(1, inv.getProductID());
-                psInventory.setString(2, inv.getPackageType());
-                psInventory.setDouble(3, inv.getQuantity());
-                psInventory.setDouble(4, inv.getUnitPrice());
-                psInventory.setInt(5, inv.getPackSize());
-                int rowsInv = psInventory.executeUpdate();
-                System.out.println("Inserted Inventory rows: " + rowsInv);
-
-                ResultSet rsInv = psInventory.getGeneratedKeys();
                 int inventoryID = 0;
-                if (rsInv.next()) {
-                    inventoryID = rsInv.getInt(1);
-                }
-                inv.setInventoryID(inventoryID);
-                System.out.println("Generated InventoryID: " + inventoryID);
 
+                // 2.1 Check if inventory exists
+                psCheckInv.setInt(1, inv.getProductID());
+                psCheckInv.setString(2, inv.getPackageType());
+                psCheckInv.setInt(3, inv.getPackSize());
+                ResultSet rsCheck = psCheckInv.executeQuery();
+
+                if (rsCheck.next()) {
+                    // Exists
+                    inventoryID = rsCheck.getInt("InventoryID");
+                    System.out.println("Found existing InventoryID: " + inventoryID);
+                } else {
+                    // Insert new inventory with Quantity = 0
+                    psInsertInv.setInt(1, inv.getProductID());
+                    psInsertInv.setString(2, inv.getPackageType());
+                    psInsertInv.setInt(3, inv.getPackSize());
+                    psInsertInv.executeUpdate();
+
+                    ResultSet rsNewInv = psInsertInv.getGeneratedKeys();
+                    if (rsNewInv.next()) {
+                        inventoryID = rsNewInv.getInt(1);
+                    }
+                    System.out.println("Created new InventoryID: " + inventoryID);
+                }
+
+                // 2.2 Insert into StockInDetail
                 StockInDetail detail = detailList.get(i);
                 psDetail.setInt(1, stockInID);
                 psDetail.setInt(2, inventoryID);
                 psDetail.setDouble(3, detail.getQuantity());
                 psDetail.setDouble(4, detail.getUnitPrice());
-                int rowsDetail = psDetail.executeUpdate();
-                System.out.println("Inserted StockInDetail rows: " + rowsDetail
-                        + " | StockInID=" + stockInID
-                        + " | InventoryID=" + inventoryID);
+                psDetail.setDate(5, detail.getExpirationDate());
+                psDetail.executeUpdate();
+
+                System.out.println("Inserted StockInDetail: StockInID=" + stockInID + ", InventoryID=" + inventoryID);
             }
 
             conn.commit();
@@ -152,15 +156,17 @@ public class StockDAO extends DBContext {
             conn.setAutoCommit(true);
         }
     }
-    
+
     // Lấy tất cả StockIn
     public List<StockIn> getAllStockIns() throws SQLException {
         List<StockIn> list = new ArrayList<>();
         String sql = """
-            SELECT s.StockInID, s.DateIn, s.Status, m.CompanyName AS ManufacturerName, r.FullName AS ReceiverName
+            SELECT s.StockInID, s.DateIn, s.Status,
+                   m.CompanyName AS ManufacturerName,
+                   r.FullName AS ReceiverName
             FROM StockIn s
-            JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
-            JOIN Account r ON s.ReceiverID = r.AccountID
+            LEFT JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
+            LEFT JOIN Account r ON s.ReceiverID = r.AccountID
             ORDER BY s.StockInID DESC
         """;
 
@@ -179,6 +185,38 @@ public class StockDAO extends DBContext {
         return list;
     }
 
+    public List<StockIn> searchStockIn(String keyword) throws SQLException {
+        List<StockIn> list = new ArrayList<>();
+        String sql = "SELECT s.StockInID, s.DateIn, s.Status, "
+                + "       m.CompanyName AS ManufacturerName, "
+                + "       r.FullName AS ReceiverName "
+                + "FROM StockIn s "
+                + "LEFT JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID "
+                + "LEFT JOIN Account r ON s.ReceiverID = r.AccountID "
+                + "WHERE CAST(s.StockInID AS VARCHAR(50)) LIKE ? OR m.CompanyName LIKE ? OR r.FullName LIKE ? "
+                + "ORDER BY s.DateIn DESC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            String kw = "%" + keyword + "%";
+            ps.setString(1, kw);
+            ps.setString(2, kw);
+            ps.setString(3, kw);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    StockIn s = new StockIn();
+                    s.setStockInID(rs.getInt("StockInID"));
+                    s.setDateIn(rs.getDate("DateIn"));
+                    s.setStatus(rs.getString("Status"));
+                    s.setManufacturerName(rs.getString("ManufacturerName"));  
+                    s.setReceiverName(rs.getString("ReceiverName"));
+                    s.setDetails(new ArrayList<>());
+                    list.add(s);
+                }
+            }
+        }
+        return list;
+    }
+
     public List<StockIn> getStockInByManufacturer(int manufacturerId) throws SQLException {
         List<StockIn> list = new ArrayList<>();
         String sql = """
@@ -186,8 +224,8 @@ public class StockDAO extends DBContext {
                    m.CompanyName AS ManufacturerName,
                    r.FullName AS ReceiverName
             FROM StockIn s
-            JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
-            JOIN Account r ON s.ReceiverID = r.AccountID
+            LEFT JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
+            LEFT JOIN Account r ON s.ReceiverID = r.AccountID
             WHERE s.ManufacturerID = ?
             ORDER BY s.DateIn DESC
         """;
@@ -211,7 +249,7 @@ public class StockDAO extends DBContext {
     // Lấy StockInDetail theo StockInID
     public List<StockInDetail> getDetailsByStockInID(int stockInID) throws SQLException {
         List<StockInDetail> list = new ArrayList<>();
-        String sql = "SELECT d.InventoryID, p.ProductName, d.Quantity, d.UnitPrice "
+        String sql = "SELECT d.InventoryID, p.ProductName, d.Quantity, d.UnitPrice, d.ExpiryDate "
                 + "FROM StockInDetail d "
                 + "JOIN Inventory i ON d.InventoryID = i.InventoryID "
                 + "JOIN Product p ON i.ProductID = p.ProductID "
@@ -226,6 +264,7 @@ public class StockDAO extends DBContext {
                     d.setProductName(rs.getString("ProductName"));
                     d.setQuantity(rs.getDouble("Quantity"));
                     d.setUnitPrice(rs.getDouble("UnitPrice"));
+                    d.setExpirationDate(rs.getDate("ExpiryDate"));
                     list.add(d);
                 }
             }
@@ -237,10 +276,12 @@ public class StockDAO extends DBContext {
     public StockIn getStockInByID(int stockInID) throws SQLException {
         StockIn stock = null;
         String sql = """
-            SELECT s.StockInID, s.DateIn, s.Status, m.CompanyName AS ManufacturerName, r.FullName AS ReceiverName
+            SELECT s.StockInID, s.DateIn, s.Status,
+                   m.CompanyName AS ManufacturerName,
+                   r.FullName AS ReceiverName
             FROM StockIn s
-            JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
-            JOIN Account r ON s.ReceiverID = r.AccountID
+            LEFT JOIN Manufacturer m ON s.ManufacturerID = m.ManufacturerID
+            LEFT JOIN Account r ON s.ReceiverID = r.AccountID
             WHERE s.StockInID = ?
         """;
 
@@ -275,7 +316,7 @@ public class StockDAO extends DBContext {
         }
     }
 
-    public void rejectStockIn(int stockInID, List<StockInDetail> details) throws SQLException {
+    public void rejectStockIn(int stockInID) throws SQLException {
         try {
             conn.setAutoCommit(false);
 
@@ -291,21 +332,29 @@ public class StockDAO extends DBContext {
         }
     }
 
-    public void approveStockIn(int stockInID, List<StockInDetail> details) throws SQLException {
-        try {
+    public void approveStockIn(int stockInID) throws SQLException {
+        String sqlUpdateStockIn = "UPDATE StockIn SET Status = 'Completed' WHERE StockInID = ?";
+        String sqlUpdateInventory
+                = "UPDATE i "
+                + "SET i.Quantity = i.Quantity + d.Quantity "
+                + "FROM Inventory i "
+                + "JOIN StockInDetail d ON i.InventoryID = d.InventoryID "
+                + "WHERE d.StockInID = ?";
+
+        try (
+                PreparedStatement psStock = conn.prepareStatement(sqlUpdateStockIn); PreparedStatement psInv = conn.prepareStatement(sqlUpdateInventory)) {
             conn.setAutoCommit(false);
 
-            // Cập nhật trạng thái StockIn
-            updateStockInStatus(stockInID, "Completed");
+            // 1. Cập nhật trạng thái StockIn
+            psStock.setInt(1, stockInID);
+            psStock.executeUpdate();
 
-            // Cập nhật từng Inventory và Product
-            for (StockInDetail detail : details) {
-                
-                int productId = getProductIdByInventoryId(detail.getInventoryID());
-                updateProductStock(productId, detail.getQuantity());
-            }
+            // 2. Cập nhật tồn kho cho tất cả Inventory liên quan
+            psInv.setInt(1, stockInID);
+            psInv.executeUpdate();
 
             conn.commit();
+            System.out.println("StockIn " + stockInID + " approved and inventory updated!");
         } catch (SQLException e) {
             conn.rollback();
             throw e;
@@ -323,6 +372,5 @@ public class StockDAO extends DBContext {
             ps.executeUpdate();
         }
     }
-
 
 }
