@@ -390,7 +390,7 @@
                             }
 
                             // Tự động xác định packageType và packSize dựa trên BoxUnitName
-                            let packageType = 'UNIT';
+                            let packageType = 'BOX';
                             let packSize = 0;
 
                             if (item.boxUnitName) {
@@ -404,7 +404,7 @@
                                     packSize = 0;
                                 } else {
                                     // bỏ qua PACK, chỉ còn BOX và KG
-                                    packageType = 'UNIT';
+                                    packageType = 'BOX';
                                     packSize = 0;
                                 }
                             }
