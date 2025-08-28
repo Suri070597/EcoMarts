@@ -288,22 +288,14 @@
                                                         <small class="text-muted">Còn lại: ${buyNowItem.product.stockQuantity} ${buyNowItem.product.unit}</small>
                                                     </div>
                                                     <div class="price-section">
-                                                        <!-- DEBUG INFO -->
-                                                        <div style="font-size: 12px; color: #666;">
-                                                            Debug - Applied Promotion: ${not empty appliedPromotion ? 'YES' : 'NO'}<br/>
-                                                            Debug - Original Price: ${originalPrice}<br/>
-                                                            Debug - Product Price: ${buyNowItem.product.price}<br/>
-                                                            Debug - Promotion Info: ${not empty appliedPromotion ? appliedPromotion.promotionName.concat(' (').concat(appliedPromotion.discountPercent).concat('%)') : 'N/A'}
-                                                        </div>
-                                                        
                                                         <c:if test="${not empty appliedPromotion}">
                                                             <!-- Giá gốc (gạch ngang) -->
                                                             <p class="text-muted mb-1" style="text-decoration: line-through;">
-                                                                <fmt:formatNumber value="${originalPrice}" type="number" pattern="#,###"/> đ
+                                                                <fmt:formatNumber value="${originalPrice}" type="number" pattern="#,###"/> đ/${buyNowItem.product.unit}
                                                             </p>
                                                             <!-- Giá đã giảm và badge khuyến mãi -->
                                                             <p class="text-danger fw-bold mb-0 d-flex align-items-center">
-                                                                <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ
+                                                                <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ/${buyNowItem.product.unit}
                                                                 <span class="badge bg-danger ms-2">
                                                                     -<fmt:formatNumber value="${appliedPromotion.discountPercent}" pattern="#,##0"/>%
                                                                 </span>
@@ -312,7 +304,7 @@
                                                         <c:if test="${empty appliedPromotion}">
                                                             <!-- Chỉ hiển thị giá gốc nếu không có khuyến mãi -->
                                                             <p class="text-success fw-bold mb-0">
-                                                                <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ
+                                                                <fmt:formatNumber value="${buyNowItem.product.price}" type="number" pattern="#,###"/> đ/${buyNowItem.product.unit}
                                                             </p>
                                                         </c:if>
                                                     </div>
