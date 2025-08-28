@@ -59,6 +59,7 @@
                                                 <th>Sản phẩm</th>
                                                 <th>Số lượng</th>
                                                 <th>Giá nhập</th>
+                                                <th>Ngày hết hạn</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -68,6 +69,9 @@
                                                     <td>${detail.productName}</td>
                                                     <td><fmt:formatNumber value="${detail.quantity}" type="number" maxFractionDigits="0"/></td>
                                                     <td><fmt:formatNumber value="${detail.unitPrice}" type="number" groupingUsed="true"/></td>
+                                                    <td style="padding:0.35rem;">
+                                                        ${detail.expirationDate} <!-- hiển thị ngày hết hạn -->
+                                                    </td>
                                                 </tr>
                                             </c:forEach>
                                         </tbody>
