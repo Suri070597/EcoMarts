@@ -118,8 +118,8 @@
                                     <select class="form-select" name="conversionType" required>
                                         <option value="">-- Chọn loại chuyển đổi --</option>
                                         <option value="pack">Chuyển sang lốc</option>
-                                        <option value="both">Chuyển cả lốc và unit</option>
-                                        <option value="unit">Chuyển sang unit</option>
+                                        <option value="both">Chuyển cả lốc và <%= product.getItemUnitName() != null ? product.getItemUnitName() : "unit" %></option>
+                                        <option value="unit">Chuyển sang <%= product.getItemUnitName() != null ? product.getItemUnitName() : "unit" %></option>
                                     </select>
                                 </div>
                                 
@@ -140,7 +140,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Loại chuyển đổi</label>
                                     <select class="form-select" name="conversionType" required>
-                                        <option value="unit" selected>Chuyển sang unit</option>
+                                        <option value="unit" selected>Chuyển sang <%= product.getItemUnitName() != null ? product.getItemUnitName() : "unit" %></option>
                                     </select>
                                 </div>
                                 
@@ -165,7 +165,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <p><strong>Số lượng lốc:</strong> <span id="resultPacks"></span></p>
-                                    <p><strong>Đơn vị:</strong> <span id="resultUnitName"></span></p>
+                                    <p><strong>Đơn vị:</strong> <span id="resultUnitName"><%= product.getItemUnitName() != null ? product.getItemUnitName() : "unit" %></span></p>
                                 </div>
                             </div>
                         </div>

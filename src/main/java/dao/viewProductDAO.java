@@ -124,11 +124,11 @@ public class ViewProductDAO extends DBContext {
                     JOIN Category c ON p.CategoryID = c.CategoryID
                     LEFT JOIN inventory i ON p.ProductID = i.ProductID AND
                          ((c.ParentID = 3 AND i.PackageType = 'KG') OR
-                          (c.ParentID != 3 AND i.PackageType = 'UNIT')) AND i.quantity > 0
+                          (c.ParentID != 3 AND i.PackageType = 'UNIT'))
                     WHERE c.ParentID = ?
                     GROUP BY p.ProductID, p.ProductName, p.PriceUnit, p.ImageURL, p.ItemUnitName, p.CategoryID,
                              p.UnitPerBox, p.BoxUnitName
-                    HAVING COALESCE(SUM(i.quantity), 0) > 0
+                    HAVING COALESCE(SUM(i.quantity), 0) >= 0
                     ORDER BY p.ProductID
                     OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """;
