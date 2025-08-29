@@ -30,6 +30,7 @@ import model.Product;
 import model.Promotion;
 import model.Voucher;
 import util.VNPayUtil;
+import helper.PrepareCheckoutPage;
 
 /**
  * Servlet for handling "Buy Now" functionality
@@ -171,41 +172,40 @@ public class BuyNowServlet extends HttpServlet {
         AccountDAO accountDAO = new AccountDAO();
         Account fullAccount = accountDAO.getUserDetail(account.getAccountID());
 
-            // Calculate total price including promotions
-            prepareCheckoutPage(request, account, buyNowItem, product);        // Get available vouchers for the user
+        // Calculate total price including promotions
+        PrepareCheckoutPage pre = new PrepareCheckoutPage();
+        pre.prepareCheckoutPage(request, account, buyNowItem, product);        // Get available vouchers for the user
         VoucherDAO voucherDAO = new VoucherDAO();
         List<Voucher> availableVouchers = voucherDAO.getVouchersByAccountId(account.getAccountID());
 
-            // Filter valid vouchers (active and not expired)
-            List<Voucher> validVouchers = new ArrayList<>();
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            
-            // Calculate total amount before voucher
-            double itemTotal = product.getPrice() * buyNowItem.getQuantity();
+        // Filter valid vouchers (active and not expired)
+        List<Voucher> validVouchers = new ArrayList<>();
+        Timestamp now = new Timestamp(System.currentTimeMillis());
 
-            for (Voucher voucher : availableVouchers) {
-                if (voucher.isActive()
-                        && now.after(voucher.getStartDate())
-                        && now.before(voucher.getEndDate())
-                        && itemTotal >= voucher.getMinOrderValue()
-                        && voucher.getUsageCount() < voucher.getMaxUsage()) {
+        // Calculate total amount before voucher
+        double itemTotal = product.getPrice() * buyNowItem.getQuantity();
 
-                    // Check if voucher is applicable to this product's category
-                    Integer voucherCategoryId = voucher.getCategoryID();
-                    Category productCategory = product.getCategory();
-                    
-                    if (voucherCategoryId == null 
-                            || (productCategory != null && (
-                                voucherCategoryId.equals(productCategory.getCategoryID())
-                                || (productCategory.getParentID() != null 
-                                    && voucherCategoryId.equals(productCategory.getParentID()))
-                            ))) {
-                        validVouchers.add(voucher);
-                    }
+        for (Voucher voucher : availableVouchers) {
+            if (voucher.isActive()
+                    && now.after(voucher.getStartDate())
+                    && now.before(voucher.getEndDate())
+                    && itemTotal >= voucher.getMinOrderValue()
+                    && voucher.getUsageCount() < voucher.getMaxUsage()) {
+
+                // Check if voucher is applicable to this product's category
+                Integer voucherCategoryId = voucher.getCategoryID();
+                Category productCategory = product.getCategory();
+
+                if (voucherCategoryId == null
+                        || (productCategory != null && (voucherCategoryId.equals(productCategory.getCategoryID())
+                        || (productCategory.getParentID() != null
+                        && voucherCategoryId.equals(productCategory.getParentID()))))) {
+                    validVouchers.add(voucher);
                 }
             }
+        }
 
-            double roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;
+        double roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;
         request.setAttribute("buyNowItem", buyNowItem);
         request.setAttribute("itemTotal", roundedItemTotal);
         request.setAttribute("totalAmount", roundedItemTotal);
@@ -280,7 +280,10 @@ public class BuyNowServlet extends HttpServlet {
             String packSizeStr = request.getParameter("packSize");
             Integer packSize = null;
             if (packSizeStr != null && !packSizeStr.trim().isEmpty()) {
-                try { packSize = Integer.parseInt(packSizeStr); } catch (Exception ignore) {}
+                try {
+                    packSize = Integer.parseInt(packSizeStr);
+                } catch (Exception ignore) {
+                }
             }
 
             // Validate quantity
@@ -350,7 +353,6 @@ public class BuyNowServlet extends HttpServlet {
             }
 
             // Quantity changes from the client are ignored; use existing session quantity
-
             // Get product information and check stock again
             ProductDAO productDAO = new ProductDAO();
             Product product = productDAO.getProductById(buyNowItem.getProductID());
@@ -377,7 +379,8 @@ public class BuyNowServlet extends HttpServlet {
                 buyNowItem.setQuantity(stockQty);
 
                 // Re-populate the form with corrected quantity
-                prepareCheckoutPage(request, account, buyNowItem, product);
+                PrepareCheckoutPage pre = new PrepareCheckoutPage();
+                pre.prepareCheckoutPage(request, account, buyNowItem, product);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                 return;
             }
@@ -404,7 +407,8 @@ public class BuyNowServlet extends HttpServlet {
                 request.setAttribute("shippingPhone", shippingPhone);
                 request.setAttribute("notes", notes);
 
-                prepareCheckoutPage(request, account, buyNowItem, product);
+                PrepareCheckoutPage pre = new PrepareCheckoutPage();
+                pre.prepareCheckoutPage(request, account, buyNowItem, product);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                 return;
             }
@@ -417,14 +421,16 @@ public class BuyNowServlet extends HttpServlet {
                 request.setAttribute("shippingPhone", shippingPhone);
                 request.setAttribute("notes", notes);
 
-                prepareCheckoutPage(request, account, buyNowItem, product);
+                PrepareCheckoutPage pre = new PrepareCheckoutPage();
+                pre.prepareCheckoutPage(request, account, buyNowItem, product);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                 return;
             }
 
             // Re-prepare checkout page to ensure consistent pricing
-            prepareCheckoutPage(request, account, buyNowItem, product);
-            
+            PrepareCheckoutPage pre = new PrepareCheckoutPage();
+            pre.prepareCheckoutPage(request, account, buyNowItem, product);
+
             // Get the final price including any promotions
             double totalAmount = product.getPrice() * buyNowItem.getQuantity();
 
@@ -462,7 +468,9 @@ public class BuyNowServlet extends HttpServlet {
                     basePrice = product.getPrice();
                 } else {
                     basePrice = product.getPriceUnit();
-                    if (basePrice == null) basePrice = 0.0;
+                    if (basePrice == null) {
+                        basePrice = 0.0;
+                    }
                 }
 
                 buyNowItem.getProduct().setUnit(unitLabel);
@@ -508,7 +516,7 @@ public class BuyNowServlet extends HttpServlet {
                             request.setAttribute("shippingPhone", shippingPhone);
                             request.setAttribute("notes", notes);
 
-                            prepareCheckoutPage(request, account, buyNowItem, product);
+                            pre.prepareCheckoutPage(request, account, buyNowItem, product);
                             request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                             return;
                         }
@@ -531,7 +539,7 @@ public class BuyNowServlet extends HttpServlet {
                         request.setAttribute("shippingPhone", shippingPhone);
                         request.setAttribute("notes", notes);
 
-                        prepareCheckoutPage(request, account, buyNowItem, product);
+                        pre.prepareCheckoutPage(request, account, buyNowItem, product);
                         request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                         return;
                     }
@@ -544,7 +552,7 @@ public class BuyNowServlet extends HttpServlet {
                     request.setAttribute("shippingPhone", shippingPhone);
                     request.setAttribute("notes", notes);
 
-                    prepareCheckoutPage(request, account, buyNowItem, product);
+                    pre.prepareCheckoutPage(request, account, buyNowItem, product);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
                 }
@@ -610,7 +618,7 @@ public class BuyNowServlet extends HttpServlet {
             } else {
                 // Failed to create order
                 request.setAttribute("error", "Đã có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
-                prepareCheckoutPage(request, account, buyNowItem, product);
+                pre.prepareCheckoutPage(request, account, buyNowItem, product);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
             }
 
@@ -624,140 +632,12 @@ public class BuyNowServlet extends HttpServlet {
                 ProductDAO productDAO = new ProductDAO();
                 Product product = productDAO.getProductById(buyNowItem.getProductID());
                 if (product != null) {
-                    prepareCheckoutPage(request, account, buyNowItem, product);
+                    PrepareCheckoutPage pre = new PrepareCheckoutPage();
+                    pre.prepareCheckoutPage(request, account, buyNowItem, product);
                 }
             }
 
             request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
-        }
-    }
-
-    /**
-     * Helper method to prepare the checkout page
-     */
-    private void prepareCheckoutPage(HttpServletRequest request, Account account, CartItem buyNowItem, Product product) {
-        try {
-            // Set product for the buy now item
-            buyNowItem.setProduct(product);
-
-            // Get categories from database 
-            CategoryDAO categoryDAO = new CategoryDAO();
-            List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
-            request.setAttribute("categories", categories);
-
-            // Get base price based on package type
-            Double basePrice;
-            String packageType = buyNowItem.getPackageType();
-            if (packageType == null) packageType = "UNIT";
-            
-            switch(packageType.toUpperCase()) {
-                case "PACK":
-                    if (buyNowItem.getPackSize() != null) {
-                        Double pricePack = product.getPricePack();
-                        if (pricePack != null) {
-                            basePrice = pricePack;
-                        } else {
-                            Double unitPrice = product.getPriceUnit();
-                            basePrice = unitPrice != null ? unitPrice * buyNowItem.getPackSize() : 0.0;
-                        }
-                    } else {
-                        basePrice = product.getPriceUnit(); // Fallback to unit price if pack size not specified
-                    }
-                    break;
-                    
-                case "BOX":
-                    basePrice = product.getPrice(); // price field holds priceBox value
-                    break;
-                    
-                case "KG":
-                case "UNIT":
-                default:
-                    basePrice = product.getPriceUnit();
-                    break;
-            }
-            
-            if (basePrice == null) basePrice = 0.0;
-            
-            // Check for active promotion and calculate final price
-            double finalPrice = basePrice;
-            
-            PromotionDAO promotionDAO = new PromotionDAO();
-            Promotion activePromotion = promotionDAO.getValidPromotionForProduct(product.getProductID());
-            
-            if (activePromotion != null) {
-                double discountPercent = activePromotion.getDiscountPercent();
-                finalPrice = basePrice * (1 - discountPercent / 100);
-                request.setAttribute("appliedPromotion", activePromotion); 
-                request.setAttribute("originalPrice", basePrice);
-            }
-
-            // Set final price and calculate total
-            product.setPrice(finalPrice);
-            double itemTotal = finalPrice * buyNowItem.getQuantity();
-
-            // Set effective unit and stock for display
-            String unitLabel;
-            if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
-                String itemUnitName = product.getItemUnitName();
-                unitLabel = "Lốc" + (buyNowItem.getPackSize() != null ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
-            } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
-                String boxUnitName = product.getBoxUnitName();
-                unitLabel = boxUnitName != null ? boxUnitName : "thùng";
-            } else if ("KG".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
-                unitLabel = "kg";
-            } else {
-                String itemUnitName = product.getItemUnitName();
-                unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
-            }
-            product.setUnit(unitLabel);
-
-            // Update stock quantity
-            product.setStockQuantity(
-                ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null)
-                    ? new ProductDAO().getPackQuantity(buyNowItem.getProductID(), buyNowItem.getPackSize())
-                    : new ProductDAO().getQuantityByPackageType(buyNowItem.getProductID(), buyNowItem.getPackageType() != null ? buyNowItem.getPackageType() : "UNIT")
-            );
-
-            // Get available vouchers for the user
-            VoucherDAO voucherDAO = new VoucherDAO();
-            List<Voucher> availableVouchers = voucherDAO.getVouchersByAccountId(account.getAccountID());
-
-            // Filter valid vouchers (active and not expired)
-            List<Voucher> validVouchers = new ArrayList<>();
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-
-            for (Voucher voucher : availableVouchers) {
-                if (voucher.isActive()
-                        && now.after(voucher.getStartDate())
-                        && now.before(voucher.getEndDate())
-                        && itemTotal >= voucher.getMinOrderValue()
-                        && voucher.getUsageCount() < voucher.getMaxUsage()) {
-
-                    // Check if voucher is applicable to this product's category
-                    if (voucher.getCategoryID() == null
-                            || voucher.getCategoryID() == product.getCategory().getCategoryID()
-                            || voucher.getCategoryID() == product.getCategory().getParentID()) {
-                        validVouchers.add(voucher);
-                    }
-                }
-            }
-
-            // Set checkout page attributes
-            request.setAttribute("buyNowItem", buyNowItem);
-            request.setAttribute("itemTotal", itemTotal);
-            request.setAttribute("totalAmount", itemTotal); // Initial total before voucher
-            request.setAttribute("validVouchers", validVouchers);
-
-
-
-            // Get user info if not already set
-            if (request.getAttribute("userInfo") == null) {
-                AccountDAO accountDAO = new AccountDAO();
-                Account userInfo = accountDAO.getUserDetail(account.getAccountID());
-                request.setAttribute("userInfo", userInfo);
-            }
-        } catch (Exception e) {
-            request.setAttribute("error", "Lỗi khi chuẩn bị trang thanh toán: " + e.getMessage());
         }
     }
 
@@ -773,12 +653,6 @@ public class BuyNowServlet extends HttpServlet {
         String pattern = "^(0|\\+84)[3|5|7|8|9][0-9]{8}$";
         return phone.matches(pattern);
     }
-    /**
-     * Calculate base price for a product based on package type.
-     * Extracted from prepareCheckoutPage for testing.
-     */
-
-
 
     /**
      * Xử lý callback từ VNPay sau khi thanh toán
@@ -885,7 +759,6 @@ public class BuyNowServlet extends HttpServlet {
             }
 
             // Quantity changes from the client are ignored; use quantities from session/cart
-
             // Get order details from form
             String recipientName = request.getParameter("recipientName");
             String shippingAddress = request.getParameter("shippingAddress");
@@ -971,7 +844,7 @@ public class BuyNowServlet extends HttpServlet {
                     // Check for active promotion
                     PromotionDAO promotionDAO = new PromotionDAO();
                     Promotion activePromotion = promotionDAO.getValidPromotionForProduct(product.getProductID());
-                    
+
                     if (activePromotion != null) {
                         // Calculate discounted price
                         double discountPercent = activePromotion.getDiscountPercent();
@@ -1106,7 +979,7 @@ public class BuyNowServlet extends HttpServlet {
             // Check if we have selected items
             String selectedItemsStr = request.getParameter("selectedItems");
             List<Integer> selectedItemIds = new ArrayList<>();
-            
+
             if (selectedItemsStr != null && !selectedItemsStr.trim().isEmpty()) {
                 String[] itemIds = selectedItemsStr.split(",");
                 for (String itemId : itemIds) {
@@ -1117,12 +990,12 @@ public class BuyNowServlet extends HttpServlet {
                     }
                 }
             }
-            
+
             // Get cart items for this user
             CartItemDAO cartItemDAO = new CartItemDAO();
             List<CartItem> allCartItems = cartItemDAO.getCartByAccountId(account.getAccountID(), false);
             List<CartItem> cartItems = new ArrayList<>();
-            
+
             // Filter cart items based on selected IDs if any, otherwise use all items
             if (!selectedItemIds.isEmpty()) {
                 for (CartItem item : allCartItems) {
