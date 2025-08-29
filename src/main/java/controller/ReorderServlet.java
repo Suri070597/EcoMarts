@@ -51,21 +51,32 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
 
 for (Order order : orders) {
-    double totalAfterDiscount = order.getTotalAmount(); // Đã trừ giảm giá
-    double discount = orderDAO.getDiscountAmountByOrderID(order.getOrderID()).doubleValue(); // Lấy số giảm
-
-    double subtotal = totalAfterDiscount + discount; // Giá gốc
-    double vat = subtotal * 0.08;
-    double grandTotal = totalAfterDiscount + vat;
+    // Lấy danh sách OrderDetail để tính toán chính xác
+    List<OrderDetail> orderDetails = orderDetailDAO.getOrderDetailsByOrderId(order.getOrderID());
+    
+    // Tính tổng từ OrderDetail (giống như OrderDetailServlet)
+    double total = 0;
+    for (OrderDetail od : orderDetails) {
+        total += od.getSubTotal();
+    }
+    
+    // Tính VAT = 8% của tổng phụ
+    double vat = total * 0.08;
+    
+    // Lấy thông tin voucher đã sử dụng (nếu có)
+    double discount = orderDAO.getDiscountAmountByOrderID(order.getOrderID()).doubleValue();
+    
+    // Tổng thanh toán cuối cùng = tổng phụ - giảm giá + VAT
+    double finalTotal = total - discount + vat;
 
     order.setDiscountAmount(discount);
-    order.setSubtotal(subtotal);
+    order.setSubtotal(total);
     order.setVat(vat);
-    order.setGrandTotal(grandTotal);
+    order.setGrandTotal(finalTotal);
     
     // Lấy danh sách tên sản phẩm cho order này
     String productNames = orderDetailDAO.getProductNamesByOrderId(order.getOrderID());
-    order.setProductNames(productNames); // Cần thêm field này vào model Order
+    order.setProductNames(productNames);
 }
 
 

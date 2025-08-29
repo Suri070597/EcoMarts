@@ -58,6 +58,17 @@ public class OrderDetailDAO extends DBContext {
                 // Set package information
                 String packageType = rs.getString("PackageType");
                 Integer packSize = (Integer) rs.getObject("PackSize");
+                
+                // Đảm bảo PackSize đúng cho từng PackageType
+                if ("UNIT".equalsIgnoreCase(packageType) || "KG".equalsIgnoreCase(packageType) || "BOX".equalsIgnoreCase(packageType)) {
+                    packSize = null; // UNIT, KG, BOX không cần PackSize
+                } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    // PACK chỉ cần PackSize > 0
+                    if (packSize == null || packSize <= 0) {
+                        packSize = null;
+                    }
+                }
+                
                 orderDetail.setPackageType(packageType);
                 orderDetail.setPackSize(packSize);
 
