@@ -25,17 +25,17 @@ import model.Product;
  *
  * @author LNQB
  */
-@WebServlet(name = "SearchProductServlet", urlPatterns = { "/SearchProduct" })
+@WebServlet(name = "SearchProductServlet", urlPatterns = {"/SearchProduct"})
 public class SearchProductServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -59,10 +59,10 @@ public class SearchProductServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -116,17 +116,18 @@ public class SearchProductServlet extends HttpServlet {
                 // Kiểm tra tồn kho đúng loại
                 String packageType = (parentId == 3) ? "KG" : "UNIT";
                 double qty = productDao.getQuantityByPackageType(pid, packageType);
-                if (qty <= 0)
-                    continue;
+// if (qty <= 0) continue;  // BỎ DÒNG NÀY
 
-                // Phải có PriceUnit + ItemUnitName
-                if (p.getPriceUnit() == null)
+// Giữ kiểm tra có giá và đơn vị để ẩn sản phẩm chưa cấu hình đủ
+                if (p.getPriceUnit() == null) {
                     continue;
+                }
                 String itemUnit = p.getItemUnitName();
-                if (itemUnit == null || itemUnit.trim().isEmpty())
+                if (itemUnit == null || itemUnit.trim().isEmpty()) {
                     continue;
+                }
 
-                // Set tồn kho để JSP điều khiển nút
+// Đặt tồn kho (0 cũng đặt) để JSP hiển thị badge "Hết hàng" và disable nút
                 p.setStockQuantity(qty);
                 filteredResult.add(p);
             }
@@ -185,10 +186,10 @@ public class SearchProductServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
