@@ -190,28 +190,11 @@
                                     <span>(<%= count%>)</span>
                                 </div>
                                 <div class="product-price">
-
                                     <%
-                                        // Lấy giá unit (lon) từ Inventory
-                                        java.util.Map<Integer, Double> unitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("unitPriceMap");
-                                        Double unitPrice = null;
-                                        if (unitPriceMap != null) {
-                                            unitPrice = unitPriceMap.get(p.getProductID());
-                                        }
-
-                                        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
-                                        symbols.setGroupingSeparator('.');
-                                        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
-
-                                        if (unitPrice != null) {
-                                            // Có giá lon → hiển thị giá lon
-                                            out.print(formatter.format(unitPrice) + " đ / lon");
-                                        } else {
-                                            // Không có giá lon → hiển thị giá thùng
-                                            out.print(formatter.format(p.getPrice()) + " đ / thùng");
-                                        }
+                                        java.util.Map<Integer, String> priceDisplayMap = (java.util.Map<Integer, String>) request.getAttribute("priceDisplayMap");
+                                        String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
+                                        if (display != null) out.print(display);
                                     %>
-
                                 </div>
                                 <div class="button-group">
                                     <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
@@ -219,6 +202,8 @@
                                         <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                         <input type="hidden" name="quantity" value="1"> 
                                         <input type="hidden" name="action" value="initiate"> 
+                                        <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT" %>"> 
+                                        <input type="hidden" name="packSize" value="0"> 
                                         <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                     </form>
                                 </div>

@@ -129,11 +129,6 @@
                 background-color: #4CAF50;
                 color: white;
             }
-            
-            .small {
-                white-space: nowrap;
-            }
-            
         </style>
     </head>
     <body>

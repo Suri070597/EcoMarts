@@ -112,7 +112,7 @@
                         </c:forEach>
                     </c:when>
                     <c:otherwise>
-                        <p class="no-result-message"><i class="fas fa-exclamation-circle"></i> Không tìm thấy sản phẩm phù hợp hoặc tất cả sản phẩm đã hết hàng.</p>
+                        <p class="no-result-message"><i class="fas fa-exclamation-circle"></i> Không tìm thấy sản phẩm phù hợp</p>
                     </c:otherwise>
                 </c:choose>
             </div>

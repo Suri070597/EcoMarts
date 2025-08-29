@@ -146,7 +146,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -154,21 +154,29 @@
                     <div class="section-title">
                         <i class="fas fa-glass-cheers"></i> Sản phẩm nổi bật
                     </div>
-                    <a href="ViewAllProductServlet?type=featured" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>    
+                    <%-- <a href="ViewAllProductServlet?type=featured" class="view-all">Xem tất cả <i class="fas fa-chevron-right"></i></a>     --%>
                 </div>
                 <div class="product-grid" id="featured-Products">
                     <%
                         if (featuredProducts != null && !featuredProducts.isEmpty()) {
                             for (Product p : featuredProducts) {
                     %>
-                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
-                        <% if (p.getStockQuantity() <= 0) { %>
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%=request.getAttribute("unitQuantityMap") != null
+                            ? ((java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap")).getOrDefault(p.getProductID(), 0.0) : 0.0%>">
+                        <%
+                            double unitQty = 0.0;
+                            if (request.getAttribute("unitQuantityMap") != null) {
+                                java.util.Map<Integer, Double> unitQuantityMap = (java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap");
+                                unitQty = unitQuantityMap.getOrDefault(p.getProductID(), 0.0);
+                            }
+                            if (unitQty <= 0) {
+                        %>
                         <div class="product-badge out-of-stock">Hết hàng</div>
                         <% }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -201,25 +209,19 @@
                             <div class="product-price">
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
-                                    if (display != null) out.print(display);
-                                    // Only append unit info here for Drinks/Milk; skip for Fruits to avoid (1 kg)
-                                    if (display == null || (display != null && display.indexOf("(") == -1)) {
-                                        Integer parentId = p.getCategory() != null ? p.getCategory().getParentID() : null;
-                                        int cid = p.getCategory() != null ? p.getCategory().getCategoryID() : p.getCategoryID();
-                                        boolean isDrinkMilk = (cid == 1) || (cid == 2) || (parentId != null && (parentId == 1 || parentId == 2));
-                                        if (isDrinkMilk && p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
-                                            out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
-                                        }
-                                    }
+                                    if (display != null)
+                                        out.print(display);
                                 %>
                             </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT"%>"> 
+                                    <input type="hidden" name="packSize" value="0"> 
+                                    <button type="submit" class="buy-now-btn" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
@@ -233,10 +235,14 @@
                         }
                     %>
                 </div>
-                <% if (featuredProducts != null && featuredProducts.size() >= 6) { %>
-                <button id="load-more-featured" class="see-more-btn"
-                        data-type="featured" data-target="featured-Products">Xem thêm sản phẩm <i class="fas fa-arrow-right"></i></button>
+                
+                    <% if (featuredProducts != null && featuredProducts.size() >= 6) { %>
+                    <button id="load-more-featured" class="see-more-btn"
+                    data-type="featured" data-target="featured-Products">
+                    Xem thêm sản phẩm <i class="fas fa-arrow-right"></i>
+                    </button>
                     <% } %>
+                
             </section>
 
             <!--kết thúc-->
@@ -244,7 +250,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner1.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -259,14 +265,22 @@
                         if (drinkProducts != null && !drinkProducts.isEmpty()) {
                             for (Product p : drinkProducts) {
                     %>
-                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
-                        <% if (p.getStockQuantity() <= 0) { %>
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%=request.getAttribute("unitQuantityMap") != null
+                            ? ((java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap")).getOrDefault(p.getProductID(), 0.0) : 0.0%>">
+                        <%
+                            double unitQty = 0.0;
+                            if (request.getAttribute("unitQuantityMap") != null) {
+                                java.util.Map<Integer, Double> unitQuantityMap = (java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap");
+                                unitQty = unitQuantityMap.getOrDefault(p.getProductID(), 0.0);
+                            }
+                            if (unitQty <= 0) {
+                        %>
                         <div class="product-badge out-of-stock">Hết hàng</div>
                         <% }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -299,22 +313,19 @@
                             <div class="product-price">
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
-                                    if (display != null) out.print(display);
-                                    // Avoid duplicate unit info if already in display
-                                    if (display == null || (display != null && display.indexOf("(") == -1)) {
-                                        if (p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
-                                            out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
-                                        }
-                                    }
+                                    if (display != null)
+                                        out.print(display);
                                 %>
                             </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT"%>"> 
+                                    <input type="hidden" name="packSize" value="0"> 
+                                    <button type="submit" class="buy-now-btn" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
@@ -339,7 +350,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner2.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -354,14 +365,22 @@
                         if (MilkProducts != null && !MilkProducts.isEmpty()) {
                             for (Product p : MilkProducts) {
                     %>
-                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
-                        <% if (p.getStockQuantity() <= 0) { %>
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%=request.getAttribute("unitQuantityMap") != null
+                            ? ((java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap")).getOrDefault(p.getProductID(), 0.0) : 0.0%>">
+                        <%
+                            double unitQty = 0.0;
+                            if (request.getAttribute("unitQuantityMap") != null) {
+                                java.util.Map<Integer, Double> unitQuantityMap = (java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap");
+                                unitQty = unitQuantityMap.getOrDefault(p.getProductID(), 0.0);
+                            }
+                            if (unitQty <= 0) {
+                        %>
                         <div class="product-badge out-of-stock">Hết hàng</div>
                         <% }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -394,24 +413,20 @@
                             <div class="product-price">
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
-                                    if (display != null) out.print(display);
-                                    // Append unit info for Drinks (1) and Milk (2)
-                                    Integer parentId = p.getCategory() != null ? p.getCategory().getParentID() : null;
-                                    int cid = p.getCategory() != null ? p.getCategory().getCategoryID() : p.getCategoryID();
-                                    boolean isDrinkMilk = (cid == 1) || (cid == 2) || (parentId != null && (parentId == 1 || parentId == 2));
-                                    if (isDrinkMilk && p.getUnitPerBox() > 0 && p.getItemUnitName() != null && !p.getItemUnitName().trim().isEmpty()) {
-                                        out.print(" (" + p.getUnitPerBox() + " " + p.getItemUnitName() + ")");
-                                    }
+                                    if (display != null)
+                                        out.print(display);
                                 %>
                             </div>
 
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT"%>"> 
+                                    <input type="hidden" name="packSize" value="0"> 
+                                    <button type="submit" class="buy-now-btn" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
@@ -438,7 +453,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner3.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -453,14 +468,22 @@
                         if (FruitProducts != null && !FruitProducts.isEmpty()) {
                             for (Product p : FruitProducts) {
                     %>
-                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
-                        <% if (p.getStockQuantity() <= 0) { %>
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%=request.getAttribute("unitQuantityMap") != null
+                            ? ((java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap")).getOrDefault(p.getProductID(), 0.0) : 0.0%>">
+                        <%
+                            double unitQty = 0.0;
+                            if (request.getAttribute("unitQuantityMap") != null) {
+                                java.util.Map<Integer, Double> unitQuantityMap = (java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap");
+                                unitQty = unitQuantityMap.getOrDefault(p.getProductID(), 0.0);
+                            }
+                            if (unitQty <= 0) {
+                        %>
                         <div class="product-badge out-of-stock">Hết hàng</div>
                         <% }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -493,16 +516,19 @@
                             <div class="product-price">
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
-                                    if (display != null) out.print(display);
+                                    if (display != null)
+                                        out.print(display);
                                 %>
                             </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT"%>"> 
+                                    <input type="hidden" name="packSize" value="0"> 
+                                    <button type="submit" class="buy-now-btn" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
@@ -529,7 +555,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner4.jpg" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -544,14 +570,22 @@
                         if (CandyProducts != null && !CandyProducts.isEmpty()) {
                             for (Product p : CandyProducts) {
                     %>
-                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
-                        <% if (p.getStockQuantity() <= 0) { %>
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%=request.getAttribute("unitQuantityMap") != null
+                            ? ((java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap")).getOrDefault(p.getProductID(), 0.0) : 0.0%>">
+                        <%
+                            double unitQty = 0.0;
+                            if (request.getAttribute("unitQuantityMap") != null) {
+                                java.util.Map<Integer, Double> unitQuantityMap = (java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap");
+                                unitQty = unitQuantityMap.getOrDefault(p.getProductID(), 0.0);
+                            }
+                            if (unitQty <= 0) {
+                        %>
                         <div class="product-badge out-of-stock">Hết hàng</div>
                         <% }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -584,16 +618,19 @@
                             <div class="product-price">
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
-                                    if (display != null) out.print(display);
+                                    if (display != null)
+                                        out.print(display);
                                 %>
                             </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT"%>"> 
+                                    <input type="hidden" name="packSize" value="0"> 
+                                    <button type="submit" class="buy-now-btn" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
@@ -623,7 +660,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner5.png" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -638,14 +675,22 @@
                         if (MotherBabyProducts != null && !MotherBabyProducts.isEmpty()) {
                             for (Product p : MotherBabyProducts) {
                     %>
-                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
-                        <% if (p.getStockQuantity() <= 0) { %>
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%=request.getAttribute("unitQuantityMap") != null
+                            ? ((java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap")).getOrDefault(p.getProductID(), 0.0) : 0.0%>">
+                        <%
+                            double unitQty = 0.0;
+                            if (request.getAttribute("unitQuantityMap") != null) {
+                                java.util.Map<Integer, Double> unitQuantityMap = (java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap");
+                                unitQty = unitQuantityMap.getOrDefault(p.getProductID(), 0.0);
+                            }
+                            if (unitQty <= 0) {
+                        %>
                         <div class="product-badge out-of-stock">Hết hàng</div>
                         <% }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -678,16 +723,19 @@
                             <div class="product-price">
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
-                                    if (display != null) out.print(display);
+                                    if (display != null)
+                                        out.print(display);
                                 %>
                             </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT"%>"> 
+                                    <input type="hidden" name="packSize" value="0"> 
+                                    <button type="submit" class="buy-now-btn" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
@@ -714,7 +762,7 @@
             <!--mở đầu-->
 
             <section class="banner-section" data-aos="fade-up">
-                <img src="assets/img/freecompress-hero-banner-pc_202504181036599398.jpg" alt="Banner" class="full-width-banner">
+                <img src="assets/img/baner6.png" alt="Banner" class="full-width-banner">
             </section>
 
             <section class="product-section" data-aos="fade-up">
@@ -729,14 +777,22 @@
                         if (CosmeticProducts != null && !CosmeticProducts.isEmpty()) {
                             for (Product p : CosmeticProducts) {
                     %>
-                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
-                        <% if (p.getStockQuantity() <= 0) { %>
+                    <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%=request.getAttribute("unitQuantityMap") != null
+                            ? ((java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap")).getOrDefault(p.getProductID(), 0.0) : 0.0%>">
+                        <%
+                            double unitQty = 0.0;
+                            if (request.getAttribute("unitQuantityMap") != null) {
+                                java.util.Map<Integer, Double> unitQuantityMap = (java.util.Map<Integer, Double>) request.getAttribute("unitQuantityMap");
+                                unitQty = unitQuantityMap.getOrDefault(p.getProductID(), 0.0);
+                            }
+                            if (unitQty <= 0) {
+                        %>
                         <div class="product-badge out-of-stock">Hết hàng</div>
                         <% }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -769,16 +825,19 @@
                             <div class="product-price">
                                 <%
                                     String display = priceDisplayMap != null ? priceDisplayMap.get(p.getProductID()) : null;
-                                    if (display != null) out.print(display);
+                                    if (display != null)
+                                        out.print(display);
                                 %>
                             </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= unitQty%>" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT"%>"> 
+                                    <input type="hidden" name="packSize" value="0"> 
+                                    <button type="submit" class="buy-now-btn" <%= unitQty <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>

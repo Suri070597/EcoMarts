@@ -1030,10 +1030,13 @@ public class OrderDAO extends DBContext {
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     for (CartItem item : items) {
                         if (item.getProduct() != null) {
+                            // Lấy giá chính xác dựa trên PackageType
+                            double unitPrice = getCorrectPriceForPackageType(item);
+                            
                             ps.setInt(1, orderId);
                             ps.setInt(2, item.getProductID());
                             ps.setDouble(3, item.getQuantity());
-                            ps.setDouble(4, item.getProduct().getPrice());
+                            ps.setDouble(4, unitPrice);
                             ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
                             if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
                             ps.addBatch();
@@ -1137,10 +1140,13 @@ public class OrderDAO extends DBContext {
                             "VALUES (?, ?, ?, ?, ?, ?)";
 
                     try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
+                        // Lấy giá chính xác dựa trên PackageType
+                        double unitPrice = getCorrectPriceForPackageType(item);
+                        
                         ps.setInt(1, orderId);
                         ps.setInt(2, item.getProductID());
                         ps.setDouble(3, item.getQuantity());
-                        ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
+                        ps.setDouble(4, unitPrice);
                         ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
                         if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
 
@@ -1247,6 +1253,50 @@ public class OrderDAO extends DBContext {
             e.printStackTrace();
         }
         return discount;
+    }
+
+    /**
+     * Helper method to get the correct price based on package type
+     */
+    private double getCorrectPriceForPackageType(CartItem item) {
+        if (item.getProduct() == null) {
+            return 0.0;
+        }
+        
+        String packageType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
+        Integer packSize = item.getPackSize();
+        
+        // Lấy giá từ database dựa trên PackageType
+        String sql = "SELECT PriceBox, PriceUnit, PricePack FROM Product WHERE ProductID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, item.getProductID());
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                Double priceBox = rs.getObject("PriceBox", Double.class);
+                Double priceUnit = rs.getObject("PriceUnit", Double.class);
+                Double pricePack = rs.getObject("PricePack", Double.class);
+                
+                if ("KG".equalsIgnoreCase(packageType) || "UNIT".equalsIgnoreCase(packageType)) {
+                    return priceUnit != null ? priceUnit : 0.0;
+                } else if ("BOX".equalsIgnoreCase(packageType)) {
+                    return priceBox != null ? priceBox : 0.0;
+                } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    if (pricePack != null) {
+                        return pricePack;
+                    } else if (priceUnit != null && packSize != null) {
+                        return priceUnit * packSize;
+                    } else {
+                        return 0.0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        // Fallback to product price if something goes wrong
+        return item.getProduct().getPrice();
     }
 
 }
