@@ -143,6 +143,8 @@
                     var boxFields = document.querySelectorAll('.box-related');
                     var itemUnitGroup = document.getElementById('item-unit-group');
                     var itemUnitSelect = document.getElementById('itemUnitName');
+                    // Lưu lại danh sách option gốc để khôi phục khi chuyển từ trái cây sang nhóm khác
+                    var originalItemUnitOptions = itemUnitSelect ? itemUnitSelect.innerHTML : '';
                     var unitPerBoxInput = document.getElementById('unitPerBox');
                     var boxUnitNameInput = document.getElementById('boxUnitName'); // Hidden input với value="thùng"
                     // đã bỏ các trường hạn sử dụng và giá/ tồn kho
@@ -168,7 +170,10 @@
                                     input.disabled = false;
                                 }
                             });
-                            // Khôi phục các đơn vị nhỏ nhất khác - chỉ thay đổi value của option đầu tiên
+                            // Khôi phục đầy đủ danh sách đơn vị nhỏ nhất ban đầu
+                            if (originalItemUnitOptions) {
+                                itemUnitSelect.innerHTML = originalItemUnitOptions;
+                            }
                             itemUnitSelect.value = '';
                         }
                     }
