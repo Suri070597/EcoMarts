@@ -54,7 +54,7 @@
                                             <%= product.getCategory().getCategoryName() %>
                                         <% } %>
                                     </p>
-                                    <p><strong>Số lượng thùng hiện có:</strong> <%= product.getStockQuantity() %></p>
+                                    <p><strong>Số lượng thùng hiện có:</strong> <%= (long)product.getStockQuantity() %></p>
                                 </div>
                                 <div class="col-md-6">
                                     <p><strong>Số lượng sản phẩm trong 1 thùng:</strong> <%= product.getUnitPerBox() %></p>
