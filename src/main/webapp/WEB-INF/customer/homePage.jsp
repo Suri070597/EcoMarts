@@ -202,18 +202,6 @@
                                 // Hết hạn nếu ngày hết hạn < ngày hôm nay (không bao gồm ngày hôm nay)
                                 isExpired = cal2.before(cal1);
                                 
-                                // Debug: In ra để kiểm tra
-                                System.out.println("=== DEBUG FEATURED PRODUCTS ===");
-                                System.out.println("Product: " + p.getProductName() + " (ID: " + p.getProductID() + ")");
-                                System.out.println("Expiry Date: " + p.getExpirationDate());
-                                System.out.println("Today: " + today);
-                                System.out.println("Cal1 (Today): " + cal1.getTime());
-                                System.out.println("Cal2 (Expiry): " + cal2.getTime());
-                                System.out.println("Cal2.before(Cal1): " + cal2.before(cal1));
-                                System.out.println("Is Expired: " + isExpired);
-                                System.out.println("FEATURED PRODUCTS SECTION");
-                                System.out.println("==============================");
-                                
                                 if (isExpired) {
                         %>
                         <div class="product-badge expired">Hết hạn</div>

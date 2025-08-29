@@ -26,13 +26,14 @@ public class SearchProductsDAO extends DBContext {
         }
 
         String[] words = keyword.trim().split("\\s+");
-        StringBuilder sql = new StringBuilder("""
-                    SELECT p.*
-                    FROM Product p
-                    JOIN Category c ON p.CategoryID = c.CategoryID
-                    LEFT JOIN Category pc ON c.ParentID = pc.CategoryID
-                    WHERE 1=1 AND
-                """);
+        StringBuilder sql = new StringBuilder(
+                """
+                            SELECT p.*, (SELECT TOP 1 sd.ExpiryDate FROM StockInDetail sd JOIN StockIn si ON sd.StockInID = si.StockInID JOIN Inventory inv ON sd.InventoryID = inv.InventoryID WHERE inv.ProductID = p.ProductID AND si.Status = 'Completed' ORDER BY si.DateIn DESC, sd.StockInDetailID DESC) as LatestExpiryDate
+                            FROM Product p
+                            JOIN Category c ON p.CategoryID = c.CategoryID
+                            LEFT JOIN Category pc ON c.ParentID = pc.CategoryID
+                            WHERE 1=1 AND
+                        """);
 
         // Tạo điều kiện cho mỗi từ khóa với OR logic (product/category only)
         List<String> conditions = new ArrayList<>();
@@ -83,6 +84,11 @@ public class SearchProductsDAO extends DBContext {
                 }
                 try {
                     p.setItemUnitName(rs.getString("ItemUnitName"));
+                } catch (Exception ignore) {
+                }
+                // Thêm ngày hết hạn
+                try {
+                    p.setExpirationDate(rs.getDate("LatestExpiryDate"));
                 } catch (Exception ignore) {
                 }
                 productList.add(p);

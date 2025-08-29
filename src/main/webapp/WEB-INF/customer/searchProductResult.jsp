@@ -47,14 +47,50 @@
                 <c:choose>
                     <c:when test="${not empty searchResult}">
                         <c:forEach var="p" items="${searchResult}">
+                            <%
+                                // Khai báo biến isExpired ở đầu vòng lặp
+                                boolean isExpired = false;
+                                if (pageContext.getAttribute("p") != null) {
+                                    Object productObj = pageContext.getAttribute("p");
+                                    if (productObj instanceof model.Product) {
+                                        model.Product product = (model.Product) productObj;
+                                        if (product.getExpirationDate() != null) {
+                                            java.util.Date today = new java.util.Date();
+                                            java.util.Date expiryDate = product.getExpirationDate();
+                                            
+                                            java.util.Calendar cal1 = java.util.Calendar.getInstance();
+                                            java.util.Calendar cal2 = java.util.Calendar.getInstance();
+                                            cal1.setTime(today);
+                                            cal2.setTime(expiryDate);
+                                            
+                                            cal1.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                                            cal1.set(java.util.Calendar.MINUTE, 0);
+                                            cal1.set(java.util.Calendar.SECOND, 0);
+                                            cal1.set(java.util.Calendar.MILLISECOND, 0);
+                                            cal2.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                                            cal2.set(java.util.Calendar.MINUTE, 0);
+                                            cal2.set(java.util.Calendar.SECOND, 0);
+                                            cal2.set(java.util.Calendar.MILLISECOND, 0);
+                                            
+                                            isExpired = cal2.before(cal1);
+                                        }
+                                    }
+                                }
+                                pageContext.setAttribute("isExpired", isExpired);
+                            %>
                             <div class="product-card" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}">
-                                <c:if test="${p.stockQuantity <= 0}">
-                                    <div class="product-badge out-of-stock">Hết hàng</div>
-                                </c:if>
+                                <c:choose>
+                                    <c:when test="${p.stockQuantity <= 0}">
+                                        <div class="product-badge out-of-stock">Hết hàng</div>
+                                    </c:when>
+                                    <c:when test="${isExpired}">
+                                        <div class="product-badge expired">Hết hạn</div>
+                                    </c:when>
+                                </c:choose>
                                 <div class="product-image-container">
                                     <img src="ImageServlet?name=${p.imageURL}" alt="${p.productName}" class="product-image">
                                     <div class="product-actions">
-                                        <button class="action-btn add-to-cart-action" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}" <c:if test="${p.stockQuantity <= 0}">disabled style='opacity:0.5;cursor:not-allowed;'</c:if>><i class="fas fa-cart-plus"></i></button>
+                                        <button class="action-btn add-to-cart-action" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}" <c:if test="${p.stockQuantity <= 0 or isExpired}">disabled style='opacity:0.5;cursor:not-allowed;'</c:if>><i class="fas fa-cart-plus"></i></button>
                                         <a href="ProductDetail?id=${p.productID}" class="action-btn"><i class="fas fa-eye"></i></a>
                                     </div>
                                 </div>
@@ -104,8 +140,8 @@
                                         ${priceDisplayMap[pid]}
                                     </div>
                                     <div class="button-group">
-                                        <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}" <c:if test="${p.stockQuantity <= 0}">disabled style='opacity:0.5;cursor:not-allowed;'</c:if>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
-                                        <a href="${pageContext.request.contextPath}/ProductDetail?id=${p.productID}" class="buy-now-btn" <c:if test="${p.stockQuantity <= 0}">style='pointer-events:none;opacity:0.5;cursor:not-allowed;'</c:if>>Mua ngay</a>
+                                        <button class="add-to-cart-btn" data-product-id="${p.productID}" data-stock-quantity="${p.stockQuantity}" <c:if test="${p.stockQuantity <= 0 or isExpired}">disabled style='opacity:0.5;cursor:not-allowed;'</c:if>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                        <a href="${pageContext.request.contextPath}/ProductDetail?id=${p.productID}" class="buy-now-btn" <c:if test="${p.stockQuantity <= 0 or isExpired}">style='pointer-events:none;opacity:0.5;cursor:not-allowed;'</c:if>>Mua ngay</a>
                                     </div>
                                 </div>
                             </div>

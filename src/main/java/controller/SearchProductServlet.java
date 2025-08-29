@@ -7,6 +7,7 @@ package controller;
 import dao.CategoryDAO;
 import dao.SearchProductsDAO;
 import dao.FeedBackDAO;
+import dao.InventoryDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -25,17 +26,17 @@ import model.Product;
  *
  * @author LNQB
  */
-@WebServlet(name = "SearchProductServlet", urlPatterns = {"/SearchProduct"})
+@WebServlet(name = "SearchProductServlet", urlPatterns = { "/SearchProduct" })
 public class SearchProductServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -59,10 +60,10 @@ public class SearchProductServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -80,34 +81,17 @@ public class SearchProductServlet extends HttpServlet {
             // Filter results per rule: đúng PackageType (KG cho trái cây; UNIT cho danh mục
             // khác) và hiển thị PriceUnit/ItemUnitName
             java.util.List<Product> filteredResult = new java.util.ArrayList<>();
-            dao.ProductDAO productDao = new dao.ProductDAO();
             java.util.Map<Integer, Integer> parentIdMap = new java.util.HashMap<>();
             for (Product p : result) {
                 int pid = p.getProductID();
                 int parentId = 0;
+
+                // Lấy parentId từ CategoryDAO
                 try {
-                    Product full = productDao.getProductById(pid);
-                    if (full != null && full.getCategory() != null) {
-                        parentId = full.getCategory().getParentID();
-                        // ensure names are present on p for JSP labels
-                        try {
-                            p.setBoxUnitName(full.getBoxUnitName());
-                        } catch (Exception ignore) {
-                        }
-                        try {
-                            p.setItemUnitName(full.getItemUnitName());
-                        } catch (Exception ignore) {
-                        }
-                        try {
-                            p.setUnitPerBox(full.getUnitPerBox());
-                        } catch (Exception ignore) {
-                        }
-                        if (p.getPriceUnit() == null) {
-                            try {
-                                p.setPriceUnit(full.getPriceUnit());
-                            } catch (Exception ignore) {
-                            }
-                        }
+                    CategoryDAO catDAO = new CategoryDAO();
+                    Category cat = catDAO.getCategoryById(p.getCategoryID());
+                    if (cat != null) {
+                        parentId = cat.getParentID();
                     }
                 } catch (Exception ignore) {
                 }
@@ -115,10 +99,15 @@ public class SearchProductServlet extends HttpServlet {
 
                 // Kiểm tra tồn kho đúng loại
                 String packageType = (parentId == 3) ? "KG" : "UNIT";
-                double qty = productDao.getQuantityByPackageType(pid, packageType);
-// if (qty <= 0) continue;  // BỎ DÒNG NÀY
+                double qty = 0.0;
+                try {
+                    // Sử dụng InventoryDAO để lấy số lượng
+                    InventoryDAO invDAO = new InventoryDAO();
+                    qty = invDAO.getQuantityByPackage(pid, packageType, 0);
+                } catch (Exception ignore) {
+                }
 
-// Giữ kiểm tra có giá và đơn vị để ẩn sản phẩm chưa cấu hình đủ
+                // Giữ kiểm tra có giá và đơn vị để ẩn sản phẩm chưa cấu hình đủ
                 if (p.getPriceUnit() == null) {
                     continue;
                 }
@@ -127,7 +116,7 @@ public class SearchProductServlet extends HttpServlet {
                     continue;
                 }
 
-// Đặt tồn kho (0 cũng đặt) để JSP hiển thị badge "Hết hàng" và disable nút
+                // Đặt tồn kho (0 cũng đặt) để JSP hiển thị badge "Hết hàng" và disable nút
                 p.setStockQuantity(qty);
                 filteredResult.add(p);
             }
@@ -186,10 +175,10 @@ public class SearchProductServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
