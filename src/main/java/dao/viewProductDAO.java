@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import db.DBContext;
+import java.util.Date;
 import model.Product;
 
 /**
@@ -117,21 +118,28 @@ public class ViewProductDAO extends DBContext {
     public List<Product> getFeaturedProductsByPage(int parentCategoryId, int offset, int limit) {
         List<Product> list = new ArrayList<>();
         String sql = """
-                    SELECT p.ProductID, p.ProductName, p.PriceUnit, p.ImageURL, p.ItemUnitName, p.CategoryID,
-                           p.UnitPerBox, p.BoxUnitName, p.ItemUnitName,
-                           COALESCE(SUM(i.quantity), 0) as StockQuantity
-                    FROM Product p
-                    JOIN Category c ON p.CategoryID = c.CategoryID
-                    LEFT JOIN inventory i ON p.ProductID = i.ProductID AND
-                         ((c.ParentID = 3 AND i.PackageType = 'KG') OR
-                          (c.ParentID != 3 AND i.PackageType = 'UNIT'))
-                    WHERE c.ParentID = ?
-                    GROUP BY p.ProductID, p.ProductName, p.PriceUnit, p.ImageURL, p.ItemUnitName, p.CategoryID,
-                             p.UnitPerBox, p.BoxUnitName
-                    HAVING COALESCE(SUM(i.quantity), 0) >= 0
-                    ORDER BY p.ProductID
-                    OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
-                """;
+              SELECT p.ProductID, p.ProductName, p.PriceUnit, p.ImageURL, p.ItemUnitName, p.CategoryID,
+                       p.UnitPerBox, p.BoxUnitName, p.ItemUnitName,
+                       COALESCE(SUM(i.quantity), 0) as StockQuantity,
+                       (SELECT TOP 1 sd.ExpiryDate 
+                        FROM StockInDetail sd 
+                        JOIN StockIn si ON sd.StockInID = si.StockInID 
+                        JOIN Inventory inv ON sd.InventoryID = inv.InventoryID
+                        WHERE inv.ProductID = p.ProductID 
+                          AND si.Status = 'Completed'  -- Chỉ lấy đơn nhập kho đã hoàn thành
+                        ORDER BY si.DateIn DESC, sd.StockInDetailID DESC) as LatestExpiryDate
+                FROM Product p
+                JOIN Category c ON p.CategoryID = c.CategoryID
+                LEFT JOIN inventory i ON p.ProductID = i.ProductID AND
+                     ((c.ParentID = 3 AND i.PackageType = 'KG') OR
+                      (c.ParentID != 3 AND i.PackageType = 'UNIT'))
+                WHERE c.ParentID = ?
+                GROUP BY p.ProductID, p.ProductName, p.PriceUnit, p.ImageURL, p.ItemUnitName, p.CategoryID,
+                         p.UnitPerBox, p.BoxUnitName
+                HAVING COALESCE(SUM(i.quantity), 0) >= 0
+                ORDER BY p.ProductID
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+            """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, parentCategoryId);
@@ -142,11 +150,16 @@ public class ViewProductDAO extends DBContext {
                 Product p = new Product();
                 p.setProductID(rs.getInt("ProductID"));
                 p.setProductName(rs.getString("ProductName"));
-                p.setPriceUnit(rs.getObject("PriceUnit", Double.class)); // Sử dụng PriceUnit thay vì Price
+                p.setPriceUnit(rs.getObject("PriceUnit", Double.class));
                 p.setImageURL(rs.getString("ImageURL"));
-                p.setUnit(rs.getString("ItemUnitName")); // Sử dụng ItemUnitName làm Unit
+                p.setUnit(rs.getString("ItemUnitName"));
                 p.setStockQuantity(rs.getDouble("StockQuantity"));
                 p.setCategoryID(rs.getInt("CategoryID"));
+
+                // Thêm ngày hết hạn
+                Date expiryDate = rs.getDate("LatestExpiryDate");
+                p.setExpirationDate(expiryDate);
+
                 try {
                     p.setUnitPerBox(rs.getInt("UnitPerBox"));
                     p.setBoxUnitName(rs.getString("BoxUnitName"));

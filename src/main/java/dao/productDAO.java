@@ -265,6 +265,84 @@ public class ProductDAO extends DBContext {
         return product;
     }
 
+    // xử lí riêng cho sản phẩm nổi bật
+    public Product getProductById2(int id) {
+        Product product = null;
+        String sql = "SELECT p.*, c.categoryName, c.parentID, "
+                + "COALESCE(box_inv.Quantity, 0) as BoxQuantity, "
+                + "COALESCE(kg_inv.Quantity, 0) as KgQuantity, "
+                + "(SELECT TOP 1 sd.ExpiryDate "
+                + "FROM StockInDetail sd "
+                + "JOIN StockIn si ON sd.StockInID = si.StockInID "
+                + "JOIN Inventory inv ON sd.InventoryID = inv.InventoryID "
+                + "WHERE inv.ProductID = p.ProductID "
+                + "  AND si.Status = 'Completed' "
+                + "ORDER BY si.DateIn DESC, sd.StockInDetailID DESC) as LatestExpiryDate "
+                + "FROM Product p "
+                + "JOIN Category c ON p.categoryID = c.categoryID "
+                + "LEFT JOIN Inventory box_inv ON p.ProductID = box_inv.ProductID AND box_inv.PackageType = 'BOX' "
+                + "LEFT JOIN Inventory kg_inv ON p.ProductID = kg_inv.ProductID AND kg_inv.PackageType = 'KG' "
+                + "WHERE p.ProductID = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                // Product info
+                String proName = rs.getString("productName");
+                String description = rs.getString("description");
+                String imageURL = rs.getString("ImageURL");
+                Timestamp createdAt = rs.getTimestamp("createdAt");
+
+                int categoryId = rs.getInt("categoryID");
+                String categoryName = rs.getString("categoryName");
+                int parentId = rs.getInt("parentID");
+                Category category = new Category(categoryId, categoryName, parentId, null);
+
+                // Lấy số lượng dựa theo loại sản phẩm
+                double boxQty = rs.getDouble("BoxQuantity");
+                double kgQty = rs.getDouble("KgQuantity");
+                double stockQuantity;
+
+                if (parentId == 3) {
+                    stockQuantity = kgQty; // Trái cây lấy KG
+                } else {
+                    stockQuantity = boxQty; // Sản phẩm khác lấy BOX
+                }
+
+                product = new Product();
+                product.setProductID(id);
+                product.setProductName(proName);
+                product.setDescription(description);
+                product.setStockQuantity(stockQuantity);
+                product.setImageURL(imageURL);
+                product.setCreatedAt(createdAt);
+                product.setCategory(category);
+
+                // Lấy các trường giá mới - xử lý nullable
+                Double priceBox = rs.getObject("PriceBox", Double.class);
+                Double priceUnit = rs.getObject("PriceUnit", Double.class);
+                Double pricePack = rs.getObject("PricePack", Double.class);
+
+                product.setPrice(priceBox); // Giá thùng
+                product.setPriceUnit(priceUnit); // Giá unit
+                product.setPricePack(pricePack); // Giá pack
+
+                product.setUnitPerBox(rs.getInt("UnitPerBox"));
+                product.setBoxUnitName(rs.getString("BoxUnitName"));
+                product.setItemUnitName(rs.getString("ItemUnitName"));
+
+                // Thêm ngày hết hạn
+                Date expiryDate = rs.getDate("LatestExpiryDate");
+                product.setExpirationDate(expiryDate);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return product;
+    }
+
     //
     public boolean delete(int id) {
         String sqlCartItem = "DELETE FROM CartItem WHERE ProductID = ?";
@@ -1314,17 +1392,17 @@ public class ProductDAO extends DBContext {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         int pid = rs.getInt(1);
-                        Product p = getProductById(pid);
+                        Product p = getProductById2(pid); // Thay đổi từ getProductById thành getProductById2
                         if (p == null) {
                             continue;
                         }
 
                         String packageType = isFruitCategory ? "KG" : "UNIT";
                         double qty = getQuantityByPackageType(pid, packageType);
-                       
+
                         Double priceUnit = p.getPriceUnit();
                         if (priceUnit == null) {
-                            Product full = getProductById(pid);
+                            Product full = getProductById2(pid); // Thay đổi từ getProductById thành getProductById2
                             if (full != null) {
                                 priceUnit = full.getPriceUnit();
                             }

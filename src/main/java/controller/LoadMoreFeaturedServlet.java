@@ -55,7 +55,8 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 for (int i = offset; i < rows.size() && i < offset + limit; i++) {
                                         java.util.Map<String, Object> row = rows.get(i);
                                         int pid = ((Number) row.get("productId")).intValue();
-                                        Product p = productDao.getProductById(pid);
+                                        Product p = productDao.getProductById2(pid); // Thay đổi từ getProductById thành
+                                                                                     // getProductById2
                                         if (p != null)
                                                 feats.add(p);
                                 }
@@ -105,9 +106,9 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 String packageType = (effectiveParentId != null && effectiveParentId == 3) ? "KG"
                                                 : "UNIT";
                                 double pkgQty = productDao.getQuantityByPackageType(p.getProductID(), packageType);
-//                                if (pkgQty <= 0) {
-////                                        continue; // không hiển thị nếu không có tồn đúng loại
-//                                }
+                                // if (pkgQty <= 0) {
+                                //// continue; // không hiển thị nếu không có tồn đúng loại
+                                // }
 
                                 // Lấy giá từ Product.PriceUnit thay vì Inventory.UnitPrice
                                 Double unitPrice = p.getPriceUnit();
@@ -126,11 +127,36 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 }
                                 String priceDisplay = formatter.format(unitPrice) + " đ / " + unitLabel;
 
+                                // Kiểm tra hết hạn
+                                boolean isExpired = false;
+                                if (p.getExpirationDate() != null) {
+                                        java.util.Date today = new java.util.Date();
+                                        java.util.Calendar cal1 = java.util.Calendar.getInstance();
+                                        java.util.Calendar cal2 = java.util.Calendar.getInstance();
+                                        cal1.setTime(today);
+                                        cal2.setTime(p.getExpirationDate());
+
+                                        // Reset giờ về 00:00:00 để so sánh chỉ ngày
+                                        cal1.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                                        cal1.set(java.util.Calendar.MINUTE, 0);
+                                        cal1.set(java.util.Calendar.SECOND, 0);
+                                        cal1.set(java.util.Calendar.MILLISECOND, 0);
+                                        cal2.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                                        cal2.set(java.util.Calendar.MINUTE, 0);
+                                        cal2.set(java.util.Calendar.SECOND, 0);
+                                        cal2.set(java.util.Calendar.MILLISECOND, 0);
+
+                                        // Hết hạn nếu ngày hết hạn < ngày hôm nay (không bao gồm ngày hôm nay)
+                                        isExpired = cal2.before(cal1);
+                                }
+
                                 html.append("<div class=\"product-card\" data-product-id=\"").append(p.getProductID())
                                                 .append("\" data-stock-quantity=\"").append(pkgQty)
                                                 .append("\">");
                                 if (pkgQty <= 0) {
                                         html.append("<div class=\"product-badge out-of-stock\">Hết hàng</div>");
+                                } else if (isExpired) {
+                                        html.append("<div class=\"product-badge expired\">Hết hạn</div>");
                                 }
                                 html.append("    <div class=\"product-image-container\">");
                                 html.append("        <img src=\"ImageServlet?name=").append(p.getImageURL())
@@ -142,7 +168,7 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                                 .append(p.getProductID())
                                                 .append("\" data-stock-quantity=\"").append(pkgQty)
                                                 .append("\" ")
-                                                .append(pkgQty <= 0
+                                                .append((pkgQty <= 0 || isExpired)
                                                                 ? "disabled style='opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append("><i class=\"fas fa-cart-plus\"></i></button>");
@@ -171,7 +197,7 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                                 .append(p.getProductID())
                                                 .append("\" data-stock-quantity=\"").append(pkgQty)
                                                 .append("\" ")
-                                                .append(pkgQty <= 0
+                                                .append((pkgQty <= 0 || isExpired)
                                                                 ? "disabled style='opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append("><i class=\"fas fa-shopping-cart\"></i> Giỏ hàng</button>");
@@ -179,7 +205,7 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                                 .append("/ProductDetail?id=")
                                                 .append(p.getProductID())
                                                 .append("\" class=\"buy-now-btn\" ")
-                                                .append(pkgQty <= 0
+                                                .append((pkgQty <= 0 || isExpired)
                                                                 ? "style='pointer-events:none;opacity:0.5;cursor:not-allowed;'"
                                                                 : "")
                                                 .append(">Mua ngay</a>");
