@@ -558,11 +558,22 @@ public class BuyNowServlet extends HttpServlet {
                 }
             }
 
+            // Calculate VAT (8% of total after promotion, BEFORE voucher)
+            double vat = (totalAmount + discountAmount) * 0.08;
+            
+            // Final total = total after promotion - voucher + VAT
+            double finalTotal = totalAmount + vat;
+            
+            // Ensure final total is not negative (same logic as ReorderServlet)
+            if (finalTotal < 0) {
+                finalTotal = 0;
+            }
+            
             // Create new order
             Order newOrder = new Order();
             newOrder.setAccountID(account.getAccountID());
             newOrder.setOrderDate(new Timestamp(System.currentTimeMillis()));
-            newOrder.setTotalAmount(totalAmount);
+            newOrder.setTotalAmount(finalTotal); // Lưu tổng tiền cuối cùng bao gồm VAT
             newOrder.setShippingAddress(shippingAddress);
             newOrder.setShippingPhone(shippingPhone);
             newOrder.setPaymentMethod(paymentMethod);
@@ -592,10 +603,10 @@ public class BuyNowServlet extends HttpServlet {
                 if ("VNPay".equals(paymentMethod)) {
                     // Store order ID in session for payment processing
                     session.setAttribute("pendingOrderId", orderId);
-                    session.setAttribute("pendingAmount", totalAmount);
+                    session.setAttribute("pendingAmount", finalTotal);
 
                     // Tạo URL thanh toán VNPay với orderId
-                    String paymentUrl = VNPayUtil.getPaymentUrl(request, response, totalAmount, orderId);
+                    String paymentUrl = VNPayUtil.getPaymentUrl(request, response, finalTotal, orderId);
 
                     // Chuyển hướng đến trang thanh toán VNPay
                     response.sendRedirect(paymentUrl);
@@ -649,10 +660,10 @@ public class BuyNowServlet extends HttpServlet {
             return false;
         }
 
-        // Pattern for Vietnamese mobile numbers (10 digits, starting with 03, 05, 07, 08, 09)
-        String pattern = "^(0|\\+84)[3|5|7|8|9][0-9]{8}$";
-        return phone.matches(pattern);
-    }
+    // Pattern for Vietnamese mobile numbers (10 digits)
+    String pattern = "^(0|\\+84)[0-9]{9}$";
+    return phone.matches(pattern);
+}
 
     /**
      * Xử lý callback từ VNPay sau khi thanh toán
@@ -896,14 +907,25 @@ public class BuyNowServlet extends HttpServlet {
                     request.setAttribute("error", "Mã giảm giá không tồn tại");
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
-                }
+                    }
             }
 
+            // Calculate VAT (8% of total after promotion, BEFORE voucher)
+            double vat = (totalAmount + discountAmount) * 0.08;
+            
+            // Final total = total after promotion - voucher + VAT
+            double finalTotal = totalAmount + vat;
+            
+            // Ensure final total is not negative (same logic as ReorderServlet)
+            if (finalTotal < 0) {
+                finalTotal = 0;
+            }
+            
             // Create new order
             Order newOrder = new Order();
             newOrder.setAccountID(account.getAccountID());
             newOrder.setOrderDate(new Timestamp(System.currentTimeMillis()));
-            newOrder.setTotalAmount(totalAmount);
+            newOrder.setTotalAmount(finalTotal); // Lưu tổng tiền cuối cùng bao gồm VAT
             newOrder.setShippingAddress(shippingAddress);
             newOrder.setShippingPhone(shippingPhone);
             newOrder.setPaymentMethod(paymentMethod);
@@ -942,10 +964,10 @@ public class BuyNowServlet extends HttpServlet {
                 if ("VNPay".equals(paymentMethod)) {
                     // Store order ID in session for payment processing
                     session.setAttribute("pendingOrderId", orderId);
-                    session.setAttribute("pendingAmount", totalAmount);
+                    session.setAttribute("pendingAmount", finalTotal);
 
                     // Tạo URL thanh toán VNPay với orderId
-                    String paymentUrl = VNPayUtil.getPaymentUrl(request, response, totalAmount, orderId);
+                    String paymentUrl = VNPayUtil.getPaymentUrl(request, response, finalTotal, orderId);
 
                     // Chuyển hướng đến trang thanh toán VNPay
                     response.sendRedirect(paymentUrl);

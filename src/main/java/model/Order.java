@@ -22,6 +22,7 @@ public class Order {
     private Double subtotal;
     private Double vat;
     private Double grandTotal;
+    private Double totalSavings; // Thêm trường tổng tiền ưu đãi từ promotion
 
     public Order() {
     }
@@ -171,6 +172,14 @@ public class Order {
 
     public void setGrandTotal(Double grandTotal) {
         this.grandTotal = grandTotal;
+    }
+
+    public Double getTotalSavings() {
+        return totalSavings;
+    }
+
+    public void setTotalSavings(Double totalSavings) {
+        this.totalSavings = totalSavings;
     }
 
     // Thêm field để lưu tên các sản phẩm trong order

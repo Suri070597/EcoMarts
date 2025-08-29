@@ -35,6 +35,7 @@ dao\VoucherDAO$AssignResult.class
 model\StockInDetail.class
 dao\ProductDAO.class
 dao\StockDAO.class
+controller\supplier\SupplierServlet.class
 db\DBContext1.class
 model\InventoryTransaction.class
 dao\AccountDAO.class
@@ -59,7 +60,6 @@ controller\ReadNotificationServlet.class
 controller\MonthlyRevenueServlet.class
 model\StockIn.class
 controller\VoucherSaveServlet$1.class
-util\CartUtil.class
 controller\HomeServlet.class
 dao\CustomerDAO.class
 controller\google\LoginServlets.class
@@ -82,6 +82,7 @@ model\Category.class
 controller\shortcuts\VoucherShortcuts.class
 controller\AdminVoucherServlet.class
 controller\Manufacturer\ManufacturerServlet.class
+helper\PrepareCheckoutPage.class
 model\Token.class
 model\CartItem.class
 model\OrderDetail.class
