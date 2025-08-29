@@ -1321,10 +1321,7 @@ public class ProductDAO extends DBContext {
 
                         String packageType = isFruitCategory ? "KG" : "UNIT";
                         double qty = getQuantityByPackageType(pid, packageType);
-                        if (qty <= 0) {
-                            continue;
-                        }
-
+                       
                         Double priceUnit = p.getPriceUnit();
                         if (priceUnit == null) {
                             Product full = getProductById(pid);
