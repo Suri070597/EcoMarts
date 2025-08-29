@@ -13,15 +13,11 @@ import jakarta.servlet.http.Part;
 import java.io.File;
 import static java.lang.System.out;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import model.Category;
 import model.Product;
-import model.Manufacturer;
 
 @WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
 @MultipartConfig
@@ -239,7 +235,7 @@ public class ProductServlet extends HttpServlet {
 
         ProductDAO dao = new ProductDAO();
         String action = request.getParameter("action");
-        PrintWriter out = response.getWriter();
+        // PrintWriter out = response.getWriter();
         if (action == null) {
             response.sendRedirect("/admin/product");
             return;
@@ -790,13 +786,4 @@ public class ProductServlet extends HttpServlet {
         return "ProductServlet handles CRUD for products";
     }
 
-    private Date truncateTime(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
-    }
 }

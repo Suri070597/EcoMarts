@@ -118,7 +118,6 @@
                                     <select class="form-select" name="conversionType" required>
                                         <option value="">-- Chọn loại chuyển đổi --</option>
                                         <option value="pack">Chuyển sang lốc</option>
-                                        <option value="both">Chuyển cả lốc và <%= product.getItemUnitName() != null ? product.getItemUnitName() : "unit" %></option>
                                         <option value="unit">Chuyển sang <%= product.getItemUnitName() != null ? product.getItemUnitName() : "unit" %></option>
                                     </select>
                                 </div>
@@ -183,7 +182,7 @@
                 const packSizeField = document.getElementById('packSizeField');
                 const packSizeInput = document.querySelector('input[name="packSize"]');
                 
-                if (this.value === 'pack' || this.value === 'both') {
+                if (this.value === 'pack') {
                     packSizeField.style.display = 'block';
                     packSizeInput.required = true;
                 } else {
