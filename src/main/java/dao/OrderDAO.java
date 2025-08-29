@@ -1038,7 +1038,8 @@ public class OrderDAO extends DBContext {
                             ps.setDouble(3, item.getQuantity());
                             ps.setDouble(4, unitPrice);
                             ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
-                            if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
+                            Integer packSize = getCorrectPackSize(item);
+                            if (packSize != null) { ps.setInt(6, packSize); } else { ps.setNull(6, java.sql.Types.INTEGER); }
                             ps.addBatch();
                         }
                     }
@@ -1148,7 +1149,8 @@ public class OrderDAO extends DBContext {
                         ps.setDouble(3, item.getQuantity());
                         ps.setDouble(4, unitPrice);
                         ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
-                        if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
+                        Integer packSize = getCorrectPackSize(item);
+                        if (packSize != null) { ps.setInt(6, packSize); } else { ps.setNull(6, java.sql.Types.INTEGER); }
 
                         ps.executeUpdate();
                     }
@@ -1284,7 +1286,7 @@ public class OrderDAO extends DBContext {
                 } else if ("PACK".equalsIgnoreCase(packageType)) {
                     if (pricePack != null) {
                         return pricePack;
-                    } else if (priceUnit != null && packSize != null) {
+                    } else if (priceUnit != null && packSize != null && packSize > 0) {
                         return priceUnit * packSize;
                     } else {
                         return 0.0;
@@ -1297,6 +1299,31 @@ public class OrderDAO extends DBContext {
         
         // Fallback to product price if something goes wrong
         return item.getProduct().getPrice();
+    }
+
+    /**
+     * Helper method to get correct PackSize value based on PackageType
+     */
+    private Integer getCorrectPackSize(CartItem item) {
+        String packageType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
+        Integer packSize = item.getPackSize();
+        
+        // UNIT và KG không cần PackSize, nên trả về NULL
+        if ("UNIT".equalsIgnoreCase(packageType) || "KG".equalsIgnoreCase(packageType)) {
+            return null;
+        }
+        
+        // BOX cũng không cần PackSize
+        if ("BOX".equalsIgnoreCase(packageType)) {
+            return null;
+        }
+        
+        // Chỉ PACK mới cần PackSize và phải > 0
+        if ("PACK".equalsIgnoreCase(packageType)) {
+            return (packSize != null && packSize > 0) ? packSize : null;
+        }
+        
+        return null;
     }
 
 }
