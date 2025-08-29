@@ -113,10 +113,10 @@
                             <!-- Áp dụng: all / category -->
                             <div class="mb-2 section-title">Áp dụng</div>
                             <div class="d-flex gap-4 mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="applyScope" id="scopeAll"
+                                <div class="a">
+                                    <input style="display: none" class="form-check-input" type="radio" name="applyScope" id="scopeAll"
                                            value="0" ${promotion.applyScope == 0 ? 'checked' : ''}>
-                                    <label class="form-check-label" for="scopeAll">Tất cả sản phẩm</label>
+                                    <label class="form-check-label" for="scopeAll"></label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="applyScope" id="scopeCategory"
