@@ -663,6 +663,19 @@ public class ProductServlet extends HttpServlet {
                         boolean isFruit = parentId == 3;
                         boolean isBeverageOrMilk = parentId == 1 || parentId == 2;
 
+                        // Trái cây (KG): chỉ cho nhập giá khi có tồn kho KG > 0
+                        if (isFruit && priceUnit != null && priceUnit > 0) {
+                            double kgQuantity = dao.getQuantityByPackageType(productId, "KG");
+                            if (kgQuantity <= 0) {
+                                request.setAttribute("error",
+                                        "Không thể nhập giá cho kg khi chưa có số lượng tồn kho. Vui lòng nhập kho trước.");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        }
+
                         // Kiểm tra xem có thể nhập giá cho unit không (cho tất cả các loại trừ trái
                         // cây)
                         if (!isFruit && priceUnit != null && priceUnit > 0) {
