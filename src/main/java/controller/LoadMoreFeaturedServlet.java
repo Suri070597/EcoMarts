@@ -105,9 +105,9 @@ public class LoadMoreFeaturedServlet extends HttpServlet {
                                 String packageType = (effectiveParentId != null && effectiveParentId == 3) ? "KG"
                                                 : "UNIT";
                                 double pkgQty = productDao.getQuantityByPackageType(p.getProductID(), packageType);
-                                if (pkgQty <= 0) {
-                                        continue; // không hiển thị nếu không có tồn đúng loại
-                                }
+//                                if (pkgQty <= 0) {
+////                                        continue; // không hiển thị nếu không có tồn đúng loại
+//                                }
 
                                 // Lấy giá từ Product.PriceUnit thay vì Inventory.UnitPrice
                                 Double unitPrice = p.getPriceUnit();
