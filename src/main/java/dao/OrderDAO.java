@@ -21,26 +21,6 @@ import model.RevenueStats;
 
 public class OrderDAO extends DBContext {
 
-	// Helper: compute effective unit price based on package selection
-	private Double computeEffectiveUnitPrice(Product product, String packageType, Integer packSize) {
-		if (product == null) return 0.0;
-		String pkg = (packageType != null) ? packageType.toUpperCase() : "UNIT";
-		if ("BOX".equals(pkg)) {
-			Double priceBox = product.getPrice();
-			return priceBox != null ? priceBox : 0.0;
-		}
-		if ("PACK".equals(pkg)) {
-			Double pricePack = product.getPricePack();
-			if (pricePack != null) return pricePack;
-			Double unitPrice = product.getPriceUnit();
-			if (unitPrice != null && packSize != null) return unitPrice * packSize;
-			return 0.0;
-		}
-		// UNIT or KG use unit price
-		Double unitPrice = product.getPriceUnit();
-		return unitPrice != null ? unitPrice : 0.0;
-	}
-
     // Lấy danh sách tất cả đơn hàng
     public List<Order> getAllOrders() {
         List<Order> list = new ArrayList<>();
@@ -1049,19 +1029,13 @@ public class OrderDAO extends DBContext {
 
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     for (CartItem item : items) {
-                        if (item.getProduct() != null || item.getProductID() > 0) {
-                            ProductDAO productDAO = new ProductDAO();
-                            Product p = productDAO.getProductById(item.getProductID());
-                            String pkg = item.getPackageType() != null ? item.getPackageType() : "UNIT";
-                            Integer packSize = item.getPackSize();
-                            Double effectivePrice = computeEffectiveUnitPrice(p, pkg, packSize);
-
+                        if (item.getProduct() != null) {
                             ps.setInt(1, orderId);
                             ps.setInt(2, item.getProductID());
                             ps.setDouble(3, item.getQuantity());
-                            ps.setDouble(4, effectivePrice);
-                            ps.setString(5, pkg);
-                            if (packSize != null) { ps.setInt(6, packSize); } else { ps.setNull(6, java.sql.Types.INTEGER); }
+                            ps.setDouble(4, item.getProduct().getPrice());
+                            ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
+                            if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
                             ps.addBatch();
                         }
                     }
@@ -1163,16 +1137,12 @@ public class OrderDAO extends DBContext {
                             "VALUES (?, ?, ?, ?, ?, ?)";
 
                     try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
-                        String pkg = item.getPackageType() != null ? item.getPackageType() : "UNIT";
-                        Integer packSize = item.getPackSize();
-                        Double effectivePrice = computeEffectiveUnitPrice(product, pkg, packSize);
-
                         ps.setInt(1, orderId);
                         ps.setInt(2, item.getProductID());
                         ps.setDouble(3, item.getQuantity());
-                        ps.setDouble(4, effectivePrice);
-                        ps.setString(5, pkg);
-                        if (packSize != null) { ps.setInt(6, packSize); } else { ps.setNull(6, java.sql.Types.INTEGER); }
+                        ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
+                        ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
+                        if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
 
                         ps.executeUpdate();
                     }
