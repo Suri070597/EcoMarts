@@ -839,4 +839,41 @@ public class PromotionDAO extends DBContext {
                     + " — không thể gán thêm Promotion " + promotionID);
         }
     }
+
+    /**
+     * Lấy promotion cho một order dựa trên sản phẩm đầu tiên trong order
+     */
+    public Promotion getPromotionByOrderId(int orderId) {
+        String sql = """
+            SELECT TOP 1 
+              p.PromotionID,
+              p.PromotionName,
+              p.Description,
+              p.DiscountPercent,
+              p.StartDate,
+              p.EndDate,
+              p.IsActive,
+              p.PromoType       AS PromoType,
+              p.applyScope      AS ApplyScope
+            FROM Promotion p
+            JOIN Product_Promotion pp ON p.PromotionID = pp.PromotionID
+            JOIN OrderDetail od ON pp.ProductID = od.ProductID
+            WHERE od.OrderID = ?
+              AND p.IsActive = 1
+              AND p.StartDate <= GETDATE()
+              AND p.EndDate   >= GETDATE()
+            ORDER BY p.EndDate DESC
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
