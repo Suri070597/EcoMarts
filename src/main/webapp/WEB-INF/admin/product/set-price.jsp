@@ -114,7 +114,23 @@
                                     </tr>
                                     <tr>
                                         <td><strong>Số lượng hiện có:</strong></td>
-                                        <td><%= product.getStockQuantity() %> <%= product.getBoxUnitName() != null ? product.getBoxUnitName() : "N/A" %></td>
+                                        <td>
+                                            <% 
+                                                double stockQty = product.getStockQuantity();
+                                                if (isFruit) {
+                                                    // Trái cây: hiển thị decimal (kg)
+                                                    out.print(stockQty);
+                                                } else {
+                                                    // Các loại khác: hiển thị integer (thùng)
+                                                    if (stockQty == Math.floor(stockQty)) {
+                                                        out.print((long) stockQty);
+                                                    } else {
+                                                        out.print(stockQty);
+                                                    }
+                                                }
+                                            %> 
+                                            <%= product.getBoxUnitName() != null ? product.getBoxUnitName() : "N/A" %>
+                                        </td>
                                     </tr>
                                 </table>
                             </div>
