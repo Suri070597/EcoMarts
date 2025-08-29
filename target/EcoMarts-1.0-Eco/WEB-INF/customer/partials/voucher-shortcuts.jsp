@@ -186,10 +186,10 @@
                                                 <i class="fa-solid fa-bolt"></i> Số lượng có hạn
                                             </div>
 
-                                            <!-- Lưu voucher -->
+                                            <!-- Nhận voucher -->
                                             <a class="btn-save"
                                                href="${pageContext.request.contextPath}/voucher/save?code=${v.voucherCode}">
-                                                Lưu
+                                                Nhận
                                             </a>
                                         </div>
 
@@ -314,6 +314,29 @@
 
     <!-- Load More JavaScript -->
     <script src="${pageContext.request.contextPath}/assets/js/loadMore.js?version=<%= System.currentTimeMillis()%>"></script>
+    <!-- SweetAlert2 for voucher claim feedback -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        (function () {
+            var msg = "${param.msg != null ? param.msg : ''}";
+            var err = "${param.err != null ? param.err : ''}";
+            if (msg === 'saved') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Nhận voucher thành công',
+                    showConfirmButton: false,
+                    timer: 1600
+                });
+            } else if (err || (msg && msg !== 'saved')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nhận voucher thất bại',
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+            }
+        })();
+    </script>
 </body>
 
 </html>
