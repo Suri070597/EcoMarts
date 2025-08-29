@@ -50,10 +50,13 @@
                                  double unitQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "UNIT");
                                  double packQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "PACK");
                                  double boxQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "BOX");
+                                 double kgQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "KG");
                                  
-                                 // Kiểm tra xem có thể nhập giá cho unit và pack không
+                                 // Kiểm tra xem có thể nhập giá cho unit/pack/box/kg không
                                  boolean canSetUnitPrice = unitQuantity > 0;
                                  boolean canSetPackPrice = packQuantity > 0;
+                                 boolean canSetBoxPrice = boxQuantity > 0;
+                                 boolean canSetKgPrice = kgQuantity > 0;
                                  
                                  // Đối với các loại khác (không phải trái cây, nước giải khát, sữa)
                                  // cũng cần kiểm tra số lượng UNIT trước khi cho phép nhập giá
@@ -167,8 +170,14 @@
                                                min="0" 
                                                step="1000"
                                                value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : "" %>"
-                                               required>
-                                        <div class="form-text">Nhập giá bán lẻ cho 1kg trái cây</div>
+                                               <%= !canSetKgPrice ? "disabled" : "" %>>
+                                        <div class="form-text">
+                                            <% if (canSetKgPrice) { %>
+                                                Nhập giá bán lẻ cho 1kg trái cây
+                                            <% } else { %>
+                                                <span class="text-danger">Chưa có số lượng kg trong kho. Vui lòng nhập kho trước.</span>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -184,8 +193,14 @@
                                                min="0" 
                                                step="1000"
                                                value="<%= product.getPrice() != null ? product.getPrice().intValue() : "" %>"
-                                               required>
-                                        <div class="form-text">Giá bán lẻ cho 1 thùng</div>
+                                               <%= !canSetBoxPrice ? "disabled" : "" %>>
+                                        <div class="form-text">
+                                            <% if (canSetBoxPrice) { %>
+                                                Giá bán lẻ cho 1 thùng
+                                            <% } else { %>
+                                                <span class="text-danger">Chưa có số lượng thùng trong kho. Vui lòng nhập kho trước.</span>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -239,8 +254,14 @@
                                                min="0" 
                                                step="1000"
                                                value="<%= product.getPrice() != null ? product.getPrice().intValue() : "" %>"
-                                               required>
-                                        <div class="form-text">Giá bán lẻ cho 1 thùng</div>
+                                               <%= !canSetBoxPrice ? "disabled" : "" %>>
+                                        <div class="form-text">
+                                            <% if (canSetBoxPrice) { %>
+                                                Giá bán lẻ cho 1 thùng
+                                            <% } else { %>
+                                                <span class="text-danger">Chưa có số lượng thùng trong kho. Vui lòng nhập kho trước.</span>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -305,5 +326,6 @@
         </script>
     </body>
 </html>
+
 
 

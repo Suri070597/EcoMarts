@@ -13,15 +13,11 @@ import jakarta.servlet.http.Part;
 import java.io.File;
 import static java.lang.System.out;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import model.Category;
 import model.Product;
-import model.Manufacturer;
 
 @WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
 @MultipartConfig
@@ -239,7 +235,7 @@ public class ProductServlet extends HttpServlet {
 
         ProductDAO dao = new ProductDAO();
         String action = request.getParameter("action");
-        PrintWriter out = response.getWriter();
+        // PrintWriter out = response.getWriter();
         if (action == null) {
             response.sendRedirect("/admin/product");
             return;
@@ -667,6 +663,19 @@ public class ProductServlet extends HttpServlet {
                         boolean isFruit = parentId == 3;
                         boolean isBeverageOrMilk = parentId == 1 || parentId == 2;
 
+                        // Trái cây (KG): chỉ cho nhập giá khi có tồn kho KG > 0
+                        if (isFruit && priceUnit != null && priceUnit > 0) {
+                            double kgQuantity = dao.getQuantityByPackageType(productId, "KG");
+                            if (kgQuantity <= 0) {
+                                request.setAttribute("error",
+                                        "Không thể nhập giá cho kg khi chưa có số lượng tồn kho. Vui lòng nhập kho trước.");
+                                request.setAttribute("product", currentProduct);
+                                request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
+                                        response);
+                                return;
+                            }
+                        }
+
                         // Kiểm tra xem có thể nhập giá cho unit không (cho tất cả các loại trừ trái
                         // cây)
                         if (!isFruit && priceUnit != null && priceUnit > 0) {
@@ -790,13 +799,4 @@ public class ProductServlet extends HttpServlet {
         return "ProductServlet handles CRUD for products";
     }
 
-    private Date truncateTime(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
-    }
 }
