@@ -302,6 +302,19 @@ section {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.product-badge.expired {
+    background-color: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+}
+
 .product-image-container {
     position: relative;
     width: 100%;

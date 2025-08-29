@@ -45,7 +45,7 @@ public class HomeServlet extends HttpServlet {
         List<Product> topSellingProducts = new ArrayList<>();
         for (Map<String, Object> row : topRows) {
             int pid = ((Number) row.get("productId")).intValue();
-            Product p = dao.getProductById(pid); // dùng ProductDAO đang có sẵn phía trên
+            Product p = dao.getProductById2(pid); // dùng ProductDAO đang có sẵn phía trên
             if (p != null) {
                 topSellingProducts.add(p);
             }

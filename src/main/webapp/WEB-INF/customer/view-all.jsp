@@ -164,13 +164,46 @@
                             for (Product p : products) {
                     %>
                     <div class="product-card" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>">
-                        <% if (p.getStockQuantity() <= 0) { %>
+                        <%
+                            double unitQty = p.getStockQuantity();
+                            boolean isExpired = false; // Khai báo biến isExpired ở đầu vòng lặp
+                            
+                            if (unitQty <= 0) {
+                        %>
                         <div class="product-badge out-of-stock">Hết hàng</div>
-                        <% }%>
+                        <% } else {
+                            
+                            if (p.getExpirationDate() != null) {
+                                java.util.Date today = new java.util.Date();
+                                // So sánh chỉ ngày, không tính giờ
+                                java.util.Calendar cal1 = java.util.Calendar.getInstance();
+                                java.util.Calendar cal2 = java.util.Calendar.getInstance();
+                                cal1.setTime(today);
+                                cal2.setTime(p.getExpirationDate());
+                                
+                                // Reset giờ về 00:00:00 để so sánh chỉ ngày
+                                cal1.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                                cal1.set(java.util.Calendar.MINUTE, 0);
+                                cal1.set(java.util.Calendar.SECOND, 0);
+                                cal1.set(java.util.Calendar.MILLISECOND, 0);
+                                cal2.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                                cal2.set(java.util.Calendar.MINUTE, 0);
+                                cal2.set(java.util.Calendar.SECOND, 0);
+                                cal2.set(java.util.Calendar.MILLISECOND, 0);
+                                
+                                // Hết hạn nếu ngày hết hạn < ngày hôm nay (không bao gồm ngày hôm nay)
+                                isExpired = cal2.before(cal1);
+                                
+                                if (isExpired) {
+                        %>
+                        <div class="product-badge expired">Hết hạn</div>
+                        <% }
+                            }
+                        }%>
                         <div class="product-image-container">
                             <img src="ImageServlet?name=<%= p.getImageURL()%>" alt="<%= p.getProductName()%>" class="product-image">
                             <div class="product-actions">
-                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
+                                <button class="action-btn add-to-cart-action" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= (unitQty <= 0 || isExpired) ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-cart-plus"></i></button>
                                 <a href="ProductDetail?id=<%= p.getProductID()%>" class="action-btn"><i class="fas fa-eye"></i></a>
                             </div>
                         </div>
@@ -221,14 +254,14 @@
                                 %>
                             </div>
                             <div class="button-group">
-                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
+                                <button class="add-to-cart-btn" data-product-id="<%= p.getProductID()%>" data-stock-quantity="<%= p.getStockQuantity()%>" <%= (unitQty <= 0 || isExpired) ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>><i class="fas fa-shopping-cart"></i> Giỏ hàng</button>
                                 <form action="<%= request.getContextPath()%>/buy-now" method="post" style="display: inline;"> 
                                     <input type="hidden" name="productID" value="<%= p.getProductID()%>"> 
                                     <input type="hidden" name="quantity" value="1"> 
                                     <input type="hidden" name="action" value="initiate"> 
                                     <input type="hidden" name="packageType" value="<%= "kg".equalsIgnoreCase(p.getUnit()) ? "KG" : "UNIT" %>"> 
                                     <input type="hidden" name="packSize" value="0"> 
-                                    <button type="submit" class="buy-now-btn" <%= p.getStockQuantity() <= 0 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
+                                    <button type="submit" class="buy-now-btn" <%= (unitQty <= 0 || isExpired) ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""%>>Mua ngay</button> 
                                 </form>
                             </div>
                         </div>
