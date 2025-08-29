@@ -5,6 +5,8 @@ import dao.ProductDAO;
 import dao.ViewProductDAO;
 import dao.FeedBackDAO;
 import dao.PromotionDAO;
+import static dao.PromotionDAO.TYPE_FLASHSALE;
+import static dao.PromotionDAO.TYPE_SEASONAL;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.*;
@@ -12,6 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.Category;
 import model.Product;
+import model.Promotion;
 
 @WebServlet("/seasonal-shortcuts")
 public class SeasonalServlet extends HttpServlet {
@@ -30,7 +33,10 @@ public class SeasonalServlet extends HttpServlet {
         List<Product> list = dao.getAll();
         request.setAttribute("products", list);
         
+        Promotion pro = new Promotion();
         PromotionDAO promoDao = new PromotionDAO();
+        int flashInserted   = promoDao.rebuildMappingsForActiveType(TYPE_FLASHSALE);
+        System.out.println("[Rebuild] FlashSale inserted rows = " + flashInserted);
         List<Product> flash = promoDao.listSeasonalFromMapping();
         // Hydrate đầy đủ thông tin sản phẩm (stockQuantity, imageURL, unit names...)
         List<Product> hydrated = new java.util.ArrayList<>();
@@ -41,7 +47,7 @@ public class SeasonalServlet extends HttpServlet {
             }
         }
         request.setAttribute("flashSaleProducts", hydrated);
-
+        
         // Xây map hiển thị giá tương tự homepage (ưu tiên giá đơn vị + tên đơn vị)
         try {
             java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
@@ -74,7 +80,6 @@ public class SeasonalServlet extends HttpServlet {
             java.util.Map<Integer, Integer> reviewCountMap = new java.util.HashMap<>();
             java.util.Map<Integer, Double> unitPriceMap = new java.util.HashMap<>();
 
-            // Sử dụng attribute đúng đã set ở trên
             List<List<Product>> allProductLists = java.util.Arrays.asList(
                     (List<Product>) request.getAttribute("flashSaleProducts"));
 
