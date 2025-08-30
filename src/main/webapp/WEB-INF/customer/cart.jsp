@@ -253,12 +253,31 @@
                                                     <c:set var="price" value="${item.product.price}" />
                                                     <c:set var="quantity" value="${item.quantity}" />
                                                     <div class="col-md-2 mb-2 mb-md-0 text-md-end">
-                                                        <div class="fw-bold text-success item-total">
-                                                            <fmt:formatNumber value="${price * quantity}" type="number" pattern="#,###"/> ₫
-                                                        </div>
-                                                        <div class="text-muted small">
-                                                            <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.unit}
-                                                        </div>
+                                                        <!-- Nếu có Promotion -->
+                                                        <c:if test="${not empty requestScope['promotion_' += item.product.productID]}">
+                                                            <div class="fw-bold text-success item-total">
+                                                                <fmt:formatNumber value="${requestScope['finalPrice_' += item.product.productID] * quantity}" type="number" pattern="#,###"/> ₫
+                                                            </div>
+                                                            <div class="text-muted small">
+                                                                <span style="text-decoration: line-through; color: gray;">
+                                                                    <fmt:formatNumber value="${requestScope['originalPrice_' += item.product.productID]}" type="number" pattern="#,###"/> ₫
+                                                                </span>
+                                                                <span style="color:red; font-weight: bold;">
+                                                                    (-${requestScope['discountPercent_' += item.product.productID]}%)
+                                                                </span>
+                                                            </div>
+                                                        </c:if>
+
+                                                        <!-- Nếu không có Promotion -->
+                                                        <c:if test="${empty requestScope['promotion_' += item.product.productID]}">
+                                                            <div class="fw-bold text-success item-total">
+                                                                <fmt:formatNumber value="${price * quantity}" type="number" pattern="#,###"/> ₫
+                                                            </div>
+                                                            <div class="text-muted small">
+                                                                <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.unit}
+                                                            </div>
+                                                        </c:if>
+
                                                     </div>
 
                                                     <!-- Actions -->
