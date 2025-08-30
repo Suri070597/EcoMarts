@@ -228,7 +228,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="price-section">
-                                                            <c:set var="productPromotion" value="${requestScope['promotion_'.concat(item.product.productID)]}" />
+                                                            <c:set var="productPromotion" value="${requestScope['appliedPromotion_'.concat(item.product.productID)]}" />
                                                             <c:if test="${not empty productPromotion}">
                                                                 <!-- Giá gốc (gạch ngang) -->
                                                                 <p class="text-muted small mb-1" style="text-decoration: line-through;">

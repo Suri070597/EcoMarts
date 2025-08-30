@@ -7,6 +7,7 @@ import java.util.Locale;
 import dao.CartItemDAO;
 import dao.CategoryDAO;
 import dao.ProductDAO;
+import dao.PromotionDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,6 +18,7 @@ import model.Account;
 import model.CartItem;
 import model.Category;
 import model.Product;
+import model.Promotion;
 
 /**
  * Servlet for handling shopping cart operations
@@ -80,13 +82,32 @@ public class CartServlet extends HttpServlet {
         System.out.println(
                 "Cart page request: Found " + activeItems.size() + " active items for user " + account.getUsername());
 
-        // Calculate cart total
-        double cartTotal = 0;
-        for (CartItem item : activeItems) {
-            if (item.getProduct() != null) {
-                cartTotal += item.getProduct().getPrice() * item.getQuantity();
-            }
-        }
+// Tính tổng giỏ hàng có áp dụng khuyến mãi
+double cartTotal = 0;
+PromotionDAO promoDAO = new PromotionDAO();
+
+for (CartItem item : activeItems) {
+    Product p = item.getProduct();
+
+    Promotion promo = promoDAO.getValidPromotionForProduct(p.getProductID());
+    if (promo != null) {
+        double basePrice = p.getPrice();
+        double discountPercent = promo.getDiscountPercent();
+        double finalPrice = basePrice * (1 - discountPercent / 100);
+
+        // có áp dụng giảm giá
+        cartTotal += finalPrice * item.getQuantity();
+
+        // setAttribute để JSP lấy ra
+        request.setAttribute("promotion_" + p.getProductID(), promo);
+        request.setAttribute("originalPrice_" + p.getProductID(), basePrice);
+        request.setAttribute("discountPercent_" + p.getProductID(), discountPercent);
+        request.setAttribute("finalPrice_" + p.getProductID(), finalPrice);
+    } else {
+        // Không có promotion tính giá gốc
+        cartTotal += p.getPrice() * item.getQuantity();
+    }
+}
 
         // Set attributes for JSP
         request.setAttribute("activeItems", activeItems);
