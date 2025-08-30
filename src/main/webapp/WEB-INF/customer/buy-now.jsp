@@ -2,28 +2,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-                                                    <div class="price-section">
-                                                        <c:set var="productPromotion" value="${requestScope['promotion_'.concat(item.product.productID)]}" />
-                                                        <c:if test="${not empty productPromotion}">
-                                                            <!-- Giá gốc (gạch ngang) -->
-                                                            <p class="text-muted small mb-1" style="text-decoration: line-through;">
-                                                                <fmt:formatNumber value="${requestScope['originalPrice_'.concat(item.product.productID)]}" type="number" pattern="#,###"/> đ / ${item.product.unit}
-                                                            </p>
-                                                            <!-- Giá đã giảm và badge khuyến mãi -->
-                                                            <p class="text-danger small fw-bold mb-0 d-flex align-items-center">
-                                                                <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
-                                                                <span class="badge bg-danger ms-2" style="font-size: 11px;">
-                                                                    -<fmt:formatNumber value="${productPromotion.discountPercent}" pattern="#,##0"/>%
-                                                                </span>
-                                                            </p>
-                                                        </c:if>
-                                                        <c:if test="${empty productPromotion}">
-                                                            <!-- Chỉ hiển thị giá gốc nếu không có khuyến mãi -->
-                                                            <p class="text-muted small mb-0">
-                                                                <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
-                                                            </p>
-                                                        </c:if>
-                                                    </div>
 <!DOCTYPE html>
 <html>
     <head>
@@ -249,9 +227,28 @@
                                                                 <small class="text-muted">Còn lại: ${item.product.stockQuantity} ${item.product.unit}</small>
                                                             </div>
                                                         </div>
-                                                        <p class="text-muted small mb-0">
-                                                            <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
-                                                        </p>
+                                                        <div class="price-section">
+                                                            <c:set var="productPromotion" value="${requestScope['promotion_'.concat(item.product.productID)]}" />
+                                                            <c:if test="${not empty productPromotion}">
+                                                                <!-- Giá gốc (gạch ngang) -->
+                                                                <p class="text-muted small mb-1" style="text-decoration: line-through;">
+                                                                    <fmt:formatNumber value="${requestScope['originalPrice_'.concat(item.product.productID)]}" type="number" pattern="#,###"/> đ / ${item.product.unit}
+                                                                </p>
+                                                                <!-- Giá đã giảm và badge khuyến mãi -->
+                                                                <p class="text-danger small fw-bold mb-0 d-flex align-items-center">
+                                                                    <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
+                                                                    <span class="badge bg-danger ms-2" style="font-size: 11px;">
+                                                                        -<fmt:formatNumber value="${productPromotion.discountPercent}" pattern="#,##0"/>%
+                                                                    </span>
+                                                                </p>
+                                                            </c:if>
+                                                            <c:if test="${empty productPromotion}">
+                                                                <!-- Chỉ hiển thị giá gốc nếu không có khuyến mãi -->
+                                                                <p class="text-muted small mb-0">
+                                                                    <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###"/> đ / ${item.product.unit}
+                                                                </p>
+                                                            </c:if>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </c:forEach>
@@ -390,6 +387,22 @@
                                     </span>
                                 </div>
 
+                                <!-- Promotion info -->
+                                <c:if test="${not empty appliedPromotion}">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Giảm giá khuyến mãi:</span>
+                                        <span class="text-danger">
+                                            -<fmt:formatNumber value="${appliedPromotion.discountPercent}" pattern="#,##0"/>%
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Giá gốc:</span>
+                                        <span class="text-muted" style="text-decoration: line-through;">
+                                            <fmt:formatNumber value="${originalTotal}" type="number"/> đ
+                                        </span>
+                                    </div>
+                                </c:if>
+
                                 <!-- Shipping fee -->
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Phí vận chuyển:</span>
@@ -416,7 +429,7 @@
 
                                 <!-- Discount amount -->
                                 <div id="discount-row" class="d-flex justify-content-between mb-2" style="display: none">
-                                    <span>Giảm giá:</span>
+                                    <span>Giảm giá voucher:</span>
                                     <span id="discount-amount" class="text-danger">-0 đ</span>
                                 </div>
                                 <!-- VAT -->
@@ -805,6 +818,9 @@
 
                                                         // Show discount row
                                                         discountRow.style.display = 'flex';
+                                                        
+                                                        // Store voucher info for form submission
+                                                        document.getElementById('voucherCode').value = selectedOption.value;
                                                     } else {
                                                         // Reset if minimum order not met
                                                         showAlert('Mã giảm giá không áp dụng được',

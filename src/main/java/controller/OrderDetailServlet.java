@@ -86,8 +86,8 @@ public class OrderDetailServlet extends HttpServlet {
             // Get order details and product information
             List<OrderDetail> orderDetails = orderDetailDAO.getOrderDetailsByOrderId(orderId);
 
-            // Calculate total
-            double total = 0;
+            // Calculate total - Tổng tiền sản phẩm = tổng SubTotal từ bảng OrderDetail (giá gốc)
+            double total = 0; // Tổng tiền sản phẩm (SubTotal từ OrderDetail - giá gốc)
             double totalOriginal = 0; // Tổng giá gốc
             double totalPromotion = 0; // Tổng giá sau promotion
             
@@ -127,10 +127,10 @@ public class OrderDetailServlet extends HttpServlet {
                 
                 totalOriginal += originalSubTotal;
                 totalPromotion += discountedSubTotal;
-                total += discountedSubTotal; // Sử dụng giá sau promotion để tính tổng
+                total += originalSubTotal; // Sử dụng SubTotal gốc từ OrderDetail
             }
             
-            // VAT = 8% của tổng phụ (sau promotion)
+            // VAT = 8% của tổng tiền sản phẩm (giá gốc)
             double vat = total * 0.08;
 
             // Lấy thông tin voucher đã sử dụng (nếu có)
@@ -139,7 +139,7 @@ public class OrderDetailServlet extends HttpServlet {
             // Nếu có voucher thì lấy số tiền giảm
             double discount = (voucherUsage != null) ? voucherUsage.getDiscountAmount() : 0.0;
 
-            // Tổng thanh toán cuối cùng = tổng phụ (sau promotion) - giảm giá + VAT
+            // Tổng thanh toán cuối cùng = tổng tiền sản phẩm (giá gốc) - giảm giá + VAT
             double finalTotal = total - discount + vat;
             
             // Đảm bảo tổng thanh toán không âm
@@ -147,7 +147,7 @@ public class OrderDetailServlet extends HttpServlet {
                 finalTotal = 0;
             }
             
-            // Tính tổng tiền ưu đãi (tiết kiệm được từ promotion)
+            // Tính tổng tiền ưu đãi (tiết kiệm được từ promotion - không sử dụng trong tính toán chính)
             double totalSavings = totalOriginal - totalPromotion;
 
             // Get categories for the navigation menu

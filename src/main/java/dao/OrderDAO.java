@@ -998,26 +998,10 @@ public class OrderDAO extends DBContext {
             // Set autocommit to false for transaction
             conn.setAutoCommit(false);
 
-            // Calculate total subtotal from all items
-            double totalSubtotal = 0.0;
-            for (CartItem item : items) {
-                if (item.getProduct() != null) {
-                    double unitPrice = getCorrectPriceForPackageType(item);
-                    double itemSubtotal = unitPrice * item.getQuantity();
-                    totalSubtotal += itemSubtotal;
-                }
-            }
+            // Sử dụng các giá trị đã được set trong order object từ BuyNowServlet
+            // Không tính toán lại để tránh ghi đè các giá trị đã được set
 
-            // Calculate VAT (8% of total subtotal)
-            double vat = totalSubtotal * 0.08;
-
-            // Calculate final total amount
-            double finalTotalAmount = totalSubtotal + vat;
-
-            // Update order's TotalAmount with the calculated value
-            order.setTotalAmount(finalTotalAmount);
-
-            // Insert order
+            // Insert order (không cần các trường mới vì database chưa có)
             String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
                     "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -1055,8 +1039,8 @@ public class OrderDAO extends DBContext {
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     for (CartItem item : items) {
                         if (item.getProduct() != null) {
-                            // Lấy giá chính xác dựa trên PackageType
-                            double unitPrice = getCorrectPriceForPackageType(item);
+                            // Lấy giá chính xác dựa trên PackageType sau khi áp dụng promotion
+                            double unitPrice = getFinalPriceForPackageType(item);
 
                             ps.setInt(1, orderId);
                             ps.setInt(2, item.getProductID());
@@ -1131,20 +1115,10 @@ public class OrderDAO extends DBContext {
             // Set autocommit to false for transaction
             conn.setAutoCommit(false);
 
-            // Calculate subtotal for single item
-            double unitPrice = getCorrectPriceForPackageType(item);
-            double subtotal = unitPrice * item.getQuantity();
+            // Sử dụng giá trị totalAmount đã được set từ BuyNowServlet
+            // Không tính toán lại để tránh ghi đè các giá trị đã được set
 
-            // Calculate VAT (8% of subtotal)
-            double vat = subtotal * 0.08;
-
-            // Calculate final total amount
-            double finalTotalAmount = subtotal + vat;
-
-            // Update order's TotalAmount with the calculated value
-            order.setTotalAmount(finalTotalAmount);
-
-            // Insert order
+            // Insert order (không cần các trường mới vì database chưa có)
             String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
                     "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -1184,7 +1158,9 @@ public class OrderDAO extends DBContext {
                             "VALUES (?, ?, ?, ?, ?, ?)";
 
                     try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
-                        // Use the already calculated unitPrice from above
+                        // Calculate unitPrice for this specific item
+                        double unitPrice = getFinalPriceForPackageType(item);
+                        
                         ps.setInt(1, orderId);
                         ps.setInt(2, item.getProductID());
                         ps.setDouble(3, item.getQuantity());
@@ -1344,6 +1320,52 @@ public class OrderDAO extends DBContext {
 
         // Fallback to product price if something goes wrong
         return item.getProduct().getPrice();
+    }
+
+    /**
+     * Helper method to get the final price after applying promotion and voucher
+     */
+    private double getFinalPriceAfterPromotionAndVoucher(CartItem item, double basePrice) {
+        if (item.getProduct() == null) {
+            return basePrice;
+        }
+
+        double finalPrice = basePrice;
+
+        // Check for active promotion
+        try {
+            String promotionSql = """
+                SELECT TOP 1 p.DiscountPercent
+                FROM Promotion p
+                JOIN Product_Promotion pp ON p.PromotionID = pp.PromotionID
+                WHERE pp.ProductID = ?
+                  AND p.IsActive = 1
+                  AND p.StartDate <= GETDATE()
+                  AND p.EndDate >= GETDATE()
+                ORDER BY p.EndDate DESC
+                """;
+            
+            try (PreparedStatement ps = conn.prepareStatement(promotionSql)) {
+                ps.setInt(1, item.getProductID());
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    double discountPercent = rs.getDouble("DiscountPercent");
+                    finalPrice = basePrice * (1 - discountPercent / 100);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return finalPrice;
+    }
+
+    /**
+     * Helper method to get the final price for a specific package type after promotion
+     */
+    public double getFinalPriceForPackageType(CartItem item) {
+        double basePrice = getCorrectPriceForPackageType(item);
+        return getFinalPriceAfterPromotionAndVoucher(item, basePrice);
     }
 
     /**

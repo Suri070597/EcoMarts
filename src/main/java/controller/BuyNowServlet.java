@@ -866,23 +866,22 @@ public class BuyNowServlet extends HttpServlet {
                         basePrice = product.getPriceUnit() != null ? product.getPriceUnit() : 0.0;
                     }
 
-                    // Check for active promotion
+                    // Check for active promotion and get final price
+                    OrderDAO orderDAO = new OrderDAO();
+                    double finalPrice = orderDAO.getFinalPriceForPackageType(item);
+                    
+                    // Store promotion info for display
                     PromotionDAO promotionDAO = new PromotionDAO();
                     Promotion activePromotion = promotionDAO.getValidPromotionForProduct(product.getProductID());
-
+                    
                     if (activePromotion != null) {
-                        // Calculate discounted price
-                        double discountPercent = activePromotion.getDiscountPercent();
-                        double finalPrice = basePrice * (1 - discountPercent / 100);
-                        // Store promotion info for display
                         request.setAttribute("promotion_" + product.getProductID(), activePromotion);
                         request.setAttribute("originalPrice_" + product.getProductID(), basePrice);
-                        product.setPrice(finalPrice); // Set discounted price to product
-                        totalAmount += finalPrice * item.getQuantity();
-                    } else {
-                        product.setPrice(basePrice);
-                        totalAmount += basePrice * item.getQuantity();
+                        request.setAttribute("discountPercent_" + product.getProductID(), activePromotion.getDiscountPercent());
                     }
+                    
+                    product.setPrice(finalPrice);
+                    totalAmount += finalPrice * item.getQuantity();
                 }
             }
 
@@ -929,6 +928,12 @@ public class BuyNowServlet extends HttpServlet {
 
             // Final total = total after promotion - voucher + VAT
             double finalTotal = totalAmount + vat;
+            
+            // Store voucher information for display
+            if (appliedVoucher != null) {
+                request.setAttribute("appliedVoucher", appliedVoucher);
+                request.setAttribute("voucherDiscount", discountAmount);
+            }
 
             // Ensure final total is not negative (same logic as ReorderServlet)
             if (finalTotal < 0) {
@@ -939,7 +944,11 @@ public class BuyNowServlet extends HttpServlet {
             Order newOrder = new Order();
             newOrder.setAccountID(account.getAccountID());
             newOrder.setOrderDate(new Timestamp(System.currentTimeMillis()));
-            newOrder.setTotalAmount(finalTotal); // Lưu tổng tiền trước VAT (VAT sẽ được tính trong DAO)
+            
+            // Lưu finalTotal (tổng tiền cuối cùng đã bao gồm VAT và áp dụng voucher) vào TotalAmount
+            // để khi OrderDAO tính toán lại, nó sẽ sử dụng giá trị này
+            newOrder.setTotalAmount(finalTotal);
+            
             newOrder.setShippingAddress(shippingAddress);
             newOrder.setShippingPhone(shippingPhone);
             newOrder.setPaymentMethod(paymentMethod);

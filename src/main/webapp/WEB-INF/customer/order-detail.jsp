@@ -237,16 +237,7 @@
                                             <td class="text-center">
                                                 <c:choose>
                                                     <c:when test="${not empty od.productPromotion}">
-                                                        <!-- Hiển thị giá gốc bị gạch và giá giảm -->
-                                                        <div class="text-decoration-line-through text-muted">
-                                                            <fmt:formatNumber value="${od.unitPrice}" type="number" pattern="#,###"/> đ
-                                                        </div>
-                                                        <div class="text-danger fw-bold fs-6">
-                                                            <fmt:formatNumber value="${od.unitPrice * (1 - od.productPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ
-                                                        </div>
-                                                        <div class="badge bg-danger">
-                                                            -<fmt:formatNumber value="${od.productPromotion.discountPercent}" pattern="#"/>%
-                                                        </div>
+                                            <td class="text-center"><fmt:formatNumber value="${od.unitPrice}" type="number" pattern="#,###"/> đ</td>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <!-- Hiển thị giá gốc nếu không có promotion -->
@@ -274,19 +265,8 @@
                                             </td>
                                             <td class="text-center">
                                                 <a href="${pageContext.request.contextPath}/ProductDetail?id=${od.productID}" class="btn btn-sm btn-outline-primary">Đánh giá</a>
-                                            </td>
-                                            <td class="text-end fw-bold">
-                                                <c:choose>
-                                                    <c:when test="${not empty od.productPromotion}">
-                                                        <!-- Hiển thị thành tiền sau promotion -->
-                                                        <fmt:formatNumber value="${od.unitPrice * (1 - od.productPromotion.discountPercent / 100) * od.quantity}" type="number"/> đ
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <!-- Hiển thị thành tiền gốc nếu không có promotion -->
-                                                        <fmt:formatNumber value="${od.subTotal}" type="number"/> đ
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
+                                            </td>                                    
+                                            <td class="text-end fw-bold"><fmt:formatNumber value="${od.subTotal}" type="number"/> đ</td>
                                         </tr>
                                     </c:forEach>
                                 </tbody>
@@ -303,12 +283,6 @@
                             <span class="text-end"><fmt:formatNumber value="${total}" type="number"/> đ</span>
                         </div>
 
-                        <c:if test="${totalSavings > 0}">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>Ưu đãi:</span>
-                                <span class="text-success">-<fmt:formatNumber value="${totalSavings}" type="number"/> đ</span>
-                            </div>
-                        </c:if>
 
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>Phí vận chuyển:</span>
