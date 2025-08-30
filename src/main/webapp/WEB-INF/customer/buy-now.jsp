@@ -818,7 +818,7 @@
 
                                                         // Show discount row
                                                         discountRow.style.display = 'flex';
-                                                        
+
                                                         // Store voucher info for form submission
                                                         document.getElementById('voucherCode').value = selectedOption.value;
                                                     } else {
