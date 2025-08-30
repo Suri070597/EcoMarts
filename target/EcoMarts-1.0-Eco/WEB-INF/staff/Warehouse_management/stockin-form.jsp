@@ -143,7 +143,7 @@
                                         Swal.fire({
                                             icon: 'success',
                                             title: 'Thành công!',
-                                            text: 'Nhập kho thành công!',
+                                            text: 'Lưu phiếu nhập thành công!',
                                             timer: 1000, // tự tắt sau 2 giây
                                             showConfirmButton: false
                                         });
@@ -409,6 +409,8 @@
                                 }
                             }
 
+                            // >>> NEW: baseMin = ngày nhập hoặc hôm nay
+                            const baseMin = document.getElementById('date').value || new Date().toISOString().split('T')[0];
 
                             // Nếu chưa có, thêm row mới
                             const row = document.createElement("tr");
@@ -424,7 +426,7 @@
                                 <option value="\${item.productID}" selected>\${item.productName}</option>
                             </select>
                         </td>
-                                                    <td>
+                        <td>
                             <span class="form-control-plaintext">\${item.boxUnitName}</span>
                             <input type="hidden" name="packageType" value="\${packageType}">
                             <input type="hidden" name="packSize" value="\${packSize}">
@@ -434,7 +436,7 @@
                         <td><input type="number" name="price" step="0.01" min="1" class="form-control" required style="white-space: nowrap; width:120px;"></td>
                         <td>
                             <input type="date" name="expiryDate" class="form-control" required 
-                                   min="\${new Date().toISOString().split('T')[0]}" 
+                                   min="${baseMin}" 
                                    style="white-space: nowrap; width:140px;">
                         </td>
                         <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fas fa-trash"></i></button></td>
@@ -594,6 +596,56 @@
                         const url = window.location.href.split('?')[0];
                         window.history.replaceState({}, document.title, url);
                     }
+                </script>
+
+                <!-- NEW: Ràng buộc ngày hết hạn >= ngày nhập + validate submit -->
+                <script>
+                  document.addEventListener('DOMContentLoaded', function () {
+                    const dateInput = document.getElementById('date');
+                    const tableBody = document.getElementById('productTableBody');
+
+                    // Set min cho tất cả expiry theo ngày nhập (hoặc hôm nay nếu chưa chọn)
+                    function setMinForAllExpiry() {
+                      const base = dateInput.value || new Date().toISOString().split('T')[0];
+                      document.querySelectorAll("input[name='expiryDate']").forEach(inp => {
+                        inp.min = base;
+                        if (inp.value && inp.value < base) {
+                          inp.value = base; // tự chỉnh nếu đang sai
+                        }
+                      });
+                    }
+
+                    // Gọi khi load & khi đổi ngày nhập
+                    setMinForAllExpiry();
+                    if (dateInput) {
+                      dateInput.addEventListener('change', setMinForAllExpiry);
+                    }
+
+                    // Theo dõi thêm/xóa hàng sản phẩm
+                    const mo = new MutationObserver(() => setMinForAllExpiry());
+                    mo.observe(tableBody, { childList: true, subtree: true });
+
+                    // Validate khi submit form
+                    const stockInFormWrapper = document.getElementById('stockInForm');
+                    const form = stockInFormWrapper ? stockInFormWrapper.querySelector('form') : null;
+
+                    if (form) {
+                      form.addEventListener('submit', function (e) {
+                        const base = dateInput.value || new Date().toISOString().split('T')[0];
+                        let valid = true;
+                        document.querySelectorAll("input[name='expiryDate']").forEach(inp => {
+                          if (inp.value && inp.value < base) {
+                            valid = false;
+                            inp.focus();
+                          }
+                        });
+                        if (!valid) {
+                          e.preventDefault();
+                          alert('Ngày hết hạn không được nhỏ hơn Ngày nhập!');
+                        }
+                      });
+                    }
+                  });
                 </script>
         </body>
 

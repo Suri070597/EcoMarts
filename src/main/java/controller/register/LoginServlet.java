@@ -110,7 +110,7 @@ public class LoginServlet extends HttpServlet {
                 }
             } else {
                 System.out.println("Tài khoản không tồn tại!");
-                request.getSession().setAttribute("error", "Tài khoản không tồn tại!");
+                request.getSession().setAttribute("error", "Email hoặc mật khẩu không đúng!");
                 response.sendRedirect(request.getContextPath() + "/login");
             }
         } catch (SQLException e) {
