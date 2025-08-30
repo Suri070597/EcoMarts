@@ -35,7 +35,7 @@ import helper.PrepareCheckoutPage;
 /**
  * Servlet for handling "Buy Now" functionality
  */
-@WebServlet(name = "BuyNowServlet", urlPatterns = { "/buy-now", "/buy-now/vnpay" })
+@WebServlet(name = "BuyNowServlet", urlPatterns = {"/buy-now", "/buy-now/vnpay"})
 public class BuyNowServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -200,8 +200,8 @@ public class BuyNowServlet extends HttpServlet {
 
                 if (voucherCategoryId == null
                         || (productCategory != null && (voucherCategoryId.equals(productCategory.getCategoryID())
-                                || (productCategory.getParentID() != null
-                                        && voucherCategoryId.equals(productCategory.getParentID()))))) {
+                        || (productCategory.getParentID() != null
+                        && voucherCategoryId.equals(productCategory.getParentID()))))) {
                     validVouchers.add(voucher);
                 }
             }
@@ -844,7 +844,7 @@ public class BuyNowServlet extends HttpServlet {
                 if (stockQty < item.getQuantity()) {
                     request.setAttribute("error",
                             "Sản phẩm " + (product != null ? product.getProductName() : ("#" + item.getProductID()))
-                                    + " không đủ số lượng yêu cầu. Còn lại: " + stockQty);
+                            + " không đủ số lượng yêu cầu. Còn lại: " + stockQty);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
                 }
@@ -869,17 +869,17 @@ public class BuyNowServlet extends HttpServlet {
                     // Check for active promotion and get final price
                     OrderDAO orderDAO = new OrderDAO();
                     double finalPrice = orderDAO.getFinalPriceForPackageType(item);
-                    
+
                     // Store promotion info for display
                     PromotionDAO promotionDAO = new PromotionDAO();
                     Promotion activePromotion = promotionDAO.getValidPromotionForProduct(product.getProductID());
-                    
+
                     if (activePromotion != null) {
                         request.setAttribute("promotion_" + product.getProductID(), activePromotion);
                         request.setAttribute("originalPrice_" + product.getProductID(), basePrice);
                         request.setAttribute("discountPercent_" + product.getProductID(), activePromotion.getDiscountPercent());
                     }
-                    
+
                     product.setPrice(finalPrice);
                     totalAmount += finalPrice * item.getQuantity();
                 }
@@ -928,7 +928,7 @@ public class BuyNowServlet extends HttpServlet {
 
             // Final total = total after promotion - voucher + VAT
             double finalTotal = totalAmount + vat;
-            
+
             // Store voucher information for display
             if (appliedVoucher != null) {
                 request.setAttribute("appliedVoucher", appliedVoucher);
@@ -944,11 +944,11 @@ public class BuyNowServlet extends HttpServlet {
             Order newOrder = new Order();
             newOrder.setAccountID(account.getAccountID());
             newOrder.setOrderDate(new Timestamp(System.currentTimeMillis()));
-            
+
             // Lưu finalTotal (tổng tiền cuối cùng đã bao gồm VAT và áp dụng voucher) vào TotalAmount
             // để khi OrderDAO tính toán lại, nó sẽ sử dụng giá trị này
             newOrder.setTotalAmount(finalTotal);
-            
+
             newOrder.setShippingAddress(shippingAddress);
             newOrder.setShippingPhone(shippingPhone);
             newOrder.setPaymentMethod(paymentMethod);
@@ -1099,9 +1099,10 @@ public class BuyNowServlet extends HttpServlet {
                     }
                 }
 
-                // Calculate item total using effective price/unit already set on product by DAO
-                double effectivePrice = (product != null && product.getPrice() != null) ? product.getPrice() : 0.0;
-                itemTotal += effectivePrice * item.getQuantity();
+                PromotionDAO promoDAO = new PromotionDAO();
+                double finalPrice = promoDAO.applyPromotion(product);
+
+                request.setAttribute("originalPrice_" + product.getProductID(), product.getPrice());
             }
 
             // If stock issues and cart is now empty, redirect back to cart

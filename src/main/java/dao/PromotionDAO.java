@@ -800,6 +800,22 @@ public class PromotionDAO extends DBContext {
             e.printStackTrace();
         }
     }
+    
+    public double applyPromotion(Product product) {
+        if (product == null || product.getPrice() == null) {
+            return 0.0;
+        }
+        double basePrice = product.getPrice();
+        Promotion promo = getValidPromotionForProduct(product.getProductID());
+
+        double finalPrice = basePrice;
+        if (promo != null) {
+            finalPrice = basePrice * (1 - promo.getDiscountPercent() / 100.0);
+        }
+
+        product.setPrice(finalPrice);
+        return finalPrice;
+    }
 
     /**
      * Lấy PromotionID đang gán cho 1 sản phẩm; null nếu chưa có
