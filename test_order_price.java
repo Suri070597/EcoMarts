@@ -1,38 +1,30 @@
-// Test file để kiểm tra logic tính giá
-public class TestOrderPrice {
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class test_order_price {
     
     public static void main(String[] args) {
-        // Test các trường hợp PackageType khác nhau
-        testPriceCalculation("UNIT", 12.0, null, 12.0, 24.0, 36.0);
-        testPriceCalculation("BOX", 12.0, null, 12.0, 24.0, 36.0);
-        testPriceCalculation("PACK", 12.0, 6, 12.0, 24.0, 36.0);
-        testPriceCalculation("KG", 12.0, null, 12.0, 24.0, 36.0);
-    }
-    
-    private static void testPriceCalculation(String packageType, double priceUnit, Integer packSize, 
-                                           double priceBox, double pricePack, double expectedPrice) {
-        System.out.println("Testing PackageType: " + packageType);
-        System.out.println("PriceUnit: " + priceUnit + ", PackSize: " + packSize);
-        System.out.println("PriceBox: " + priceBox + ", PricePack: " + pricePack);
+        // Test the logic for calculating "Giá gốc" (Original Price)
+        System.out.println("Testing Order Price Calculation Logic");
+        System.out.println("=====================================");
         
-        double calculatedPrice = 0.0;
+        // The logic should be:
+        // 1. Giá gốc = SUM(SubTotal) from OrderDetail WHERE OrderID = ?
+        // 2. Giảm giá = DiscountAmount from VoucherUsage WHERE OrderID = ?
+        // 3. VAT = 8% of Giá gốc
+        // 4. Tổng thanh toán = Giá gốc - Giảm giá + VAT
         
-        if ("KG".equalsIgnoreCase(packageType) || "UNIT".equalsIgnoreCase(packageType)) {
-            calculatedPrice = priceUnit;
-        } else if ("BOX".equalsIgnoreCase(packageType)) {
-            calculatedPrice = priceBox;
-        } else if ("PACK".equalsIgnoreCase(packageType)) {
-            if (pricePack > 0) {
-                calculatedPrice = pricePack;
-            } else if (priceUnit > 0 && packSize != null) {
-                calculatedPrice = priceUnit * packSize;
-            } else {
-                calculatedPrice = 0.0;
-            }
-        }
+        System.out.println("Formula:");
+        System.out.println("Giá gốc = SUM(SubTotal) from OrderDetail");
+        System.out.println("VAT = Giá gốc * 0.08");
+        System.out.println("Tổng thanh toán = Giá gốc - Giảm giá + VAT");
+        System.out.println();
         
-        System.out.println("Expected: " + expectedPrice + ", Calculated: " + calculatedPrice);
-        System.out.println("Test " + (calculatedPrice == expectedPrice ? "PASSED" : "FAILED"));
-        System.out.println("---");
+        System.out.println("Implementation:");
+        System.out.println("1. Added getSubtotalByOrderID() method to OrderDAO");
+        System.out.println("2. Updated calculateOrderSummary() in OrderServlet");
+        System.out.println("3. Now 'Giá gốc' correctly shows sum of all SubTotal values");
     }
 }

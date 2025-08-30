@@ -196,12 +196,17 @@ public class OrderServlet extends HttpServlet {
     }
 
     private void calculateOrderSummary(Order order) {
-        double totalAfterDiscount = order.getTotalAmount(); // Đã trừ giảm giá
-        double discount = dao.getDiscountAmountByOrderID(order.getOrderID()).doubleValue(); // Lấy số giảm
-
-        double subtotal = totalAfterDiscount + discount; // Giá gốc
+        // Tính giá gốc: tổng các giá SubTotal của sản phẩm có cùng OrderID trong bảng OrderDetail
+        double subtotal = dao.getSubtotalByOrderID(order.getOrderID());
+        
+        // Lấy số tiền giảm giá từ voucher (nếu có)
+        double discount = dao.getDiscountAmountByOrderID(order.getOrderID()).doubleValue();
+        
+        // Tính VAT = 8% của giá gốc
         double vat = subtotal * 0.08;
-        double grandTotal = totalAfterDiscount + vat;
+        
+        // Tổng thanh toán = giá gốc - giảm giá + VAT
+        double grandTotal = subtotal - discount + vat;
 
         order.setDiscountAmount(discount);
         order.setSubtotal(subtotal);
