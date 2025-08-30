@@ -222,14 +222,14 @@
                                                                     </button>
                                                                     <c:choose>
                                                                         <c:when test="${item.product.unit eq 'kg'}">
-                                                                            <input type="number" class="form-control form-control-sm text-center cart-quantity-input"
+                                                                            <input type="number" class="form-control form-control-sm text-center cart-quantity-input" disabled
                                                                                    name="cartQuantity_${item.cartItemID}" 
                                                                                    value="${item.quantity}" min="0.1" step="0.1" max="${item.product.stockQuantity}"
                                                                                    data-price="${item.product.price}" data-id="${item.cartItemID}" 
                                                                                    data-max="${item.product.stockQuantity}" data-unit="${item.product.unit}">
                                                                         </c:when>
                                                                         <c:otherwise>
-                                                                            <input type="number" class="form-control form-control-sm text-center cart-quantity-input"
+                                                                            <input type="number" class="form-control form-control-sm text-center cart-quantity-input" disabled
                                                                                    name="cartQuantity_${item.cartItemID}" 
                                                                                    value="${fn:endsWith(item.quantity, '.0') ? fn:substringBefore(item.quantity, '.0') : item.quantity}"
                                                                                    min="1" step="1" max="${item.product.stockQuantity}" 
@@ -279,25 +279,25 @@
                                                     <p class="text-muted mb-0">Đơn vị: ${buyNowItem.product.unit}</p>
                                                     <div class="quantity-controls mb-2">
                                                         <div class="input-group" style="width: 150px;">
-                                                            <button type="button" class="btn btn-outline-secondary btn-sm quantity-decrease">
+<!--                                                            <button type="button" class="btn btn-outline-secondary btn-sm quantity-decrease">
                                                                 <i class="fas fa-minus"></i>
-                                                            </button>
+                                                            </button>-->
                                                             <c:choose>
                                                                 <c:when test="${buyNowItem.product.unit eq 'kg'}">
-                                                                    <input type="number" id="product-quantity" name="quantity" class="form-control form-control-sm text-center" 
+                                                                    <input type="number" id="product-quantity" name="quantity" class="form-control form-control-sm text-center" disabled
                                                                            value="${buyNowItem.quantity}" min="0.1" step="0.1" max="${buyNowItem.product.stockQuantity}" 
                                                                            data-price="${buyNowItem.product.price}" data-max="${buyNowItem.product.stockQuantity}">
                                                                 </c:when>
                                                                 <c:otherwise>
-                                                                    <input type="number" id="product-quantity" name="quantity" class="form-control form-control-sm text-center" 
+                                                                    <input type="number" id="product-quantity" name="quantity" class="form-control form-control-sm text-center" disabled
                                                                            value="${fn:endsWith(buyNowItem.quantity, '.0') ? fn:substringBefore(buyNowItem.quantity, '.0') : buyNowItem.quantity}" 
                                                                            min="1" step="1" max="${buyNowItem.product.stockQuantity}" 
                                                                            data-price="${buyNowItem.product.price}" data-max="${buyNowItem.product.stockQuantity}" pattern="\d*">
                                                                 </c:otherwise>
                                                             </c:choose>
-                                                            <button type="button" class="btn btn-outline-secondary btn-sm quantity-increase">
+<!--                                                            <button type="button" class="btn btn-outline-secondary btn-sm quantity-increase">
                                                                 <i class="fas fa-plus"></i>
-                                                            </button>
+                                                            </button>-->
                                                         </div>
                                                         <small class="text-muted">Còn lại: ${buyNowItem.product.stockQuantity} ${buyNowItem.product.unit}</small>
                                                     </div>

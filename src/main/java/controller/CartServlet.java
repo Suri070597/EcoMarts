@@ -530,7 +530,7 @@ public class CartServlet extends HttpServlet {
                     : cartItemDAO.updateCartItemQuantity(cartItemID, quantity);
             System.out.println("Update result: " + (success ? "success" : "failed"));
 
- // ==== ÁP KHUYẾN MÃI CHO GIÁ ====
+            // ==== ÁP KHUYẾN MÃI CHO GIÁ ====
             PromotionDAO promoDAO = new PromotionDAO();
 
             // tính itemTotal theo giá sau KM (nếu có)
@@ -562,7 +562,6 @@ public class CartServlet extends HttpServlet {
                         "Cart update successful: Item total=" + itemTotal + ", Cart total=" + cartTotal
                         + ", Total items=" + totalItems);
 
-            
 //            double itemTotal = 0;
 //            itemTotal = cartItem.getProduct().getPrice() * quantity;
 //
@@ -580,72 +579,63 @@ public class CartServlet extends HttpServlet {
 //            System.out.println(
 //                    "Cart update successful: Item total=" + itemTotal + ", Cart total=" + cartTotal
 //                    + ", Total items=" + totalItems);
+                // Ensure values are valid numbers and properly formatted for JSON
+                if (Double.isNaN(cartTotal)) {
+                    cartTotal = 0;
+                }
+                if (Double.isNaN(itemTotal)) {
+                    itemTotal = 0;
+                }
 
-            // Ensure values are valid numbers and properly formatted for JSON
-            if (Double.isNaN(cartTotal)) {
-                cartTotal = 0;
-            }
-            if (Double.isNaN(itemTotal)) {
-                itemTotal = 0;
-            }
+                // Get active cart items count
+                int activeItemsCount = activeItems.size();
+                System.out.println("isAjax: " + isAjax);
+                if (isAjax) {
+                    // Return JSON with updated information
+                    String json = String.format(java.util.Locale.US,
+                            "{\"success\":true,"
+                            + "\"message\":\"Đã cập nhật số lượng\","
+                            + "\"cartTotal\":%.2f,"
+                            + "\"itemTotal\":%.2f,"
+                            + "\"updatedQuantity\":%.2f,"
+                            + "\"totalItems\":%d,"
+                            + "\"itemCount\":%d}",
+                            cartTotal,
+                            itemTotal,
+                            quantity,
+                            totalItems,
+                            activeItemsCount);
+                    response.getWriter().write(json);
+                    System.out.println("Response sent: " + json);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/cart");
+                }
 
-            // Get active cart items count
-            int activeItemsCount = activeItems.size();
-            System.out.println("isAjax: " + isAjax);
-            if (isAjax) {
-                // Return JSON with updated information
-                String json = String.format(java.util.Locale.US,
-                        "{\"success\":true,"
-                        + "\"message\":\"Đã cập nhật số lượng\","
-                        + "\"cartTotal\":%.2f,"
-                        + "\"itemTotal\":%.2f,"
-                        + "\"updatedQuantity\":%.2f,"
-                        + "\"totalItems\":%d,"
-                        + "\"itemCount\":%d}",
-                        cartTotal,
-                        itemTotal,
-                        quantity,
-                        totalItems,
-                        activeItemsCount);
-                response.getWriter().write(json);
-                System.out.println("Response sent: " + json);
             } else {
-                response.sendRedirect(request.getContextPath() + "/cart");
-            }
-
-        }else {
                 System.out.println("Failed to update cart item quantity");
                 response.getWriter().write("{\"success\":false,\"message\":\"Không thể cập nhật số lượng\"}");
             }
-    }
-    catch (NumberFormatException e
-
-    
-        ) {
+        } catch (NumberFormatException e) {
             System.err.println("Number format exception: " + e.getMessage());
-        e.printStackTrace();
-        response.getWriter().write("{\"success\":false,\"message\":\"Dữ liệu không hợp lệ\"}");
-    }
-    catch (Exception e
-
-    
-        ) {
+            e.printStackTrace();
+            response.getWriter().write("{\"success\":false,\"message\":\"Dữ liệu không hợp lệ\"}");
+        } catch (Exception e) {
             System.err.println("Error updating cart: " + e.getMessage());
-        e.printStackTrace();
-        String safeMessage = e.getMessage();
-        if (safeMessage != null) {
-            safeMessage = safeMessage.replace("\"", "'");
-        } else {
-            safeMessage = "Unknown error";
+            e.printStackTrace();
+            String safeMessage = e.getMessage();
+            if (safeMessage != null) {
+                safeMessage = safeMessage.replace("\"", "'");
+            } else {
+                safeMessage = "Unknown error";
+            }
+            response.getWriter().write("{\"success\":false,\"message\":\"Lỗi: " + safeMessage + "\"}");
         }
-        response.getWriter().write("{\"success\":false,\"message\":\"Lỗi: " + safeMessage + "\"}");
     }
-}
 
-/**
- * Remove item from cart
- */
-private void removeCartItem(HttpServletRequest request, HttpServletResponse response, CartItemDAO cartItemDAO)
+    /**
+     * Remove item from cart
+     */
+    private void removeCartItem(HttpServletRequest request, HttpServletResponse response, CartItemDAO cartItemDAO)
             throws IOException {
         // Đảm bảo content-type được thiết lập ngay từ đầu
         response.setContentType("application/json");
