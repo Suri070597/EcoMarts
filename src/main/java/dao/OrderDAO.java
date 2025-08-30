@@ -1009,13 +1009,15 @@ public class OrderDAO extends DBContext {
             }
 
             // Calculate VAT (8% of total subtotal)
-            double vat = totalSubtotal * 0.08;
+//            double vat = totalSubtotal * 0.08;
+//
+//            // Calculate final total amount
+//            double finalTotalAmount = totalSubtotal + vat;
+//
+//            // Update order's TotalAmount with the calculated value
+//            order.setTotalAmount(finalTotalAmount);
 
-            // Calculate final total amount
-            double finalTotalAmount = totalSubtotal + vat;
-
-            // Update order's TotalAmount with the calculated value
-            order.setTotalAmount(finalTotalAmount);
+            double finalTotal = order.getTotalAmount();
 
             // Insert order
             String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
@@ -1026,7 +1028,8 @@ public class OrderDAO extends DBContext {
                     PreparedStatement.RETURN_GENERATED_KEYS)) {
                 ps.setInt(1, order.getAccountID());
                 ps.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
-                ps.setDouble(3, order.getTotalAmount());
+//                ps.setDouble(3, order.getTotalAmount());
+                ps.setDouble(3, finalTotal);
                 ps.setString(4, order.getShippingAddress());
                 ps.setString(5, order.getShippingPhone());
                 ps.setString(6, order.getPaymentMethod());
@@ -1134,15 +1137,16 @@ public class OrderDAO extends DBContext {
             // Calculate subtotal for single item
             double unitPrice = getCorrectPriceForPackageType(item);
             double subtotal = unitPrice * item.getQuantity();
+            double finalTotal = order.getTotalAmount();
 
-            // Calculate VAT (8% of subtotal)
-            double vat = subtotal * 0.08;
-
-            // Calculate final total amount
-            double finalTotalAmount = subtotal + vat;
-
-            // Update order's TotalAmount with the calculated value
-            order.setTotalAmount(finalTotalAmount);
+//            // Calculate VAT (8% of subtotal)
+//            double vat = subtotal * 0.08;
+//
+//            // Calculate final total amount
+//            double finalTotalAmount = subtotal + vat;
+//
+//            // Update order's TotalAmount with the calculated value
+//            order.setTotalAmount(finalTotalAmount);
 
             // Insert order
             String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
@@ -1153,7 +1157,7 @@ public class OrderDAO extends DBContext {
                     PreparedStatement.RETURN_GENERATED_KEYS)) {
                 ps.setInt(1, order.getAccountID());
                 ps.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
-                ps.setDouble(3, order.getTotalAmount());
+                ps.setDouble(3, finalTotal);
                 ps.setString(4, order.getShippingAddress());
                 ps.setString(5, order.getShippingPhone());
                 ps.setString(6, order.getPaymentMethod());

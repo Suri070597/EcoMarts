@@ -35,7 +35,7 @@ import helper.PrepareCheckoutPage;
 /**
  * Servlet for handling "Buy Now" functionality
  */
-@WebServlet(name = "BuyNowServlet", urlPatterns = { "/buy-now", "/buy-now/vnpay" })
+@WebServlet(name = "BuyNowServlet", urlPatterns = {"/buy-now", "/buy-now/vnpay"})
 public class BuyNowServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -200,8 +200,8 @@ public class BuyNowServlet extends HttpServlet {
 
                 if (voucherCategoryId == null
                         || (productCategory != null && (voucherCategoryId.equals(productCategory.getCategoryID())
-                                || (productCategory.getParentID() != null
-                                        && voucherCategoryId.equals(productCategory.getParentID()))))) {
+                        || (productCategory.getParentID() != null
+                        && voucherCategoryId.equals(productCategory.getParentID()))))) {
                     validVouchers.add(voucher);
                 }
             }
@@ -574,6 +574,18 @@ public class BuyNowServlet extends HttpServlet {
                 finalTotal = 0;
             }
 
+//            // Calculate VAT (8% of total after promotion, BEFORE voucher)
+//            double vat = totalAmount * 0.08;
+//
+//            // Final total = total after promotion + VAT - voucher
+//            double finalTotal = totalAmount + vat - discountAmount;
+//
+//            // Ensure final total is not negative
+//            if (finalTotal < 0) {
+//                finalTotal = 0;
+//            }
+
+
             // Create new order
             Order newOrder = new Order();
             newOrder.setAccountID(account.getAccountID());
@@ -844,7 +856,7 @@ public class BuyNowServlet extends HttpServlet {
                 if (stockQty < item.getQuantity()) {
                     request.setAttribute("error",
                             "Sản phẩm " + (product != null ? product.getProductName() : ("#" + item.getProductID()))
-                                    + " không đủ số lượng yêu cầu. Còn lại: " + stockQty);
+                            + " không đủ số lượng yêu cầu. Còn lại: " + stockQty);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
                 }
@@ -925,12 +937,12 @@ public class BuyNowServlet extends HttpServlet {
             }
 
             // Calculate VAT (8% of total after promotion, BEFORE voucher)
-            double vat = (totalAmount + discountAmount) * 0.08;
+            double vat = totalAmount * 0.08;
 
-            // Final total = total after promotion - voucher + VAT
-            double finalTotal = totalAmount + vat;
+            // Final total = total after promotion + VAT - voucher
+            double finalTotal = totalAmount + vat - discountAmount;
 
-            // Ensure final total is not negative (same logic as ReorderServlet)
+            // Ensure final total is not negative
             if (finalTotal < 0) {
                 finalTotal = 0;
             }
