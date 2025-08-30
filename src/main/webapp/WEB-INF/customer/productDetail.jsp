@@ -290,15 +290,15 @@
                                             <button type="button" class="btn btn-outline-secondary unit-btn" data-type="UNIT" data-available="${inventory['UNIT_Quantity']}" data-base="${basePrice * (1 - appliedPromotion.discountPercent/100.0)}">
                                                 <span class="btn-label">${mo.itemUnitName}</span>
                                                 <span class="btn-price-current text-danger fw-bold d-block"></span>
-<span class="btn-price-original text-muted text-decoration-line-through d-block"></span>
-<span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through d-block"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
 
                                             </button>
                                             <button type="button" class="btn btn-outline-secondary unit-btn" data-type="BOX" data-available="${inventory['BOX_Quantity']}" data-base="${mo.price * (1 - appliedPromotion.discountPercent/100.0)}">
                                                 <span class="btn-label">${mo.boxUnitName}</span>
                                                 <span class="btn-price-current text-danger fw-bold d-block"></span>
-<span class="btn-price-original text-muted text-decoration-line-through d-block"></span>
-<span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through d-block"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
 
                                             </button>
                                             <c:if test="${not empty inventory['PACK_LIST']}">
@@ -309,8 +309,8 @@
                                                                                                                                                        * (1 - appliedPromotion.discountPercent/100.0)}">
                                                         <span class="btn-label">Lốc ${p.packSize} ${mo.itemUnitName}</span>
                                                         <span class="btn-price-current text-danger fw-bold d-block"></span>
-<span class="btn-price-original text-muted text-decoration-line-through d-block"></span>
-<span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                                        <span class="btn-price-original text-muted text-decoration-line-through d-block"></span>
+                                                        <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
 
                                                     </button>
                                                 </c:forEach>
@@ -320,8 +320,8 @@
                                             <button type="button" class="btn btn-outline-secondary unit-btn active" data-type="KG" data-available="${inventory['UNIT_Quantity']}" data-base="${mo.priceUnit * (1 - appliedPromotion.discountPercent/100.0)}">
                                                 <span class="btn-label">kg</span>
                                                 <span class="btn-price-current text-danger fw-bold d-block"></span>
-<span class="btn-price-original text-muted text-decoration-line-through d-block"></span>
-<span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through d-block"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
 
                                             </button>
                                         </c:if>
@@ -640,7 +640,7 @@
                                         });
                                     });
                                 </script>
-                                
+
 
                             </form>
 
@@ -1214,80 +1214,80 @@
         <!-- Script để xử lý thông báo từ session -->
         <script>
             // Kiểm tra và hiển thị thông báo từ session
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Kiểm tra cartError
-                <% if (session.getAttribute("cartError") != null) { %>
-                    const errorMessage = '<%= session.getAttribute("cartError") %>';
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Lỗi!',
-                        text: errorMessage,
-                        confirmButtonText: 'Đóng',
-                        confirmButtonColor: '#d33'
-                    });
-                    <% session.removeAttribute("cartError"); %>
-                <% } %>
-                
+            <% if (session.getAttribute("cartError") != null) {%>
+                const errorMessage = '<%= session.getAttribute("cartError")%>';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: errorMessage,
+                    confirmButtonText: 'Đóng',
+                    confirmButtonColor: '#d33'
+                });
+            <% session.removeAttribute("cartError"); %>
+            <% } %>
+
                 // Kiểm tra cartMessage
-                <% if (session.getAttribute("cartMessage") != null) { %>
-                    const successMessage = '<%= session.getAttribute("cartMessage") %>';
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Thành công!',
-                        text: successMessage,
-                        confirmButtonText: 'Đóng',
-                        confirmButtonColor: '#28a745'
-                    });
-                    <% session.removeAttribute("cartMessage"); %>
-                <% } %>
+            <% if (session.getAttribute("cartMessage") != null) {%>
+                const successMessage = '<%= session.getAttribute("cartMessage")%>';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonText: 'Đóng',
+                    confirmButtonColor: '#28a745'
+                });
+            <% session.removeAttribute("cartMessage"); %>
+            <% }%>
             });
         </script>
-<script>
-    function formatVND(n) {
-    try {
-        return new Intl.NumberFormat('vi-VN').format(n);
-    } catch (e) {
-        return n;
-    }
-}
+        <script>
+            function formatVND(n) {
+                try {
+                    return new Intl.NumberFormat('vi-VN').format(n);
+                } catch (e) {
+                    return n;
+                }
+            }
 
-function updateButtonPrices(discountPercent) {
-    document.querySelectorAll('.unit-btn').forEach(btn => {
-        const base = parseFloat(btn.getAttribute('data-base') || '0');
-        
-        // Giá gốc chưa giảm
-        let original = 0;
-        if (discountPercent > 0) {
-            original = base / (1 - discountPercent / 100);
-        } else {
-            original = base;
-        }
+            function updateButtonPrices(discountPercent) {
+                document.querySelectorAll('.unit-btn').forEach(btn => {
+                    const base = parseFloat(btn.getAttribute('data-base') || '0');
 
-        const currentEl = btn.querySelector('.btn-price-current');
-        const originalEl = btn.querySelector('.btn-price-original');
-        const percentEl = btn.querySelector('.btn-price-percent');
+                    // Giá gốc chưa giảm
+                    let original = 0;
+                    if (discountPercent > 0) {
+                        original = base / (1 - discountPercent / 100);
+                    } else {
+                        original = base;
+                    }
 
-        // Gán giá khuyến mãi
-        currentEl.textContent = formatVND(base) + "₫";
+                    const currentEl = btn.querySelector('.btn-price-current');
+                    const originalEl = btn.querySelector('.btn-price-original');
+                    const percentEl = btn.querySelector('.btn-price-percent');
 
-        if (discountPercent > 0) {
-            // Gán giá gốc + hiển thị
-            originalEl.textContent = formatVND(original) + "₫";
-            originalEl.style.display = "block";
+                    // Gán giá khuyến mãi
+                    currentEl.textContent = formatVND(base) + "₫";
 
-            // Gán phần trăm giảm
-            percentEl.textContent = "-" + discountPercent + "%";
-            percentEl.style.display = "inline-block";
-        } else {
-            originalEl.style.display = "none";
-            percentEl.style.display = "none";
-        }
-    });
-}
+                    if (discountPercent > 0) {
+                        // Gán giá gốc + hiển thị
+                        originalEl.textContent = formatVND(original) + "₫";
+                        originalEl.style.display = "block";
 
-// gọi khi load trang (truyền từ server vào)
-updateButtonPrices(${appliedPromotion.discountPercent});
+                        // Gán phần trăm giảm
+                        percentEl.textContent = "-" + discountPercent + "%";
+                        percentEl.style.display = "inline-block";
+                    } else {
+                        originalEl.style.display = "none";
+                        percentEl.style.display = "none";
+                    }
+                });
+            }
 
-    </script>
+        // gọi khi load trang (truyền từ server vào)
+            updateButtonPrices(${appliedPromotion.discountPercent});
+
+        </script>
     </body>
 </html>
