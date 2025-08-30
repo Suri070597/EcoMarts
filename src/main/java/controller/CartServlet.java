@@ -83,31 +83,31 @@ public class CartServlet extends HttpServlet {
                 "Cart page request: Found " + activeItems.size() + " active items for user " + account.getUsername());
 
 // Tính tổng giỏ hàng có áp dụng khuyến mãi
-double cartTotal = 0;
-PromotionDAO promoDAO = new PromotionDAO();
+        double cartTotal = 0;
+        PromotionDAO promoDAO = new PromotionDAO();
 
-for (CartItem item : activeItems) {
-    Product p = item.getProduct();
+        for (CartItem item : activeItems) {
+            Product p = item.getProduct();
 
-    Promotion promo = promoDAO.getValidPromotionForProduct(p.getProductID());
-    if (promo != null) {
-        double basePrice = p.getPrice();
-        double discountPercent = promo.getDiscountPercent();
-        double finalPrice = basePrice * (1 - discountPercent / 100);
+            Promotion promo = promoDAO.getValidPromotionForProduct(p.getProductID());
+            if (promo != null) {
+                double basePrice = p.getPrice();
+                double discountPercent = promo.getDiscountPercent();
+                double finalPrice = basePrice * (1 - discountPercent / 100);
 
-        // có áp dụng giảm giá
-        cartTotal += finalPrice * item.getQuantity();
+                // có áp dụng giảm giá
+                cartTotal += finalPrice * item.getQuantity();
 
-        // setAttribute để JSP lấy ra
-        request.setAttribute("promotion_" + p.getProductID(), promo);
-        request.setAttribute("originalPrice_" + p.getProductID(), basePrice);
-        request.setAttribute("discountPercent_" + p.getProductID(), discountPercent);
-        request.setAttribute("finalPrice_" + p.getProductID(), finalPrice);
-    } else {
-        // Không có promotion tính giá gốc
-        cartTotal += p.getPrice() * item.getQuantity();
-    }
-}
+                // setAttribute để JSP lấy ra
+                request.setAttribute("promotion_" + p.getProductID(), promo);
+                request.setAttribute("originalPrice_" + p.getProductID(), basePrice);
+                request.setAttribute("discountPercent_" + p.getProductID(), discountPercent);
+                request.setAttribute("finalPrice_" + p.getProductID(), finalPrice);
+            } else {
+                // Không có promotion tính giá gốc
+                cartTotal += p.getPrice() * item.getQuantity();
+            }
+        }
 
         // Set attributes for JSP
         request.setAttribute("activeItems", activeItems);
@@ -238,7 +238,7 @@ for (CartItem item : activeItems) {
             case "remove":
                 removeCartItem(request, response, cartItemDAO);
                 break;
-                
+
             case "removeSelected":
                 removeSelectedItems(request, response, account, cartItemDAO);
                 break;
@@ -320,7 +320,10 @@ for (CartItem item : activeItems) {
             String packSizeStr = request.getParameter("packSize");
             Integer packSize = null;
             if (packSizeStr != null && !packSizeStr.trim().isEmpty()) {
-                try { packSize = Integer.parseInt(packSizeStr); } catch (Exception ignore) {}
+                try {
+                    packSize = Integer.parseInt(packSizeStr);
+                } catch (Exception ignore) {
+                }
             }
 
             // Validate quantity
@@ -339,7 +342,8 @@ for (CartItem item : activeItems) {
                         packageType = "KG";
                     }
                 }
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
             // Override by explicit request when not fruit
             if (packageTypeReq != null && !"KG".equals(packageType)) {
                 packageType = packageTypeReq;
@@ -508,7 +512,7 @@ for (CartItem item : activeItems) {
                 if (isAjax) {
                     String json = String.format(
                             "{\"success\":false,"
-                            + "\"message\":\"%s\"," 
+                            + "\"message\":\"%s\","
                             + "\"validQuantity\":%.2f}",
                             errorMessage,
                             Math.min(currentQuantity, stockQuantity)
@@ -874,35 +878,35 @@ for (CartItem item : activeItems) {
                 response.sendRedirect("cart");
                 return;
             }
-            
+
             // Split the comma-separated list of IDs
             String[] itemIds = selectedItems.split(",");
             int removedCount = 0;
             ProductDAO productDAO = new ProductDAO();
-            
+
             // Remove each selected item
             for (String itemIdStr : itemIds) {
                 try {
                     int itemId = Integer.parseInt(itemIdStr.trim());
-                    
+
                     // Get the cart item to check product details before removal
                     CartItem item = cartItemDAO.getCartItemById(itemId);
                     if (item == null) {
                         continue;
                     }
-                    
+
                     // Verify the item belongs to this user
                     if (item.getAccountID() != account.getAccountID()) {
                         continue;
                     }
-                    
+
                     // Get product to restore stock
                     Product product = item.getProduct();
                     if (product == null) {
                         // If product info not in cart item, try to get it from database
                         product = productDAO.getProductById(item.getProductID());
                     }
-                    
+
                     // Remove the item
                     boolean removed = cartItemDAO.updateCartItemStatus(itemId, "Removed");
                     if (removed && product != null) {
@@ -914,23 +918,23 @@ for (CartItem item : activeItems) {
                     continue;
                 }
             }
-            
+
             // Set appropriate message
             if (removedCount > 0) {
                 request.getSession().setAttribute("cartMessage", "Đã xóa " + removedCount + " sản phẩm khỏi giỏ hàng");
             } else {
                 request.getSession().setAttribute("cartError", "Không thể xóa sản phẩm khỏi giỏ hàng");
             }
-            
+
             // Redirect back to cart
             response.sendRedirect("cart");
-            
+
         } catch (Exception e) {
             request.getSession().setAttribute("cartError", "Lỗi khi xóa sản phẩm: " + e.getMessage());
             response.sendRedirect("cart");
         }
     }
-    
+
     /**
      * Helper method to handle AJAX errors
      */
