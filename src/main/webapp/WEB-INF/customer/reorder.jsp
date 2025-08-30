@@ -195,7 +195,7 @@
                                         <tr>
                                             <td>#${order.orderID}</td>
                                             <td>${order.productNames}</td>
-                                            <td class="price"><fmt:formatNumber value="${order.grandTotal}" type="number"/> đ</td>
+                                            <td class="price"><fmt:formatNumber value="${order.totalAmount}" type="number"/> đ</td>
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${order.orderStatus == 'Đang xử lý'}">

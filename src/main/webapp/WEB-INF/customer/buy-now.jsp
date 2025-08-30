@@ -144,6 +144,23 @@
                 border-radius: 16px;
                 margin-left: 10px;
             }
+            .cart-quantity-decrease,
+            .cart-quantity-increase,
+            .quantity-decrease,
+            .quantity-increase {
+                display: none !important;
+            }
+            input[type="number"]::-webkit-outer-spin-button,
+            input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            input[type="number"] {
+                
+            }
+            #product-quantity,
+            .cart-quantity-input {
+            
         </style>
     </head>
     <body>
