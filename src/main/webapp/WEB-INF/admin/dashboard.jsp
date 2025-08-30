@@ -130,7 +130,7 @@
                                                     <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy" />
                                                 </td>
                                                 <td class="price">
-                                                    <fmt:formatNumber value="${order.grandTotal}" type="number" maxFractionDigits="0" /> ₫
+                                                    <fmt:formatNumber value="${order.totalAmount}" type="number" maxFractionDigits="0" /> ₫
                                                 </td>
                                                 <td>
                                                     <c:choose>
