@@ -20,11 +20,11 @@
     List<Category> dataCate = (List<Category>) request.getAttribute("dataCate");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-    String nsx = "", hsd = "";
-    if (mo != null) {
-        nsx = sdf.format(mo.getManufactureDate());
-        hsd = sdf.format(mo.getExpirationDate());
-    }
+//    String nsx = "", hsd = "";
+//    if (mo != null) {
+//        nsx = sdf.format(mo.getManufactureDate());
+//        hsd = sdf.format(mo.getExpirationDate());
+//    }
 %>
 <c:set var="isDrinkOrMilk" value="false"/>
 <c:if test="${mo ne null}">
@@ -66,6 +66,8 @@
 
         <!-- Animate on scroll -->
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
 
     <body>
@@ -96,21 +98,7 @@
             <%
             } else if (mo != null) {
             %>
-            <% if (session.getAttribute("cartMessage") != null) { %>
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 45px; margin-bottom: 20px;">
-                ${sessionScope.cartMessage}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <% session.removeAttribute("cartMessage"); %>
-            <% } %>
-
-            <% if (session.getAttribute("cartError") != null) { %>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 45px; margin-bottom: 20px;">
-                ${sessionScope.cartError}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <% session.removeAttribute("cartError"); %>
-            <% }%>
+            <!-- SweetAlert2 sẽ hiển thị thông báo thay vì Bootstrap alert -->
 
             <div class="container mt-5">
                 <div class="row">
@@ -182,102 +170,44 @@
                             --%>
 
                             <c:choose>
-                                <c:when test="${isDrinkOrMilk}">
-                                    <c:choose>
-                                        <c:when test="${not empty appliedPromotion}">
-                                            <div class="flash-sale-banner mt-3">
-                                                <div class="flash-sale-header">
-                                                    <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
-                                                    <div class="countdown-text">
-                                                        <i class="bi bi-clock"></i> KẾT THÚC TRONG 
-                                                        <span class="countdown-box" id="timer-dd">--</span> :
-                                                        <span class="countdown-box" id="timer-hh">--</span> :
-                                                        <span class="countdown-box" id="timer-mm">--</span> :
-                                                        <span class="countdown-box" id="timer-ss">--</span>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <span class="flash-sale-price">
-                                                        <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                    </span>
-                                                    <span class="original-price">
-                                                        <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
-                                                    </span>
-                                                    <span class="discount-percent">
-                                                        -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
-                                                    </span>
-                                                </div>
+                                <c:when test="${not empty appliedPromotion}">
+                                    <div class="flash-sale-banner mt-3">
+                                        <div class="flash-sale-header">
+                                            <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
+                                            <div class="countdown-text">
+                                                <i class="bi bi-clock"></i> KẾT THÚC TRONG 
+                                                <span class="countdown-box" id="timer-dd">--</span> :
+                                                <span class="countdown-box" id="timer-hh">--</span> :
+                                                <span class="countdown-box" id="timer-mm">--</span> :
+                                                <span class="countdown-box" id="timer-ss">--</span>
                                             </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="flash-sale-banner mt-3">
-                                                <div class="flash-sale-header">
-                                                    <span class="flash-sale-price">
-                                                        <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
+                                        </div>
+                                        <div class="mt-3">
+                                            <c:set var="basePrice" value="${not empty mo.priceUnit ? mo.priceUnit : mo.price}"/>
+                                            <c:set var="unitLabel" value="${not empty mo.itemUnitName ? mo.itemUnitName : mo.boxUnitName}"/>
+                                            <c:set var="discounted" value="${basePrice * (1 - appliedPromotion.discountPercent/100.0)}"/>
+                                            <span class="flash-sale-price">
+                                                <fmt:formatNumber value="${discounted}" type="number" pattern="#,###"/> đ / ${unitLabel}
+                                            </span>
+                                            <span class="original-price">
+                                                <fmt:formatNumber value="${basePrice}" type="number" pattern="#,###"/> đ / ${unitLabel}
+                                            </span>
+                                            <span class="discount-percent">
+                                                -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
+                                            </span>
+                                        </div>
+                                    </div>
                                 </c:when>
                                 <c:otherwise>
-                                    <c:choose>
-                                        <c:when test="${not empty appliedPromotion}">
-                                            <div class="flash-sale-banner mt-3">
-                                                <div class="flash-sale-header">
-                                                    <div class="flash-sale-label">${appliedPromotion.promotionName}</div>
-                                                    <div class="countdown-text">
-                                                        <i class="bi bi-clock"></i> KẾT THÚC TRONG 
-                                                        <span class="countdown-box" id="timer-dd">--</span> :
-                                                        <span class="countdown-box" id="timer-hh">--</span> :
-                                                        <span class="countdown-box" id="timer-mm">--</span> :
-                                                        <span class="countdown-box" id="timer-ss">--</span>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <span class="flash-sale-price">
-                                                        <c:choose>
-                                                            <c:when test="${unitPrice != null}">
-                                                                <fmt:formatNumber value="${unitPrice * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <fmt:formatNumber value="${mo.price * (1 - appliedPromotion.discountPercent / 100)}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </span>
-                                                    <span class="original-price">
-                                                        <c:choose>
-                                                            <c:when test="${unitPrice != null}">
-                                                                <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </span>
-                                                    <span class="discount-percent">
-                                                        -<fmt:formatNumber value="${appliedPromotion.discountPercent}" type="number"/>%
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="flash-sale-banner mt-3">
-                                                <div class="flash-sale-header">
-                                                    <span class="flash-sale-price">
-                                                        <c:choose>
-                                                            <c:when test="${unitPrice != null}">
-                                                                <fmt:formatNumber value="${unitPrice}" type="number" pattern="#,###"/> đ / ${mo.itemUnitName}
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <fmt:formatNumber value="${mo.price}" type="number" pattern="#,###"/> đ / ${mo.boxUnitName}
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
+                                    <div class="flash-sale-banner mt-3">
+                                        <div class="flash-sale-header">
+                                            <span class="flash-sale-price">
+                                                <c:set var="basePrice2" value="${not empty mo.priceUnit ? mo.priceUnit : mo.price}"/>
+                                                <c:set var="unitLabel2" value="${not empty mo.itemUnitName ? mo.itemUnitName : mo.boxUnitName}"/>
+                                                <fmt:formatNumber value="${basePrice2}" type="number" pattern="#,###"/> đ / ${unitLabel2}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </c:otherwise>
                             </c:choose>
                         </div>
@@ -318,20 +248,12 @@
                                     }
                                 %>
                             </p>
-                            <p><strong>Số Lượng Tồn Kho:</strong> 
-                                <%
-                                    double stockQty = mo.getStockQuantity();
-                                    if (stockQty % 1 == 0) {
-                                        out.print((int) stockQty);
-                                    } else {
-                                        out.print(stockQty);
-                                    }
-                                %>
-                            </p>
-                            <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p>
-                            <p><strong>Nhà Sản Xuất:</strong> <%=mo.getManufacturer().getCompanyName()%></p>
+                            <!-- Remove old stock quantity display per requirement -->
+                            <%-- sửa ngay phần này --%>
+                            <%-- <p><strong>Hạn Sử Dụng:</strong>  <%=nsx%> – <%=hsd%></p> --%>
+                            <%-- <p><strong>Nhà Sản Xuất:</strong> <%=mo.getManufacturer().getCompanyName()%></p> --%>
 
-                            <form action="cart" method="post">
+                            <form action="cart" method="post" id="detail-cart-form">
                                 <input type="hidden" name="action" value="add">
                                 <input type="hidden" name="productID" value="<%= mo.getProductID()%>">
 
@@ -356,11 +278,70 @@
                                     String value = isFruit ? "0.1" : "1";
                                 %>
 
-                                <div class="d-flex gap-2 mb-3">
-                                    <strong>Số Lượng: </strong>
-                                    <input type="number" id="product-quantity" name="quantity" class="form-control w-25" value="<%= value%>" min="<%= min%>" max="<%= mo.getAvailableQuantity()%>" step="<%= step%>">
-                                    <div class="form-text text-danger" id="quantity-warning" style="display: none;">Số lượng vượt quá tồn kho!</div>
+                                <input type="hidden" name="packageType" id="selected-package-type" value="">
+                                <input type="hidden" name="packSize" id="selected-pack-size" value="0">
+
+                                <c:set var="discountPercent" value="${appliedPromotion != null ? appliedPromotion.discountPercent : 0}"/>
+
+                                <div class="mb-3">
+                                    <strong>Phân loại:</strong>
+                                    <div class="d-flex gap-2 mt-2" id="unit-selector">
+                                        <c:if test="${!isFruit}">
+                                            <button type="button" class="btn btn-outline-secondary unit-btn" data-type="UNIT" data-available="${inventory['UNIT_Quantity']}" data-base="${basePrice * (1 - appliedPromotion.discountPercent/100.0)}">
+                                                <span class="btn-label">${mo.itemUnitName}</span>
+                                                <span class="btn-price-current text-danger ms-1"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through ms-1" style="display:none;"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary unit-btn" data-type="BOX" data-available="${inventory['BOX_Quantity']}" data-base="${mo.price * (1 - appliedPromotion.discountPercent/100.0)}">
+                                                <span class="btn-label">${mo.boxUnitName}</span>
+                                                <span class="btn-price-current text-danger ms-1"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through ms-1" style="display:none;"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                            </button>
+                                            <c:if test="${not empty inventory['PACK_LIST']}">
+                                                <c:forEach var="p" items="${inventory['PACK_LIST']}">
+                                                    <button type="button" class="btn btn-outline-secondary unit-btn" data-type="PACK" data-packsize="${p.packSize}" data-available="${p.quantity}" data-base="${(mo.pricePack != null 
+                                                                                                                                                       ? mo.pricePack 
+                                                                                                                                                       : (mo.priceUnit != null ? mo.priceUnit * p.packSize : 0)) 
+                                                                                                                                                       * (1 - appliedPromotion.discountPercent/100.0)}">
+                                                        <span class="btn-label">Lốc ${p.packSize} ${mo.itemUnitName}</span>
+                                                        <span class="btn-price-current text-danger ms-1"></span>
+                                                        <span class="btn-price-original text-muted text-decoration-line-through ms-1" style="display:none;"></span>
+                                                        <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                                    </button>
+                                                </c:forEach>
+                                            </c:if>
+                                        </c:if>
+                                        <c:if test="${isFruit}">
+                                            <button type="button" class="btn btn-outline-secondary unit-btn active" data-type="KG" data-available="${inventory['UNIT_Quantity']}" data-base="${mo.priceUnit * (1 - appliedPromotion.discountPercent/100.0)}">
+                                                <span class="btn-label">kg</span>
+                                                <span class="btn-price-current text-danger ms-1"></span>
+                                                <span class="btn-price-original text-muted text-decoration-line-through ms-1" style="display:none;"></span>
+                                                <span class="btn-price-percent badge bg-danger ms-1" style="display:none;"></span>
+                                            </button>
+                                        </c:if>
+                                    </div>
                                 </div>
+
+                                <div class="mb-3">
+                                    <div id="price-display" style="font-size: 0px;">
+                                        <span id="current-price" class="text-danger fw-bold"></span>
+                                        <span id="original-price" class="text-muted text-decoration-line-through ms-2" style="display:none;"></span>
+                                        <span id="discount-badge" class="badge bg-danger ms-2" style="display:none;">-0%</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <strong>Số Lượng</strong>
+                                    <div class="input-group" style="width:150px;">
+                                        <button class="btn btn-outline-secondary" type="button" id="qty-dec">-</button>
+                                        <input type="number" id="product-quantity" name="quantity" class="form-control text-center" value="<%= value%>" min="<%= min%>" step="<%= step%>">
+                                        <button class="btn btn-outline-secondary" type="button" id="qty-inc">+</button>
+                                    </div>
+                                    <span class="text-muted" id="available-text"></span>
+                                </div>
+                                <div class="form-text text-danger" id="quantity-warning" style="display:none;"></div>
 
                                 <div>
                                     <button type="submit" id="add-to-cart-btn" class="btn btn-outline-danger">
@@ -375,58 +356,237 @@
                                         const quantityWarning = document.getElementById('quantity-warning');
                                         const addToCartBtn = document.getElementById('add-to-cart-btn');
                                         const buyNowBtn = document.getElementById('buy-now-btn');
-                                        const maxStock = <%= mo.getAvailableQuantity()%>;
+                                        const availableText = document.getElementById('available-text');
+                                        const form = document.getElementById('detail-cart-form');
+                                        const selType = document.getElementById('selected-package-type');
+                                        const selPack = document.getElementById('selected-pack-size');
+
+                                        const isFruitPage = ${isFruit};
+
+                                        function getAvailableFor(type, packSize) {
+                                            if (isFruitPage)
+                                                return ${inventory['UNIT_Quantity'] != null ? inventory['UNIT_Quantity'] : 0};
+
+                                            // Lấy số lượng từ button đang active
+                                            const active = document.querySelector('.unit-btn.active');
+                                            if (active) {
+                                                const available = parseFloat(active.getAttribute('data-available') || '0');
+                                                return available;
+                                            }
+
+                                            // Fallback: tìm button theo type và packSize
+                                            const targetBtn = document.querySelector(`.unit-btn[data-type="${type}"]\${packSize > 0 ? `[data - packsize = "${packSize}"]` : ''}`);
+                                            if (targetBtn) {
+                                                return parseFloat(targetBtn.getAttribute('data-available') || '0');
+                                            }
+
+                                            return 0;
+                                        }
+
+                                        function updateAvailableLabel() {
+                                            const active = document.querySelector('.unit-btn.active');
+                                            if (active) {
+                                                const avail = parseFloat(active.getAttribute('data-available') || '0');
+                                                availableText.textContent = avail + ' sản phẩm có sẵn';
+                                                return avail;
+                                            }
+                                            availableText.textContent = '0 sản phẩm có sẵn';
+                                            return 0;
+                                        }
+
+                                        function formatVND(n) {
+                                            try {
+                                                return new Intl.NumberFormat('vi-VN').format(n);
+                                            } catch (e) {
+                                                return n;
+                                            }
+                                        }
+
+                                        function updateButtonPrices() {
+                                            const dp = parseFloat(`${discountPercentJS}`);
+                                            document.querySelectorAll('.unit-btn').forEach(btn => {
+                                                const base = parseFloat(btn.getAttribute('data-base') || '0');
+                                                const cur = btn.querySelector('.btn-price-current');
+                                                const orig = btn.querySelector('.btn-price-original');
+                                                const badge = btn.querySelector('.btn-price-percent');
+                                                if (!cur)
+                                                    return;
+                                                if (!isNaN(dp) && dp > 0 && base > 0) {
+                                                    const discounted = base * (1 - dp / 100);
+                                                    cur.textContent = '(' + formatVND(discounted) + ' đ)';
+                                                    if (orig) {
+                                                        orig.textContent = formatVND(base) + ' đ';
+                                                        orig.style.display = '';
+                                                    }
+                                                    if (badge) {
+                                                        badge.textContent = `-${dp}%`;
+                                                        badge.style.display = '';
+                                                    }
+                                                } else if (base > 0) {
+                                                    cur.textContent = '(' + formatVND(base) + ' đ)';
+                                                    if (orig)
+                                                        orig.style.display = 'none';
+                                                    if (badge)
+                                                        badge.style.display = 'none';
+                                                } else {
+                                                    cur.textContent = '';
+                                                    if (orig)
+                                                        orig.style.display = 'none';
+                                                    if (badge)
+                                                        badge.style.display = 'none';
+                                                }
+                                            });
+                                        }
+
+                                        function updatePriceDisplay() {
+                                            const active = document.querySelector('.unit-btn.active');
+                                            const current = document.getElementById('current-price');
+                                            const original = document.getElementById('original-price');
+                                            const badge = document.getElementById('discount-badge');
+                                            if (!active) {
+                                                current.textContent = '';
+                                                original.style.display = 'none';
+                                                badge.style.display = 'none';
+                                                return;
+                                            }
+                                            const basePrice = parseFloat(active.getAttribute('data-base') || '0');
+                                            const dp = parseFloat(`${discountPercentJS}`);
+                                            if (!isNaN(dp) && dp > 0 && basePrice > 0) {
+                                                const discounted = basePrice * (1 - dp / 100);
+                                                current.textContent = formatVND(discounted) + ' đ';
+                                                original.textContent = formatVND(basePrice) + ' đ';
+                                                original.style.display = '';
+                                                badge.textContent = `-${dp}%`;
+                                                badge.style.display = '';
+                                            } else {
+                                                current.textContent = formatVND(basePrice) + ' đ';
+                                                original.style.display = 'none';
+                                                badge.style.display = 'none';
+                                            }
+                                        }
+
+                                        function selectDefaultUnit() {
+                                            if (isFruitPage) {
+                                                selType.value = 'KG';
+                                                return;
+                                            }
+
+                                            // Tìm button đầu tiên có sẵn và active nó
+                                            const firstBtn = document.querySelector('.unit-btn');
+                                            if (firstBtn) {
+                                                firstBtn.classList.add('active');
+                                                selType.value = firstBtn.getAttribute('data-type');
+                                                selPack.value = firstBtn.getAttribute('data-packsize') || '0';
+                                            }
+                                        }
+
+                                        // Unit selector
+                                        document.querySelectorAll('.unit-btn').forEach(btn => {
+                                            btn.addEventListener('click', () => {
+                                                document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+                                                btn.classList.add('active');
+                                                selType.value = btn.getAttribute('data-type');
+                                                selPack.value = btn.getAttribute('data-packsize') || '0';
+                                                updateAvailableLabel();
+                                                updatePriceDisplay();
+                                                updateButtonPrices();
+                                            });
+                                        });
+
+                                        // Initialize defaults and labels
+                                        selectDefaultUnit();
+                                        updateAvailableLabel();
+                                        const discountPercentJS = ${discountPercent != null ? discountPercent : 0};
+                                        updatePriceDisplay();
+                                        updateButtonPrices();
+
+                                        const decBtn = document.getElementById('qty-dec');
+                                        const incBtn = document.getElementById('qty-inc');
+
+                                        decBtn.addEventListener('click', () => {
+                                            const step = parseFloat(quantityInput.step || '1');
+                                            const min = parseFloat(quantityInput.min || step);
+                                            let val = parseFloat(quantityInput.value || min);
+                                            val = Math.max(min, val - step);
+                                            quantityInput.value = step < 1 ? val.toFixed(1) : val.toFixed(0);
+
+                                            // Clear warning when decreasing
+                                            quantityWarning.style.display = 'none';
+                                            addToCartBtn.disabled = false;
+                                            buyNowBtn.disabled = false;
+                                        });
+
+                                        incBtn.addEventListener('click', () => {
+                                            const step = parseFloat(quantityInput.step || '1');
+                                            let val = parseFloat(quantityInput.value || step);
+                                            const maxAvail = updateAvailableLabel();
+
+                                            if (val + step > maxAvail) {
+                                                quantityWarning.style.display = 'block';
+                                                quantityWarning.textContent = 'Chỉ còn ' + maxAvail + ' sản phẩm trong kho';
+                                                return;
+                                            }
+
+                                            val = val + step;
+                                            quantityInput.value = step < 1 ? val.toFixed(1) : val.toFixed(0);
+
+                                            // Clear warning when increasing within limit
+                                            quantityWarning.style.display = 'none';
+                                            addToCartBtn.disabled = false;
+                                            buyNowBtn.disabled = false;
+                                        });
 
                                         // Validate quantity when changed
                                         quantityInput.addEventListener('input', function () {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(this.value) : parseInt(this.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const quantity = isFruitPage ? parseFloat(this.value) : parseInt(this.value);
+                                            const minValue = isFruitPage ? 0.1 : 1;
 
                                             if (isNaN(quantity) || quantity < minValue) {
                                                 this.value = minValue;
                                                 quantityWarning.style.display = 'none';
                                                 addToCartBtn.disabled = false;
                                                 buyNowBtn.disabled = false;
-                                            } else if (quantity > maxStock) {
-                                                quantityWarning.style.display = 'block';
-                                                quantityWarning.textContent = 'Số lượng tối đa có thể mua: ' + maxStock;
-                                                addToCartBtn.disabled = true;
-                                                buyNowBtn.disabled = true;
                                             } else {
-                                                quantityWarning.style.display = 'none';
-                                                addToCartBtn.disabled = false;
-                                                buyNowBtn.disabled = false;
+                                                const maxAvail = updateAvailableLabel();
+                                                if (quantity > maxAvail) {
+                                                    quantityWarning.style.display = 'block';
+                                                    quantityWarning.textContent = 'Số lượng tối đa có thể mua: ' + maxAvail;
+                                                    addToCartBtn.disabled = true;
+                                                    buyNowBtn.disabled = true;
+                                                } else {
+                                                    quantityWarning.style.display = 'none';
+                                                    addToCartBtn.disabled = false;
+                                                    buyNowBtn.disabled = false;
+                                                }
                                             }
                                         });
 
                                         // Prevent form submission if quantity is invalid
-                                        const form = quantityInput.closest('form');
                                         form.addEventListener('submit', function (event) {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const quantity = isFruitPage ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
+                                            const minValue = isFruitPage ? 0.1 : 1;
+                                            const maxAvail = updateAvailableLabel();
 
-                                            if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
+                                            if (isNaN(quantity) || quantity < minValue || quantity > maxAvail) {
                                                 event.preventDefault();
                                                 quantityWarning.style.display = 'block';
-                                                quantityWarning.textContent = quantity > maxStock
-                                                        ? 'Số lượng tối đa có thể mua: ' + maxStock
+                                                quantityWarning.textContent = quantity > maxAvail
+                                                        ? 'Số lượng tối đa có thể mua: ' + maxAvail
                                                         : 'Vui lòng nhập số lượng hợp lệ (tối thiểu: ' + minValue + ')';
                                             }
                                         });
 
                                         // Add Buy Now functionality
                                         buyNowBtn.addEventListener('click', function () {
-                                            const isFruit = <%= isFruit%>;
-                                            const quantity = isFruit ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
-                                            const minValue = isFruit ? 0.1 : 1;
+                                            const quantity = isFruitPage ? parseFloat(quantityInput.value) : parseInt(quantityInput.value);
+                                            const minValue = isFruitPage ? 0.1 : 1;
+                                            const maxAvail = updateAvailableLabel();
 
                                             // Validate quantity
-                                            if (isNaN(quantity) || quantity < minValue || quantity > maxStock) {
+                                            if (isNaN(quantity) || quantity < minValue || quantity > maxAvail) {
                                                 quantityWarning.style.display = 'block';
-                                                quantityWarning.textContent = quantity > maxStock
-                                                        ? 'Số lượng tối đa có thể mua: ' + maxStock
+                                                quantityWarning.textContent = quantity > maxAvail
+                                                        ? 'Số lượng tối đa có thể mua: ' + maxAvail
                                                         : 'Vui lòng nhập số lượng hợp lệ (tối thiểu: ' + minValue + ')';
                                                 return;
                                             }
@@ -447,7 +607,7 @@
                                             const productIdInput = document.createElement('input');
                                             productIdInput.type = 'hidden';
                                             productIdInput.name = 'productID';
-                                            productIdInput.value = '<c:out value="${mo.productID}"/>';
+                                            productIdInput.value = '<%= mo.getProductID()%>';
                                             buyNowForm.appendChild(productIdInput);
 
                                             // Add quantity parameter
@@ -457,15 +617,30 @@
                                             quantityInputHidden.value = quantity;
                                             buyNowForm.appendChild(quantityInputHidden);
 
+                                            // Add selected package info
+                                            const packageTypeHidden = document.createElement('input');
+                                            packageTypeHidden.type = 'hidden';
+                                            packageTypeHidden.name = 'packageType';
+                                            packageTypeHidden.value = selType.value || 'UNIT';
+                                            buyNowForm.appendChild(packageTypeHidden);
+
+                                            const packSizeHidden = document.createElement('input');
+                                            packSizeHidden.type = 'hidden';
+                                            packSizeHidden.name = 'packSize';
+                                            packSizeHidden.value = selPack.value || '0';
+                                            buyNowForm.appendChild(packSizeHidden);
+
                                             // Append form to body and submit
                                             document.body.appendChild(buyNowForm);
                                             buyNowForm.submit();
                                         });
                                     });
                                 </script>
+                                
+
                             </form>
 
-                          
+
                         </div>
                     </div>
 
@@ -659,30 +834,23 @@
                                             <a href="<%= request.getContextPath()%>/ProductDetail?id=<%= p.getProductID()%>">
                                                 <img src="<%= request.getContextPath()%>/ImageServlet?name=<%= p.getImageURL()%>"
                                                      class="card-img-top img-fluid product-image1" style="height: 350px; object-fit: cover;" alt="<%= p.getProductName()%>">
-                                                    <div class="card-body">
-                                                        <p class="card-title mb-1"><%= p.getProductName()%></p>
-                                                        <p class="text-danger fw-bold">
-                                                            <%
-                                                                java.util.Map<Integer, String> relatedPriceDisplayMap = (java.util.Map<Integer, String>) request.getAttribute("relatedPriceDisplayMap");
-                                                                if (relatedPriceDisplayMap != null) {
-                                                                    String display = relatedPriceDisplayMap.get(p.getProductID());
-                                                                    if (display != null && !display.trim().isEmpty()) {
-                                                                        out.print(display);
-                                                                    } else {
-                                                                        // Fallback: giữ cách cũ nếu thiếu map
-                                                                        java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
-                                                                        java.util.Map<Integer, Double> relatedUnitPriceMap = (java.util.Map<Integer, Double>) request.getAttribute("relatedUnitPriceMap");
-                                                                        Double rup = relatedUnitPriceMap != null ? relatedUnitPriceMap.get(p.getProductID()) : null;
-                                                                        if (rup != null) {
-                                                                            out.print(df.format(rup) + "đ / " + p.getItemUnitName());
-                                                                        } else {
-                                                                            out.print(df.format(p.getPrice()) + "đ / " + (p.getBoxUnitName() != null ? p.getBoxUnitName() : "thùng"));
-                                                                        }
-                                                                    }
-                                                                }
-                                                            %>
-                                                        </p>
-                                                    </div>
+                                                <div class="card-body">
+                                                    <p class="card-title mb-1"><%= p.getProductName()%></p>
+                                                    <p class="text-danger fw-bold">
+                                                        <%
+                                                            // Sử dụng PriceUnit và ItemUnitName trực tiếp từ Product
+                                                            Double priceUnit1 = p.getPriceUnit();
+                                                            String itemUnitName = p.getItemUnitName();
+
+                                                            if (priceUnit1 != null && itemUnitName != null) {
+                                                                java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+                                                                out.print(df.format(priceUnit1) + " đ / " + itemUnitName);
+                                                            } else {
+                                                                out.print("Chưa có giá");
+                                                            }
+                                                        %>
+                                                    </p>
+                                                </div>
                                             </a>
                                         </div>
                                     </div>
@@ -719,51 +887,51 @@
         <script src="${pageContext.request.contextPath}/assets/js/cart.js?version=<%= System.currentTimeMillis()%>"></script>
 
         <script>
-                                                                        function setReply(parentId, orderId, productId) {
-                                                                            document.getElementById('parentReviewId').value = parentId;
-                                                                            document.getElementsByName('orderId')[0].value = orderId;
-                                                                            document.getElementsByName('productId')[0].value = productId;
-                                                                            document.getElementById('action').value = 'add';
-                                                                            document.getElementById('reviewId').value = '';
-                                                                            document.getElementById('comment').focus();
-                                                                            document.getElementById('comment').value = '';
+                                                                                function setReply(parentId, orderId, productId) {
+                                                                                    document.getElementById('parentReviewId').value = parentId;
+                                                                                    document.getElementsByName('orderId')[0].value = orderId;
+                                                                                    document.getElementsByName('productId')[0].value = productId;
+                                                                                    document.getElementById('action').value = 'add';
+                                                                                    document.getElementById('reviewId').value = '';
+                                                                                    document.getElementById('comment').focus();
+                                                                                    document.getElementById('comment').value = '';
 
-                                                                            // Reset rating
-                                                                            var stars = document.getElementsByName('rating');
-                                                                            for (var i = 0; i < stars.length; i++) {
-                                                                                stars[i].checked = false;
-                                                                            }
-
-                                                                            // Ẩn/hiện rating
-                                                                            var ratingSection = document.getElementById('ratingSection');
-                                                                            if (ratingSection) {
-                                                                                if (parentId) {
-                                                                                    ratingSection.style.display = 'none';
-                                                                                    // Bỏ required cho rating khi reply
+                                                                                    // Reset rating
+                                                                                    var stars = document.getElementsByName('rating');
                                                                                     for (var i = 0; i < stars.length; i++) {
-                                                                                        stars[i].required = false;
+                                                                                        stars[i].checked = false;
                                                                                     }
-                                                                                } else {
-                                                                                    ratingSection.style.display = 'block';
-                                                                                    // Bắt buộc required khi review gốc
-                                                                                    for (var i = 0; i < stars.length; i++) {
-                                                                                        stars[i].required = true;
+
+                                                                                    // Ẩn/hiện rating
+                                                                                    var ratingSection = document.getElementById('ratingSection');
+                                                                                    if (ratingSection) {
+                                                                                        if (parentId) {
+                                                                                            ratingSection.style.display = 'none';
+                                                                                            // Bỏ required cho rating khi reply
+                                                                                            for (var i = 0; i < stars.length; i++) {
+                                                                                                stars[i].required = false;
+                                                                                            }
+                                                                                        } else {
+                                                                                            ratingSection.style.display = 'block';
+                                                                                            // Bắt buộc required khi review gốc
+                                                                                            for (var i = 0; i < stars.length; i++) {
+                                                                                                stars[i].required = true;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+
+                                                                                    // Reset file input
+                                                                                    document.getElementById('image').value = '';
+
+                                                                                    // Đổi text button
+                                                                                    document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
+                                                                                }
+
+                                                                                function deleteReview(reviewId) {
+                                                                                    if (confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
+                                                                                        window.location.href = 'Review?action=delete&reviewId=' + reviewId;
                                                                                     }
                                                                                 }
-                                                                            }
-
-                                                                            // Reset file input
-                                                                            document.getElementById('image').value = '';
-
-                                                                            // Đổi text button
-                                                                            document.querySelector('#reviewForm button[type="submit"]').textContent = 'Gửi';
-                                                                        }
-
-                                                                        function deleteReview(reviewId) {
-                                                                            if (confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
-                                                                                window.location.href = 'Review?action=delete&reviewId=' + reviewId;
-                                                                            }
-                                                                        }
         </script>
 
         <script>
@@ -806,13 +974,56 @@
                 padding: 10px 8px;
                 margin-top: 6px;
             }
-            .reply-item { position: relative; margin: 8px 0; }
-            .reply-item:before { content: ""; position: absolute; left: -16px; top: 0; bottom: 0; border-left: 2px dashed #e0cba4; }
-            .bubble { background: #fffdf7; border: 1px solid #e8d7bc; border-radius: 8px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(139,108,66,0.06); width: 100%; box-sizing: border-box; }
-            .bubble:before { content: ""; position: absolute; left: -8px; top: 12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-right:8px solid #e8d7bc; }
-            .bubble:after { content: ""; position: absolute; left: -7px; top: 12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-right:8px solid #fffdf7; }
-            .bubble-staff { background:#f7fbff; border-color:#c8def2; }
-            .bubble-staff:after { border-right-color:#f7fbff; }
+            .reply-item {
+                position: relative;
+                margin: 8px 0;
+            }
+            .reply-item:before {
+                content: "";
+                position: absolute;
+                left: -16px;
+                top: 0;
+                bottom: 0;
+                border-left: 2px dashed #e0cba4;
+            }
+            .bubble {
+                background: #fffdf7;
+                border: 1px solid #e8d7bc;
+                border-radius: 8px;
+                padding: 10px 12px;
+                box-shadow: 0 1px 3px rgba(139,108,66,0.06);
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .bubble:before {
+                content: "";
+                position: absolute;
+                left: -8px;
+                top: 12px;
+                width:0;
+                height:0;
+                border-top:8px solid transparent;
+                border-bottom:8px solid transparent;
+                border-right:8px solid #e8d7bc;
+            }
+            .bubble:after {
+                content: "";
+                position: absolute;
+                left: -7px;
+                top: 12px;
+                width:0;
+                height:0;
+                border-top:8px solid transparent;
+                border-bottom:8px solid transparent;
+                border-right:8px solid #fffdf7;
+            }
+            .bubble-staff {
+                background:#f7fbff;
+                border-color:#c8def2;
+            }
+            .bubble-staff:after {
+                border-right-color:#f7fbff;
+            }
             .badge-staff {
                 background: #0d6efd;
                 color: #fff;
@@ -824,7 +1035,10 @@
                 font-size: .75rem;
             }
             .reply-image {
-                max-width: 140px; max-height: 140px; border-radius: 6px; border: 1px solid #e1e1e1;
+                max-width: 140px;
+                max-height: 140px;
+                border-radius: 6px;
+                border: 1px solid #e1e1e1;
             }
             .toggle-reply-box button {
                 transition: all 0.3s ease;
@@ -991,6 +1205,38 @@
                     ss.innerHTML = seconds;
                 }, 1000);
             })();
+        </script>
+
+        <!-- Script để xử lý thông báo từ session -->
+        <script>
+            // Kiểm tra và hiển thị thông báo từ session
+            document.addEventListener('DOMContentLoaded', function() {
+                // Kiểm tra cartError
+                <% if (session.getAttribute("cartError") != null) { %>
+                    const errorMessage = '<%= session.getAttribute("cartError") %>';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: errorMessage,
+                        confirmButtonText: 'Đóng',
+                        confirmButtonColor: '#d33'
+                    });
+                    <% session.removeAttribute("cartError"); %>
+                <% } %>
+                
+                // Kiểm tra cartMessage
+                <% if (session.getAttribute("cartMessage") != null) { %>
+                    const successMessage = '<%= session.getAttribute("cartMessage") %>';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: successMessage,
+                        confirmButtonText: 'Đóng',
+                        confirmButtonColor: '#28a745'
+                    });
+                    <% session.removeAttribute("cartMessage"); %>
+                <% } %>
+            });
         </script>
 
     </body>

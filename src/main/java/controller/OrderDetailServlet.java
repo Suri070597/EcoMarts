@@ -14,6 +14,7 @@ import dao.CategoryDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
 import dao.ProductDAO;
+import dao.PromotionDAO;
 import dao.VoucherUsageDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,6 +27,7 @@ import model.Category;
 import model.Order;
 import model.OrderDetail;
 import model.Product;
+import model.Promotion;
 import model.VoucherUsage;
 
 /**
@@ -41,6 +43,7 @@ public class OrderDetailServlet extends HttpServlet {
     private final ProductDAO productDAO = new ProductDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
     private final VoucherUsageDAO voucherUsageDAO = new VoucherUsageDAO();
+    private final PromotionDAO promotionDAO = new PromotionDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -83,8 +86,11 @@ public class OrderDetailServlet extends HttpServlet {
             // Get order details and product information
             List<OrderDetail> orderDetails = orderDetailDAO.getOrderDetailsByOrderId(orderId);
 
-            // Calculate total
-            double total = 0;
+            // Calculate total - Tổng tiền sản phẩm = tổng SubTotal từ bảng OrderDetail (giá gốc)
+            double total = 0; // Tổng tiền sản phẩm (SubTotal từ OrderDetail - giá gốc)
+            double totalOriginal = 0; // Tổng giá gốc
+            double totalPromotion = 0; // Tổng giá sau promotion
+            
             for (OrderDetail od : orderDetails) {
                 // Load product information for display purposes only (image, description, etc)
                 Product product = productDAO.getProductById(od.getProductID());
@@ -100,19 +106,49 @@ public class OrderDetailServlet extends HttpServlet {
                     od.getPackageType() != null ? od.getPackageType() : "UNIT"
                 );
 
-                total += od.getSubTotal();
+                // Tính giá gốc và giá sau promotion
+                double originalPrice = od.getUnitPrice();
+                double originalSubTotal = od.getSubTotal();
+                
+                // Kiểm tra promotion cho sản phẩm này
+                Promotion productPromotion = promotionDAO.getValidPromotionForProduct(od.getProductID());
+                double discountedPrice = originalPrice;
+                double discountedSubTotal = originalSubTotal;
+                
+                if (productPromotion != null) {
+                    // Tính giá sau giảm giá
+                    double discountPercent = productPromotion.getDiscountPercent();
+                    discountedPrice = originalPrice * (1 - discountPercent / 100);
+                    discountedSubTotal = discountedPrice * od.getQuantity();
+                    
+                    // Lưu promotion vào OrderDetail để hiển thị
+                    od.setProductPromotion(productPromotion);
+                }
+                
+                totalOriginal += originalSubTotal;
+                totalPromotion += discountedSubTotal;
+                total += originalSubTotal; // Sử dụng SubTotal gốc từ OrderDetail
             }
-// VAT = 8% của tổng phụ
+            
+            // VAT = 8% của tổng tiền sản phẩm (giá gốc)
             double vat = total * 0.08;
 
-// Lấy thông tin voucher đã sử dụng (nếu có)
+            // Lấy thông tin voucher đã sử dụng (nếu có)
             VoucherUsage voucherUsage = voucherUsageDAO.getByOrderId(orderId);
 
-// Nếu có voucher thì lấy số tiền giảm
+            // Nếu có voucher thì lấy số tiền giảm
             double discount = (voucherUsage != null) ? voucherUsage.getDiscountAmount() : 0.0;
 
-// Tổng thanh toán cuối cùng = tổng phụ - giảm giá + VAT
+            // Tổng thanh toán cuối cùng = tổng tiền sản phẩm (giá gốc) - giảm giá + VAT
             double finalTotal = total - discount + vat;
+            
+            // Đảm bảo tổng thanh toán không âm
+            if (finalTotal < 0) {
+                finalTotal = 0;
+            }
+            
+            // Tính tổng tiền ưu đãi (tiết kiệm được từ promotion - không sử dụng trong tính toán chính)
+            double totalSavings = totalOriginal - totalPromotion;
 
             // Get categories for the navigation menu
             List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
@@ -126,6 +162,7 @@ public class OrderDetailServlet extends HttpServlet {
             request.setAttribute("discount", discount);
             request.setAttribute("vat", vat);
             request.setAttribute("finalTotal", finalTotal);
+            request.setAttribute("totalSavings", totalSavings);
 
             // Check for messages in session
             String successMessage = (String) session.getAttribute("successMessage");

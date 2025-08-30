@@ -127,7 +127,9 @@ public class OrderDAO extends DBContext {
                 } else if ("BOX".equalsIgnoreCase(packageType)) {
                     unitLabel = boxUnitName != null ? boxUnitName : "thùng";
                 } else if ("PACK".equalsIgnoreCase(packageType)) {
-                    unitLabel = "Lốc" + (packSize != null ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+                    unitLabel = "Lốc" + (packSize != null
+                            ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị"))
+                            : "");
                 } else {
                     unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
                 }
@@ -684,7 +686,9 @@ public class OrderDAO extends DBContext {
                 } else if ("BOX".equalsIgnoreCase(packageType)) {
                     unitLabel = boxUnitName != null ? boxUnitName : "thùng";
                 } else if ("PACK".equalsIgnoreCase(packageType)) {
-                    unitLabel = "Lốc" + (packSize != null ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+                    unitLabel = "Lốc" + (packSize != null
+                            ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị"))
+                            : "");
                 } else {
                     unitLabel = itemUnitName != null ? itemUnitName : "đơn vị"; // UNIT hoặc null -> dùng ItemUnitName
                 }
@@ -870,7 +874,8 @@ public class OrderDAO extends DBContext {
                     double quantity = rs.getDouble("Quantity");
                     String packageType = rs.getString("PackageType");
                     Integer packSize = (Integer) rs.getObject("PackSize");
-                    invDao.adjustInventoryQuantity(productId, packageType != null ? packageType : "UNIT", packSize, quantity);
+                    invDao.adjustInventoryQuantity(productId, packageType != null ? packageType : "UNIT", packSize,
+                            quantity);
                 }
             }
 
@@ -993,7 +998,10 @@ public class OrderDAO extends DBContext {
             // Set autocommit to false for transaction
             conn.setAutoCommit(false);
 
-            // Insert order
+            // Sử dụng các giá trị đã được set trong order object từ BuyNowServlet
+            // Không tính toán lại để tránh ghi đè các giá trị đã được set
+
+            // Insert order (không cần các trường mới vì database chưa có)
             String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
                     "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -1024,18 +1032,27 @@ public class OrderDAO extends DBContext {
             // If order creation succeeded, insert order details
             if (orderId > 0) {
                 // Insert order details
-                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize) " +
+                String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize) "
+                        +
                         "VALUES (?, ?, ?, ?, ?, ?)";
 
                 try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
                     for (CartItem item : items) {
                         if (item.getProduct() != null) {
+                            // Lấy giá chính xác dựa trên PackageType sau khi áp dụng promotion
+                            double unitPrice = getFinalPriceForPackageType(item);
+
                             ps.setInt(1, orderId);
                             ps.setInt(2, item.getProductID());
                             ps.setDouble(3, item.getQuantity());
-                            ps.setDouble(4, item.getProduct().getPrice());
+                            ps.setDouble(4, unitPrice);
                             ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
-                            if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
+                            Integer packSize = getCorrectPackSize(item);
+                            if (packSize != null) {
+                                ps.setInt(6, packSize);
+                            } else {
+                                ps.setNull(6, java.sql.Types.INTEGER);
+                            }
                             ps.addBatch();
                         }
                     }
@@ -1098,7 +1115,10 @@ public class OrderDAO extends DBContext {
             // Set autocommit to false for transaction
             conn.setAutoCommit(false);
 
-            // Insert order
+            // Sử dụng giá trị totalAmount đã được set từ BuyNowServlet
+            // Không tính toán lại để tránh ghi đè các giá trị đã được set
+
+            // Insert order (không cần các trường mới vì database chưa có)
             String insertOrderSql = "INSERT INTO [Order] (AccountID, OrderDate, TotalAmount, ShippingAddress, " +
                     "ShippingPhone, PaymentMethod, PaymentStatus, OrderStatus, Notes) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -1133,16 +1153,25 @@ public class OrderDAO extends DBContext {
                 Product product = productDAO.getProductById(item.getProductID());
 
                 if (product != null) {
-                    String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize) " +
+                    String insertDetailSql = "INSERT INTO OrderDetail (OrderID, ProductID, Quantity, UnitPrice, PackageType, PackSize) "
+                            +
                             "VALUES (?, ?, ?, ?, ?, ?)";
 
                     try (PreparedStatement ps = conn.prepareStatement(insertDetailSql)) {
+                        // Calculate unitPrice for this specific item
+                        double unitPrice = getFinalPriceForPackageType(item);
+                        
                         ps.setInt(1, orderId);
                         ps.setInt(2, item.getProductID());
                         ps.setDouble(3, item.getQuantity());
-                        ps.setDouble(4, item.getProduct() != null ? item.getProduct().getPrice() : product.getPrice());
+                        ps.setDouble(4, unitPrice);
                         ps.setString(5, item.getPackageType() != null ? item.getPackageType() : "UNIT");
-                        if (item.getPackSize() != null) { ps.setInt(6, item.getPackSize()); } else { ps.setNull(6, java.sql.Types.INTEGER); }
+                        Integer packSize = getCorrectPackSize(item);
+                        if (packSize != null) {
+                            ps.setInt(6, packSize);
+                        } else {
+                            ps.setNull(6, java.sql.Types.INTEGER);
+                        }
 
                         ps.executeUpdate();
                     }
@@ -1247,6 +1276,121 @@ public class OrderDAO extends DBContext {
             e.printStackTrace();
         }
         return discount;
+    }
+
+    /**
+     * Helper method to get the correct price based on package type
+     */
+    private double getCorrectPriceForPackageType(CartItem item) {
+        if (item.getProduct() == null) {
+            return 0.0;
+        }
+
+        String packageType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
+        Integer packSize = item.getPackSize();
+
+        // Lấy giá từ database dựa trên PackageType
+        String sql = "SELECT PriceBox, PriceUnit, PricePack FROM Product WHERE ProductID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, item.getProductID());
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Double priceBox = rs.getObject("PriceBox", Double.class);
+                Double priceUnit = rs.getObject("PriceUnit", Double.class);
+                Double pricePack = rs.getObject("PricePack", Double.class);
+
+                if ("KG".equalsIgnoreCase(packageType) || "UNIT".equalsIgnoreCase(packageType)) {
+                    return priceUnit != null ? priceUnit : 0.0;
+                } else if ("BOX".equalsIgnoreCase(packageType)) {
+                    return priceBox != null ? priceBox : 0.0;
+                } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    if (pricePack != null) {
+                        return pricePack;
+                    } else if (priceUnit != null && packSize != null && packSize > 0) {
+                        return priceUnit * packSize;
+                    } else {
+                        return 0.0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Fallback to product price if something goes wrong
+        return item.getProduct().getPrice();
+    }
+
+    /**
+     * Helper method to get the final price after applying promotion and voucher
+     */
+    private double getFinalPriceAfterPromotionAndVoucher(CartItem item, double basePrice) {
+        if (item.getProduct() == null) {
+            return basePrice;
+        }
+
+        double finalPrice = basePrice;
+
+        // Check for active promotion
+        try {
+            String promotionSql = """
+                SELECT TOP 1 p.DiscountPercent
+                FROM Promotion p
+                JOIN Product_Promotion pp ON p.PromotionID = pp.PromotionID
+                WHERE pp.ProductID = ?
+                  AND p.IsActive = 1
+                  AND p.StartDate <= GETDATE()
+                  AND p.EndDate >= GETDATE()
+                ORDER BY p.EndDate DESC
+                """;
+            
+            try (PreparedStatement ps = conn.prepareStatement(promotionSql)) {
+                ps.setInt(1, item.getProductID());
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    double discountPercent = rs.getDouble("DiscountPercent");
+                    finalPrice = basePrice * (1 - discountPercent / 100);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return finalPrice;
+    }
+
+    /**
+     * Helper method to get the final price for a specific package type after promotion
+     */
+    public double getFinalPriceForPackageType(CartItem item) {
+        double basePrice = getCorrectPriceForPackageType(item);
+        return getFinalPriceAfterPromotionAndVoucher(item, basePrice);
+    }
+
+    /**
+     * Helper method to get correct PackSize value based on PackageType
+     */
+    private Integer getCorrectPackSize(CartItem item) {
+        String packageType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
+        Integer packSize = item.getPackSize();
+
+        // UNIT và KG không cần PackSize, nên trả về NULL
+        if ("UNIT".equalsIgnoreCase(packageType) || "KG".equalsIgnoreCase(packageType)) {
+            return null;
+        }
+
+        // BOX cũng không cần PackSize
+        if ("BOX".equalsIgnoreCase(packageType)) {
+            return null;
+        }
+
+        // Chỉ PACK mới cần PackSize và phải > 0
+        if ("PACK".equalsIgnoreCase(packageType)) {
+            return (packSize != null && packSize > 0) ? packSize : null;
+        }
+
+        return null;
     }
 
 }

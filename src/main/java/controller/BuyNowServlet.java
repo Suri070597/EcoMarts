@@ -35,7 +35,7 @@ import helper.PrepareCheckoutPage;
 /**
  * Servlet for handling "Buy Now" functionality
  */
-@WebServlet(name = "BuyNowServlet", urlPatterns = {"/buy-now", "/buy-now/vnpay"})
+@WebServlet(name = "BuyNowServlet", urlPatterns = { "/buy-now", "/buy-now/vnpay" })
 public class BuyNowServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -155,7 +155,9 @@ public class BuyNowServlet extends HttpServlet {
         String unitLabel;
         if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
             String itemUnitName = product.getItemUnitName();
-            unitLabel = "Lốc" + (buyNowItem.getPackSize() != null ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+            unitLabel = "Lốc" + (buyNowItem.getPackSize() != null
+                    ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị"))
+                    : "");
         } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
             String boxUnitName = product.getBoxUnitName();
             unitLabel = boxUnitName != null ? boxUnitName : "thùng";
@@ -174,7 +176,7 @@ public class BuyNowServlet extends HttpServlet {
 
         // Calculate total price including promotions
         PrepareCheckoutPage pre = new PrepareCheckoutPage();
-        pre.prepareCheckoutPage(request, account, buyNowItem, product);        // Get available vouchers for the user
+        pre.prepareCheckoutPage(request, account, buyNowItem, product); // Get available vouchers for the user
         VoucherDAO voucherDAO = new VoucherDAO();
         List<Voucher> availableVouchers = voucherDAO.getVouchersByAccountId(account.getAccountID());
 
@@ -198,8 +200,8 @@ public class BuyNowServlet extends HttpServlet {
 
                 if (voucherCategoryId == null
                         || (productCategory != null && (voucherCategoryId.equals(productCategory.getCategoryID())
-                        || (productCategory.getParentID() != null
-                        && voucherCategoryId.equals(productCategory.getParentID()))))) {
+                                || (productCategory.getParentID() != null
+                                        && voucherCategoryId.equals(productCategory.getParentID()))))) {
                     validVouchers.add(voucher);
                 }
             }
@@ -415,7 +417,8 @@ public class BuyNowServlet extends HttpServlet {
 
             // Validate phone number
             if (!validatePhoneNumber(shippingPhone)) {
-                request.setAttribute("error", "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam hợp lệ.");
+                request.setAttribute("error",
+                        "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam hợp lệ.");
                 request.setAttribute("recipientName", recipientName);
                 request.setAttribute("shippingAddress", shippingAddress);
                 request.setAttribute("shippingPhone", shippingPhone);
@@ -443,7 +446,9 @@ public class BuyNowServlet extends HttpServlet {
                 String unitLabel;
                 if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
                     String itemUnitName = product.getItemUnitName();
-                    unitLabel = "Lốc" + (buyNowItem.getPackSize() != null ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
+                    unitLabel = "Lốc" + (buyNowItem.getPackSize() != null
+                            ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị"))
+                            : "");
                 } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
                     String boxUnitName = product.getBoxUnitName();
                     unitLabel = boxUnitName != null ? boxUnitName : "thùng";
@@ -558,11 +563,22 @@ public class BuyNowServlet extends HttpServlet {
                 }
             }
 
+            // Calculate VAT (8% of total after promotion, BEFORE voucher)
+            double vat = (totalAmount + discountAmount) * 0.08;
+
+            // Final total = total after promotion - voucher + VAT
+            double finalTotal = totalAmount + vat;
+
+            // Ensure final total is not negative (same logic as ReorderServlet)
+            if (finalTotal < 0) {
+                finalTotal = 0;
+            }
+
             // Create new order
             Order newOrder = new Order();
             newOrder.setAccountID(account.getAccountID());
             newOrder.setOrderDate(new Timestamp(System.currentTimeMillis()));
-            newOrder.setTotalAmount(totalAmount);
+            newOrder.setTotalAmount(finalTotal); // Lưu tổng tiền trước VAT (VAT sẽ được tính trong DAO)
             newOrder.setShippingAddress(shippingAddress);
             newOrder.setShippingPhone(shippingPhone);
             newOrder.setPaymentMethod(paymentMethod);
@@ -581,21 +597,24 @@ public class BuyNowServlet extends HttpServlet {
 
                 // Apply voucher usage if applicable
                 if (appliedVoucher != null && discountAmount > 0) {
-                    orderDAO.recordVoucherUsage(appliedVoucher.getVoucherID(), account.getAccountID(), orderId, discountAmount);
+                    orderDAO.recordVoucherUsage(appliedVoucher.getVoucherID(), account.getAccountID(), orderId,
+                            discountAmount);
                 }
 
                 // Update product stock
-                productDAO.updateProductStock(product.getProductID(), product.getStockQuantity() - buyNowItem.getQuantity());
+                productDAO.updateProductStock(product.getProductID(),
+                        product.getStockQuantity() - buyNowItem.getQuantity());
 
-                // Order history will be created after successful redirect to avoid foreign key issues
+                // Order history will be created after successful redirect to avoid foreign key
+                // issues
                 // Handle payment redirection if needed
                 if ("VNPay".equals(paymentMethod)) {
                     // Store order ID in session for payment processing
                     session.setAttribute("pendingOrderId", orderId);
-                    session.setAttribute("pendingAmount", totalAmount);
+                    session.setAttribute("pendingAmount", finalTotal);
 
                     // Tạo URL thanh toán VNPay với orderId
-                    String paymentUrl = VNPayUtil.getPaymentUrl(request, response, totalAmount, orderId);
+                    String paymentUrl = VNPayUtil.getPaymentUrl(request, response, finalTotal, orderId);
 
                     // Chuyển hướng đến trang thanh toán VNPay
                     response.sendRedirect(paymentUrl);
@@ -613,7 +632,8 @@ public class BuyNowServlet extends HttpServlet {
                     session.removeAttribute("checkoutFromCart");
 
                     // Redirect to order detail page with flag to create history
-                    response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + orderId + "&newOrder=true");
+                    response.sendRedirect(
+                            request.getContextPath() + "/orderDetail?orderID=" + orderId + "&newOrder=true");
                 }
             } else {
                 // Failed to create order
@@ -649,8 +669,8 @@ public class BuyNowServlet extends HttpServlet {
             return false;
         }
 
-        // Pattern for Vietnamese mobile numbers (10 digits, starting with 03, 05, 07, 08, 09)
-        String pattern = "^(0|\\+84)[3|5|7|8|9][0-9]{8}$";
+        // Pattern for Vietnamese mobile numbers (10 digits)
+        String pattern = "^(0|\\+84)[0-9]{9}$";
         return phone.matches(pattern);
     }
 
@@ -726,7 +746,8 @@ public class BuyNowServlet extends HttpServlet {
                 session.removeAttribute("checkoutFromCart");
 
                 // Chuyển hướng đến trang chi tiết đơn hàng
-                response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + pendingOrderId + "&newOrder=true");
+                response.sendRedirect(
+                        request.getContextPath() + "/orderDetail?orderID=" + pendingOrderId + "&newOrder=true");
             } else {
                 // Lỗi cập nhật trạng thái
                 session.setAttribute("errorMessage", "Đã xảy ra lỗi khi cập nhật trạng thái thanh toán");
@@ -758,7 +779,8 @@ public class BuyNowServlet extends HttpServlet {
                 return;
             }
 
-            // Quantity changes from the client are ignored; use quantities from session/cart
+            // Quantity changes from the client are ignored; use quantities from
+            // session/cart
             // Get order details from form
             String recipientName = request.getParameter("recipientName");
             String shippingAddress = request.getParameter("shippingAddress");
@@ -788,7 +810,8 @@ public class BuyNowServlet extends HttpServlet {
 
             // Validate phone number
             if (!validatePhoneNumber(shippingPhone)) {
-                request.setAttribute("error", "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam hợp lệ.");
+                request.setAttribute("error",
+                        "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam hợp lệ.");
                 request.setAttribute("recipientName", recipientName);
                 request.setAttribute("shippingAddress", shippingAddress);
                 request.setAttribute("shippingPhone", shippingPhone);
@@ -819,7 +842,9 @@ public class BuyNowServlet extends HttpServlet {
                     stockQty = productDAO.getQuantityByPackageType(item.getProductID(), effType);
                 }
                 if (stockQty < item.getQuantity()) {
-                    request.setAttribute("error", "Sản phẩm " + (product != null ? product.getProductName() : ("#" + item.getProductID())) + " không đủ số lượng yêu cầu. Còn lại: " + stockQty);
+                    request.setAttribute("error",
+                            "Sản phẩm " + (product != null ? product.getProductName() : ("#" + item.getProductID()))
+                                    + " không đủ số lượng yêu cầu. Còn lại: " + stockQty);
                     request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
                     return;
                 }
@@ -841,23 +866,22 @@ public class BuyNowServlet extends HttpServlet {
                         basePrice = product.getPriceUnit() != null ? product.getPriceUnit() : 0.0;
                     }
 
-                    // Check for active promotion
+                    // Check for active promotion and get final price
+                    OrderDAO orderDAO = new OrderDAO();
+                    double finalPrice = orderDAO.getFinalPriceForPackageType(item);
+                    
+                    // Store promotion info for display
                     PromotionDAO promotionDAO = new PromotionDAO();
                     Promotion activePromotion = promotionDAO.getValidPromotionForProduct(product.getProductID());
-
+                    
                     if (activePromotion != null) {
-                        // Calculate discounted price
-                        double discountPercent = activePromotion.getDiscountPercent();
-                        double finalPrice = basePrice * (1 - discountPercent / 100);
-                        // Store promotion info for display
                         request.setAttribute("promotion_" + product.getProductID(), activePromotion);
                         request.setAttribute("originalPrice_" + product.getProductID(), basePrice);
-                        product.setPrice(finalPrice); // Set discounted price to product
-                        totalAmount += finalPrice * item.getQuantity();
-                    } else {
-                        product.setPrice(basePrice);
-                        totalAmount += basePrice * item.getQuantity();
+                        request.setAttribute("discountPercent_" + product.getProductID(), activePromotion.getDiscountPercent());
                     }
+                    
+                    product.setPrice(finalPrice);
+                    totalAmount += finalPrice * item.getQuantity();
                 }
             }
 
@@ -899,11 +923,32 @@ public class BuyNowServlet extends HttpServlet {
                 }
             }
 
+            // Calculate VAT (8% of total after promotion, BEFORE voucher)
+            double vat = (totalAmount + discountAmount) * 0.08;
+
+            // Final total = total after promotion - voucher + VAT
+            double finalTotal = totalAmount + vat;
+            
+            // Store voucher information for display
+            if (appliedVoucher != null) {
+                request.setAttribute("appliedVoucher", appliedVoucher);
+                request.setAttribute("voucherDiscount", discountAmount);
+            }
+
+            // Ensure final total is not negative (same logic as ReorderServlet)
+            if (finalTotal < 0) {
+                finalTotal = 0;
+            }
+
             // Create new order
             Order newOrder = new Order();
             newOrder.setAccountID(account.getAccountID());
             newOrder.setOrderDate(new Timestamp(System.currentTimeMillis()));
-            newOrder.setTotalAmount(totalAmount);
+            
+            // Lưu finalTotal (tổng tiền cuối cùng đã bao gồm VAT và áp dụng voucher) vào TotalAmount
+            // để khi OrderDAO tính toán lại, nó sẽ sử dụng giá trị này
+            newOrder.setTotalAmount(finalTotal);
+            
             newOrder.setShippingAddress(shippingAddress);
             newOrder.setShippingPhone(shippingPhone);
             newOrder.setPaymentMethod(paymentMethod);
@@ -922,13 +967,15 @@ public class BuyNowServlet extends HttpServlet {
 
                 // Apply voucher usage if applicable
                 if (appliedVoucher != null && discountAmount > 0) {
-                    orderDAO.recordVoucherUsage(appliedVoucher.getVoucherID(), account.getAccountID(), orderId, discountAmount);
+                    orderDAO.recordVoucherUsage(appliedVoucher.getVoucherID(), account.getAccountID(), orderId,
+                            discountAmount);
                 }
 
                 // Update product stock
                 for (CartItem item : cartItems) {
                     Product product = item.getProduct();
-                    productDAO.updateProductStock(product.getProductID(), product.getStockQuantity() - item.getQuantity());
+                    productDAO.updateProductStock(product.getProductID(),
+                            product.getStockQuantity() - item.getQuantity());
                 }
 
                 // Clear cart items
@@ -937,15 +984,16 @@ public class BuyNowServlet extends HttpServlet {
                     cartItemDAO.removeCartItem(item.getCartItemID());
                 }
 
-                // Order history will be created after successful redirect to avoid foreign key issues
+                // Order history will be created after successful redirect to avoid foreign key
+                // issues
                 // Handle payment redirection if needed
                 if ("VNPay".equals(paymentMethod)) {
                     // Store order ID in session for payment processing
                     session.setAttribute("pendingOrderId", orderId);
-                    session.setAttribute("pendingAmount", totalAmount);
+                    session.setAttribute("pendingAmount", finalTotal);
 
                     // Tạo URL thanh toán VNPay với orderId
-                    String paymentUrl = VNPayUtil.getPaymentUrl(request, response, totalAmount, orderId);
+                    String paymentUrl = VNPayUtil.getPaymentUrl(request, response, finalTotal, orderId);
 
                     // Chuyển hướng đến trang thanh toán VNPay
                     response.sendRedirect(paymentUrl);
@@ -957,7 +1005,8 @@ public class BuyNowServlet extends HttpServlet {
                     session.removeAttribute("checkoutFromCart");
 
                     // Redirect to order detail page with flag to create history
-                    response.sendRedirect(request.getContextPath() + "/orderDetail?orderID=" + orderId + "&newOrder=true");
+                    response.sendRedirect(
+                            request.getContextPath() + "/orderDetail?orderID=" + orderId + "&newOrder=true");
                 }
             } else {
                 // Failed to create order
@@ -1009,7 +1058,8 @@ public class BuyNowServlet extends HttpServlet {
 
             // Check if cart is empty
             if (cartItems == null || cartItems.isEmpty()) {
-                session.setAttribute("cartError", "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm vào giỏ trước khi thanh toán.");
+                session.setAttribute("cartError",
+                        "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm vào giỏ trước khi thanh toán.");
                 response.sendRedirect("cart");
                 return;
             }
@@ -1061,7 +1111,8 @@ public class BuyNowServlet extends HttpServlet {
                     response.sendRedirect("cart");
                     return;
                 }
-                session.setAttribute("cartWarning", "Một số sản phẩm đã được điều chỉnh số lượng do kho không đủ hàng.");
+                session.setAttribute("cartWarning",
+                        "Một số sản phẩm đã được điều chỉnh số lượng do kho không đủ hàng.");
             }
 
             // Calculate item total

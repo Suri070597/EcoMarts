@@ -72,6 +72,7 @@ public class PrepareCheckoutPage {
 
             // Check promotion and tính tiền
             double finalPrice = basePrice;
+            double originalPrice = basePrice;
 
             PromotionDAO promotionDAO = new PromotionDAO();
             Promotion activePromotion = promotionDAO.getValidPromotionForProduct(product.getProductID());
@@ -80,12 +81,14 @@ public class PrepareCheckoutPage {
                 double discountPercent = activePromotion.getDiscountPercent();
                 finalPrice = basePrice * (1 - discountPercent / 100);
                 request.setAttribute("appliedPromotion", activePromotion);
-                request.setAttribute("originalPrice", basePrice);
+                request.setAttribute("originalPrice", originalPrice);
+                request.setAttribute("discountPercent", discountPercent);
             }
 
             // Set final price 
             product.setPrice(finalPrice);
             double itemTotal = finalPrice * buyNowItem.getQuantity();
+            double originalTotal = originalPrice * buyNowItem.getQuantity();
 
             String unitLabel;
             if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
@@ -132,8 +135,11 @@ public class PrepareCheckoutPage {
 
             request.setAttribute("buyNowItem", buyNowItem);
             request.setAttribute("itemTotal", itemTotal);
+            request.setAttribute("originalTotal", originalTotal);
             request.setAttribute("totalAmount", itemTotal); 
             request.setAttribute("validVouchers", validVouchers);
+            request.setAttribute("finalPrice", finalPrice);
+            request.setAttribute("basePrice", basePrice);
 
             if (request.getAttribute("userInfo") == null) {
                 AccountDAO accountDAO = new AccountDAO();

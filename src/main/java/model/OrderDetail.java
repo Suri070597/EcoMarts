@@ -14,6 +14,7 @@ public class OrderDetail {
     private String unit;  // Thêm trường đơn vị
     private String packageType; // Thêm trường loại đóng gói (BOX, UNIT, PACK, KG)
     private Integer packSize; // Thêm trường kích thước gói (số đơn vị trong 1 lốc)
+    private Promotion productPromotion;
 
     public OrderDetail() {
     }
@@ -123,6 +124,14 @@ public class OrderDetail {
 
     public void setPackSize(Integer packSize) {
         this.packSize = packSize;
+    }
+
+    public Promotion getProductPromotion() {
+        return productPromotion;
+    }
+
+    public void setProductPromotion(Promotion productPromotion) {
+        this.productPromotion = productPromotion;
     }
 
 public OrderDetail(int productID, double quantity) {
