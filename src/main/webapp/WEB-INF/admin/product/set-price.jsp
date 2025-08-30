@@ -39,62 +39,62 @@
                             Product product = (Product) request.getAttribute("product");
                             String error = (String) request.getAttribute("error");
                             String success = (String) request.getAttribute("success");
-                            
+
                             if (product != null) {
                                 boolean isFruit = product.getCategory() != null && product.getCategory().getParentID() == 3;
-                                boolean isBeverageOrMilk = product.getCategory() != null && 
-                                    (product.getCategory().getParentID() == 1 || product.getCategory().getParentID() == 2);
-                                
-                                                                 // Lấy thông tin inventory để kiểm tra số lượng
-                                 dao.ProductDAO productDAO = new dao.ProductDAO();
-                                 double unitQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "UNIT");
-                                 double packQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "PACK");
-                                 double boxQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "BOX");
-                                 double kgQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "KG");
-                                 
-                                 // Kiểm tra xem có thể nhập giá cho unit/pack/box/kg không
-                                 boolean canSetUnitPrice = unitQuantity > 0;
-                                 boolean canSetPackPrice = packQuantity > 0;
-                                 boolean canSetBoxPrice = boxQuantity > 0;
-                                 boolean canSetKgPrice = kgQuantity > 0;
-                                 
-                                 // Đối với các loại khác (không phải trái cây, nước giải khát, sữa)
-                                 // cũng cần kiểm tra số lượng UNIT trước khi cho phép nhập giá
-                                 boolean isOtherCategory = !isFruit && !isBeverageOrMilk;
-                                 if (isOtherCategory) {
-                                     canSetUnitPrice = unitQuantity > 0;
-                                 }
+                                boolean isBeverageOrMilk = product.getCategory() != null
+                                        && (product.getCategory().getParentID() == 1 || product.getCategory().getParentID() == 2);
+
+                                // Lấy thông tin inventory để kiểm tra số lượng
+                                dao.ProductDAO productDAO = new dao.ProductDAO();
+                                double unitQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "UNIT");
+                                double packQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "PACK");
+                                double boxQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "BOX");
+                                double kgQuantity = productDAO.getQuantityByPackageType(product.getProductID(), "KG");
+
+                                // Kiểm tra xem có thể nhập giá cho unit/pack/box/kg không
+                                boolean canSetUnitPrice = unitQuantity > 0;
+                                boolean canSetPackPrice = packQuantity > 0;
+                                boolean canSetBoxPrice = boxQuantity > 0;
+                                boolean canSetKgPrice = kgQuantity > 0;
+
+                                // Đối với các loại khác (không phải trái cây, nước giải khát, sữa)
+                                // cũng cần kiểm tra số lượng UNIT trước khi cho phép nhập giá
+                                boolean isOtherCategory = !isFruit && !isBeverageOrMilk;
+                                if (isOtherCategory) {
+                                    canSetUnitPrice = unitQuantity > 0;
+                                }
                         %>
-                        
+
                         <% if (error != null) { %>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle"></i>
                             <strong>Lỗi!</strong> 
                             <% if (error.contains("Lỗi logic giá")) { %>
-                                <div class="mt-2">
-                                    <strong>Quy tắc giá:</strong>
-                                    <ul class="mb-0 mt-1">
-                                        <li>Giá đơn vị ≤ Giá thùng</li>
+                            <div class="mt-2">
+                                <strong>Quy tắc giá:</strong>
+                                <ul class="mb-0 mt-1">
+                                    <li>Giá đơn vị ≤ Giá thùng</li>
                                         <% if (isBeverageOrMilk) { %>
-                                        <li>Giá đơn vị ≤ Giá lốc</li>
-                                        <li>Giá lốc ≤ Giá thùng</li>
+                                    <li>Giá đơn vị ≤ Giá lốc</li>
+                                    <li>Giá lốc ≤ Giá thùng</li>
                                         <% } %>
-                                    </ul>
-                                </div>
-                            <% } else { %>
-                                <%= error %>
+                                </ul>
+                            </div>
+                            <% } else {%>
+                            <%= error%>
                             <% } %>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                         <% } %>
-                        
-                        <% if (success != null) { %>
+
+                        <% if (success != null) {%>
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle"></i>
-                            <strong>Thành công!</strong> <%= success %>
+                            <strong>Thành công!</strong> <%= success%>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                        <% } %>
+                        <% }%>
 
                         <div class="row">
                             <div class="col-md-6">
@@ -102,63 +102,60 @@
                                 <table class="table table-borderless">
                                     <tr>
                                         <td><strong>ID:</strong></td>
-                                        <td><%= product.getProductID() %></td>
+                                        <td><%= product.getProductID()%></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Tên sản phẩm:</strong></td>
-                                        <td><%= product.getProductName() %></td>
+                                        <td><%= product.getProductName()%></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Danh mục:</strong></td>
-                                        <td><%= product.getCategory() != null ? product.getCategory().getCategoryName() : "N/A" %></td>
+                                        <td><%= product.getCategory() != null ? product.getCategory().getCategoryName() : "N/A"%></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Số lượng hiện có:</strong></td>
                                         <td>
-                                            <% 
-                                                double stockQty = product.getStockQuantity();
+                                            <%
                                                 if (isFruit) {
-                                                    // Trái cây: hiển thị decimal (kg)
-                                                    out.print(stockQty);
+                                                    // Trái cây: hiển thị số lượng KG từ Inventory
+                                                    out.print(kgQuantity);
+                                                    out.print(" kg");
                                                 } else {
-                                                    // Các loại khác: hiển thị integer (thùng)
-                                                    if (stockQty == Math.floor(stockQty)) {
-                                                        out.print((long) stockQty);
-                                                    } else {
-                                                        out.print(stockQty);
-                                                    }
+                                                    // Các loại khác: hiển thị số lượng thùng từ Inventory
+                                                    out.print((long) boxQuantity);
+                                                    out.print(" thùng");
                                                 }
-                                            %> 
-                                            <%= product.getBoxUnitName() != null ? product.getBoxUnitName() : "N/A" %>
+                                            %>
                                         </td>
                                     </tr>
                                 </table>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <h5>Giá hiện tại</h5>
                                 <table class="table table-borderless">
-                                    <% if (isFruit) { %>
+                                    <% if (isFruit) {%>
                                     <tr>
                                         <td><strong>Giá 1Kg:</strong></td>
-                                        <td><%= product.getPriceUnit() != null ? String.format("%,.0f", product.getPriceUnit()) : "Chưa có" %> đ</td>
+                                        <td><%= product.getPriceUnit() != null ? String.format("%,.0f", product.getPriceUnit()) : "Chưa có"%> đ</td>
+                                        <!-- Thêm dấu phẩy phân cách + Không có phần thập phân + Kiểu số thực-->    
                                     </tr>
-                                    <% } else { %>
+                                    <% } else {%>
                                     <tr>
                                         <td><strong>Giá thùng:</strong></td>
-                                        <td><%= product.getPrice() != null ? String.format("%,.0f", product.getPrice()) : "Chưa có" %> đ</td>
+                                        <td><%= product.getPrice() != null ? String.format("%,.0f", product.getPrice()) : "Chưa có"%> đ</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Giá đơn vị:</strong></td>
-                                        <td><%= product.getPriceUnit() != null ? String.format("%,.0f", product.getPriceUnit()) : "Chưa có" %> đ</td>
+                                        <td><%= product.getPriceUnit() != null ? String.format("%,.0f", product.getPriceUnit()) : "Chưa có"%> đ</td>
                                     </tr>
-                                    <% if (isBeverageOrMilk) { %>
+                                    <% if (isBeverageOrMilk) {%>
                                     <tr>
                                         <td><strong>Giá lốc:</strong></td>
-                                        <td><%= product.getPricePack() != null ? String.format("%,.0f", product.getPricePack()) : "Chưa có" %> đ</td>
+                                        <td><%= product.getPricePack() != null ? String.format("%,.0f", product.getPricePack()) : "Chưa có"%> đ</td>
                                     </tr>
                                     <% } %>
-                                    <% } %>
+                                    <% }%>
                                 </table>
                             </div>
                         </div>
@@ -171,10 +168,10 @@
 
                         <form action="${pageContext.request.contextPath}/admin/product" method="post" id="priceForm">
                             <input type="hidden" name="action" value="updatePrice">
-                            <input type="hidden" name="productId" value="<%= product.getProductID() %>">
-                            
+                            <input type="hidden" name="productId" value="<%= product.getProductID()%>">
+
                             <div class="row">
-                                <% if (isFruit) { %>
+                                <% if (isFruit) {%>
                                 <!-- Form cho trái cây -->
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -185,19 +182,19 @@
                                                name="priceUnit" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : "" %>"
-                                               <%= !canSetKgPrice ? "disabled" : "" %>>
+                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : ""%>"
+                                               <%= !canSetKgPrice ? "disabled" : ""%>>
                                         <div class="form-text">
                                             <% if (canSetKgPrice) { %>
-                                                Nhập giá bán lẻ cho 1kg trái cây
+                                            Nhập giá bán lẻ cho 1kg trái cây
                                             <% } else { %>
-                                                <span class="text-danger">Chưa có số lượng kg trong kho. Vui lòng nhập kho trước.</span>
+                                            <span class="text-danger">Chưa có số lượng kg trong kho. Vui lòng nhập kho trước.</span>
                                             <% } %>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <% } else if (isBeverageOrMilk) { %>
+
+                                <% } else if (isBeverageOrMilk) {%>
                                 <!-- Form cho nước giải khát và sữa -->
                                 <div class="col-md-4">
                                     <div class="mb-3">
@@ -208,22 +205,22 @@
                                                name="priceBox" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPrice() != null ? product.getPrice().intValue() : "" %>"
-                                               <%= !canSetBoxPrice ? "disabled" : "" %>>
+                                               value="<%= product.getPrice() != null ? product.getPrice().intValue() : ""%>"
+                                               <%= !canSetBoxPrice ? "disabled" : ""%>>
                                         <div class="form-text">
                                             <% if (canSetBoxPrice) { %>
-                                                Giá bán lẻ cho 1 thùng
+                                            Giá bán lẻ cho 1 thùng
                                             <% } else { %>
-                                                <span class="text-danger">Chưa có số lượng thùng trong kho. Vui lòng nhập kho trước.</span>
-                                            <% } %>
+                                            <span class="text-danger">Chưa có số lượng thùng trong kho. Vui lòng nhập kho trước.</span>
+                                            <% }%>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="priceUnit" class="form-label">
-                                            Giá bán lẻ cho <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %> (đ)
+                                            Giá bán lẻ cho <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị"%> (đ)
                                         </label>
                                         <input type="number" 
                                                class="form-control" 
@@ -231,14 +228,14 @@
                                                name="priceUnit" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : "" %>"
-                                               <%= !canSetUnitPrice ? "disabled" : "" %>>
+                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : ""%>"
+                                               <%= !canSetUnitPrice ? "disabled" : ""%>>
                                         <div class="form-text">
-                                            Giá bán lẻ cho 1 <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %>
+                                            Giá bán lẻ cho 1 <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị"%>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="pricePack" class="form-label">
@@ -250,15 +247,15 @@
                                                name="pricePack" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPricePack() != null ? product.getPricePack().intValue() : "" %>"
-                                               <%= !canSetPackPrice ? "disabled" : "" %>>
+                                               value="<%= product.getPricePack() != null ? product.getPricePack().intValue() : ""%>"
+                                               <%= !canSetPackPrice ? "disabled" : ""%>>
                                         <div class="form-text">
                                             Giá bán lẻ cho 1 lốc
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <% } else { %>
+
+                                <% } else {%>
                                 <!-- Form cho các loại khác -->
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -269,35 +266,35 @@
                                                name="priceBox" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPrice() != null ? product.getPrice().intValue() : "" %>"
-                                               <%= !canSetBoxPrice ? "disabled" : "" %>>
+                                               value="<%= product.getPrice() != null ? product.getPrice().intValue() : ""%>"
+                                               <%= !canSetBoxPrice ? "disabled" : ""%>>
                                         <div class="form-text">
                                             <% if (canSetBoxPrice) { %>
-                                                Giá bán lẻ cho 1 thùng
+                                            Giá bán lẻ cho 1 thùng
                                             <% } else { %>
-                                                <span class="text-danger">Chưa có số lượng thùng trong kho. Vui lòng nhập kho trước.</span>
-                                            <% } %>
+                                            <span class="text-danger">Chưa có số lượng thùng trong kho. Vui lòng nhập kho trước.</span>
+                                            <% }%>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="priceUnit" class="form-label">Giá bán lẻ cho <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %> (đ)</label>
+                                        <label for="priceUnit" class="form-label">Giá bán lẻ cho <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị"%> (đ)</label>
                                         <input type="number" 
                                                class="form-control" 
                                                id="priceUnit" 
                                                name="priceUnit" 
                                                min="0" 
                                                step="1000"
-                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : "" %>"
-                                               <%= !canSetUnitPrice ? "disabled" : "" %>>
+                                               value="<%= product.getPriceUnit() != null ? product.getPriceUnit().intValue() : ""%>"
+                                               <%= !canSetUnitPrice ? "disabled" : ""%>>
                                         <div class="form-text">
-                                            <% if (canSetUnitPrice) { %>
-                                                Giá bán lẻ cho 1 <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị" %>
+                                            <% if (canSetUnitPrice) {%>
+                                            Giá bán lẻ cho 1 <%= product.getItemUnitName() != null ? product.getItemUnitName() : "đơn vị"%>
 
                                             <% } else { %>
-                                                <span class="text-danger">Chưa có số lượng sau chuyển đổi. Vui lòng thực hiện chuyển đổi đơn vị trước.</span>
+                                            <span class="text-danger">Chưa có số lượng sau chuyển đổi. Vui lòng thực hiện chuyển đổi đơn vị trước.</span>
                                             <% } %>
                                         </div>
                                     </div>
@@ -314,13 +311,13 @@
                                 </a>
                             </div>
                         </form>
-                        
+
                         <% } else { %>
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle"></i>
                             <strong>Lỗi!</strong> Không tìm thấy thông tin sản phẩm.
                         </div>
-                        <% } %>
+                        <% }%>
                     </div>
                 </div>
             </div>
@@ -329,10 +326,10 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
             // Auto-hide alerts
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(alert => {
-                    setTimeout(function() {
+                    setTimeout(function () {
                         if (alert && alert.parentNode) {
                             alert.remove();
                         }

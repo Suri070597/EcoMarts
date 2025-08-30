@@ -170,6 +170,9 @@
                                                         }
                                                     } else {
                                                         int showLimit = 2;
+//                                                        Nếu i < showLimit: Hiển thị thông tin lốc
+//                                                        Nếu i == showLimit: Bắt đầu một div ẩn để chứa các lốc còn lại
+//                                                        Nếu i > showLimit: Hiển thị các lốc còn lại
                                                         for (int i = 0; i < packList.size(); i++) {
                                                             java.util.Map<String, Object> p = packList.get(i);
                                                             Object qs = p.get("quantity");

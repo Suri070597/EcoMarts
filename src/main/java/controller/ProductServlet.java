@@ -19,7 +19,7 @@ import java.util.Map;
 import model.Category;
 import model.Product;
 
-@WebServlet(name = "ProductServlet", urlPatterns = { "/admin/product" })
+@WebServlet(name = "ProductServlet", urlPatterns = {"/admin/product"})
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
@@ -92,8 +92,8 @@ public class ProductServlet extends HttpServlet {
                 // Counters for stock status cards based on search results
                 final int SEARCH_LOW_STOCK_THRESHOLD = 10;
                 int searchInStock = 0,
-                        searchLowStock = 0,
-                        searchOutOfStock = 0;
+                 searchLowStock = 0,
+                 searchOutOfStock = 0;
 
                 for (Product p : searchResults) {
                     double boxQuantity = dao.getQuantityByPackageType(p.getProductID(), "BOX");
@@ -485,8 +485,8 @@ public class ProductServlet extends HttpServlet {
             case "convertUnits":
                 try {
                     int productId = Integer.parseInt(request.getParameter("productId"));
-                    int boxesToConvert = Integer.parseInt(request.getParameter("boxesToConvert"));
-                    String conversionType = request.getParameter("conversionType");
+                    int boxesToConvert = Integer.parseInt(request.getParameter("boxesToConvert")); // số lượng thùng cần chuyển đổi vào này nằm trong convert-product.jsp á
+                    String conversionType = request.getParameter("conversionType");  // loại chuyển đổi
                     int packSize = 0;
                     String packSizeStr = request.getParameter("packSize");
 
@@ -494,7 +494,7 @@ public class ProductServlet extends HttpServlet {
                         packSize = Integer.parseInt(packSizeStr);
                     }
 
-                    // Validate input
+                    // số lượng thùng nó phải lớn hơn 0, mặc dù bên jsp đã bắt nhập trong khoảng rồi
                     if (boxesToConvert <= 0) {
                         request.setAttribute("error", "Số lượng thùng phải lớn hơn 0");
                         Product product = dao.getProductById(productId);
@@ -504,7 +504,7 @@ public class ProductServlet extends HttpServlet {
                         return;
                     }
 
-                    // Get current product to validate
+                    // cho trường hợp giả sử đổi ID trên url thì thông báo
                     Product currentProduct = dao.getProductById(productId);
                     if (currentProduct == null) {
                         request.setAttribute("error", "Không tìm thấy sản phẩm");
@@ -522,6 +522,7 @@ public class ProductServlet extends HttpServlet {
                                     response);
                             return;
                         }
+                        // bắt trường hợp nhập số lượng unit < 2 và lớn hơn bằng số lượng unit trong thùng
                         if (packSize < 2 || packSize >= currentProduct.getUnitPerBox()) {
                             request.setAttribute("error",
                                     "Số đơn vị/lốc phải từ 2 đến " + (currentProduct.getUnitPerBox() - 1));
@@ -531,11 +532,11 @@ public class ProductServlet extends HttpServlet {
                             return;
                         }
 
-                        // Kiểm tra số lon trong 1 thùng phải chia hết cho packSize
+                        // Kiểm tra số lon trong 1 thùng phải chia hết cho packSize giả sử trường hợp 24 lon không chia hết cho 7
                         if (currentProduct.getUnitPerBox() % packSize != 0) {
                             request.setAttribute("error",
                                     "Số lon trong 1 thùng (" + currentProduct.getUnitPerBox()
-                                            + ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
+                                    + ") không chia hết cho " + packSize + " lon/lốc - không được dư lon");
                             request.setAttribute("product", currentProduct);
                             request.getRequestDispatcher("/WEB-INF/admin/product/convert-product.jsp").forward(request,
                                     response);
@@ -668,7 +669,7 @@ public class ProductServlet extends HttpServlet {
                             double kgQuantity = dao.getQuantityByPackageType(productId, "KG");
                             if (kgQuantity <= 0) {
                                 request.setAttribute("error",
-                                        "Không thể nhập giá cho kg khi chưa có số lượng tồn kho. Vui lòng nhập kho trước.");
+                                        "Chưa có số lượng kg trong kho. Vui lòng nhập kho trước.");
                                 request.setAttribute("product", currentProduct);
                                 request.getRequestDispatcher("/WEB-INF/admin/product/set-price.jsp").forward(request,
                                         response);

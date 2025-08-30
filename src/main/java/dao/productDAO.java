@@ -201,13 +201,14 @@ public class ProductDAO extends DBContext {
     }
 
     public Product getProductById(int id) {
+        // COALESCE(box_inv.Quantity, 0) nếu không có số lượng box thì trả về 0 và kg cũng vậy
         Product product = null;
         String sql = "SELECT p.*, c.categoryName, c.parentID, "
                 + "COALESCE(box_inv.Quantity, 0) as BoxQuantity, "
                 + "COALESCE(kg_inv.Quantity, 0) as KgQuantity "
                 + "FROM Product p "
                 + "JOIN Category c ON p.categoryID = c.categoryID "
-                + "LEFT JOIN Inventory box_inv ON p.ProductID = box_inv.ProductID AND box_inv.PackageType = 'BOX' "
+                + "LEFT JOIN Inventory box_inv ON p.ProductID = box_inv.ProductID AND box_inv.PackageType = 'BOX' " // LEFT JOIN đảm bảo vẫn lấy được product dù không có inventory giả sử cho trường hợp xem chi tiết sp á
                 + "LEFT JOIN Inventory kg_inv ON p.ProductID = kg_inv.ProductID AND kg_inv.PackageType = 'KG' "
                 + "WHERE p.ProductID = ?";
         try {
@@ -398,7 +399,7 @@ public class ProductDAO extends DBContext {
         try {
             // Xác định có phải trái cây không
             boolean isFruit = false;
-            String sqlCheckFruit = "SELECT CASE WHEN c.CategoryID = 3 OR c.ParentID = 3 THEN 1 ELSE 0 END AS IsFruit "
+            String sqlCheckFruit = "SELECT CASE WHEN c.ParentID = 3 THEN 1 ELSE 0 END AS IsFruit "
                     + "FROM Category c WHERE c.CategoryID = ?";
             try (PreparedStatement ps = conn.prepareStatement(sqlCheckFruit)) {
                 ps.setInt(1, categoryId);
@@ -466,6 +467,7 @@ public class ProductDAO extends DBContext {
         }
     }
 
+    // lấy ngày hết hạn của đơn nhập sớm nhất
     public Date getLatestExpiryDate(int productId) {
         String sql = "SELECT TOP 1 sid.ExpiryDate "
                 + "FROM Product p "
@@ -716,36 +718,40 @@ public class ProductDAO extends DBContext {
         }
     }
 
+    // lưu lại lịch sử chuyển đổi trong bảng ProductUnitConversion
     public boolean convertUnits(int productId, int boxesToConvert, String conversionType, int packSize) {
         try {
             Product product = getProductById(productId);
             if (product == null) {
                 return false;
             }
-            int totalUnits = boxesToConvert * product.getUnitPerBox();
+            int totalUnits = boxesToConvert * product.getUnitPerBox(); // tổng đơn vị chuyển đổi = số lượng thùng chuyển đổi * số lượng unit trong thùng
             Integer packCount = null;
             Integer unitCount = null;
 
+            // không chuyển đổi giá nữa
             Double price = product.getPrice();
             if (price == null) {
                 price = 0.0;
             }
             double unitPrice = price / product.getUnitPerBox();
+            // --------------
             Double packPrice = null;
 
             switch (conversionType) {
                 case "unit":
-                    unitCount = totalUnits;
+                    unitCount = totalUnits;  // chuyển toàn bộ thành đơn vị lẻ
                     break;
                 case "pack":
                     if (packSize > 0) {
-                        if (product.getUnitPerBox() % packSize != 0) {
+                        if (product.getUnitPerBox() % packSize != 0) {   // số lượng lon trong 1 thùng phải chia hết cho số lon trong lốc
                             return false;
                         }
-                        packCount = totalUnits / packSize;
-                        packPrice = unitPrice * packSize;
+                        packCount = totalUnits / packSize;  // lưu số lượng lốc => số lon trong thùng chia cho số lon trong 1 lốc thì ra được số lượng lốc
+                        packPrice = unitPrice * packSize; // bỏ 
                     }
                     break;
+                // bỏ trường hợp cả 2
                 case "both":
                     if (packSize > 0) {
                         if (product.getUnitPerBox() % packSize != 0) {
@@ -859,18 +865,7 @@ public class ProductDAO extends DBContext {
         }
     }
 
-    /**
-     * Cập nhật inventory khi chuyển đổi sản phẩm (bao gồm cả BOX)
-     *
-     * @param productId The product ID
-     * @param boxesToConvert Số thùng được chuyển đổi
-     * @param unitCount Số đơn vị được tạo
-     * @param packCount Số lốc được tạo
-     * @param packSize Số đơn vị trong 1 lốc
-     * @param unitPrice Giá 1 đơn vị
-     * @param packPrice Giá 1 lốc
-     * @return true nếu thành công, false nếu thất bại
-     */
+    // phương thức cập nhật inventory sau khi đã chuyển đổi
     public boolean updateInventoryWithBox(int productId, int boxesToConvert, Integer unitCount, Integer packCount,
             int packSize,
             double unitPrice, Double packPrice) {
@@ -895,6 +890,11 @@ public class ProductDAO extends DBContext {
                 ps.executeUpdate();
             }
 
+            // Cập nhật hoặc tạo mới record inventory cho sản phẩm loại UNIT (đơn vị lẻ).
+            // target là đích tức là inventory là đích 
+            // đổi với source là nguồn
+            // nếu nguồn mà nó khớp với đích thì nó sẽ update
+            // còn nếu không khớp thì tại record mới
             if (unitCount != null && unitCount > 0) {
                 String sqlUnit = "MERGE Inventory AS target "
                         + "USING (SELECT ? AS ProductID, 'UNIT' AS PackageType, 0 AS PackSize) AS source "
@@ -924,6 +924,7 @@ public class ProductDAO extends DBContext {
                     psCheck.setInt(2, packSize);
                     ResultSet rs = psCheck.executeQuery();
                     if (rs.next()) {
+                        // Nếu tìm thấy record → packRowExists = true và lấy số lượng hiện tại
                         packRowExists = true;
                         currentPackQuantity = rs.getDouble("Quantity");
                     }
@@ -934,7 +935,7 @@ public class ProductDAO extends DBContext {
                     String sqlUpdatePack = "UPDATE Inventory SET Quantity = ?, LastUpdated = GETDATE() "
                             + "WHERE ProductID = ? AND PackageType = 'PACK' AND PackSize = ?";
                     try (PreparedStatement ps = conn.prepareStatement(sqlUpdatePack)) {
-                        ps.setDouble(1, currentPackQuantity + packCount);
+                        ps.setDouble(1, currentPackQuantity + packCount); // cộng thêm số lượng
                         ps.setInt(2, productId);
                         ps.setInt(3, packSize);
                         ps.executeUpdate();
@@ -1038,15 +1039,15 @@ public class ProductDAO extends DBContext {
         return null;
     }
 
-    /**
-     * Get current inventory for a product
-     *
-     * @param productId The product ID
-     * @return Map containing inventory information
-     */
+    // lấy thông tin đầy đủ về inventory và giá của một sản phẩm, bao gồm số lượng theo từng loại đơn vị và thông tin giá.
     public Map<String, Object> getProductInventory(int productId) {
-        Map<String, Object> inventory = new HashMap<>();
+        Map<String, Object> inventory = new HashMap<>(); //  Map chính chứa tất cả thông tin 
+        // Key: Tên field (ví dụ: "BOX_Quantity", "UNIT_Price")
+        // Value: Giá trị tương ứng
         List<Map<String, Object>> packList = new ArrayList<>();
+        //  List chứa thông tin chi tiết về các loại lốc
+        //  Mỗi phần tử là một Map chứa packSize và quantity
+        // có nghĩa là 25 lốc mỗi lốc 6 lon
 
         // Lấy thông tin inventory
         String inventorySql = "SELECT PackageType, Quantity, PackSize FROM Inventory WHERE ProductID = ?";
@@ -1062,12 +1063,12 @@ public class ProductDAO extends DBContext {
                 String packageType = rs.getString("PackageType");
                 double qty = rs.getDouble("Quantity");
 
-                int packSize = rs.getInt("PackSize");
+                int packSize = rs.getInt("PackSize"); // // Số lon trong 1 lốc
 
                 if ("PACK".equalsIgnoreCase(packageType)) {
                     Map<String, Object> p = new HashMap<>();
                     p.put("packSize", packSize);
-                    p.put("quantity", qty);
+                    p.put("quantity", qty); // số lượng lốc
                     packList.add(p);
                     totalPackQty += qty;
                 } else {
@@ -1551,6 +1552,8 @@ public class ProductDAO extends DBContext {
                 + "JOIN Manufacturer m ON m.ManufacturerID = si.ManufacturerID "
                 + "WHERE p.ProductID = ? AND si.Status = 'Completed' "
                 + "ORDER BY si.DateIn DESC, si.StockInID DESC";
+        // si.DateIn DESC: Sắp xếp theo ngày nhập kho giảm dần (mới nhất trước)
+        //si.StockInID DESC: Nếu cùng ngày, lấy StockInID lớn nhất (mới nhất)
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
@@ -1592,7 +1595,7 @@ public class ProductDAO extends DBContext {
      * Kiểm tra xem sản phẩm có thuộc danh mục nước giải khát hoặc sữa không
      */
     public boolean isBeverageOrMilkCategory(int productId) {
-        String sql = "SELECT CASE WHEN c.CategoryID IN (1, 2) OR c.ParentID IN (1, 2) THEN 1 ELSE 0 END as IsBeverageOrMilk "
+        String sql = "SELECT CASE WHEN c.ParentID IN (1, 2) THEN 1 ELSE 0 END as IsBeverageOrMilk "
                 + "FROM Product p "
                 + "JOIN Category c ON p.CategoryID = c.CategoryID "
                 + "WHERE p.ProductID = ?";
