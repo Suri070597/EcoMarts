@@ -1279,6 +1279,30 @@ public class OrderDAO extends DBContext {
     }
 
     /**
+     * Lấy tổng giá gốc (tổng các SubTotal) của đơn hàng từ bảng OrderDetail
+     */
+    public double getSubtotalByOrderID(int orderId) {
+        double subtotal = 0.0;
+        String sql = "SELECT SUM(SubTotal) as TotalSubTotal FROM OrderDetail WHERE OrderID = ?";
+        try {
+            DBContext db = new DBContext();
+            Connection conn = db.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                subtotal = rs.getDouble("TotalSubTotal");
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return subtotal;
+    }
+
+    /**
      * Helper method to get the correct price based on package type
      */
     private double getCorrectPriceForPackageType(CartItem item) {
