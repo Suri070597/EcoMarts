@@ -237,7 +237,7 @@
                                             <td class="text-center">
                                                 <c:choose>
                                                     <c:when test="${not empty od.productPromotion}">
-                                            <td class="text-center"><fmt:formatNumber value="${od.unitPrice}" type="number" pattern="#,###"/> đ</td>
+                                                        <fmt:formatNumber value="${od.unitPrice}" type="number" pattern="#,###"/> đ</td>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <!-- Hiển thị giá gốc nếu không có promotion -->
