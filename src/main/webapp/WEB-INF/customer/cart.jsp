@@ -129,6 +129,14 @@
                 background-color: #4CAF50;
                 color: white;
             }
+
+            /* Ẩn mũi tên tăng giảm trên Chrome, Safari, Edge */
+            input[type=number]::-webkit-inner-spin-button,
+            input[type=number]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
         </style>
     </head>
     <body>
