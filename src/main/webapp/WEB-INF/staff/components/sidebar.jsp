@@ -10,6 +10,11 @@
                 Bảng điều khiển chính</a></li>
         <li><a href="${pageContext.request.contextPath}/staff/order"><i class="fas fa-receipt"></i> Quản lý đơn hàng</a>
         </li>
+        <li>
+            <a href="${pageContext.request.contextPath}/staff/stockin">
+                <i class="fas fa-box"></i> Quản lý nhập kho
+            </a>
+        </li>
         <li><a href="${pageContext.request.contextPath}/staff/product"><i class="fas fa-box"></i> Quản lý sản phẩm</a></li>
         <li><a href="${pageContext.request.contextPath}/staff/manage-review"><i class="fas fa-receipt"></i> Quản lý phản hồi</a>
         </li>
@@ -18,11 +23,6 @@
         </li>
         </li>
         <li><a href="${pageContext.request.contextPath}/verifypasswordServlet"><i class="fas fa-receipt"></i>Đổi mật khẩu</a>
-        </li>
-        <li>
-            <a href="${pageContext.request.contextPath}/staff/stockin">
-                <i class="fas fa-box"></i> Quản lý nhập kho
-            </a>
         </li>
         <li><a href="${pageContext.request.contextPath}/logout"><i
                     class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>

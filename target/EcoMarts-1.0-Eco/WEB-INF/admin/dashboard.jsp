@@ -62,46 +62,6 @@
                     </div>
                 </div>
 
-                <!-- Thông tin chi tiết doanh thu -->
-                <div class="dashboard-stats mt-4">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-receipt"></i>
-                        </div>
-                        <div class="stat-title">Tạm tính (trước thuế)</div>
-                        <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.subtotal}" type="number" maxFractionDigits="0" /> ₫
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-percentage"></i>
-                        </div>
-                        <div class="stat-title">Thuế VAT (8%)</div>
-                        <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.totalTax}" type="number" maxFractionDigits="0" /> ₫
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-tag"></i>
-                        </div>
-                        <div class="stat-title">Giảm giá Voucher</div>
-                        <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.totalDiscount}" type="number" maxFractionDigits="0" /> ₫
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <div class="stat-title">Doanh thu tháng này</div>
-                        <div class="stat-value">
-                            <fmt:formatNumber value="${revenueSummary.monthly}" type="number" maxFractionDigits="0" /> ₫
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Nội dung chính -->
                 <div class="dashboard-content">
                     <!-- Đơn hàng gần đây -->

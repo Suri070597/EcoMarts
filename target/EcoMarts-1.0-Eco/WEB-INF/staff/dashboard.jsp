@@ -61,13 +61,6 @@
                         <div class="stat-title">Đang giao hàng</div>
                         <div class="stat-value">${shippingOrders}</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-exchange-alt"></i>
-                        </div>
-                        <div class="stat-title">Hoàn trả/Đổi trả</div>
-                        <div class="stat-value">${returnOrders}</div>
-                    </div>
                 </div>
 
 
