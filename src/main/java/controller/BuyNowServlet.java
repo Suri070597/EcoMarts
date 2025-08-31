@@ -83,11 +83,13 @@ public class BuyNowServlet extends HttpServlet {
         List<Category> categories = categoryDAO.getAllCategoriesWithChildren();
         request.setAttribute("categories", categories);
 
-        // Check if buying from cart
+        // Kiểm tra xem trong session có cờ "checkoutFromCart" hay không.
+        // Nếu có, nghĩa là người dùng đang thực hiện thanh toán từ giỏ hàng.
         boolean isFromCart = session.getAttribute("checkoutFromCart") != null;
 
+        // Nếu đang mua hàng từ giỏ hàng
         if (isFromCart) {
-            // Process cart checkout
+            // Lấy danh sách sản phẩm trong giỏ hàng từ session
             List<CartItem> cartItems = (List<CartItem>) session.getAttribute("cartItems");
             if (cartItems == null || cartItems.isEmpty()) {
                 session.setAttribute("cartError", "Giỏ hàng của bạn đang trống. Vui lòng thử lại.");
@@ -95,27 +97,29 @@ public class BuyNowServlet extends HttpServlet {
                 return;
             }
 
-            // Ensure totals and helper attrs are available for JSP
+            // Đảm bảo các giá trị tổng tiền, voucher hợp lệ và thông tin user có sẵn cho JSP
             Object cartTotal = session.getAttribute("cartTotal");
             if (cartTotal != null) {
                 request.setAttribute("itemTotal", cartTotal);
                 request.setAttribute("totalAmount", cartTotal);
             }
             Object validVouchers = session.getAttribute("validVouchers");
+            // Lấy danh sách voucher hợp lệ từ session
             if (validVouchers != null) {
                 request.setAttribute("validVouchers", validVouchers);
             }
             Object userInfo = session.getAttribute("userInfo");
+            // Lấy thông tin người dùng từ session
             if (userInfo != null) {
                 request.setAttribute("userInfo", userInfo);
             }
 
-            // Forward to checkout page with cart items
+            // Chuyển tiếp (forward) sang trang checkout buy-now.jsp để hiển thị form thanh toán
             request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
             return;
         }
 
-        // Check if we have the product info in session for single product buy now
+        // Nếu không phải checkout từ giỏ hàng, kiểm tra xem có "buyNowItem" trong session không (mua ngay 1 sản phẩm)
         CartItem buyNowItem = (CartItem) session.getAttribute("buyNowItem");
         if (buyNowItem == null) {
             // No product in session, redirect to home
@@ -126,6 +130,7 @@ public class BuyNowServlet extends HttpServlet {
 
         // Get product information
         ProductDAO productDAO = new ProductDAO();
+        // Lấy thông tin chi tiết sản phẩm từ DB bằng ID của buyNowItem
         Product product = productDAO.getProductById(buyNowItem.getProductID());
         if (product == null) {
             session.setAttribute("cartError", "Không tìm thấy sản phẩm. Vui lòng thử lại.");
@@ -133,8 +138,10 @@ public class BuyNowServlet extends HttpServlet {
             return;
         }
 
-        // Check product availability using selected package
+        // Kiểm tra số lượng tồn kho của sản phẩm dựa vào loại gói (BOX, PACK, UNIT, ...)
         double stockQuantity;
+        // Nếu loại gói là PACK (so sánh không phân biệt hoa thường) 
+        // và có thông tin kích thước pack (packSize không null)
         if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
             stockQuantity = productDAO.getPackQuantity(buyNowItem.getProductID(), buyNowItem.getPackSize());
         } else {
@@ -148,12 +155,13 @@ public class BuyNowServlet extends HttpServlet {
             return;
         }
 
-        // Set product for the buy now item
+        // Gán đối tượng Product vừa lấy từ DB vào cho buyNowItem (CartItem)
         buyNowItem.setProduct(product);
 
-        // Derive effective unit label based on selected package and set stock
+        // Xác định nhãn đơn vị hiển thị (unitLabel) dựa trên loại package mà user chọn
         String unitLabel;
         if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
+            // Nếu user mua theo lốc (PACK) và có size (VD: lốc 6 lon, 8 lon, …)
             String itemUnitName = product.getItemUnitName();
             unitLabel = "Lốc" + (buyNowItem.getPackSize() != null
                     ? (" " + buyNowItem.getPackSize() + " " + (itemUnitName != null ? itemUnitName : "đơn vị"))
@@ -167,26 +175,30 @@ public class BuyNowServlet extends HttpServlet {
             String itemUnitName = product.getItemUnitName();
             unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
         }
+        // Set nhãn đơn vị và số lượng tồn kho (stockQuantity đã check ở trên) cho sản phẩm
         product.setUnit(unitLabel);
         product.setStockQuantity(stockQuantity);
 
-        // Get account info for shipping
+        // Lấy thông tin tài khoản đầy đủ (bao gồm địa chỉ, số điện thoại, …) để điền vào form giao hàng
         AccountDAO accountDAO = new AccountDAO();
         Account fullAccount = accountDAO.getUserDetail(account.getAccountID());
 
-        // Calculate total price including promotions
+        // Chuẩn bị dữ liệu cho trang checkout (tính toán khuyến mãi, shipping, …)
         PrepareCheckoutPage pre = new PrepareCheckoutPage();
         pre.prepareCheckoutPage(request, account, buyNowItem, product); // Get available vouchers for the user
+
+        // Lấy danh sách voucher mà user này sở hữu
         VoucherDAO voucherDAO = new VoucherDAO();
         List<Voucher> availableVouchers = voucherDAO.getVouchersByAccountId(account.getAccountID());
 
-        // Filter valid vouchers (active and not expired)
+        // Tạo danh sách voucher hợp lệ (chỉ giữ lại voucher còn hiệu lực)
         List<Voucher> validVouchers = new ArrayList<>();
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
-        // Calculate total amount before voucher
+        // Tính tổng tiền hàng (chưa áp dụng voucher/khuyến mãi)
         double itemTotal = product.getPrice() * buyNowItem.getQuantity();
 
+        // Duyệt qua từng voucher của user để kiểm tra điều kiện hợp lệ
         for (Voucher voucher : availableVouchers) {
             if (voucher.isActive()
                     && now.after(voucher.getStartDate())
@@ -198,6 +210,7 @@ public class BuyNowServlet extends HttpServlet {
                 Integer voucherCategoryId = voucher.getCategoryID();
                 Category productCategory = product.getCategory();
 
+                // voucher dùng cho tất cả sản phẩm
                 if (voucherCategoryId == null
                         || (productCategory != null && (voucherCategoryId.equals(productCategory.getCategoryID())
                         || (productCategory.getParentID() != null
@@ -207,6 +220,7 @@ public class BuyNowServlet extends HttpServlet {
             }
         }
 
+        // Làm tròn tổng tiền về bội số của 1000 (VD: 125,500 → 126,000)
         double roundedItemTotal = Math.round(itemTotal / 1000.0) * 1000;
         request.setAttribute("buyNowItem", buyNowItem);
         request.setAttribute("itemTotal", roundedItemTotal);
@@ -247,23 +261,23 @@ public class BuyNowServlet extends HttpServlet {
             return;
         }
 
-        // Get the action parameter
+        // Lấy tham số action từ request (VD: initiate, processSingle, initiateCart, processCart)
         String action = request.getParameter("action");
 
         if ("initiate".equals(action)) {
-            // Handle initiate buy now process for single product
+            // Nếu action = initiate → bắt đầu quy trình "Mua ngay" cho 1 sản phẩm
             initiateOrder(request, response, session, account);
         } else if ("processSingle".equals(action)) {
-            // Handle process buy now order for single product
+            // Nếu action = processSingle → xử lý đặt hàng (thanh toán) cho 1 sản phẩm "Mua ngay"
             processOrder(request, response, session, account);
         } else if ("initiateCart".equals(action)) {
-            // Handle buy now from cart
+            // Nếu action = initiateCart → bắt đầu quy trình đặt hàng cho nhiều sản phẩm trong giỏ hàng
             initiateFromCart(request, response, session, account);
         } else if ("processCart".equals(action)) {
-            // Handle process order from cart
+            // Nếu action = processCart → xử lý đặt hàng (thanh toán) cho toàn bộ giỏ hàng
             processCartOrder(request, response, session, account);
         } else {
-            // Invalid action
+            // Nếu action không thuộc 4 loại trên → coi là không hợp lệ
             session.setAttribute("cartError", "Hành động không hợp lệ");
             response.sendRedirect("home");
         }
@@ -278,8 +292,11 @@ public class BuyNowServlet extends HttpServlet {
             // Get product ID and quantity from request
             int productID = Integer.parseInt(request.getParameter("productID"));
             double quantity = Double.parseDouble(request.getParameter("quantity"));
+            // Lấy loại gói (packageType: BOX, PACK, UNIT, KG...) từ request
             String packageType = request.getParameter("packageType");
+            // Lấy giá trị packSize (số lượng lon trong 1 lốc nếu packageType = PACK)
             String packSizeStr = request.getParameter("packSize");
+            // Biến lưu packSize thực tế (Integer để có thể null nếu không truyền)
             Integer packSize = null;
             if (packSizeStr != null && !packSizeStr.trim().isEmpty()) {
                 try {
@@ -320,14 +337,14 @@ public class BuyNowServlet extends HttpServlet {
             buyNowItem.setAddedAt(new Timestamp(new Date().getTime()));
             buyNowItem.setStatus("BuyNow");
 
-            // Clear any existing checkout sessions to avoid conflicts
+            // Xóa dữ liệu phiên thanh toán trước đó để tránh xung đột
             session.removeAttribute("cartItems");
             session.removeAttribute("checkoutFromCart");
 
-            // Store in session
+            // Lưu đối tượng sản phẩm mua ngay vào session
             session.setAttribute("buyNowItem", buyNowItem);
 
-            // Redirect to buy-now GET to display checkout page
+            // Chuyển hướng sang servlet “buy-now” (phương thức GET) để hiển thị trang thanh toán ngay
             response.sendRedirect("buy-now");
 
         } catch (NumberFormatException e) {
@@ -377,10 +394,10 @@ public class BuyNowServlet extends HttpServlet {
                 request.setAttribute("error", "Sản phẩm đã hết hàng hoặc không đủ số lượng yêu cầu. Hiện chỉ còn "
                         + stockQty);
 
-                // Adjust quantity to maximum available
+                // Điều chỉnh lại số lượng mua = số lượng tối đa còn trong kho
                 buyNowItem.setQuantity(stockQty);
 
-                // Re-populate the form with corrected quantity
+                // Nạp lại thông tin checkout với số lượng đã chỉnh sửa
                 PrepareCheckoutPage pre = new PrepareCheckoutPage();
                 pre.prepareCheckoutPage(request, account, buyNowItem, product);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
@@ -409,6 +426,7 @@ public class BuyNowServlet extends HttpServlet {
                 request.setAttribute("shippingPhone", shippingPhone);
                 request.setAttribute("notes", notes);
 
+                // Gọi phương thức chuẩn bị dữ liệu (ví dụ: tổng tiền, voucher hợp lệ, thông tin sản phẩm, tài khoản) và gắn vào request  
                 PrepareCheckoutPage pre = new PrepareCheckoutPage();
                 pre.prepareCheckoutPage(request, account, buyNowItem, product);
                 request.getRequestDispatcher("/WEB-INF/customer/buy-now.jsp").forward(request, response);
@@ -418,7 +436,7 @@ public class BuyNowServlet extends HttpServlet {
             // Validate phone number
             if (!validatePhoneNumber(shippingPhone)) {
                 request.setAttribute("error",
-                        "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam hợp lệ.");
+                        "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại hợp lệ.");
                 request.setAttribute("recipientName", recipientName);
                 request.setAttribute("shippingAddress", shippingAddress);
                 request.setAttribute("shippingPhone", shippingPhone);
@@ -434,15 +452,15 @@ public class BuyNowServlet extends HttpServlet {
             PrepareCheckoutPage pre = new PrepareCheckoutPage();
             pre.prepareCheckoutPage(request, account, buyNowItem, product);
 
-            // Get the final price including any promotions
+            // Tính tổng số tiền đơn hàng dựa trên giá sản phẩm và số lượng (chưa tính giảm giá phức tạp khác)  
             double totalAmount = product.getPrice() * buyNowItem.getQuantity();
 
-            // Ensure the product attached to buyNowItem carries the effective unit price
+            // Nếu trong đối tượng buyNowItem chưa có thông tin Product thì gán Product hiện tại vào  
             if (buyNowItem.getProduct() == null) {
                 buyNowItem.setProduct(product);
             }
             if (buyNowItem.getProduct() != null) {
-                // Set effective unit label and stock for display consistency
+                // Tạo biến unitLabel để hiển thị đơn vị tính (lốc, thùng, kg, lon, trái, …) cho đúng loại sản phẩm
                 String unitLabel;
                 if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
                     String itemUnitName = product.getItemUnitName();
@@ -459,7 +477,7 @@ public class BuyNowServlet extends HttpServlet {
                     unitLabel = itemUnitName != null ? itemUnitName : "đơn vị";
                 }
 
-                // Calculate base price based on package type
+                // Khai báo biến basePrice để lưu giá cơ bản của sản phẩm theo loại gói (PACK, BOX, UNIT, ...)
                 Double basePrice;
                 if ("PACK".equalsIgnoreCase(buyNowItem.getPackageType()) && buyNowItem.getPackSize() != null) {
                     Double pricePack = product.getPricePack();
@@ -472,16 +490,25 @@ public class BuyNowServlet extends HttpServlet {
                 } else if ("BOX".equalsIgnoreCase(String.valueOf(buyNowItem.getPackageType()))) {
                     basePrice = product.getPrice();
                 } else {
+                    // Các trường hợp còn lại (mua theo đơn vị lẻ, kg, trái, lon, ...)  
+                    // thì lấy giá đơn vị (Unit price)
                     basePrice = product.getPriceUnit();
                     if (basePrice == null) {
+                        // Nếu giá unit bị null thì set mặc định = 0.0 để tránh lỗi NullPointerException
                         basePrice = 0.0;
                     }
                 }
 
+                // Gán nhãn đơn vị tính (lon, thùng, lốc 6 lon, kg, ...) cho sản phẩm trong buyNowItem  
+                // để hiển thị đúng trong giao diện checkout
                 buyNowItem.getProduct().setUnit(unitLabel);
+                // Cập nhật số lượng tồn kho hiện tại vào sản phẩm để hiển thị cho người dùng
                 buyNowItem.getProduct().setStockQuantity(stockQty);
-                buyNowItem.getProduct().setPrice(basePrice); // Set base price for order detail
+                // Gán giá cơ bản (theo loại mua) cho sản phẩm trong buyNowItem  
+                // Giá này sẽ được dùng để hiển thị và lưu vào chi tiết đơn hàng
+                buyNowItem.getProduct().setPrice(basePrice);
             }
+
             double discountAmount = 0;
 
             // Apply voucher if provided
@@ -504,11 +531,13 @@ public class BuyNowServlet extends HttpServlet {
                                 || appliedVoucher.getCategoryID() == product.getCategory().getCategoryID()
                                 || appliedVoucher.getCategoryID() == product.getCategory().getParentID()) {
 
-                            // Apply discount
+                            // Lấy số tiền giảm giá từ voucher đã áp dụng và gán vào biến discountAmount
                             discountAmount = appliedVoucher.getDiscountAmount();
+                            // Trừ số tiền giảm giá ra khỏi tổng tiền đơn hàng
                             totalAmount -= discountAmount;
 
-                            // Ensure total is not negative
+                            // Đảm bảo rằng tổng tiền không bị âm sau khi trừ giảm giá
+                            // Nếu âm thì gán về 0 (vì tổng thanh toán nhỏ nhất phải là 0)
                             if (totalAmount < 0) {
                                 totalAmount = 0;
                             }
@@ -526,16 +555,24 @@ public class BuyNowServlet extends HttpServlet {
                             return;
                         }
                     } else {
-                        // Voucher expired or not valid
+                        // Khởi tạo biến errorMsg để lưu thông báo lỗi (nếu mã giảm giá không hợp lệ)
                         String errorMsg = "";
                         if (now.before(appliedVoucher.getStartDate())) {
+                            // Kiểm tra nếu thời gian hiện tại nhỏ hơn ngày bắt đầu của voucher
                             errorMsg = "Mã giảm giá chưa có hiệu lực";
+                            // → Nghĩa là voucher chưa thể sử dụng
                         } else if (now.after(appliedVoucher.getEndDate())) {
+                            // Kiểm tra nếu thời gian hiện tại lớn hơn ngày kết thúc của voucher
                             errorMsg = "Mã giảm giá đã hết hạn";
+                            // → Voucher đã hết hạn sử dụng
                         } else if (totalAmount < appliedVoucher.getMinOrderValue()) {
+                            // Kiểm tra nếu tổng giá trị đơn hàng nhỏ hơn giá trị tối thiểu mà voucher yêu cầu
                             errorMsg = "Đơn hàng không đủ giá trị tối thiểu để áp dụng mã giảm giá";
+                            // → Người dùng chưa đạt điều kiện giá trị đơn hàng tối thiểu
                         } else if (appliedVoucher.getUsageCount() >= appliedVoucher.getMaxUsage()) {
+                            // Kiểm tra nếu số lần voucher đã được dùng >= số lần tối đa cho phép
                             errorMsg = "Mã giảm giá đã đạt giới hạn sử dụng";
+                            // → Voucher không thể sử dụng thêm
                         }
 
                         request.setAttribute("error", errorMsg);
@@ -563,13 +600,14 @@ public class BuyNowServlet extends HttpServlet {
                 }
             }
 
-            // Calculate VAT (8% of total after promotion, BEFORE voucher)
+            // Tính thuế VAT (8%) dựa trên tổng tiền sau khuyến mãi nhưng trước khi áp dụng voucher.
+            // Lưu ý: cộng lại discountAmount để ra giá trị trước khi trừ voucher, sau đó nhân 8%.
             double vat = (totalAmount + discountAmount) * 0.08;
 
-            // Final total = total after promotion - voucher + VAT
+            // Tính tổng tiền cuối cùng: tổng sau khi trừ khuyến mãi/voucher rồi cộng thêm VAT.
             double finalTotal = totalAmount + vat;
 
-            // Ensure final total is not negative (same logic as ReorderServlet)
+            // Đảm bảo rằng tổng tiền cuối cùng không bị âm. Nếu âm thì đặt bằng 0.
             if (finalTotal < 0) {
                 finalTotal = 0;
             }
@@ -595,13 +633,15 @@ public class BuyNowServlet extends HttpServlet {
             if (orderId > 0) {
                 // Order created successfully
 
-                // Apply voucher usage if applicable
+                // Nếu có áp dụng voucher và số tiền giảm giá > 0:
+                // → Lưu lại việc sử dụng voucher vào database (liên kết voucher với đơn hàng, user và số tiền giảm).
                 if (appliedVoucher != null && discountAmount > 0) {
                     orderDAO.recordVoucherUsage(appliedVoucher.getVoucherID(), account.getAccountID(), orderId,
                             discountAmount);
                 }
 
-                // Update product stock
+                // Cập nhật lại số lượng tồn kho của sản phẩm sau khi đặt hàng thành công:
+                // Lấy số lượng hiện tại trong Product trừ đi số lượng khách đã mua (buyNowItem.getQuantity()).
                 productDAO.updateProductStock(product.getProductID(),
                         product.getStockQuantity() - buyNowItem.getQuantity());
 

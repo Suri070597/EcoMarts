@@ -89,21 +89,21 @@ public class CartItemDAO extends DBContext {
                 item.setAddedAt(rs.getTimestamp("AddedAt"));
                 item.setStatus(rs.getString("Status"));
 
-                // Build product for cart display using unit price/unit label consistent with home
+                // ===== Build Product để hiển thị trong giỏ =====
                 int pid = rs.getInt("ProductID");
                 ProductDAO pdao = new ProductDAO();
-                Product full = pdao.getProductById(pid);
+                Product full = pdao.getProductById(pid); // lấy dữ liệu đầy đủ (nếu cần dùng thêm sau này)
                 Product product = new Product();
                 product.setProductID(pid);
                 product.setProductName(rs.getString("ProductName"));
                 product.setImageURL(rs.getString("ImageURL"));
                 product.setStatus(rs.getString("ProductStatus"));
 
-                // Determine package type/pack size from cart item
+                // Lấy loại đơn vị từ giỏ hàng (mặc định UNIT nếu null)
                 String packageType = item.getPackageType() != null ? item.getPackageType() : "UNIT";
                 Integer packSize = item.getPackSize();
 
-                // Stock by selected package
+                // Lấy số lượng tồn kho theo loại gói hàng
                 double stockQty;
                 if ("PACK".equalsIgnoreCase(packageType) && packSize != null) {
                     stockQty = pdao.getPackQuantity(pid, packSize);
@@ -112,35 +112,40 @@ public class CartItemDAO extends DBContext {
                 }
                 product.setStockQuantity(stockQty);
 
-                // Price and unit label by selected package
+                // ===== Xác định giá và đơn vị hiển thị =====
                 Double priceBox = rs.getObject("PriceBox", Double.class);
                 Double priceUnit = rs.getObject("PriceUnit", Double.class);
                 Double pricePack = rs.getObject("PricePack", Double.class);
                 String itemUnitName = rs.getString("ItemUnitName");
                 String boxUnitName = rs.getString("BoxUnitName");
-                Double effectivePrice = 0.0;
-                String unitLabel = itemUnitName;
+                Double effectivePrice = 0.0; // giá sau khi xử lý
+                String unitLabel = itemUnitName; // nhãn đơn vị hiển thị
                 if ("KG".equalsIgnoreCase(packageType) || "UNIT".equalsIgnoreCase(packageType)) {
+                    // Nếu là KG hoặc UNIT
                     effectivePrice = priceUnit != null ? priceUnit : 0.0;
                     unitLabel = ("KG".equalsIgnoreCase(packageType)) ? "kg" : (itemUnitName != null ? itemUnitName : "đơn vị");
                 } else if ("BOX".equalsIgnoreCase(packageType)) {
+                    // Nếu là thùng (BOX)
                     effectivePrice = priceBox != null ? priceBox : 0.0;
                     unitLabel = boxUnitName != null ? boxUnitName : "thùng";
                 } else if ("PACK".equalsIgnoreCase(packageType)) {
+                    // Nếu là lốc (PACK)
                     if (pricePack != null) {
                         effectivePrice = pricePack;
                     } else if (priceUnit != null && packSize != null) {
-                        effectivePrice = priceUnit * packSize;
+                        effectivePrice = priceUnit * packSize; // tự tính giá pack theo giá unit * số lượng
                     } else {
                         effectivePrice = 0.0;
                     }
                     unitLabel = "Lốc" + (packSize != null ? (" " + packSize + " " + (itemUnitName != null ? itemUnitName : "đơn vị")) : "");
                 }
+                
+                // Set giá + đơn vị vào product
                 product.setPrice(effectivePrice);
                 product.setUnit(unitLabel);
-
+                // Gắn product vào cart item
                 item.setProduct(product);
-
+                // Thêm vào danh sách cart items
                 cartItems.add(item);
             }
             rs.close();

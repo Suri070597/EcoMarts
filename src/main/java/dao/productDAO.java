@@ -1355,6 +1355,7 @@ public class ProductDAO extends DBContext {
     public double getPackQuantity(int productId, int packSize) {
         double qty = 0.0;
         try {
+            // COALESCE(Quantity, 0) đảm bảo nếu Quantity = NULL thì trả về 0
             String sql = "SELECT COALESCE(Quantity, 0) AS Q FROM Inventory WHERE ProductID = ? AND PackageType = 'PACK' AND PackSize = ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, productId);
@@ -1368,6 +1369,7 @@ public class ProductDAO extends DBContext {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // Trả về số lượng tìm được (nếu không có bản ghi nào thì mặc định = 0.0)
         return qty;
     }
 

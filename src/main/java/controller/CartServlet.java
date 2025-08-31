@@ -99,13 +99,21 @@ public class CartServlet extends HttpServlet {
                 cartTotal += finalPrice * item.getQuantity();
 
                 // setAttribute để JSP lấy ra
-                request.setAttribute("promotion_" + p.getProductID(), promo);
-                request.setAttribute("originalPrice_" + p.getProductID(), basePrice);
-                request.setAttribute("discountPercent_" + p.getProductID(), discountPercent);
-                request.setAttribute("finalPrice_" + p.getProductID(), finalPrice);
+                // setAttribute để JSP lấy ra
+                request.setAttribute("promotion_item_" + item.getCartItemID(), promo);
+                request.setAttribute("originalPrice_item_" + item.getCartItemID(), basePrice);
+                request.setAttribute("discountPercent_item_" + item.getCartItemID(), discountPercent);
+                request.setAttribute("finalPrice_item_" + item.getCartItemID(), finalPrice);
+//                request.setAttribute("promotion_" + p.getProductID(), promo);
+//                request.setAttribute("originalPrice_" + p.getProductID(), basePrice);
+//                request.setAttribute("discountPercent_" + p.getProductID(), discountPercent);
+//                request.setAttribute("finalPrice_" + p.getProductID(), finalPrice);
             } else {
                 // Không có promotion tính giá gốc
                 cartTotal += p.getPrice() * item.getQuantity();
+                request.setAttribute("originalPrice_item_" + item.getCartItemID(), p.getPrice());
+                request.setAttribute("finalPrice_item_" + item.getCartItemID(), p.getPrice());
+            
             }
         }
 
@@ -326,17 +334,21 @@ public class CartServlet extends HttpServlet {
                 }
             }
 
-            // Validate quantity
+            // Kiểm tra và chuẩn hóa số lượng sản phẩm người dùng nhập vào
             if (quantity <= 0) {
-                quantity = 1;
+                quantity = 1; // Nếu số lượng <= 0 thì mặc định đặt lại thành 1
             }
 
             // Get the actual stock quantity by package type (KG for fruits, UNIT otherwise)
             ProductDAO productDAO = new ProductDAO();
+            // Lấy sản phẩm theo productID được truyền vào
             Product product = productDAO.getProductById(productID);
+            // Mặc định loại đóng gói là "UNIT" (tính theo đơn vị)
             String packageType = "UNIT";
             try {
+                // Nếu sản phẩm tồn tại và có danh mục cha
                 if (product != null && product.getCategory() != null) {
+                    // Nếu danh mục cha có ID = 3 (giả sử 3 = Trái cây), thì dùng đơn vị tính là KG
                     int parentId = product.getCategory().getParentID();
                     if (parentId == 3) {
                         packageType = "KG";
@@ -344,11 +356,12 @@ public class CartServlet extends HttpServlet {
                 }
             } catch (Exception ignore) {
             }
-            // Override by explicit request when not fruit
+            // Nếu người dùng truyền packageTypeReq và sản phẩm không phải trái cây
+            // thì ưu tiên loại đóng gói mà người dùng chọn (BOX, PACK, UNIT)
             if (packageTypeReq != null && !"KG".equals(packageType)) {
                 packageType = packageTypeReq;
             }
-            // Normalize pack selection for subsequent checks
+            // Nếu packageType là PACK thì xác định thêm packSize để dùng trong kiểm tra giỏ hàng
             Integer effectivePackSize = ("PACK".equalsIgnoreCase(packageType) && packSize != null) ? packSize : null;
 
             double stockQuantity;
@@ -358,12 +371,14 @@ public class CartServlet extends HttpServlet {
                 stockQuantity = productDAO.getQuantityByPackageType(productID, packageType);
             }
 
-            // Check existing quantity in cart with same package selection
+            // Kiểm tra giỏ hàng xem có sản phẩm này với loại đóng gói và packSize trùng không
             CartItem existing = cartItemDAO.getCartItemByProductAndPackage(account.getAccountID(), productID, "Active", packageType, effectivePackSize);
+            // Tính tổng số lượng mà người dùng muốn mua = số lượng mới thêm + số lượng đã có trong giỏ hàng
             double requestedTotal = quantity + (existing != null ? existing.getQuantity() : 0.0);
 
-            // Check if stock is sufficient for total intended quantity
+            // Kiểm tra nếu tồn kho < số lượng người dùng muốn mua (bao gồm cả trong giỏ)
             if (stockQuantity < requestedTotal) {
+                // Nếu request là AJAX (thêm giỏ hàng bằng JS mà không reload trang)
                 if (isAjax) {
                     String errorMessage;
                     if (existing != null && existing.getQuantity() > 0) {
@@ -375,6 +390,7 @@ public class CartServlet extends HttpServlet {
                     return;
                 }
 
+                // Trường hợp request không phải AJAX (thêm giỏ hàng trực tiếp trên trang)
                 String errorMessage;
                 if (existing != null && existing.getQuantity() > 0) {
                     errorMessage = "Bạn đã có " + existing.getQuantity() + " sản phẩm trong giỏ hàng. Không thể thêm số lượng đã chọn vào giỏ hàng vì sẽ vượt quá giới hạn mua hàng của bạn.";
@@ -386,8 +402,9 @@ public class CartServlet extends HttpServlet {
                 return;
             }
 
-            // Add to cart with selected package type and pack size
-            // upsert behavior: increment if exists (same packageType+packSize), else insert
+            // Thêm sản phẩm vào giỏ hàng với loại đóng gói (packageType) và số lốc (packSize) mà người dùng đã chọn
+            // upsert behavior: nếu sản phẩm đã tồn tại trong giỏ (cùng packageType + packSize) thì cộng dồn thêm số lượng
+            //                 nếu chưa tồn tại thì thêm mới một dòng sản phẩm vào giỏ hàng
             cartItemDAO.upsertCartItem(account.getAccountID(), productID, quantity, packageType, effectivePackSize);
             boolean success = true;
 
@@ -492,7 +509,7 @@ public class CartServlet extends HttpServlet {
             // Get current quantity in cart
             double currentQuantity = cartItem.getQuantity();
 
-            // Check stock based on the item's selected package (BOX/UNIT/PACK/KG)
+            // Kiểm tra tồn kho dựa trên loại đơn vị sản phẩm (BOX/UNIT/PACK/KG)
             ProductDAO productDAO = new ProductDAO();
             String packageType = cartItem.getPackageType() != null ? cartItem.getPackageType() : "UNIT";
             Double stockQuantity;
@@ -504,28 +521,32 @@ public class CartServlet extends HttpServlet {
             System.out.println("Updating cart item: ID=" + cartItemID + ", Current quantity=" + currentQuantity
                     + ", New quantity=" + quantity + ", Stock quantity=" + stockQuantity);
 
-            // Only validate stock if increasing quantity
-            // Always allow decreasing quantity even if current quantity exceeds stock
+            // Chỉ kiểm tra tồn kho khi tăng số lượng
+            // Nếu giảm số lượng thì luôn cho phép (ngay cả khi số lượng hiện tại > tồn kho)
             if (quantity > currentQuantity && stockQuantity < quantity) {
                 String errorMessage = "Không đủ số lượng trong kho. Hiện tại chỉ còn " + stockQuantity + " sản phẩm.";
                 System.out.println("Stock insufficient: " + errorMessage);
+                // Nếu request từ AJAX thì trả về JSON báo lỗi
                 if (isAjax) {
                     String json = String.format(
                             "{\"success\":false,"
                             + "\"message\":\"%s\","
                             + "\"validQuantity\":%.2f}",
                             errorMessage,
-                            Math.min(currentQuantity, stockQuantity)
+                            Math.min(currentQuantity, stockQuantity) // Giới hạn số lượng tối đa hợp lệ
                     );
                     response.getWriter().write(json);
                 } else {
+                    // Nếu không phải AJAX thì set thông báo lỗi và redirect về trang giỏ hàng
                     session.setAttribute("errorMessage", errorMessage);
                     response.sendRedirect(request.getContextPath() + "/cart");
                 }
                 return;
             }
 
-            // Update cart item quantity
+            // Cập nhật số lượng sản phẩm trong giỏ
+            // Nếu số lượng <= 0 thì xóa sản phẩm khỏi giỏ
+            // Ngược lại thì update số lượng mới
             boolean success = quantity <= 0 ? cartItemDAO.removeCartItem(cartItemID)
                     : cartItemDAO.updateCartItemQuantity(cartItemID, quantity);
             System.out.println("Update result: " + (success ? "success" : "failed"));
@@ -533,29 +554,35 @@ public class CartServlet extends HttpServlet {
             // ==== ÁP KHUYẾN MÃI CHO GIÁ ====
             PromotionDAO promoDAO = new PromotionDAO();
 
-            // tính itemTotal theo giá sau KM (nếu có)
+            // Tính giá của sản phẩm theo khuyến mãi (nếu có)
             double unitPrice = cartItem.getProduct().getPrice();
             Promotion promoForThis = promoDAO.getValidPromotionForProduct(cartItem.getProductID());
             if (promoForThis != null) {
                 unitPrice = unitPrice * (1 - promoForThis.getDiscountPercent() / 100.0);
             }
+            
+            // Tính tổng tiền cho item này = đơn giá sau KM * số lượng
             double itemTotal = unitPrice * quantity;
 
             if (success) {
-                // Calculate new cart total theo giá sau KM
+                // Nếu update giỏ hàng thành công → tính lại tổng giỏ hàng sau KM
                 List<CartItem> activeItems = cartItemDAO.getCartItems(account.getAccountID(), "Active");
                 double cartTotalCalc = 0;
                 for (CartItem it : activeItems) {
                     if (it.getProduct() != null) {
+                        // Lấy giá gốc
                         double u = it.getProduct().getPrice();
+                        // Nếu sản phẩm có khuyến mãi thì áp dụng giảm giá
                         Promotion p = promoDAO.getValidPromotionForProduct(it.getProductID());
                         if (p != null) {
                             u = u * (1 - p.getDiscountPercent() / 100.0);
                         }
+                        // Cộng dồn vào tổng giỏ hàng
                         cartTotalCalc += u * it.getQuantity();
                     }
                 }
                 double cartTotal = cartTotalCalc;
+                // Đếm số sản phẩm trong giỏ (đang ở trạng thái "Active")
                 int totalItems = cartItemDAO.countCartItems(account.getAccountID(), "Active");
 
                 System.out.println(
@@ -580,6 +607,8 @@ public class CartServlet extends HttpServlet {
 //                    "Cart update successful: Item total=" + itemTotal + ", Cart total=" + cartTotal
 //                    + ", Total items=" + totalItems);
                 // Ensure values are valid numbers and properly formatted for JSON
+                
+                // Nếu tổng giỏ hoặc tổng item bị NaN (không hợp lệ) thì set về 0
                 if (Double.isNaN(cartTotal)) {
                     cartTotal = 0;
                 }
@@ -587,7 +616,7 @@ public class CartServlet extends HttpServlet {
                     itemTotal = 0;
                 }
 
-                // Get active cart items count
+                // Lấy số lượng item active trong giỏ
                 int activeItemsCount = activeItems.size();
                 System.out.println("isAjax: " + isAjax);
                 if (isAjax) {
@@ -690,11 +719,11 @@ public class CartServlet extends HttpServlet {
                     cartTotal = 0;
                 }
 
-                // Get active cart items count (reuse the list fetched for total)
+                // Lấy số lượng item đang active trong giỏ (dùng lại list đã fetch trước đó để tránh query lại DB)
                 int activeItemsCount = activeItems.size();
 
-                // Return JSON with updated info - use raw numeric value instead of formatted
-                // string
+                // Nếu xóa thành công → trả JSON response về client
+                // Sử dụng Locale.US để format số thập phân theo chuẩn (dấu chấm thay vì dấu phẩy)
                 String json = String.format(Locale.US,
                         "{\"success\":true,"
                         + "\"message\":\"Đã xóa sản phẩm khỏi giỏ hàng\","
@@ -901,7 +930,7 @@ public class CartServlet extends HttpServlet {
     private void removeSelectedItems(HttpServletRequest request, HttpServletResponse response, Account account, CartItemDAO cartItemDAO)
             throws IOException {
         try {
-            // Get the selected item IDs
+            // Lấy danh sách ID sản phẩm được chọn từ request
             String selectedItems = request.getParameter("selectedItems");
             if (selectedItems == null || selectedItems.trim().isEmpty()) {
                 request.getSession().setAttribute("cartError", "Không có sản phẩm nào được chọn để xóa");
@@ -909,38 +938,38 @@ public class CartServlet extends HttpServlet {
                 return;
             }
 
-            // Split the comma-separated list of IDs
+            // Tách chuỗi ID (cách nhau bằng dấu phẩy) thành mảng
             String[] itemIds = selectedItems.split(",");
             int removedCount = 0;
             ProductDAO productDAO = new ProductDAO();
 
-            // Remove each selected item
+            // Duyệt từng ID để xóa
             for (String itemIdStr : itemIds) {
                 try {
                     int itemId = Integer.parseInt(itemIdStr.trim());
 
-                    // Get the cart item to check product details before removal
+                    // Lấy thông tin CartItem từ DB để kiểm tra
                     CartItem item = cartItemDAO.getCartItemById(itemId);
                     if (item == null) {
-                        continue;
+                        continue; // Nếu không tồn tại thì bỏ qua
                     }
 
-                    // Verify the item belongs to this user
+                    // Kiểm tra sản phẩm này có thuộc về user hiện tại không
                     if (item.getAccountID() != account.getAccountID()) {
-                        continue;
+                        continue; // Không cho xóa nếu không phải của user
                     }
 
-                    // Get product to restore stock
+                    // Lấy thông tin sản phẩm để xử lý sau này (nếu cần phục hồi stock)
                     Product product = item.getProduct();
                     if (product == null) {
-                        // If product info not in cart item, try to get it from database
+                        // Nếu product chưa gắn vào cart item → fetch từ DB
                         product = productDAO.getProductById(item.getProductID());
                     }
 
-                    // Remove the item
+                    // Đánh dấu cart item này thành "Removed" (xóa mềm chứ không xóa DB hẳn)
                     boolean removed = cartItemDAO.updateCartItemStatus(itemId, "Removed");
                     if (removed && product != null) {
-                        // Increment removed counter
+                        // Nếu xóa thành công thì tăng counter
                         removedCount++;
                     }
                 } catch (NumberFormatException e) {
@@ -949,7 +978,7 @@ public class CartServlet extends HttpServlet {
                 }
             }
 
-            // Set appropriate message
+            // Sau khi xử lý xong, set thông báo phù hợp
             if (removedCount > 0) {
                 request.getSession().setAttribute("cartMessage", "Đã xóa " + removedCount + " sản phẩm khỏi giỏ hàng");
             } else {
@@ -966,11 +995,11 @@ public class CartServlet extends HttpServlet {
     }
 
     /**
-     * Helper method to handle AJAX errors
+     * Helper method để xử lý lỗi trong quá trình AJAX hoặc request thường
      */
     private void handleAjaxError(HttpServletRequest request, HttpServletResponse response, String message)
             throws IOException {
-        // Check if this is an AJAX request
+        // Kiểm tra request có phải AJAX hay không dựa vào header "X-Requested-With"
         String xRequestedWith = request.getHeader("X-Requested-With");
         if ("XMLHttpRequest".equals(xRequestedWith)) {
             response.setContentType("application/json");
