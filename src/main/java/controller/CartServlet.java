@@ -100,20 +100,15 @@ public class CartServlet extends HttpServlet {
 
                 // setAttribute để JSP lấy ra
                 // setAttribute để JSP lấy ra
-                request.setAttribute("promotion_item_" + item.getCartItemID(), promo);
-                request.setAttribute("originalPrice_item_" + item.getCartItemID(), basePrice);
-                request.setAttribute("discountPercent_item_" + item.getCartItemID(), discountPercent);
-                request.setAttribute("finalPrice_item_" + item.getCartItemID(), finalPrice);
-//                request.setAttribute("promotion_" + p.getProductID(), promo);
-//                request.setAttribute("originalPrice_" + p.getProductID(), basePrice);
-//                request.setAttribute("discountPercent_" + p.getProductID(), discountPercent);
-//                request.setAttribute("finalPrice_" + p.getProductID(), finalPrice);
+               
+                request.setAttribute("promotion_" + p.getProductID(), promo);
+                request.setAttribute("originalPrice_" + p.getProductID(), basePrice);
+                request.setAttribute("discountPercent_" + p.getProductID(), discountPercent);
+                request.setAttribute("finalPrice_" + p.getProductID(), finalPrice);
             } else {
                 // Không có promotion tính giá gốc
                 cartTotal += p.getPrice() * item.getQuantity();
-                request.setAttribute("originalPrice_item_" + item.getCartItemID(), p.getPrice());
-                request.setAttribute("finalPrice_item_" + item.getCartItemID(), p.getPrice());
-            
+             
             }
         }
 

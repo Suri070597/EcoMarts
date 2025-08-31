@@ -257,43 +257,36 @@
                                                         </form>
                                                     </div>
 
-                                                    <!-- Price (thành tiền) -->
+                                                 <!-- Price (thành tiền) -->
                                                     <c:set var="price" value="${item.product.price}" />
                                                     <c:set var="quantity" value="${item.quantity}" />
-                                                    <%-- ADDED: dùng cartItemID làm khóa duy nhất cho từng dòng --%>
-                                                    <c:set var="cid" value="${item.cartItemID}" />
                                                     <div class="col-md-2 mb-2 mb-md-0 text-md-end">
-                                                        <%-- CHANGED: Có khuyến mãi cho DÒNG NÀY (key: promotion_item_{cid}) --%>
-                                                        <c:if test="${not empty requestScope['promotion_item_'.concat(cid)]}">
+                                                        <!-- Nếu có Promotion -->
+                                                        <c:if test="${not empty requestScope['promotion_' += item.product.productID]}">
                                                             <div class="fw-bold text-success item-total">
-                                                                <%-- CHANGED: thành tiền theo finalPrice_item_{cid} --%>
-                                                                <fmt:formatNumber value="${requestScope['finalPrice_item_'.concat(cid)] * quantity}" type="number" pattern="#,###"/> ₫
+                                                                <fmt:formatNumber value="${requestScope['finalPrice_' += item.product.productID] * quantity}" type="number" pattern="#,###"/> ₫
                                                             </div>
                                                             <div class="text-muted small">
                                                                 <span style="text-decoration: line-through; color: gray;">
-                                                                    <%-- CHANGED: giá gốc theo dòng --%>
-                                                                    <fmt:formatNumber value="${requestScope['originalPrice_item_'.concat(cid)]}" type="number" pattern="#,###"/> ₫
+                                                                    <fmt:formatNumber value="${requestScope['originalPrice_' += item.product.productID]}" type="number" pattern="#,###"/> ₫
                                                                 </span>
                                                                 <span style="color:red; font-weight: bold;">
-                                                                    <%-- CHANGED: % giảm theo dòng --%>
-                                                                    (-${requestScope['discountPercent_item_'.concat(cid)]}%)
+                                                                    (-${requestScope['discountPercent_' += item.product.productID]}%)
                                                                 </span>
                                                             </div>
                                                         </c:if>
 
-                                                        <%-- CHANGED: Không có khuyến mãi cho DÒNG NÀY --%>
-                                                        <c:if test="${empty requestScope['promotion_item_'.concat(cid)]}">
+                                                        <!-- Nếu không có Promotion -->
+                                                        <c:if test="${empty requestScope['promotion_' += item.product.productID]}">
                                                             <div class="fw-bold text-success item-total">
-                                                                <%-- CHANGED: finalPrice_item_{cid} đã được server set = price khi không có KM --%>
-                                                                <fmt:formatNumber value="${requestScope['finalPrice_item_'.concat(cid)] * quantity}" type="number" pattern="#,###"/> ₫
+                                                                <fmt:formatNumber value="${price * quantity}" type="number" pattern="#,###"/> ₫
                                                             </div>
                                                             <div class="text-muted small">
-                                                                <%-- CHANGED: đơn giá/đơn vị theo dòng --%>
-                                                                <fmt:formatNumber value="${requestScope['originalPrice_item_'.concat(cid)]}" type="number" pattern="#,###"/> ₫ / ${item.product.unit}
+                                                                <fmt:formatNumber value="${price}" type="number" pattern="#,###"/> ₫ / ${item.product.unit}
                                                             </div>
                                                         </c:if>
-                                                    </div>
 
+                                                    </div>
                                                     <!-- Actions -->
                                                     <div class="col-md-1 text-end">
                                                         <div class="btn-group-vertical">
