@@ -80,7 +80,8 @@ CREATE TABLE Manufacturer (
 
 INSERT INTO Manufacturer (BrandName, CompanyName, [Address], Email, Phone, [Status])
 VALUES
-(N'Thịnh An', N'Công ty Thịnh An', N'123 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'thinhan@fruit.vn', '0909123456', 1);
+(N'Thịnh An', N'Công ty Thịnh An', N'123 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'thinhan@fruit.vn', '0909123456', 1),
+(N'Teknix', N'Công ty TNHH Teknix Việt Nam', N'456 Lê Lợi, Q.1, TP.HCM', N'contact@teknix.vn', '0287654321', 1);
 
 CREATE TABLE Category (
     CategoryID INT PRIMARY KEY IDENTITY(1,1),
